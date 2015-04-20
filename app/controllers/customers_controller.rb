@@ -1,6 +1,6 @@
 class CustomersController < ApplicationController
 
-    def new #create customer account through Stripe webhook
+    def create #create customer account through Stripe webhook
         #use customer.created hook
         #system to update the trial end date in stripe using the StartDate model
         #check for potential duplicate payment and send report
