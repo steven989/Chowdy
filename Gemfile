@@ -45,7 +45,7 @@ gem 'figaro'
 gem 'hirb'
 
 #4) Stripe
-gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'f
+gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 
 
 # Use ActiveModel has_secure_password

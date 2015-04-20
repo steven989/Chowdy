@@ -38,15 +38,18 @@ protect_from_forgery :except => :create
             active?:"Yes",
             first_pick_up_date: StartDate.first.start_date,
             purchase:"Recurring",
-            next_pick_up_date: StartDate.first.start_dates
+            next_pick_up_date: StartDate.first.start_date
             )
 
         #add logic to split odd grean meal numbers
 
-        render status:200
-
         #2) system to update the trial end date in stripe using the StartDate model
-        
+
+        stripe_customer = Stripe::Customer.retrieve(customer_id)
+        stripe_subscription = stripe_customer.subscriptions.retrieve(subscription_id)
+        stripe_subscription.trial_end = StartDate.first.start_date.to_time.to_i
+        stripe_subscription.prorate = false
+        stripe_subscription.save
 
         #3) check for potential duplicate payment and send report
 
