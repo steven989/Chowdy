@@ -32,6 +32,9 @@ group :doc do
   gem 'sdoc', require: false
 end
 
+# 1) forward Stripe webhook to localhost (UltraHook)
+gem 'ultrahook'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
