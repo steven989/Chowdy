@@ -35,6 +35,10 @@ end
 # 1) forward Stripe webhook to localhost (UltraHook)
 gem 'ultrahook'
 
+# 2) Hide secret keys
+gem 'figaro'
+
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
