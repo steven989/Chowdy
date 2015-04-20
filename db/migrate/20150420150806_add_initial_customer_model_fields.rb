@@ -1,0 +1,54 @@
+class AddInitialCustomerModelFields < ActiveRecord::Migration
+  def change
+    add_column :customers, :name, :string
+    add_column :customers, :gender, :string
+    add_column :customers, :race, :string
+    add_column :customers, :phone_number, :string
+    add_column :customers, :hub, :string
+    add_column :customers, :hub_note, :string
+    add_column :customers, :purchase, :string
+    add_column :customers, :active?, :string
+    add_column :customers, :first_pick_up_date, :date
+    add_column :customers, :last_pick_up_date, :date
+    add_column :customers, :total_meals_per_week, :integer
+    add_column :customers, :number_of_green, :integer
+    add_column :customers, :number_of_plus, :integer
+    add_column :customers, :latest_chowdy_plus_bill_week, :date
+    add_column :customers, :next_pick_up_date, :date
+    add_column :customers, :monday_regular_meal_count_override, :integer
+    add_column :customers, :thursday_regular_meal_count_override, :integer
+    add_column :customers, :monday_green_meal_count_override, :integer
+    add_column :customers, :thursday_green_meal_count_override, :integer
+    add_column :customers, :monday_plus_meal_count_override, :integer
+    add_column :customers, :thursday_plus_meal_count_override, :integer
+    add_column :customers, :regular_meals_on_monday, :integer
+    add_column :customers, :green_meals_on_monday, :integer
+    add_column :customers, :plus_meals_on_monday, :integer
+    add_column :customers, :regular_meals_on_thursday, :integer
+    add_column :customers, :green_meals_on_thursday, :integer
+    add_column :customers, :plus_meals_on_thursday, :integer
+    add_column :customers, :paused?, :string
+    add_column :customers, :pause_start_date, :date
+    add_column :customers, :pause_end_date, :date
+    add_column :customers, :openmat_member?, :string
+    add_column :customers, :one_time_fee_paid?, :string
+    add_column :customers, :referral, :string
+    add_column :customers, :referral_bonus_referrer, :integer
+    add_column :customers, :referral_bonus_referree, :integer
+    add_column :customers, :referral_bonus_paid, :integer
+    add_column :customers, :date_signed_up_for_recurring, :date
+    add_column :customers, :date_cancelled, :date
+    add_column :customers, :pause_cancel_request, :string
+    add_column :customers, :cancellation_reason, :string
+    add_column :customers, :notes, :text
+    add_column :customers, :meal_preferences, :string
+    add_column :customers, :last_surveyed, :date
+    add_column :customers, :recurring_delivery?, :string
+    add_column :customers, :delivery_address, :string
+    add_column :customers, :delivery_time, :string
+    add_column :customers, :delivery_set_up?, :string
+    add_column :customers, :special_delivery_instructions, :string
+    add_column :customers, :delivery_charge_accrued, :integer
+    add_column :customers, :delivery_charge_paid, :integer
+   end
+end
