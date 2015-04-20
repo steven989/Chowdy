@@ -3,8 +3,11 @@ source 'https://rubygems.org'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.0.4'
 
-# Use sqlite3 as the database for Active Record
-gem 'sqlite3'
+# # Use sqlite3 as the database for Active Record
+# gem 'sqlite3'
+
+# use Postgres SQL as the database for Active Record
+gem 'pg'
 
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.2'
@@ -37,6 +40,9 @@ gem 'ultrahook'
 
 # 2) Hide secret keys
 gem 'figaro'
+
+# 3) Prettify database pull in console
+gem 'hirb'
 
 
 # Use ActiveModel has_secure_password

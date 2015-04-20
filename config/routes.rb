@@ -3,6 +3,7 @@ Chowdy::Application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   post 'customers/create' => 'customers#create', as: 'create_customer'
+  post 'customers/update' => 'customers#update', as: 'update_customer'
 
   # You can have the root of your site routed with "root"
   # root 'welcome#index'

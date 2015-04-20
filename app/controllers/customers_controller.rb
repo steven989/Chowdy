@@ -1,6 +1,17 @@
 class CustomersController < ApplicationController
 
+protect_from_forgery :except => :create
+
     def create #create customer account through Stripe webhook
+        customer_id = params[:data][:object][:id]
+        green_number = params[:data][:object][:metadata][:green_meals_number]
+        customer_email = params[:data][:object][:email]
+        customer_name = params[:data][:object][:metadata][:name]
+        hub = params[:data][:object][:metadata][:hub]
+        referral = params[:data][:object][:metadata][:referral]
+
+        render status:200
+
         #use customer.created hook
         #system to update the trial end date in stripe using the StartDate model
         #check for potential duplicate payment and send report
