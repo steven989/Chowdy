@@ -11,7 +11,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150420154019) do
+ActiveRecord::Schema.define(version: 20150420204904) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
 
   create_table "customers", force: true do |t|
     t.datetime "created_at"
@@ -66,6 +69,9 @@ ActiveRecord::Schema.define(version: 20150420154019) do
     t.string   "special_delivery_instructions"
     t.integer  "delivery_charge_accrued"
     t.integer  "delivery_charge_paid"
+    t.string   "stripe_customer_id"
+    t.string   "stripe_subscription_id"
+    t.string   "email"
   end
 
   create_table "start_date_tables", force: true do |t|
