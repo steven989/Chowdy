@@ -65,7 +65,18 @@ protect_from_forgery :except => :create
                 #referrer discount
                 stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
                 stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
-                stripe_referral_subscription_match.coupon = "referral bonus"
+                
+                    #check for existing coupons
+                    if stripe_referral_subscription_match.discount.nil?
+                        stripe_referral_subscription_match.coupon = "referral bonus"
+                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
+                        stripe_referral_subscription_match.coupon = "referral bonus x 2"
+                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
+                        stripe_referral_subscription_match.coupon = "referral bonus x 3"
+                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
+                        stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                    end
+
                 stripe_referral_subscription_match.prorate = false
                 stripe_referral_subscription_match.save                
                 #referree discount
