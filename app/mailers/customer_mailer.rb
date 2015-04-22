@@ -1,7 +1,15 @@
 class CustomerMailer < ActionMailer::Base
   default from: "steven989@gmail.com"
 
-  def confirmation_email(hub,name,start_date,customer_email,meal_count)
+  def confirmation_email(hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
+    
+    @total_monday = monday_regular + monday_green
+    @total_thursday = thursday_regular + thursday_green
+    @green_monday = monday_green
+    @green_thursday = thursday_green
+
+    @referral = referral
+
     @hub = hub
     @delivery = !@hub.match(/delivery/i).nil?
     @op_hours = case 

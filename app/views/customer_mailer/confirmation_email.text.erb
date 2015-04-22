@@ -1,3 +1,8 @@
-Hi <%=@name%>, thanks for signing up to Chowdy. This is a confirmation we have received your payment for <%= @meal_count %> meals<% unless @delivery %> and you are scheduled to start your pick up on <%= @start_date.to_time.strftime("%A %B %d, %Y") %>, from <%= @hub %>. Note that the hours at this hub is <%= @op_hours %>.<% end %><% if @delivery %>. You've indicated that you want delivery, please reply to this email with your phone number, and delivery address as soon as possible. <% end %>
+Hi <%=@name%>, thanks for signing up to Chowdy. This is a confirmation we have received your payment for <%= @meal_count %> meals and you are scheduled to start your service on <%= @start_date.to_time.strftime("%A %B %d, %Y") %><% unless @delivery %>, picking up from <%= @hub %><% end %>. Note that you will receive <%= @total_monday %> meals (<%= @green_monday %> green) on Monday and <%= @total_thursday %> meals (<%= @green_thursday %> green) on Thursday.<% unless @delivery %> The hours at this hub is <%= @op_hours %>.<% end %><% if @delivery %> You've indicated that you want delivery, please reply to this email with your phone number, and delivery address as soon as possible. <% end %>
+
+<% if @referral %>
+Since you're referred to us by <%= @referral %>, you will be receiving a $10 off your next invoice.
+<% end %>
+
 - the Chowdy team
 

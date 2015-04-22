@@ -5,7 +5,7 @@ protect_from_forgery :except => :create
     def create #create customer account through Stripe webhook
         #1) create customer in the system
         customer_id = params[:data][:object][:id]
-        green_number = params[:data][:object][:metadata][:green_meals_number].to_i #create something here to throw an error if value cannot be converted to integer
+        green_number = params[:data][:object][:metadata][:green_meals_number] #create something here to throw an error if value cannot be converted to integer
         customer_email = params[:data][:object][:email]
         customer_name = params[:data][:object][:metadata][:name]
         hub = params[:data][:object][:metadata][:hub]
@@ -28,7 +28,7 @@ protect_from_forgery :except => :create
 
         customer = Customer.create(
             stripe_customer_id:customer_id, 
-            number_of_green:green_number, 
+            raw_green_input:green_number, 
             email:customer_email, 
             name:customer_name,
             hub:hub,
@@ -42,11 +42,69 @@ protect_from_forgery :except => :create
             )
 
         #add logic to split odd grean meal numbers
-        
+        raw_green_input = customer.raw_green_input
+        begin
+            Integer(raw_green_input)
+        rescue
+            if raw_green_input.nil? || raw_green_input == "null" || raw_green_input.blank?
+                    monday_green = 0
+                    thursday_green = 0
+            else
+                if raw_green_input.scan(/^all|\ball/i).length == 1 #if the string contains the text "all" at either the beginning of string or preceded by a white space
+                    customer.update(number_of_green:meal_per_week)
+                    customer.update(green_meals_on_monday:meal_per_week/2)
+                    customer.update(green_meals_on_thursday:meal_per_week/2)
+                    monday_green = meal_per_week/2
+                    thursday_green = meal_per_week/2
+                elsif raw_green_input.scan(/^none|\bnone/i).length == 1 #if the string contains the text "none" at either the beginning of string or preceded by a white space
+                    customer.update(number_of_green:0)
+                    monday_green = 0
+                    thursday_green = 0
+                elsif raw_green_input.scan(/\d+/).length == 1 #if the string contains 1 number
+                    customer.update(number_of_green:raw_green_input.scan(/\d+/)[0].to_i)
+                    if raw_green_input.scan(/\d+/)[0].to_i.odd?
+                        customer.update(green_meals_on_monday:raw_green_input.scan(/\d+/)[0].to_i/2+1)
+                        customer.update(green_meals_on_thursday:raw_green_input.scan(/\d+/)[0].to_i/2)
+                        monday_green = raw_green_input.scan(/\d+/)[0].to_i/2+1
+                        thursday_green = raw_green_input.scan(/\d+/)[0].to_i/2
+                    else
+                        customer.update(green_meals_on_monday:raw_green_input.scan(/\d+/)[0].to_i/2)
+                        customer.update(green_meals_on_thursday:raw_green_input.scan(/\d+/)[0].to_i/2)                    
+                        monday_green = raw_green_input.scan(/\d+/)[0].to_i/2
+                        thursday_green = raw_green_input.scan(/\d+/)[0].to_i/2
+                    end
+                else 
+                    #send email for manual check
+                    monday_green = 0
+                    thursday_green = 0
+                end
+            end
+        else 
+            customer.update(number_of_green:raw_green_input.to_i)
+                if raw_green_input.to_i.odd?
+                    customer.update(green_meals_on_monday:raw_green_input.to_i/2+1)
+                    customer.update(green_meals_on_thursday:raw_green_input.to_i/2)
+                    monday_green = raw_green_input.to_i/2+1
+                    thursday_green = raw_green_input.to_i/2
+                else
+                    customer.update(green_meals_on_monday:raw_green_input.to_i/2)
+                    customer.update(green_meals_on_thursday:raw_green_input.to_i/2)                    
+                    monday_green = raw_green_input.to_i/2
+                    thursday_green = raw_green_input.to_i/2
+                end
+        end
+
+        #logic to split meal count into Mondays and Thursdays
+            if meal_per_week.odd?
+                customer.update(regular_meals_on_monday:meal_per_week/2+1-monday_green)
+                customer.update(regular_meals_on_thursday:meal_per_week/2-thursday_green)
+            else 
+                customer.update(regular_meals_on_monday:meal_per_week/2-monday_green)
+                customer.update(regular_meals_on_thursday:meal_per_week/2-thursday_green)
+            end
 
         #determine gender https://gender-api.com/
         #auto generate a unique customer ID (that's not a sequential number-based ID)
-        #logic to split meal count into Mondays and Thursdays
         #add an additional column to track Monday vs. Thursday hubs
 
         #2) system to update the trial end date in stripe using the StartDate model
@@ -58,7 +116,6 @@ protect_from_forgery :except => :create
         stripe_subscription.save
 
         #3) check for referral and try to match up referrals
-
         unless referral.blank?
             referral_match = Customer.where("name ilike ?", referral.downcase)
             if referral_match.length == 0
@@ -85,6 +142,7 @@ protect_from_forgery :except => :create
                 stripe_subscription.coupon = "referral bonus"
                 stripe_subscription.prorate = false
                 stripe_subscription.save
+                referral_matched = true
             elsif referral_match.length > 1
                 #send report for manual check
             end
@@ -97,8 +155,17 @@ protect_from_forgery :except => :create
             hub_email = hub.gsub(/\\/,"")
             start_date_email = StartDate.first.start_date
             first_name_email = customer_name.split(/\s/)[0].capitalize
+            
+            email_monday_regular = customer.regular_meals_on_monday
+            email_thursday_regular = customer.regular_meals_on_thursday
+            email_monday_green = customer.green_meals_on_monday
+            email_thursday_green = customer.green_meals_on_thursday
 
-            CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week).deliver
+            referral_name_email = referral.titlecase if referral_matched
+
+
+
+            CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
     
         #6) Send report with actions required
             #unmatched referrals
