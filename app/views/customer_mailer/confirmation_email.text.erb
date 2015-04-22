@@ -1,0 +1,3 @@
+Hi <%=@name%>, thanks for signing up to Chowdy. This is a confirmation we have received your payment for <%= @meal_count %> meals<% unless @delivery %> and you are scheduled to start your pick up on <%= @start_date.to_time.strftime("%A %B %d, %Y") %>, from <%= @hub %>. Note that the hours at this hub is <%= @op_hours %>.<% end %><% if @delivery %>. You've indicated that you want delivery, please reply to this email with your phone number, and delivery address as soon as possible. <% end %>
+
+

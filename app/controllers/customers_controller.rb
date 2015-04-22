@@ -88,10 +88,18 @@ protect_from_forgery :except => :create
             end
         end
 
-
         #4) check for potential duplicate payment; automatically try to refund based on information
 
+
         #5) send confirmation email. Add a column to indicate that email has been sent
+            #Hub, start date, name, email
+            puts '---------------------------------------------------'
+            hub_email = hub.gsub(/\\/,"")
+            start_date_email = StartDate.first.start_date
+            first_name_email = customer_name.split(/\s/)[0].capitalize
+
+            CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week).deliver
+            puts '---------------------------------------------------'
 
         #6) Send report with actions required
             #unmatched referrals
