@@ -26,7 +26,7 @@ protect_from_forgery :except => :create
                 meal_per_week = 14
         end
 
-        Customer.create(
+        customer = Customer.create(
             stripe_customer_id:customer_id, 
             number_of_green:green_number, 
             email:customer_email, 
@@ -42,6 +42,8 @@ protect_from_forgery :except => :create
             )
 
         #add logic to split odd grean meal numbers
+        
+
         #determine gender https://gender-api.com/
         #auto generate a unique customer ID (that's not a sequential number-based ID)
         #logic to split meal count into Mondays and Thursdays
@@ -92,15 +94,12 @@ protect_from_forgery :except => :create
 
 
         #5) send confirmation email. Add a column to indicate that email has been sent
-            #Hub, start date, name, email
-            puts '---------------------------------------------------'
             hub_email = hub.gsub(/\\/,"")
             start_date_email = StartDate.first.start_date
             first_name_email = customer_name.split(/\s/)[0].capitalize
 
             CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week).deliver
-            puts '---------------------------------------------------'
-
+    
         #6) Send report with actions required
             #unmatched referrals
             #green meal count can't be parsed
