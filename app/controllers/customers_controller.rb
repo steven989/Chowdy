@@ -149,8 +149,18 @@ protect_from_forgery :except => :create
         end
 
         #4) check for potential duplicate payment; automatically try to refund based on information
-
-
+            # -1) check if there has been another customer created within the last two hours, based on
+                    #email, #name
+                    duplicate_match = Customer.where("email ilike ? and name ilike ? and total_meals_per_week = ? and created_at >= ?", customer_email, customer_name, meal_per_week, 3.hour.ago)
+                    
+            # -2) refund payment and delete customer
+                    if duplicate_match.length >= 1
+                        charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
+                        charge = Stripe::Charge.retrieve(charge_id)
+                        if charge.refunds.create 
+                            customer.delete_with_stripe
+                        end
+                    end
         #5) send confirmation email. Add a column to indicate that email has been sent
             hub_email = hub.gsub(/\\/,"")
             start_date_email = StartDate.first.start_date
@@ -163,10 +173,10 @@ protect_from_forgery :except => :create
 
             referral_name_email = referral.titlecase if referral_matched
 
+            unless duplicate_match.length >= 1
+                CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
+            end
 
-
-            CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
-    
         #6) Send report with actions required
             #unmatched referrals
             #green meal count can't be parsed
