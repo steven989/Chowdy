@@ -3,9 +3,12 @@ class CustomersController < ApplicationController
 protect_from_forgery :except => :create
 
     def create #create customer account through Stripe webhook
+        #0) Create an empty array of manual checks to flag
+        manual_checks = []
+        
         #1) create customer in the system
         customer_id = params[:data][:object][:id]
-        green_number = params[:data][:object][:metadata][:green_meals_number] #create something here to throw an error if value cannot be converted to integer
+        green_number = params[:data][:object][:metadata][:green_meals_number] 
         customer_email = params[:data][:object][:email]
         customer_name = params[:data][:object][:metadata][:name]
         hub = params[:data][:object][:metadata][:hub]
@@ -60,37 +63,40 @@ protect_from_forgery :except => :create
                     customer.update(number_of_green:0)
                     monday_green = 0
                     thursday_green = 0
-                elsif raw_green_input.scan(/\d+/).length == 1 #if the string contains 1 number
+                elsif raw_green_input.scan(/\d+/).length == 1 #if the string contains one number
                     customer.update(number_of_green:raw_green_input.scan(/\d+/)[0].to_i)
-                    if raw_green_input.scan(/\d+/)[0].to_i.odd?
-                        customer.update(green_meals_on_monday:raw_green_input.scan(/\d+/)[0].to_i/2+1)
-                        customer.update(green_meals_on_thursday:raw_green_input.scan(/\d+/)[0].to_i/2)
-                        monday_green = raw_green_input.scan(/\d+/)[0].to_i/2+1
-                        thursday_green = raw_green_input.scan(/\d+/)[0].to_i/2
+                    green_number_to_use = [raw_green_input.scan(/\d+/)[0].to_i,meal_per_week].min
+                    if green_number_to_use.odd?
+                        customer.update(green_meals_on_monday:green_number_to_use/2+1)
+                        customer.update(green_meals_on_thursday:green_number_to_use/2)
+                        monday_green = green_number_to_use/2+1
+                        thursday_green = green_number_to_use/2
                     else
-                        customer.update(green_meals_on_monday:raw_green_input.scan(/\d+/)[0].to_i/2)
-                        customer.update(green_meals_on_thursday:raw_green_input.scan(/\d+/)[0].to_i/2)                    
-                        monday_green = raw_green_input.scan(/\d+/)[0].to_i/2
-                        thursday_green = raw_green_input.scan(/\d+/)[0].to_i/2
-                    end
+                        customer.update(green_meals_on_monday:green_number_to_use/2)
+                        customer.update(green_meals_on_thursday:green_number_to_use/2)                    
+                        monday_green = green_number_to_use/2
+                        thursday_green = green_number_to_use/2
+                    end  
                 else 
+                    manual_checks.push("Check green meal input")
                     #send email for manual check
                     monday_green = 0
                     thursday_green = 0
                 end
             end
         else 
-            customer.update(number_of_green:raw_green_input.to_i)
-                if raw_green_input.to_i.odd?
-                    customer.update(green_meals_on_monday:raw_green_input.to_i/2+1)
-                    customer.update(green_meals_on_thursday:raw_green_input.to_i/2)
-                    monday_green = raw_green_input.to_i/2+1
-                    thursday_green = raw_green_input.to_i/2
+            green_number_to_use = [raw_green_input.to_i,meal_per_week].min
+            customer.update(number_of_green:green_number_to_use)
+                if green_number_to_use.odd?
+                    customer.update(green_meals_on_monday:green_number_to_use/2+1)
+                    customer.update(green_meals_on_thursday:green_number_to_use/2)
+                    monday_green = green_number_to_use/2+1
+                    thursday_green = green_number_to_use/2
                 else
-                    customer.update(green_meals_on_monday:raw_green_input.to_i/2)
-                    customer.update(green_meals_on_thursday:raw_green_input.to_i/2)                    
-                    monday_green = raw_green_input.to_i/2
-                    thursday_green = raw_green_input.to_i/2
+                    customer.update(green_meals_on_monday:green_number_to_use/2)
+                    customer.update(green_meals_on_thursday:green_number_to_use/2)                    
+                    monday_green = green_number_to_use/2
+                    thursday_green = green_number_to_use/2
                 end
         end
 
@@ -119,7 +125,7 @@ protect_from_forgery :except => :create
         unless referral.blank?
             referral_match = Customer.where("name ilike ?", referral.downcase)
             if referral_match.length == 0
-                #send report for manual check
+                manual_checks.push("Referral typed in but no match")
             elsif referral_match.length == 1
                 #referrer discount
                 stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
@@ -144,15 +150,17 @@ protect_from_forgery :except => :create
                 stripe_subscription.save
                 referral_matched = true
             elsif referral_match.length > 1
-                #send report for manual check
+                manual_checks.push("Referral matched multiple customers")
             end
         end
 
         #4) check for potential duplicate payment; automatically try to refund based on information
             # -1) check if there has been another customer created within the last two hours, based on
                     #email, #name
-                    duplicate_match = Customer.where("email ilike ? and name ilike ? and total_meals_per_week = ? and created_at >= ?", customer_email, customer_name, meal_per_week, 3.hour.ago)
-                    
+                    duplicate_match = Customer.where("email ilike ? and name ilike ? and total_meals_per_week = ? and id <> ? and created_at >= ?", customer_email, customer_name, meal_per_week,customer.id,3.hour.ago)
+                    if Customer.where("email ilike ?", customer_email).length >= 1
+                        manual_checks.push("New sign up email matches an existing customer")
+                    end
             # -2) refund payment and delete customer
                     if duplicate_match.length >= 1
                         charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
@@ -173,17 +181,26 @@ protect_from_forgery :except => :create
 
             referral_name_email = referral.titlecase if referral_matched
 
-            unless duplicate_match.length >= 1
+            if duplicate_match.length >= 1
+                CustomerMailer.duplicate_signup_email(first_name_email,customer_email).deliver
+            else 
                 CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
             end
 
         #6) Send report with actions required
-            #unmatched referrals
-            #green meal count can't be parsed
-            #duplicate payment that's not auto refunded
-            #Delivery required --> auto send delivery information request email
-            #Hub not determined
-            #email matches an existing customer
+            if !hub.match(/delivery/i).nil?
+                manual_checks.push("Delivery required")
+            end
+            #unmatched referrals (added)
+            #green meal count can't be parsed (added) 
+            #Delivery required --> auto send delivery information request email (added)
+            #email matches an existing customer (added)
+
+            if manual_checks.length >= 1 && duplicate_match.length < 1
+                CustomerMailer.manual_check_for_signup(customer,manual_checks).deliver 
+            end
+
+            render nothing:true, status:200, content_type:'text/html'
 
     end
 

@@ -32,4 +32,27 @@ class CustomerMailer < ActionMailer::Base
     end
   end
 
+  def duplicate_signup_email(first_name_email,customer_email)
+    @name = first_name_email
+
+    mail(
+      to: customer_email, 
+      subject: 'Duplicate payment refunded'
+      ) do |format|
+        format.text
+    end
+
+  end
+
+  def manual_check_for_signup(customer,manual_checks)
+    @customer = customer
+    @manual_checks = manual_checks
+    mail(
+      to: "steven989@gmail.com", 
+      subject: 'Customer sign up to look into'
+      ) do |format|
+        format.text
+    end
+  end
+
 end

@@ -1,0 +1,5 @@
+Hi admin, there are a few things you need to look into for <%= @customer.email %>, with Stripe ID of <%= @customer.stripe_customer_id %>.
+
+<% @manual_checks.each do |check| %>
+    <%= check %>
+<% end %>
