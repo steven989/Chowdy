@@ -9,8 +9,15 @@ class UsersController < ApplicationController
     def profile
         require_login
 
-        @current_user = current_user
-
+        @current_customer = current_user.customer
+        current_period_end = Stripe::Customer.retrieve(@current_customer.stripe_customer_id).subscriptions.data[0].current_period_end
+        @next_billing_date = Time.at(current_period_end).to_datetime + 2.hours
+        if @current_customer.recurring_delivery?.blank?
+            @delivery_note = "Delivery not requested"
+        else 
+            @delivery_note = "Delivery details"
+        end
+    
     end
 
     private
