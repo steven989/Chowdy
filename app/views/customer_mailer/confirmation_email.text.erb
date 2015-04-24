@@ -4,5 +4,9 @@ Hi <%=@name%>, thanks for signing up to Chowdy. This is a confirmation we have r
 Since you're referred to us by <%= @referral %>, you will be receiving a $10 off your next invoice.
 <% end %>
 
+Create a profile online to update your account from your browser. Click the link below to create an account:
+
+<%= create_customer_profile_url(@stripe_customer_id) %>
+
 - the Chowdy team
 

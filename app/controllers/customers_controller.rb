@@ -184,7 +184,7 @@ protect_from_forgery :except => :create
             if duplicate_match.length >= 1
                 CustomerMailer.duplicate_signup_email(first_name_email,customer_email).deliver
             else 
-                CustomerMailer.confirmation_email(hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
+                CustomerMailer.confirmation_email(customer,hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
             end
 
         #6) Send report with actions required
@@ -201,6 +201,17 @@ protect_from_forgery :except => :create
             end
 
             render nothing:true, status:200, content_type:'text/html'
+
+    end
+
+    def create_profile
+        customer = Customer.where(stripe_customer_id:params[:id]).take
+        if customer
+            @user = User.new
+            @stripe_customer_id = params[:id]
+        else
+            #add a code to render something to the effect of customer not found
+        end
 
     end
 

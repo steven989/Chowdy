@@ -1,9 +1,18 @@
 Chowdy::Application.routes.draw do
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
+  
+  post "user_sessions/create"
+  get "user_sessions/destroy"
+  get 'login' => 'user_sessions#new', :as => :login
+  get 'logout' => 'user_sessions#destroy', :as => :logout
 
   post 'customers/create' => 'customers#create', as: 'create_customer'
   post 'customers/update' => 'customers#update', as: 'update_customer'
+  get 'customers/:id/create_profile' => 'customers#create_profile', as: 'create_customer_profile'
+  resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
+  get 'user/profile' => 'users#profile', as: 'user_profile'
 
   # You can have the root of your site routed with "root"
   # root 'welcome#index'

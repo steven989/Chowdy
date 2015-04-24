@@ -1,12 +1,13 @@
 class CustomerMailer < ActionMailer::Base
   default from: "steven989@gmail.com"
 
-  def confirmation_email(hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
+  def confirmation_email(customer,hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
     
     @total_monday = monday_regular.to_i + monday_green.to_i
     @total_thursday = thursday_regular.to_i + thursday_green.to_i
     @green_monday = monday_green
     @green_thursday = thursday_green
+    @stripe_customer_id = customer.stripe_customer_id
 
     @referral = referral
 

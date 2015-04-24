@@ -1,0 +1,18 @@
+<%= form_for @user, url: users_path do |f| %>
+<div class="field">
+    <%= label_tag 'email', 'Email' %>
+    <%= f.text_field 'email', placeholder: 'example@gmail.com', class: 'ui input' %>
+</div>
+<div class="field">
+   <%= f.label :password %><br />
+   <%= f.password_field :password %>
+</div>
+<div class="field">
+   <%= f.label :password_confirmation %><br />
+   <%= f.password_field :password_confirmation %>
+</div>
+    <%= f.hidden_field :stripe_customer_id, options = {value:@stripe_customer_id} %>
+<p>
+    <%= f.submit 'Sign up now', class: 'mini ui givrgreen button' %>
+</p>
+<% end %>
