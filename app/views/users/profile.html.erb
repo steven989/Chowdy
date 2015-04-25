@@ -1,8 +1,12 @@
 <p>Status: <%= @current_status %> <%= "(restarting on #{@pause_end.strftime("%B %d, %Y")})" if @pause_end %></p>
-<p>Email: <%= @current_customer.email %></p>
 <%= form_tag update_customer_path("email"), method: 'POST' do %>
     <%= label_tag 'email', "Email" %>
-    <%= text_field_tag 'email' %>
+    <%= text_field_tag 'email', @current_customer.email %>
+    <%= submit_tag 'Update' %>
+<% end %>
+<%= form_tag update_customer_path("name"), method: 'POST' do %>
+    <%= label_tag 'name', "Name" %>
+    <%= text_field_tag 'name', @current_customer.name %>
     <%= submit_tag 'Update' %>
 <% end %>
 <p>Hub: <%= @current_customer.hub %></p>
@@ -22,6 +26,19 @@
 <p>Regular meals on Thursday: <%= @current_customer.regular_meals_on_thursday.to_i %></p>
 <p>Green meals on Thursday: <%= @current_customer.green_meals_on_thursday.to_i %></p>
 <p>Delivery: <%= @delivery_note %></p>
+<%= form_tag update_customer_path("delivery"), method: 'POST' do %>
+    <%= label_tag 'phone_number', "Phone number" %>
+    <%= text_field_tag 'phone_number', @phone_number %>
+    <%= label_tag 'delivery_address', "Delivery address with unit number" %>
+    <%= text_field_tag 'delivery_address', @delivery_address %>
+    <%= label_tag 'note', "Additional note (default time is Monday and Thursday by noon)" %>
+    <%= text_area_tag 'note', @note %>
+    <%= submit_tag @delivery_button %>
+<% end %>
+<%= form_tag update_customer_path("stop_delivery"), method: 'POST' do %>
+    <%= submit_tag "Stop delivery" %>
+<% end %>
+
 <p>Meal preferences: <%= @current_customer.meal_preferences %></p>
 
 <%= form_tag update_customer_path("pause"), method: 'POST' do %>

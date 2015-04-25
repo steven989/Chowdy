@@ -43,10 +43,16 @@ class UsersController < ApplicationController
         end
         if @current_customer.recurring_delivery?.blank?
             @delivery_note = "Delivery not requested"
+            @delivery_button = "Request delivery"
         else 
-            @delivery_note = "Delivery details"
+            @delivery_note = "Delivery requested"
+            @delivery_button = "Update delivery information"
         end
-    
+        
+        @delivery_address = @current_customer.delivery_address
+        @phone_number = @current_customer.phone_number
+        @note = @current_customer.special_delivery_instructions
+
     end
 
     private

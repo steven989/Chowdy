@@ -300,6 +300,12 @@ protect_from_forgery :except => :create
                 current_customer.update(email:params[:email])
                 current_customer.user.update(email:params[:email])
             end
+        elsif params[:id].downcase == "delivery" 
+            current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery?:"Yes")
+        elsif params[:id].downcase == "stop_delivery" 
+            current_customer.update(recurring_delivery?:nil)
+        elsif params[:id].downcase == "name" 
+            current_customer.update(name:params[:name])
         end
 
         redirect_to user_profile_path
