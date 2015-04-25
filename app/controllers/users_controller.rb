@@ -8,8 +8,6 @@ class UsersController < ApplicationController
         else
             redirect_to create_customer_profile_path(@user.stripe_customer_id)
         end
-
-
     end
 
     def profile
@@ -19,7 +17,13 @@ class UsersController < ApplicationController
 
         if @current_customer.active?.downcase == "yes" 
             if @current_customer.paused?.blank? || @current_customer.paused? == "No" || @current_customer.paused? == "no"
-                @current_status = "Active"
+                if @current_customer.pause_cancel_request == 'pause'
+                    @current_status = "Active (pause starting #{(Date.commercial(Date.today.to_date.year, 1+Date.today.to_date.cweek, 1)+7.days).strftime("%B %d, %Y")})"
+                elsif @current_customer.pause_cancel_request == 'cancel'
+                    @current_status = "Active (cancel starting #{(Date.commercial(Date.today.to_date.year, 1+Date.today.to_date.cweek, 1)+7.days).strftime("%B %d, %Y")})"
+                else
+                    @current_status = "Active"
+                end
             else   
                 @current_status = "Paused"
                 @pause_end = @current_customer.pause_end_date

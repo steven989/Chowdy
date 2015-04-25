@@ -233,24 +233,32 @@ protect_from_forgery :except => :create
             end_date = params[:end_date]
             
             unless end_date.blank?
-                if end_date.to_date > Date.today
-                    if end_date.to_date.wday == 1
-                        pause_end_day_updated = end_date.to_date
-                    else
-                        pause_end_day_updated = Date.commercial(end_date.to_date.year, 1+end_date.to_date.cweek, 1)
-                    end
-                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                    stripe_subscription.trial_end = pause_end_day_updated.to_time.to_i
-                    stripe_subscription.prorate = false
-                    if stripe_subscription.save
-                        current_customer.update(paused?:"yes", pause_end_date:pause_end_day_updated, next_pick_up_date:pause_end_day_updated)    
+                if Date.today.wday > 4 #can't pause after Thursday
+                    current_customer.update(pause_cancel_request:'pause')
+                else
+                    if end_date.to_date > Date.today
+                        if end_date.to_date.wday == 1
+                            pause_end_day_updated = end_date.to_date
+                        else
+                            pause_end_day_updated = Date.commercial(end_date.to_date.year, 1+end_date.to_date.cweek, 1)
+                        end
+                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                        stripe_subscription.trial_end = pause_end_day_updated.to_time.to_i
+                        stripe_subscription.prorate = false
+                        if stripe_subscription.save
+                            current_customer.update(paused?:"yes", pause_end_date:pause_end_day_updated, next_pick_up_date:pause_end_day_updated)    
+                        end
                     end
                 end
             end
         elsif params[:id].downcase == "cancel"    
-            stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-            if stripe_subscription.delete
-                current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+            if Date.today.wday > 4 #can't pause after Thursday  
+                current_customer.update(pause_cancel_request:'cancel')
+            else
+                stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                if stripe_subscription.delete
+                    current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                end
             end
         elsif params[:id].downcase == "restart"    
             if current_customer.stripe_subscription_id.blank?
@@ -270,7 +278,7 @@ protect_from_forgery :except => :create
                 start_date_update = StartDate.first.start_date
                 if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
                     new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
-                    current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", stripe_subscription_id: new_subscription_id)
+                    current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", stripe_subscription_id: new_subscription_id,pause_cancel_request:nil)
                 end
             else 
                 start_date_update = StartDate.first.start_date
@@ -278,7 +286,7 @@ protect_from_forgery :except => :create
                 paused_subscription.trial_end = start_date_update.to_time.to_i
                 paused_subscription.prorate = false
                 if paused_subscription.save
-                    current_customer.update(next_pick_up_date:start_date_update, paused?:'No', pause_end_date:nil)
+                    current_customer.update(next_pick_up_date:start_date_update, paused?:'No', pause_end_date:nil,pause_cancel_request:nil)
                 end
             end
         elsif params[:id].downcase == "change_card"    
