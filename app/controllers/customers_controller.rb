@@ -235,6 +235,33 @@ protect_from_forgery :except => :create
     # end
 
     def update #change customer account information from website
+        puts '---------------------------------------------------'
+        puts params.inspect
+        puts '---------------------------------------------------'
+
+        if params[:id].downcase == "pause"
+            current_customer = current_user.customer
+            end_date = params[:end_date]
+            
+            unless end_date.blank?
+                if end_date.to_date > Date.today
+                    if end_date.to_date.wday == 1
+                        pause_end_day_updated = end_date.to_date
+                    else
+                        pause_end_day_updated = Date.commercial(end_date.to_date.year, 1+end_date.to_date.cweek, 1)
+                    end
+                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                    stripe_subscription.trial_end = pause_end_day_updated.to_time.to_i
+                    stripe_subscription.prorate = false
+                    if stripe_subscription.save
+                        current_customer.update(paused?:"yes", pause_end_date:pause_end_day_updated, next_pick_up_date:pause_end_day_updated)    
+                    end
+                end
+            end
+        end
+
+        redirect_to user_profile_path
+
         #affect stripe
             #meal count (change plan in Stripe)      
             #credit card

@@ -9,7 +9,7 @@ Chowdy::Application.routes.draw do
   get 'logout' => 'user_sessions#destroy', :as => :logout
 
   post 'customers/create' => 'customers#create', as: 'create_customer'
-  post 'customers/update' => 'customers#update', as: 'update_customer'
+  post 'customers/update/:id' => 'customers#update', as: 'update_customer'
   get 'customers/:id/create_profile' => 'customers#create_profile', as: 'create_customer_profile'
   resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
   get 'user/profile' => 'users#profile', as: 'user_profile'

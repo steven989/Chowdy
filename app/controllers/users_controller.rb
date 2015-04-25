@@ -10,7 +10,23 @@ class UsersController < ApplicationController
         require_login
 
         @current_customer = current_user.customer
-        current_period_end = Stripe::Customer.retrieve(@current_customer.stripe_customer_id).subscriptions.data[0].current_period_end
+
+        if @current_customer.active?.downcase == "yes" 
+            if @current_customer.paused?.blank?
+                @current_status = "Active"
+            else   
+                @current_status = "Paused"
+                @pause_end = @current_customer.pause_end_date
+            end
+        else
+            @current_status = "Inactive"
+        end
+
+        stripe_customer = Stripe::Customer.retrieve(@current_customer.stripe_customer_id)
+        card = stripe_customer.sources.all(:object => "card")
+        @card_brand = card.data[0].brand
+        @card_last4 = card.data[0].last4
+        current_period_end = stripe_customer.subscriptions.data[0].current_period_end
         @next_billing_date = Time.at(current_period_end).to_datetime + 2.hours
         if @current_customer.recurring_delivery?.blank?
             @delivery_note = "Delivery not requested"

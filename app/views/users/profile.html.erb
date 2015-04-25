@@ -1,12 +1,20 @@
-
+<p>Status: <%= @current_status %> <%= "(restarting on #{@pause_end.strftime("%B %d, %Y")})" if @pause_end %></p>
+<p>Email: <%= @current_customer.email %></p>
 <p>Hub: <%= @current_customer.hub %></p>
-<p>Next pick-up date:<%= @current_customer.next_pick_up_date.strftime("%B %d %Y") %></p>
-<p>Next billing date: <%= @next_billing_date.strftime("%B %d %Y") %> </p>
+<p>Credit card: <%= @card_brand %> card ending in <%= @card_last4 %></p>
+<p>Next pick-up date:<%= @current_customer.next_pick_up_date.strftime("%B %d, %Y") %></p>
+<p>Next billing date: <%= @next_billing_date.strftime("%B %d, %Y") %> </p>
 <p>Regular meals on Monday: <%= @current_customer.regular_meals_on_monday.to_i %></p>
 <p>Green meals on Monday: <%= @current_customer.green_meals_on_monday.to_i %></p>
 <p>Regular meals on Thursday: <%= @current_customer.regular_meals_on_thursday.to_i %></p>
 <p>Green meals on Thursday: <%= @current_customer.green_meals_on_thursday.to_i %></p>
 <p>Delivery: <%= @delivery_note %></p>
 <p>Meal preferences: <%= @current_customer.meal_preferences %></p>
+
+<%= form_tag update_customer_path("pause"), method: 'POST' do %>
+    <%= label_tag 'end_date', "Pause end date" %>
+    <%= date_field_tag 'end_date', 14.days.from_now.strftime("%Y-%m-%d") %>
+    <%= submit_tag 'Pause' %>
+<% end %>
 
 <%= link_to "log out", logout_path %>
