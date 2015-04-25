@@ -239,8 +239,9 @@ protect_from_forgery :except => :create
         puts params.inspect
         puts '---------------------------------------------------'
 
+        current_customer = current_user.customer
+        
         if params[:id].downcase == "pause"
-            current_customer = current_user.customer
             end_date = params[:end_date]
             
             unless end_date.blank?
@@ -256,6 +257,40 @@ protect_from_forgery :except => :create
                     if stripe_subscription.save
                         current_customer.update(paused?:"yes", pause_end_date:pause_end_day_updated, next_pick_up_date:pause_end_day_updated)    
                     end
+                end
+            end
+        elsif params[:id].downcase == "cancel"    
+            stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+            if stripe_subscription.delete
+                current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+            end
+        elsif params[:id].downcase == "restart"    
+            if current_customer.stripe_subscription_id.blank?
+                case current_customer.total_meals_per_week
+                    when 6
+                        meals_per_week = "6mealswk" 
+                    when 8
+                        meals_per_week = "8mealswk"
+                    when 10
+                        meals_per_week = "10mealswk"
+                    when 12
+                        meals_per_week = "12mealsweek"
+                    when 14
+                        meals_per_week = "14mealsweek"
+                end
+
+                start_date_update = StartDate.first.start_date
+                if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
+                    new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
+                    current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", stripe_subscription_id: new_subscription_id)
+                end
+            else 
+                start_date_update = StartDate.first.start_date
+                paused_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                paused_subscription.trial_end = start_date_update.to_time.to_i
+                paused_subscription.prorate = false
+                if paused_subscription.save
+                    current_customer.update(next_pick_up_date:start_date_update, paused?:'No', pause_end_date:nil)
                 end
             end
         end
