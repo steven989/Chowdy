@@ -56,4 +56,15 @@ class CustomerMailer < ActionMailer::Base
     end
   end
 
+  def feedback_received(customer)
+    @customer = customer
+    @feedback = customer.feedbacks.last.feedback
+    mail(
+      to: "steven989@gmail.com", 
+      subject: 'New customer feedback'
+      ) do |format|
+        format.text
+    end    
+  end
+
 end

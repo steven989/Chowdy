@@ -53,5 +53,11 @@
     <%= submit_tag 'Restart Now' %>
 <% end %>
 
+<%= form_tag update_customer_path("feedback"), method: 'POST' do %>
+    <%= label_tag 'feedback', "Submit feedback to help improve Chowdy" %>
+    <p><%= text_area_tag 'feedback', nil,placeholder: "Food, process, etc." %></p>
+    <p><%= submit_tag 'Submit feedback' %></p>
+<% end %>
+
 
 <%= link_to "log out", logout_path %>

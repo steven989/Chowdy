@@ -306,6 +306,10 @@ protect_from_forgery :except => :create
             current_customer.update(recurring_delivery?:nil)
         elsif params[:id].downcase == "name" 
             current_customer.update(name:params[:name])
+        elsif params[:id].downcase == "feedback"
+            if current_customer.feedbacks.create(feedback:params[:feedback]) 
+                CustomerMailer.feedback_received(current_customer).deliver
+            end
         end
 
         redirect_to user_profile_path
