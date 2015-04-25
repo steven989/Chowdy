@@ -293,6 +293,10 @@ protect_from_forgery :except => :create
                     current_customer.update(next_pick_up_date:start_date_update, paused?:'No', pause_end_date:nil)
                 end
             end
+        elsif params[:id].downcase == "change_card"    
+            current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)
+            current_stripe_customer.source = params[:stripeToken]
+            current_stripe_customer.save
         end
 
         redirect_to user_profile_path
