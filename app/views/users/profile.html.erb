@@ -1,7 +1,12 @@
 <p>Status: <%= @current_status %> <%= "(restarting on #{@pause_end.strftime("%B %d, %Y")})" if @pause_end %></p>
 <p>Email: <%= @current_customer.email %></p>
+<%= form_tag update_customer_path("email"), method: 'POST' do %>
+    <%= label_tag 'email', "Email" %>
+    <%= text_field_tag 'email' %>
+    <%= submit_tag 'Update' %>
+<% end %>
 <p>Hub: <%= @current_customer.hub %></p>
-<p>Credit card: <%= @card_brand %> card ending in <%= @card_last4 %></p>
+<p>Credit card: <%= @card_brand %> ending in <%= @card_last4 %></p>
 <%= form_tag update_customer_path("change_card") do %>
   <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
           data-key="<%= Rails.configuration.stripe[:publishable_key] %>"

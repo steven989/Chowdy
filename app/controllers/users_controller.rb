@@ -3,7 +3,13 @@ class UsersController < ApplicationController
     def create
         @user = User.new(user_params)
         if @user.save
+            auto_login(@user)
+            redirect_to user_profile_path
+        else
+            redirect_to create_customer_profile_path(@user.stripe_customer_id)
         end
+
+
     end
 
     def profile

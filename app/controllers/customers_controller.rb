@@ -209,23 +209,11 @@ protect_from_forgery :except => :create
         if customer
             @user = User.new
             @stripe_customer_id = params[:id]
+            @email = customer.email
         else
             #add a code to render something to the effect of customer not found
         end
 
-    end
-
-    def show
-        #meal count
-        #hub
-        #regular vs. green, monday vs. thursday split
-        #meal preferences
-        #next billing date
-        #credit card info
-        #email
-        #name
-        #active status
-        #delivery information
     end
 
     # def stripe_update #change customer account information through Stripe webhook
@@ -297,14 +285,21 @@ protect_from_forgery :except => :create
             current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)
             current_stripe_customer.source = params[:stripeToken]
             current_stripe_customer.save
+        elsif params[:id].downcase == "email" 
+            current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
+            current_stripe_customer.email = params[:email]
+            if current_stripe_customer.save
+                current_customer.update(email:params[:email])
+                current_customer.user.update(email:params[:email])
+            end
         end
 
         redirect_to user_profile_path
 
         #affect stripe
             #meal count (change plan in Stripe)      
-            #credit card
             #email (change in Stripe)
+            #credit card
             #pause (change trial date)
             #active/inactive (add/delete subscriptions; new subscriptions to have trial end date associated with it)
         #all database fields
