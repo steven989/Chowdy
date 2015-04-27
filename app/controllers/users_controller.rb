@@ -26,7 +26,7 @@ class UsersController < ApplicationController
                 end
             else   
                 @current_status = "Paused"
-                @pause_end = @current_customer.pause_end_date
+                @pause_end = @current_customer.next_pick_up_date
             end
         else
             @current_status = "Inactive"

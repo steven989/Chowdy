@@ -246,7 +246,8 @@ protect_from_forgery :except => :create
                         stripe_subscription.trial_end = pause_end_day_updated.to_time.to_i
                         stripe_subscription.prorate = false
                         if stripe_subscription.save
-                            current_customer.update(paused?:"yes", pause_end_date:pause_end_day_updated, next_pick_up_date:pause_end_day_updated)    
+                            current_customer.update(paused?:"yes", pause_end_date:pause_end_day_updated-1, next_pick_up_date:pause_end_day_updated)    
+                            current_customer.stop_requests.create(request_type:'pause',start_date:Date.commercial(Date.today.year, 1+Date.today.cweek, 1), end_date:pause_end_day_updated-1)
                         end
                     end
                 end
@@ -258,6 +259,7 @@ protect_from_forgery :except => :create
                 stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
                 if stripe_subscription.delete
                     current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                    current_customer.stop_requests.create(request_type:'cancel',start_date:Date.commercial(Date.today.year, 1+Date.today.cweek, 1))
                 end
             end
         elsif params[:id].downcase == "restart"    
@@ -278,7 +280,8 @@ protect_from_forgery :except => :create
                 start_date_update = StartDate.first.start_date
                 if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
                     new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
-                    current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", stripe_subscription_id: new_subscription_id,pause_cancel_request:nil)
+                    current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                    current_customer.stop_requests.order(created_at: :desc).take.update(end_date: start_date_update-1)
                 end
             else 
                 start_date_update = StartDate.first.start_date
@@ -287,6 +290,7 @@ protect_from_forgery :except => :create
                 paused_subscription.prorate = false
                 if paused_subscription.save
                     current_customer.update(next_pick_up_date:start_date_update, paused?:'No', pause_end_date:nil,pause_cancel_request:nil)
+                    current_customer.stop_requests.order(created_at: :desc).take.update(end_date: start_date_update-1)
                 end
             end
         elsif params[:id].downcase == "change_card"    
