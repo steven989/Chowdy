@@ -68,7 +68,7 @@ namespace :customers do
                 end
             end
         else
-            puts "No customer request"
+            puts "No pause/cancel/restart request"
         end
     end
 
