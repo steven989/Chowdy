@@ -230,68 +230,53 @@ protect_from_forgery :except => :create
         current_customer = current_user.customer
         
         if params[:id].downcase == "pause"
+            
             end_date = params[:end_date]
+            associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
             
             unless end_date.blank?
-                if Date.today.wday > 4 #can't pause after Thursday
-                    current_customer.update(pause_cancel_request:'pause')
+                adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                if [2,3,4].include? Date.today.wday
+                    adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                 else
-                    if end_date.to_date > Date.today
-                        if end_date.to_date.wday == 1
-                            pause_end_day_updated = end_date.to_date
-                        else
-                            pause_end_day_updated = Date.commercial(end_date.to_date.year, 1+end_date.to_date.cweek, 1)
-                        end
-                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                        stripe_subscription.trial_end = pause_end_day_updated.to_time.to_i
-                        stripe_subscription.prorate = false
-                        if stripe_subscription.save
-                            current_customer.update(paused?:"yes", pause_end_date:pause_end_day_updated-1, next_pick_up_date:pause_end_day_updated)    
-                            current_customer.stop_requests.create(request_type:'pause',start_date:Date.commercial(Date.today.year, 1+Date.today.cweek, 1), end_date:pause_end_day_updated-1)
-                        end
-                    end
+                    adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+                end
+                if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? current_customer.active?) && !(["Yes","yes"].include? current_customer.paused?)
+                    current_customer.stop_queues.destroy_all
+                    current_customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
                 end
             end
+
         elsif params[:id].downcase == "cancel"    
-            if Date.today.wday > 4 #can't pause after Thursday  
-                current_customer.update(pause_cancel_request:'cancel')
+            if [2,3,4].include? Date.today.wday
+                adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
             else
-                stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                if stripe_subscription.delete
-                    current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
-                    current_customer.stop_requests.create(request_type:'cancel',start_date:Date.commercial(Date.today.year, 1+Date.today.cweek, 1))
-                end
+                adjusted_cancel_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+            end
+            associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+            if ["Yes","yes"].include? current_customer.active?
+                current_customer.stop_queues.destroy_all
+                current_customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date)
+            else
+                current_customer.stop_queues.destroy_all
             end
         elsif params[:id].downcase == "restart"    
-            if current_customer.stripe_subscription_id.blank?
-                case current_customer.total_meals_per_week
-                    when 6
-                        meals_per_week = "6mealswk" 
-                    when 8
-                        meals_per_week = "8mealswk"
-                    when 10
-                        meals_per_week = "10mealswk"
-                    when 12
-                        meals_per_week = "12mealsweek"
-                    when 14
-                        meals_per_week = "14mealsweek"
+            if [2,3,4].include? Date.today.wday
+                adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+            else
+                adjusted_restart_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+            end
+            associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+            
+            if current_customer.stop_queues.order(created_at: :desc).limit(1).take.blank?
+                if ((["Yes","yes"].include? current_customer.active?) && (["Yes","yes"].include? current_customer.paused?)) || (current_customer.active?.blank? || (["No","no"].include? current_customer.active?))
+                    current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
                 end
-
-                start_date_update = StartDate.first.start_date
-                if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
-                    new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
-                    current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
-                    current_customer.stop_requests.order(created_at: :desc).take.update(end_date: start_date_update-1)
-                end
-            else 
-                start_date_update = StartDate.first.start_date
-                paused_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                paused_subscription.trial_end = start_date_update.to_time.to_i
-                paused_subscription.prorate = false
-                if paused_subscription.save
-                    current_customer.update(next_pick_up_date:start_date_update, paused?:'No', pause_end_date:nil,pause_cancel_request:nil)
-                    current_customer.stop_requests.order(created_at: :desc).take.update(end_date: start_date_update-1)
-                end
+            elsif ["pause","cancel"].include? current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type
+                current_customer.stop_queues.destroy_all
+            elsif ["restart"].include? current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type
+                    current_customer.stop_queues.destroy_all
+                    current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)                
             end
         elsif params[:id].downcase == "change_card"    
             current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)

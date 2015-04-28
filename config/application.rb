@@ -20,5 +20,37 @@ module Chowdy
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
+  
+    def closest_date(distance=0,day_of_week=0, reference_date=Date.today)
+        #distance specifies how many weeks away the desired day is from today. 1 indicates the upcoming, -1 indicates the last
+        #day_of_week is from 1 to 7, where 1 is Monday and 7 is Sunday
+        days_away = day_of_week - reference_date.to_date.wday
+        
+        if days_away > 0
+            if distance.to_i > 0
+                adjusted_distance = distance.to_i - 1
+                reference_date.to_date + days_away + adjusted_distance * 7
+            elsif distance.to_i < 0
+                adjusted_distance = distance.to_i
+                reference_date.to_date + days_away + adjusted_distance * 7
+            else
+                reference_date.to_date
+            end  
+        elsif days_away < 0
+            if distance.to_i > 0
+                adjusted_distance = distance.to_i
+                reference_date.to_date + days_away + adjusted_distance * 7
+            elsif distance.to_i < 0
+                adjusted_distance = distance.to_i + 1
+                reference_date.to_date + days_away + adjusted_distance * 7
+            else
+                reference_date.to_date
+            end  
+        else 
+            reference_date.to_date
+        end 
+    
+    end
+
   end
 end
