@@ -55,6 +55,14 @@ class UsersController < ApplicationController
             end   
         end
 
+        @number_of_failed_invoices = @current_customer.failed_invoices.where(paid:false).length
+        if @number_of_failed_invoices > 0
+            @failed_weeks = []
+            @current_customer.failed_invoices.where(paid:false).each do |failed_invoice|
+                @failed_weeks.push(Chowdy::Application.closest_date(-1,1,failed_invoice.invoice_date).strftime("%B %d"))
+            end
+        end
+
         stripe_customer = Stripe::Customer.retrieve(@current_customer.stripe_customer_id)
         card = stripe_customer.sources.all(:object => "card")
         @card_brand = card.data[0].brand

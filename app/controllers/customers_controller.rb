@@ -280,10 +280,23 @@ protect_from_forgery :except => :payment
                     current_customer.stop_queues.destroy_all
                     current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)                
             end
-        elsif params[:id].downcase == "change_card"    
+        elsif params[:id].downcase == "change_card"
             current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)
             current_stripe_customer.source = params[:stripeToken]
-            current_stripe_customer.save
+            if current_stripe_customer.save
+                #attempt to pay back overdue invoices
+                if current_customer.failed_invoices.where("number_of_attempts > ? and paid = ?", 1, false).length > 0 
+                    current_customer.failed_invoices.where("number_of_attempts > ? and paid = ?", 1, false).each do |failed_invoice| 
+                        begin 
+                            Stripe::Invoice.retrieve(failed_invoice.invoice_number).pay
+                        rescue
+                            puts "Card delined"
+                        else
+                            failed_invoice.update_attributes(paid:true,date_paid:Date.today)
+                        end
+                    end
+                end
+            end
         elsif params[:id].downcase == "email" 
             current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
             current_stripe_customer.email = params[:email]
@@ -332,7 +345,7 @@ protect_from_forgery :except => :payment
         latest_attempt_date = Date.today
         invoice_date = Time.at(params[:data][:object][:date]).to_date
 
-        existing_invoice = FailedInvoice.where(invoice_number: invoice_number).take
+        existing_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
 
         if existing_invoice.blank?
             if FailedInvoice.create(invoice_number: invoice_number, invoice_date:invoice_date, number_of_attempts:attempts, latest_attempt_date:latest_attempt_date, next_attempt:next_attempt, stripe_customer_id: stripe_customer_id, invoice_amount: invoice_amount)
@@ -351,12 +364,10 @@ protect_from_forgery :except => :payment
     end
 
     def payment
-        #check for attempt, only deal with payment attempt > 1
-        #for attempt #2 or above, find the failed charge and delete
         if params[:data][:object][:attempt_count].to_i > 1
             invoice_number = params[:data][:object][:id]
-            failed_invoice = FailedInvoice.where(invoice_number: invoice_number).take
-            failed_invoice.destroy unless failed_invoice.blank?
+            failed_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
+            failed_invoice.update_attributes(paid:true,date_paid:Date.today) unless failed_invoice.blank?
         end
         render nothing:true, status:200, content_type:'text/html'
     end
