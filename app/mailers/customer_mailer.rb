@@ -67,4 +67,16 @@ class CustomerMailer < ActionMailer::Base
     end    
   end
 
+  def failed_invoice(invoice)
+    @name = invoice.customer.name.split(/\s/)[0].capitalize
+
+    mail(
+      to: invoice.customer.email, 
+      subject: 'Credit card declined'
+      ) do |format|
+        format.text
+    end  
+
+  end
+
 end

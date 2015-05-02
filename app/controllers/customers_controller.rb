@@ -1,6 +1,8 @@
 class CustomersController < ApplicationController
 
 protect_from_forgery :except => :create
+protect_from_forgery :except => :fail
+protect_from_forgery :except => :payment
 
     def create #create customer account through Stripe webhook
         #0) Create an empty array of manual checks to flag
@@ -322,8 +324,41 @@ protect_from_forgery :except => :create
     end
 
     def fail #failed charges
-        #generate report (use charge.failed hook) for admin
-        #auto email user
+        stripe_customer_id = params[:data][:object][:customer]
+        invoice_number = params[:data][:object][:id]
+        attempts = params[:data][:object][:attempt_count].to_i
+        next_attempt = Time.at(params[:data][:object][:next_payment_attempt]).to_date
+        invoice_amount = params[:data][:object][:lines][:data][0][:amount].to_i
+        latest_attempt_date = Date.today
+        invoice_date = Time.at(params[:data][:object][:date]).to_date
+
+        existing_invoice = FailedInvoice.where(invoice_number: invoice_number).take
+
+        if existing_invoice.blank?
+            if FailedInvoice.create(invoice_number: invoice_number, invoice_date:invoice_date, number_of_attempts:attempts, latest_attempt_date:latest_attempt_date, next_attempt:next_attempt, stripe_customer_id: stripe_customer_id, invoice_amount: invoice_amount)
+                CustomerMailer.failed_invoice(FailedInvoice.where(invoice_number: invoice_number).take).deliver
+            end
+        else 
+            existing_invoice.update_attributes(
+                number_of_attempts:attempts, 
+                latest_attempt_date:latest_attempt_date, 
+                next_attempt:next_attempt, 
+                invoice_amount: invoice_amount
+                )
+        end
+
+        render nothing:true, status:200, content_type:'text/html'
+    end
+
+    def payment
+        #check for attempt, only deal with payment attempt > 1
+        #for attempt #2 or above, find the failed charge and delete
+        if params[:data][:object][:attempt_count].to_i > 1
+            invoice_number = params[:data][:object][:id]
+            failed_invoice = FailedInvoice.where(invoice_number: invoice_number).take
+            failed_invoice.destroy unless failed_invoice.blank?
+        end
+        render nothing:true, status:200, content_type:'text/html'
     end
 
     def stripe_destroy #delete customer account through Stripe webhook

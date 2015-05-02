@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150427210115) do
+ActiveRecord::Schema.define(version: 20150502204022) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -73,6 +73,26 @@ ActiveRecord::Schema.define(version: 20150427210115) do
     t.string   "stripe_subscription_id"
     t.string   "email"
     t.string   "raw_green_input"
+  end
+
+  create_table "failed_invoice_trackers", force: true do |t|
+    t.string  "invoice_number"
+    t.date    "invoice_date"
+    t.integer "number_of_attempts"
+    t.date    "latest_attempt_date"
+    t.date    "next_attempt"
+  end
+
+  create_table "failed_invoices", force: true do |t|
+    t.string   "invoice_number"
+    t.date     "invoice_date"
+    t.integer  "number_of_attempts"
+    t.date     "latest_attempt_date"
+    t.date     "next_attempt"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "stripe_customer_id"
+    t.integer  "invoice_amount"
   end
 
   create_table "feedbacks", force: true do |t|
