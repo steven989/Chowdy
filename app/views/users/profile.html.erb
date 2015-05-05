@@ -1,8 +1,183 @@
+<script>
+  
+$(function(){
+
+    map = new GMaps({
+      div: '#hub_map',
+      lat: 43.7,
+      lng: 79.4
+    });
+
+    GMaps.geocode({
+      address: '<%= @current_customer.hub.sub(/\(.+\)/, "") %>, Toronto',
+      callback: function(results, status) {
+        if (status == 'OK') {
+          var latlng = results[0].geometry.location;
+          map.setCenter(latlng.lat(), latlng.lng());
+          map.addMarker({
+            lat: latlng.lat(),
+            lng: latlng.lng(),
+            infoWindow: {
+              content: '<p>Store hours:</p>'
+            }
+          });
+        }
+      }
+    });
+
+
+  
+});
+
+</script>
+
+<section class="vbox">
+    <header class="bg-black header header-md navbar-fixed-top-xs box-shadow">
+        <div class="navbar-header aside-md dk">Chowdy
+            <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen" data-target="#nav,html">
+                      <i class="fa fa-bars"></i>
+                    </a>
+        </div>
+
+    </header>    
+    <section>
+        <section class="hbox stretch">
+            <aside class="bg-white aside-md hidden-print hidden-xs nav-off-screen b-r" id="nav">
+                <section class="vbox">
+                    <section class="w-f scrollable">
+                        <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 302px;">
+                            <div class="slim-scroll" data-height="auto" data-disable-fade-out="true" data-distance="0" data-size ="10px" data-railopacity="0.2" style="overflow: hidden; width: auto; height: 302px;">
+                                <nav class="nav-primary hidden-xs">
+                                    <ul class="nav nav-main" data-ride="collapse">
+                                        <li>
+                                          <a href="#" class="auto">
+                                            <i class="i i-statistics icon">
+                                            </i>
+                                            <span class="font-bold">Dashboard</span>
+                                          </a>
+                                        </li>
+                                        <li>
+                                          <a href="#" class="auto">
+                                            <i class="i i-stack icon">
+                                            </i>
+                                            <span class="font-bold">Change Subscription</span>
+                                          </a>
+                                        </li>
+                                        <li>
+                                          <a href="#" class="auto">
+                                            <i class="i i-lab icon">
+                                            </i>
+                                            <span class="font-bold">Delivery</span>
+                                          </a>
+                                        </li>
+                                        <li>
+                                          <a href="#" class="auto">
+                                            <i class="i i-settings icon">
+                                            </i>
+                                            <span class="font-bold">Settings</span>
+                                          </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+            </aside>
+
+
+            <section id="content ">
+                <section class="hbox stretch bg-light">
+                    <section>
+                        <section class="vbox">
+                            <section class="scrollable padder">
+                                <section class="row m-b-md">
+                                    <div class="col-sm-12">
+                                        <h3 class="m-b-xs text-muted text-center">
+                                    Welcome <%= @current_customer.name.split(/\s/)[0].capitalize %>! Your account is <%= @current_status %> <%= "(restarting on #{@pause_end.strftime("%B %d, %Y")})" if @pause_end %>
+                                        </h3>
+                                    </div>
+                                </section>
+                                <section class="row">
+                                    <div class="col-sm-12">
+                                        <div class="panel b-a">
+                                            <div class="row m-n text-center">
+                                                <div class="col-md-4 b-b">
+                                                    <section class="row m-t-md m-b-md">
+                                                      <a href="#" class="block padder-v hover">
+                                                        <div class="col-md-4 col-md-offset-1 text-success-lt text-right">
+                                                          <span class="i-s i-s-2x pull-left m-r-sm" >
+                                                              <i class="i i-hexagon2 i-s-base text-changer hover-rotate"></i>
+                                                              <i class="i i-plus2 i-1x text-white"></i>
+                                                          </span>
+                                                        </div>
+                                                        <div class="col-md-7 text-left text-success-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
+                                                              <span class="h2 block"><%= @current_customer.total_meals_per_week %></span>
+                                                              <small class="text-muted text-u-c">Weekly meals</small>
+                                                        </div>  
+                                                      </a>
+                                                    </section>
+                                                </div>
+                                                <div class="col-md-4 b-b">
+                                                    <section class="row m-t-md m-b-md">
+                                                      <a href="#" class="block padder-v hover">
+                                                        <div class="col-md-4 col-md-offset-1 text-primary-lt text-right">
+                                                          <span class="i-s i-s-2x pull-left m-r-sm" >
+                                                              <i class="i i-hexagon2 i-s-base text-changer hover-rotate"></i>
+                                                              <i class="i i-alarm i-1x text-white"></i>
+                                                          </span>
+                                                        </div>
+                                                        <div class="col-md-7 text-left text-primary-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
+                                                              <span class="h2 block"><%= @current_customer.next_pick_up_date.strftime("%b #{@current_customer.next_pick_up_date.day.ordinalize}") unless @current_customer.next_pick_up_date.blank? %></span>
+                                                              <small class="text-muted text-u-c">Next pick-up</small>
+                                                        </div>  
+                                                      </a>
+                                                    </section>
+                                                </div>
+                                                <div class="col-md-4 b-b">
+                                                    <section class="row m-t-md m-b-md">
+                                                      <a href="#" class="block padder-v hover">
+                                                        <div class="col-md-4 col-md-offset-1 text-info-lt text-right">
+                                                          <span class="i-s i-s-2x pull-left m-r-sm" >
+                                                              <i class="i i-hexagon2 i-s-base text-changer hover-rotate"></i>
+                                                              <i class="i i-alarm i-1x text-white"></i>
+                                                          </span>
+                                                        </div>
+                                                        <div class="col-md-7 text-left text-info-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
+                                                              <span class="h2 block"><%= @next_billing_date.strftime("%b #{@next_billing_date.day.ordinalize}") unless @next_billing_date.blank? %></span>
+                                                              <small class="text-muted text-u-c">Next billing</small>
+                                                        </div>  
+                                                      </a>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                <section class="row m-b-md">
+                                    <div class="col-sm-12">
+                                        <h3 class="m-b-xs text-muted text-center">
+    Pick up at <%= @current_customer.hub %>
+                                        </h3>
+                                    </div>
+                                </section>
+                                <section class="row">
+                                  <section id="hub_map" class="wrapper"style="min-height: 350px; position: relative; overflow: hidden; transform: translateZ(0px); background-color: rgb(229, 227, 223);"></section>
+                                </section>
+                            </section>
+                        </section>
+                    </section>
+                </section>
+            </section>
+        </section>
+    </section>
+</section>
+
+
 <% if @number_of_failed_invoices > 0 %>
 <p>You have <%= @number_of_failed_invoices %> overdue invoice<%= "s" if @number_of_failed_invoices > 1 %> for the week<%= "s" if @number_of_failed_invoices > 1 %> of <%= @failed_weeks.to_sentence %> due to declined credit card. We will re-attempt in a few days. You can also update your card on your profile.</p>
 <% end %>
 
-<p>Status: <%= @current_status %> <%= "(restarting on #{@pause_end.strftime("%B %d, %Y")})" if @pause_end %></p>
 
 <%= form_tag update_customer_path("email"), method: 'POST' do %>
     <%= label_tag 'email', "Email" %>
@@ -14,7 +189,8 @@
     <%= text_field_tag 'name', @current_customer.name %>
     <%= submit_tag 'Update' %>
 <% end %>
-<p>Hub: <%= @current_customer.hub %></p>
+
+
 <p>Credit card: <%= @card_brand %> ending in <%= @card_last4 %></p>
 <%= form_tag update_customer_path("change_card") do %>
   <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
@@ -24,8 +200,7 @@
           data-label="Change card"
           data-panel-label="Update"></script>
 <% end %>
-<p>Next pick-up date:<%= @current_customer.next_pick_up_date.strftime("%B %d, %Y") unless @current_customer.next_pick_up_date.blank? %></p>
-<p>Next billing date: <%= @next_billing_date.strftime("%B %d, %Y") unless @next_billing_date.blank? %> </p>
+
 <p>Regular meals on Monday: <%= @current_customer.regular_meals_on_monday.to_i %></p>
 <p>Green meals on Monday: <%= @current_customer.green_meals_on_monday.to_i %></p>
 <p>Regular meals on Thursday: <%= @current_customer.regular_meals_on_thursday.to_i %></p>

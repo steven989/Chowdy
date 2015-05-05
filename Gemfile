@@ -50,6 +50,7 @@ gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 #5) Login with Sorcery
 gem 'sorcery'
 
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
