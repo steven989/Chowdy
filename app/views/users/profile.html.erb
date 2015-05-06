@@ -1,6 +1,6 @@
 
 <script>
-  
+
 $(function(){
 
     map = new GMaps({
@@ -26,17 +26,120 @@ $(function(){
       }
     });
 
+    // highlight the side navigation bars
     $(".nav-main a").on("click", function(){
      $(".nav-main").find(".highlight").removeClass("highlight");
      $(this).parent().addClass("highlight");
     });
 
 
+    // slider
+    
+    var total_meal_number = <%= @current_customer.total_meals_per_week.to_i %>
+    var updated_total_meal_number = total_meal_number
+    var total_green = <%= @current_customer.number_of_green.to_i %>
+    var updated_green= total_green
+
+    $('#total_meals_slider').slider({
+      min: 6,
+      max: 14,
+      value: updated_total_meal_number,
+      step: 2,
+      tooltip: "show"
+    }).off('slideStop').on('slideStop',function(){
+      var updated_value = $(this).slider('getValue');
+
+      if (updated_value - updated_green < 0) { 
+          var total_amount_of_green_to_adjust_down = updated_value - updated_green
+          if (total_amount_of_green_to_adjust_down % 2 == 0) {
+            daily_adjustment = total_amount_of_green_to_adjust_down/2;
+            var updated_mon_grn = parseInt($('#disp_grn_mon').html()) + daily_adjustment;
+            var updated_thu_grn = parseInt($('#disp_grn_thu').html()) + daily_adjustment;
+            $('#disp_grn_mon').html(updated_mon_grn);
+            $('#disp_grn_thu').html(updated_thu_grn);
+            updated_green = updated_value;
+          } else {
+            daily_adjustment_low = total_amount_of_green_to_adjust_down/2 - 0.5;
+            daily_adjustment_high = total_amount_of_green_to_adjust_down/2 + 0.5;
+            var updated_mon_grn = parseInt($('#disp_grn_mon').html()) + daily_adjustment_low;
+            var updated_thu_grn = parseInt($('#disp_grn_thu').html()) + daily_adjustment_high;
+            $('#disp_grn_mon').html(updated_mon_grn);
+            $('#disp_grn_thu').html(updated_thu_grn);
+            updated_green = updated_value;
+          };
+            $('#disp_reg_mon').html(0);
+            $('#disp_reg_thu').html(0);  
+            updated_total_meal_number = updated_value;
+            setup_green_slider(); 
+       } else {
+          var regular_meals = updated_value - updated_green
+          if (regular_meals % 2 == 0) {
+            $('#disp_reg_mon').html(regular_meals/2);
+            $('#disp_reg_thu').html(regular_meals/2);            
+          } else {
+            $('#disp_reg_mon').html(regular_meals/2 - 0.5);
+            $('#disp_reg_thu').html(regular_meals/2 + 0.5); 
+          };
+          updated_total_meal_number = updated_value;
+          setup_green_slider();  
+       }
+
+    });
+
+    function setup_green_slider() {
+      $('#green_meals_slider').slider({
+        min: 0,
+        max: updated_total_meal_number,
+        value: updated_green,
+        step: 1,
+        tooltip: "show"
+      }).off('slideStop').on('slideStop',function(){
+        var updated_value = $(this).slider('getValue');
+        var daily_difference_low;
+        var daily_difference_high;
+        var updated_mon_reg;
+        var updated_thu_reg;
+        if ((updated_value - total_green) % 2 == 0) {
+          daily_difference_low = (updated_value - total_green)/2;
+          daily_difference_high = (updated_value - total_green)/2;
+          updated_mon_grn = <%= @current_customer.green_meals_on_monday.to_i %> + daily_difference_low;
+          updated_thu_grn = <%= @current_customer.green_meals_on_thursday.to_i %> + daily_difference_high;
+          $('#disp_grn_mon').html(updated_mon_grn);
+          $('#disp_grn_thu').html(updated_thu_grn);
+          updated_green = updated_value;
+          post_green_total_reg_meals = updated_total_meal_number - updated_value;
+          if (post_green_total_reg_meals % 2 == 0) {
+            $('#disp_reg_mon').html(post_green_total_reg_meals/2);
+            $('#disp_reg_thu').html(post_green_total_reg_meals/2);
+          } else {
+            $('#disp_reg_mon').html(post_green_total_reg_meals/2-0.5);
+            $('#disp_reg_thu').html(post_green_total_reg_meals/2+0.5);
+          };
+
+        } else {
+          daily_difference_low = (updated_value - total_green)/2 - 0.5;
+          daily_difference_high = (updated_value - total_green)/2 + 0.5;
+          updated_mon_grn = <%= @current_customer.green_meals_on_monday.to_i %> + daily_difference_low;
+          updated_thu_grn = <%= @current_customer.green_meals_on_thursday.to_i %> + daily_difference_high;
+          $('#disp_grn_mon').html(updated_mon_grn);
+          $('#disp_grn_thu').html(updated_thu_grn);
+          updated_green = updated_value;
+          post_green_total_reg_meals = updated_total_meal_number - updated_value;
+          if (post_green_total_reg_meals % 2 == 0) {
+            $('#disp_reg_mon').html(post_green_total_reg_meals/2);
+            $('#disp_reg_thu').html(post_green_total_reg_meals/2);
+          } else {
+            $('#disp_reg_mon').html(post_green_total_reg_meals/2-0.5);
+            $('#disp_reg_thu').html(post_green_total_reg_meals/2+0.5);
+          };
+        };
+
+      });
+    };
+    setup_green_slider();
 });
 
 </script>
-
-
 
 
 <section class="vbox">
@@ -88,7 +191,7 @@ $(function(){
             </aside>
 
 
-            <section id="content">
+            <section id="content container">
                 <section class="hbox stretch bg-light tab-content">
                     <section class="tab-pane active" id="dashboard" role="tabpanel">
                         <section class="vbox">
@@ -178,12 +281,101 @@ $(function(){
                             </section>
                         </section>
                     </section>
+                    
                     <section class="tab-pane" id="changePlan" role="tabpanel">
-                      <p>Regular meals on Monday: <%= @current_customer.regular_meals_on_monday.to_i %></p>
-                      <p>Green meals on Monday: <%= @current_customer.green_meals_on_monday.to_i %></p>
-                      <p>Regular meals on Thursday: <%= @current_customer.regular_meals_on_thursday.to_i %></p>
-                      <p>Green meals on Thursday: <%= @current_customer.green_meals_on_thursday.to_i %></p>                      
-
+                        <section class="vbox">
+                            <section class="scrollable padder">
+                              <% if @number_of_failed_invoices > 0 %>
+                                <section class="row m-t-xs">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-danger">
+                                      <i class="fa fa-ban-circle"></i>You have <strong><%= @number_of_failed_invoices %> overdue invoice </strong><%= "s" if @number_of_failed_invoices > 1 %> for the week<%= "s" if @number_of_failed_invoices > 1 %> of <%= @failed_weeks.to_sentence %> due to declined credit card. We will re-attempt in a few days. You can also update your card on your profile.
+                                    </div>
+                                  </div>
+                                </section>
+                              <% end %>
+                                <section class="row m-b-xs m-t-md">
+                                    <div class="col-sm-12">
+                                        <h5 class="m-b-xs text-muted text-left">
+                                            Subscription details
+                                        </h5>
+                                    </div>
+                                </section>
+                                <section class="row">
+                                    <div class="col-sm-12">
+                                        <div class="panel b-a">
+                                            <div class="row m-n text-center">
+                                                <div class="col-md-3 b-b">
+                                                    <section class="row m-t-md m-b-md">
+                                                      
+                                                        <div class="col-md-12 text-center text-muted m-t-n-md">
+                                                              <span class="h2 block" id="disp_reg_mon" ><%= @current_customer.regular_meals_on_monday.to_i %></span>
+                                                              <small class="text-muted text-u-c">Regular meals on Monday</small>
+                                                        </div>  
+                                                      
+                                                    </section>
+                                                </div>
+                                                <div class="col-md-3 b-b">
+                                                    <section class="row m-t-md m-b-md">
+                                                      
+                                                        <div class="col-md-12 text-center text-success-lt m-t-n-md">
+                                                              <span class="h2 block" id="disp_grn_mon"><%= @current_customer.green_meals_on_monday.to_i %></span>
+                                                              <small class="text-muted text-u-c">Green meals on Monday</small>
+                                                        </div>  
+                                                      
+                                                    </section>
+                                                </div>
+                                                <div class="col-md-3 b-b">
+                                                    <section class="row m-t-md m-b-md">
+                                                      
+                                                        <div class="col-md-12 text-center text-muted m-t-n-md">
+                                                              <span class="h2 block" id="disp_reg_thu"><%= @current_customer.regular_meals_on_thursday.to_i %></span>
+                                                              <small class="text-muted text-u-c">Regular meals on Thursday</small>
+                                                        </div>  
+                                                      
+                                                    </section>
+                                                </div>
+                                                <div class="col-md-3 b-b">
+                                                    <section class="row m-t-md m-b-md">
+                                                      
+                                                        <div class="col-md-12 text-center text-success-lt m-t-n-md">
+                                                              <span class="h2 block" id="disp_grn_thu"><%= @current_customer.green_meals_on_thursday.to_i %></span>
+                                                              <small class="text-muted text-u-c">Green meals on Thursday</small>
+                                                        </div>  
+                                                      
+                                                    </section>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                              <div class="col-sm-12 text-left padder-v">
+                                                <div class="col-sm-6 m-t-md">
+                                                  <div class="row">
+                                                    <div class="col-sm-4 text-left">
+                                                      <small class="text-muted text-u-c">Change meal plan</small>
+                                                    </div>
+                                                    <div class="col-sm-8" style="cursor:pointer;">
+                                                      <div class="slider slider-horizontal" id="total_meals_slider"></div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                <div class="col-sm-6 m-t-md">
+                                                  <div class="row">
+                                                    <div class="col-sm-5 text-left">
+                                                      <small class="text-muted text-u-c">Change number of green meals</small>
+                                                    </div>
+                                                    <div class="col-sm-7" style="cursor:pointer;">
+                                                      <div class="slider slider-horizontal" id="green_meals_slider"></div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>   
+                                        </div>
+                                    </div>
+                                </section>                           
+                            </section>
+                        </section>
+                  
                       <p>Meal preferences: <%= @current_customer.meal_preferences %></p>
 
                       <%= form_tag update_customer_path("pause"), method: 'POST' do %>
@@ -198,7 +390,9 @@ $(function(){
                           <%= submit_tag 'Restart Now' %>
                       <% end %>
 
-                    </section>  
+                    </section> 
+
+
                     <section class="tab-pane" id="delivery" role="tabpanel">
                       <p>Delivery: <%= @delivery_note %></p>
                       <%= form_tag update_customer_path("delivery"), method: 'POST' do %>
@@ -213,7 +407,9 @@ $(function(){
                       <%= form_tag update_customer_path("stop_delivery"), method: 'POST' do %>
                           <%= submit_tag "Stop delivery" %>
                       <% end %>
-                    </section>  
+                    </section>
+
+
                     <section class="tab-pane" id="settings" role="tabpanel">
                       <%= form_tag update_customer_path("email"), method: 'POST' do %>
                           <%= label_tag 'email', "Email" %>
