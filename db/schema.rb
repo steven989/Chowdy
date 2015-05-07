@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150506013438) do
+ActiveRecord::Schema.define(version: 20150507003028) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -102,6 +102,7 @@ ActiveRecord::Schema.define(version: 20150506013438) do
     t.text     "feedback"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "occasion"
   end
 
   create_table "start_date_tables", force: true do |t|

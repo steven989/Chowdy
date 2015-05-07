@@ -14,28 +14,25 @@ class UsersController < ApplicationController
         require_login
 
         @current_customer = current_user.customer
+        @display_cancel = true
+        @display_pause = true
+        @display_restart = true
 
         if @current_customer.active?.downcase == "yes" 
             if @current_customer.paused?.blank? || @current_customer.paused? == "No" || @current_customer.paused? == "no"
-                if @current_customer.stop_queues.length > 0
-                    if @current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type == 'pause'
+                if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
+                    if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'pause'
                         @current_status = "Active (pause starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")} until #{(@current_customer.stop_queues.order(created_at: :desc).limit(1).take.end_date-1).strftime("%A %B %d, %Y")})"
-                    elsif @current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type == 'cancel'
+                    elsif @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'cancel'
                         @current_status = "Active (cancel starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
                     end
                 else
                     @current_status = "Active"
+                    @display_restart = false
                 end
-                # if @current_customer.pause_cancel_request == 'pause'
-                #     @current_status = "Active (pause starting #{(Date.commercial(Date.today.to_date.year, 1+Date.today.to_date.cweek, 1)+7.days).strftime("%B %d, %Y")})"
-                # elsif @current_customer.pause_cancel_request == 'cancel'
-                #     @current_status = "Active (cancel starting #{(Date.commercial(Date.today.to_date.year, 1+Date.today.to_date.cweek, 1)+7.days).strftime("%B %d, %Y")})"
-                # else
-                #     @current_status = "Active"
-                # end
             else
-                if @current_customer.stop_queues.length > 0
-                    if @current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type == 'restart'
+                if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
+                    if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
                         @current_status = "Paused (restarting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
                     end
                 else
@@ -46,12 +43,15 @@ class UsersController < ApplicationController
                 
             end
         else
-            if @current_customer.stop_queues.length > 0
-                if @current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type == 'restart'
+            if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
+                if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
                     @current_status = "Inactive (restarting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
+                    @display_pause = false
                 end
             else
                 @current_status = "Inactive"
+                @display_cancel = false
+                @display_pause = false
             end   
         end
 
@@ -73,11 +73,13 @@ class UsersController < ApplicationController
             @next_billing_date = Time.at(current_period_end).to_datetime + 2.hours
         end
         if @current_customer.recurring_delivery?.blank?
-            @delivery_note = "Delivery not requested"
+            @delivery_note = "You do not currently have scheduled delivery"
             @delivery_button = "Request delivery"
+            @delivery_color_class = "warning"
         else 
-            @delivery_note = "Delivery requested"
+            @delivery_note = "You have scheduled delivery"
             @delivery_button = "Update delivery information"
+            @delivery_color_class = "success"
         end
         
         if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?

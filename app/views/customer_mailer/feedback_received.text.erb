@@ -1,4 +1,8 @@
 Received from <%= @customer.name %> (<%= @customer.email %>)
+<% if @customer.feedbacks.last.occasion == "cancel" %>
+This is a cancellation feedback 
+<% else %>
+This is a regular feedback
+<% end %>
 --------------------------------------------------------
-
 <%= @feedback %>

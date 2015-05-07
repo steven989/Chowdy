@@ -435,7 +435,7 @@ $(function(){
                                 <section class="row m-b-xs">
                                     <div class="col-sm-12">
                                         <h5 class="m-b-xs text-muted text-left">
-                                            Put Subscription on Hold
+                                            Put Subscription on Hold (deadline to cancel or pause is the Thursday of every week)
                                         </h5>
                                     </div>
                                 </section>
@@ -443,15 +443,23 @@ $(function(){
                                     <div class="col-sm-12">
                                         <div class="panel b-a padder text-left">
                                             <div class="row">
-                                              <div class="col-sm-2 m-b-md m-t-md">
-                                                <div class="btn btn-s-md btn-success">Restart Subscription</div>
-                                              </div>
-                                              <div class="col-sm-2 m-b-md m-t-md">
-                                                <div class="btn btn-s-md btn-default" data-toggle="modal" data-target="#pauseModal">Pause Subscription</div>
-                                              </div>
-                                              <div class="col-sm-2 m-b-md m-t-md">
-                                                <div class="btn btn-s-md btn-default">Cancel Subscription</div>
-                                              </div>
+                                              <% if @display_restart %>
+                                                <div class="col-sm-2 m-b-md m-t-md">
+                                                  <%= form_tag update_customer_path("restart"), method: 'POST' do %>
+                                                      <%= submit_tag 'Resume Subscription', class:"btn btn-s-md btn-success" %>
+                                                  <% end %>
+                                                </div>
+                                              <% end %>
+                                              <% if @display_pause %>
+                                                <div class="col-sm-2 m-b-md m-t-md">
+                                                  <div class="btn btn-s-md btn-default" data-toggle="modal" data-target="#pauseModal">Pause Subscription</div>
+                                                </div>
+                                              <% end %>
+                                              <% if @display_cancel %>
+                                                <div class="col-sm-2 m-b-md m-t-md">
+                                                  <div class="btn btn-s-md btn-default" data-toggle="modal" data-target="#cancelModal">Cancel Subscription</div>
+                                                </div>
+                                              <% end %>
                                             </div>  
                                         </div>
                                     </div>
@@ -460,36 +468,50 @@ $(function(){
                         </section>
                   
                       <p>Meal preferences: <%= @current_customer.meal_preferences %></p>
-
-                      <%= form_tag update_customer_path("pause"), method: 'POST' do %>
-                          <%= label_tag 'end_date', "Pause end date" %>
-                          <%= date_field_tag 'end_date', 14.days.from_now.strftime("%Y-%m-%d") %>
-                          <%= submit_tag 'Pause' %>
-                      <% end %>
-                      <%= form_tag update_customer_path("cancel"), method: 'POST' do %>
-                          <%= submit_tag 'Cancel subscription' %>
-                      <% end %>
-                      <%= form_tag update_customer_path("restart"), method: 'POST' do %>
-                          <%= submit_tag 'Restart Now' %>
-                      <% end %>
-
                     </section> 
 
 
                     <section class="tab-pane" id="delivery" role="tabpanel">
-                      <p>Delivery: <%= @delivery_note %></p>
-                      <%= form_tag update_customer_path("delivery"), method: 'POST' do %>
-                          <%= label_tag 'phone_number', "Phone number" %>
-                          <%= text_field_tag 'phone_number', @phone_number %>
-                          <%= label_tag 'delivery_address', "Delivery address with unit number" %>
-                          <%= text_field_tag 'delivery_address', @delivery_address %>
-                          <%= label_tag 'note', "Additional note (default time is Monday and Thursday by noon)" %>
-                          <%= text_area_tag 'note', @note %>
-                          <%= submit_tag @delivery_button %>
-                      <% end %>
-                      <%= form_tag update_customer_path("stop_delivery"), method: 'POST' do %>
-                          <%= submit_tag "Stop delivery" %>
-                      <% end %>
+                      <section class="vbox">
+                        <section class="scrollable padder">                      
+                          <div class="row">
+                            <div class="col-sm-6">
+                              <div class="alert alert-<%= @delivery_color_class %> m-t-md padder-v">
+                                  <h5><%= @delivery_note %></h5>
+                                  <% unless @current_customer.recurring_delivery?.blank? %>
+                                    <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
+                                        <%= submit_tag "Stop delivery", class:"btn btn-sm btn-danger"  %>
+                                    <% end %>
+                                  <% end %>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-sm-6">
+                              <section class="panel panel-default">
+                                <header class="panel-heading font-bold">Delivery request form</header>
+                                <div class="panel-body">
+                                  <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form' do %>
+                                    <div class="form-group">
+                                      <%= label_tag 'phone_number', "Phone number" %>
+                                      <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control", placeholder:"Enter phone number" %>
+                                    </div>
+                                    <div class="form-group">
+                                      <%= label_tag 'delivery_address', "Delivery address with unit number" %>
+                                      <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control", placeholder: "Delivery address, including unit number" %>
+                                    </div>
+                                    <div class="form-group">
+                                      <%= label_tag 'note', "Additional note (default delivery time is every Monday and Thursday between 11am and noon)" %>
+                                      <%= text_area_tag 'note', @note, class: "form-control" %>
+                                    </div>
+                                    <%= submit_tag @delivery_button, class:"btn btn-sm btn-default" %>
+                                  <% end %>
+                                </div>
+                              </section>
+                            </div>
+                          </div>                      
+                        </section>
+                      </section>                      
                     </section>
 
 
@@ -550,10 +572,33 @@ $(function(){
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <!-- <button type="button" class="btn btn-primary">Pause Subscription</button> -->
           <%= submit_tag 'Pause Subscription', class:"btn btn-primary" %>
         </div>
       </div>
     <% end %>
+  </div>
+</div>
+
+<!-- Cancel modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
+        <%= form_tag update_customer_path("cancel"), method: 'POST' do %>
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Can you let us know the reason for cancellation?</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <%= label_tag 'feedback', "Your comments" %>
+              <%= text_area_tag 'feedback',nil,class: "input-sm input-s form-control", rows: "6", placeholder: "Type your comments" %>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <%= submit_tag 'Confirm cancellation',class:"btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
   </div>
 </div>

@@ -261,6 +261,12 @@ protect_from_forgery :except => :payment
             else
                 current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
             end
+            
+            unless params[:feedback].blank?        
+                if current_customer.feedbacks.create(feedback:params[:feedback], occasion:"cancel") 
+                    CustomerMailer.feedback_received(current_customer).deliver
+                end
+            end
         elsif params[:id].downcase == "restart"    
             if [2,3,4].include? Date.today.wday
                 adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
@@ -310,7 +316,7 @@ protect_from_forgery :except => :payment
         elsif params[:id].downcase == "name" 
             current_customer.update(name:params[:name])
         elsif params[:id].downcase == "feedback"
-            if current_customer.feedbacks.create(feedback:params[:feedback]) 
+            if current_customer.feedbacks.create(feedback:params[:feedback], occasion: 'regular') 
                 CustomerMailer.feedback_received(current_customer).deliver
             end
         elsif params[:id].downcase == "change_subscription"
