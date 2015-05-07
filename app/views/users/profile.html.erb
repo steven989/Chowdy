@@ -567,7 +567,7 @@ $(function(){
                                     </div>
                                     <div class="row">
                                       <div class="col-sm-5 m-t-md">
-                                        <%= submit_tag @delivery_button, class:"btn btn-sm btn-default disabled", id: "request_delivery_submit" %>
+                                        <%= submit_tag @delivery_button, class:"btn btn-md btn-default disabled", id: "request_delivery_submit" %>
                                       </div>
                                       <div class="col-sm-7 m-t-md">
                                         <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
@@ -598,7 +598,7 @@ $(function(){
                                     <div class="form-group">
                                       <%= label_tag 'email', "Email" %>
                                       <%= text_field_tag 'email', @current_customer.email, class: "form-control" %>
-                                      <%= submit_tag 'Update email', class:"btn btn-sm btn-default m-t-sm" %>
+                                      <%= submit_tag 'Update email', class:"btn btn-md btn-default m-t-sm" %>
                                     </div>
                                   <% end %>
                                   <div class="line line-dashed b-b line-lg pull-in"></div>
@@ -606,7 +606,7 @@ $(function(){
                                     <div class="form-group">
                                       <%= label_tag 'name', "Name" %>
                                       <%= text_field_tag 'name', @current_customer.name, class: "form-control" %>
-                                      <%= submit_tag 'Update name', class:"btn btn-sm btn-default m-t-sm" %>
+                                      <%= submit_tag 'Update name', class:"btn btn-md btn-default m-t-sm" %>
                                     </div>
                                   <% end %>
                                   <div class="line line-dashed b-b line-lg pull-in"></div>
@@ -632,14 +632,14 @@ $(function(){
                                             });
                                         });
                                         </script>
-                                        <%= submit_tag 'Change Card', class:"btn btn-sm btn-info m-t-sm", data: {key: Rails.configuration.stripe[:publishable_key], description: "Update your credit card info", amount:"0", label:"Change Card", panel_label: "Change Now"} %>
+                                        <%= submit_tag 'Change Card', class:"btn btn-md btn-info m-t-sm", data: {key: Rails.configuration.stripe[:publishable_key], description: "Update your credit card info", amount:"0", label:"Change Card", panel_label: "Change Now"} %>
                                     </div>
                                   <% end %>
                                   <div class="line line-dashed b-b line-lg pull-in"></div>
                                   <div class="form-group">
                                     <label>Feedback</label>
                                     <p class="form-control-static">
-                                      <div class="btn btn-sm btn-success"  data-toggle="modal" data-target="#feedbackModal">Submit Feedback
+                                      <div class="btn btn-md btn-success"  data-toggle="modal" data-target="#feedbackModal">Submit Feedback
                                       </div>
                                     </p>
                                   </div>
