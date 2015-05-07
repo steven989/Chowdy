@@ -32,6 +32,64 @@ $(function(){
      $(this).parent().addClass("highlight");
     });
 
+    // check delivery 
+    $('#delivery_request_form input').off("change").on("change", function(){
+      $("#delivery_change_warning").removeClass("hidden");
+    });
+
+    $('#delivery_request_form input').off("focusout").on("focusout",function(e){
+        GMaps.geocode({
+          address: $('#delivery_request_form #delivery_address').val()+", Toronto",
+          callback: function(results, status) {
+            if (status == 'OK') {
+              if (results.length > 1) {
+                var result_array = results.map(function(result){
+                    return result.formatted_address+"<br>"
+                  });
+              $('#address_match_warning strong').html("We found multiple matching locations. <i>Did you mean:</i><br>"+result_array.join(" "));
+              $('#address_match_warning').removeClass("hidden");
+              $("#delivery_request_form input:submit").addClass("disabled");
+              } else {
+                if (results[0].geometry.location_type == "APPROXIMATE") {
+                  $('#address_match_warning strong').html("We could not locate your address. Please be more specific.");
+                  $('#address_match_warning').removeClass("hidden");
+                  $("#delivery_request_form input:submit").addClass("disabled");
+                } else {
+                var latlng = results[0].geometry.location;
+                  if (contains_location(latlng)) {
+                    $('#address_match_warning strong').html("Your location is in our delivery zone!");
+                    $('#address_match_warning').addClass("hidden");
+                    $("#delivery_request_form input:submit").removeClass("disabled");
+                  } else {
+                    $('#address_match_warning strong').html("Your location is outside of our delivery zone");
+                    $('#address_match_warning').removeClass("hidden");
+                    $("#delivery_request_form input:submit").addClass("disabled");
+                  }
+                }
+              }
+            } else {
+              $('#address_match_warning strong').html("Uh oh, something went wrong")
+            }
+          }
+        });
+
+    });
+
+    function contains_location(loc) {
+
+      var gmaps_boundary_path = []
+      var coordinates = <%= raw @delivery_boundary_coordinates %>
+      coordinates.forEach(function(coordinate){
+        gmaps_boundary_path.push(new google.maps.LatLng(coordinate.lat, coordinate.lng))
+      });
+      var delivery_boundary_polygon = new google.maps.Polygon({
+        paths: gmaps_boundary_path
+      });
+
+      return google.maps.geometry.poly.containsLocation(loc, delivery_boundary_polygon)
+    }
+
+
     // date picker
 
     var earliest_resume_date = new Date(<%= @earliest_pause_end_date.year %>,<%= @earliest_pause_end_date.month.to_i - 1 %>,<%= @earliest_pause_end_date.day %>,0,0,0,0)
@@ -489,9 +547,9 @@ $(function(){
                           <div class="row">
                             <div class="col-sm-6">
                               <section class="panel panel-default">
-                                <header class="panel-heading font-bold">Delivery request form</header>
+                                <header class="panel-heading font-bold">Delivery request form - note that default delivery time is every Monday and Thursday between 11am and noon</header>
                                 <div class="panel-body">
-                                  <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form' do %>
+                                  <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
                                     <div class="form-group">
                                       <%= label_tag 'phone_number', "Phone number" %>
                                       <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control", placeholder:"Enter phone number" %>
@@ -499,12 +557,25 @@ $(function(){
                                     <div class="form-group">
                                       <%= label_tag 'delivery_address', "Delivery address with unit number" %>
                                       <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control", placeholder: "Delivery address, including unit number" %>
+                                      <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
+                                          <strong></strong>
+                                      </div>
                                     </div>
                                     <div class="form-group">
-                                      <%= label_tag 'note', "Additional note (default delivery time is every Monday and Thursday between 11am and noon)" %>
+                                      <%= label_tag 'note', "Additional note" %>
                                       <%= text_area_tag 'note', @note, class: "form-control" %>
                                     </div>
-                                    <%= submit_tag @delivery_button, class:"btn btn-sm btn-default" %>
+                                    <div class="row">
+                                      <div class="col-sm-5 m-t-md">
+                                        <%= submit_tag @delivery_button, class:"btn btn-sm btn-default disabled", id: "request_delivery_submit" %>
+                                      </div>
+                                      <div class="col-sm-7 m-t-md">
+                                        <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
+                                          
+                                          You have unsaved changes
+                                        </div>
+                                      </div>
+                                    </div>
                                   <% end %>
                                 </div>
                               </section>
@@ -516,38 +587,69 @@ $(function(){
 
 
                     <section class="tab-pane" id="settings" role="tabpanel">
-                      <%= form_tag update_customer_path("email"), method: 'POST' do %>
-                          <%= label_tag 'email', "Email" %>
-                          <%= text_field_tag 'email', @current_customer.email %>
-                          <%= submit_tag 'Update' %>
-                      <% end %>
-                      <%= form_tag update_customer_path("name"), method: 'POST' do %>
-                          <%= label_tag 'name', "Name" %>
-                          <%= text_field_tag 'name', @current_customer.name %>
-                          <%= submit_tag 'Update' %>
-                      <% end %>
-                      <p>Credit card: <%= @card_brand %> ending in <%= @card_last4 %></p>
-                      <%= form_tag update_customer_path("change_card") do %>
-                        <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-                                data-key="<%= Rails.configuration.stripe[:publishable_key] %>"
-                                data-description="Update your credit card info"
-                                data-amount="0"
-                                data-label="Change card"
-                                data-panel-label="Update"></script>
-                      <% end %>
+                      <section class="vbox">
+                        <section class="scrollable padder"> 
+                          <div class="row m-t-md">
+                            <div class="col-sm-6">
+                              <section class="panel panel-default">
+                                <header class="panel-heading font-bold">Update account information</header>
+                                <div class="panel-body">
+                                  <%= form_tag update_customer_path("email"), method: 'POST', role: "form" do %>
+                                    <div class="form-group">
+                                      <%= label_tag 'email', "Email" %>
+                                      <%= text_field_tag 'email', @current_customer.email, class: "form-control" %>
+                                      <%= submit_tag 'Update email', class:"btn btn-sm btn-default m-t-sm" %>
+                                    </div>
+                                  <% end %>
+                                  <div class="line line-dashed b-b line-lg pull-in"></div>
+                                  <%= form_tag update_customer_path("name"), method: 'POST' do %>
+                                    <div class="form-group">
+                                      <%= label_tag 'name', "Name" %>
+                                      <%= text_field_tag 'name', @current_customer.name, class: "form-control" %>
+                                      <%= submit_tag 'Update name', class:"btn btn-sm btn-default m-t-sm" %>
+                                    </div>
+                                  <% end %>
+                                  <div class="line line-dashed b-b line-lg pull-in"></div>
+                                  <%= form_tag update_customer_path("change_card"), id:"change_card_form" do %>
+                                    <div class="form-group">
+                                      <label>Credit Card</label>
+                                      <p class="form-control-static"><%= @card_brand %> ending in <%= @card_last4 %></p>
+                                        <script>
+                                        $(function() {
+                                            $('#change_card_form input[type=submit]').on('click', function(event) {
+                                                event.preventDefault();
 
+                                                var $button = $(this),
+                                                    $form = $button.parents('form');
 
-                      <%= form_tag update_customer_path("feedback"), method: 'POST' do %>
-                          <%= label_tag 'feedback', "Submit feedback to help improve Chowdy" %>
-                          <p><%= text_area_tag 'feedback', nil,placeholder: "Food, process, etc." %></p>
-                          <p><%= submit_tag 'Submit feedback' %></p>
-                      <% end %>
+                                                var opts = $.extend({}, $button.data(), {
+                                                    token: function(result) {
+                                                        $form.append($('<input>').attr({ type: 'hidden', name: 'stripeToken', value: result.id })).submit();
+                                                    }
+                                                });
 
+                                                StripeCheckout.open(opts);
+                                            });
+                                        });
+                                        </script>
+                                        <%= submit_tag 'Change Card', class:"btn btn-sm btn-info m-t-sm", data: {key: Rails.configuration.stripe[:publishable_key], description: "Update your credit card info", amount:"0", label:"Change Card", panel_label: "Change Now"} %>
+                                    </div>
+                                  <% end %>
+                                  <div class="line line-dashed b-b line-lg pull-in"></div>
+                                  <div class="form-group">
+                                    <label>Feedback</label>
+                                    <p class="form-control-static">
+                                      <div class="btn btn-sm btn-success"  data-toggle="modal" data-target="#feedbackModal">Submit Feedback
+                                      </div>
+                                    </p>
+                                  </div>
+                                </div>
+                              </section>
+                            </div>
+                          </div>
+                        </section>
+                      </section>                      
                     </section>  
-
-
-
-
                 </section>
             </section>
         
@@ -597,6 +699,35 @@ $(function(){
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             <%= submit_tag 'Confirm cancellation',class:"btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+  </div>
+</div>
+
+<!-- Feedback modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
+<!--   <%= form_tag update_customer_path("feedback"), method: 'POST' do %>
+      <%= label_tag 'feedback', "Submit feedback to help improve Chowdy" %>
+      <p><%= text_area_tag 'feedback', nil,placeholder: "Food, process, etc." %></p>
+      <p><%= submit_tag 'Submit feedback' %></p>
+  <% end %> -->
+  <div class="modal-dialog">
+      <div class="modal-content">
+        <%= form_tag update_customer_path("feedback"), method: 'POST' do %>
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Feedback</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <%= label_tag 'feedback', "Submit feedback to help improve Chowdy" %>
+              <%= text_area_tag 'feedback',nil,class: "input-sm input-s form-control", rows: "6", placeholder: "Type your comments" %>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <%= submit_tag 'Submit feedback',class:"btn btn-primary" %>
           </div>
         <% end %>
       </div>

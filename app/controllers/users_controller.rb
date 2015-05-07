@@ -18,6 +18,8 @@ class UsersController < ApplicationController
         @display_pause = true
         @display_restart = true
 
+        @delivery_boundary_coordinates = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"coordinates").take.setting_value
+
         if @current_customer.active?.downcase == "yes" 
             if @current_customer.paused?.blank? || @current_customer.paused? == "No" || @current_customer.paused? == "no"
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
