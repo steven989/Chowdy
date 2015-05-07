@@ -1,7 +1,10 @@
 namespace :customers do
     desc 'push start date to the next next Monday'
     task :push_start_date, [:number_of_weeks] => [:environment] do |t, args|        
-        puts "Start date pushed to #{Chowdy::Application.closest_date(args[:number_of_weeks],1)}" if StartDate.first.update(start_date: Chowdy::Application.closest_date(args[:number_of_weeks],1))        
+        if StartDate.first.update(start_date: Chowdy::Application.closest_date(args[:number_of_weeks],1))        
+            puts "Start date pushed to #{Chowdy::Application.closest_date(args[:number_of_weeks],1)}" 
+            
+        end
     end
 
     desc 'update status information for customers restarting after pause'
@@ -13,15 +16,49 @@ namespace :customers do
 
     desc 'pause/cancel/restart customers'
     task :execute_pause_cancel_restart_queue, [:distance] => [:environment] do |t, args|
-        if StopQueue.where(associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
-            StopQueue.where(associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
+        if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
+            StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
+                current_customer = queue_item.customer
+                if queue_item.stop_type == "change_sub"
+                    case queue_item.updated_meals
+                        when 6
+                            meals_per_week = "6mealswk" 
+                        when 8
+                            meals_per_week = "8mealswk"
+                        when 10
+                            meals_per_week = "10mealswk"
+                        when 12
+                            meals_per_week = "12mealsweek"
+                        when 14
+                            meals_per_week = "14mealsweek"
+                    end                    
+                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                    stripe_subscription.plan = meals_per_week
+                    stripe_subscription.prorate = false
+                    if stripe_subscription.save
+                        current_customer.update(
+                            total_meals_per_week: queue_item.updated_meals, 
+                            number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
+                            raw_green_input: "#{current_customer.raw_green_input} (changed on #{Date.today.strftime("%Y-%m-%d")})",
+                            regular_meals_on_monday: queue_item.updated_reg_mon, 
+                            green_meals_on_monday: queue_item.updated_grn_mon,
+                            regular_meals_on_thursday: queue_item.updated_reg_thu,
+                            green_meals_on_thursday: queue_item.updated_grn_thu
+                            )
+                            queue_item.destroy
+                    end
+                end
+            end
+        end
+        if StopQueue.where(stop_type: ["cancel","pause","restart"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
+            StopQueue.where(stop_type: ["cancel","pause","restart"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
                 if queue_item.stop_type == 'pause'
                     stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
                     stripe_subscription.trial_end = queue_item.end_date.to_time.to_i
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
-                        current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)    
+                        current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
                         current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1)
                         queue_item.destroy
                     end

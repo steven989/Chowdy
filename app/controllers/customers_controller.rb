@@ -233,9 +233,8 @@ protect_from_forgery :except => :payment
         
         if params[:id].downcase == "pause"
             
-            end_date = params[:end_date]
+            end_date = params[:pause_date_picker]
             associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
-            
             unless end_date.blank?
                 adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
                 if [2,3,4].include? Date.today.wday
@@ -244,7 +243,7 @@ protect_from_forgery :except => :payment
                     adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
                 end
                 if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? current_customer.active?) && !(["Yes","yes"].include? current_customer.paused?)
-                    current_customer.stop_queues.destroy_all
+                    current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                     current_customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
                 end
             end
@@ -257,10 +256,10 @@ protect_from_forgery :except => :payment
             end
             associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
             if ["Yes","yes"].include? current_customer.active?
-                current_customer.stop_queues.destroy_all
+                current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                 current_customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date)
             else
-                current_customer.stop_queues.destroy_all
+                current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
             end
         elsif params[:id].downcase == "restart"    
             if [2,3,4].include? Date.today.wday
@@ -275,9 +274,9 @@ protect_from_forgery :except => :payment
                     current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
                 end
             elsif ["pause","cancel"].include? current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type
-                current_customer.stop_queues.destroy_all
+                current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
             elsif ["restart"].include? current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type
-                    current_customer.stop_queues.destroy_all
+                    current_customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
                     current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)                
             end
         elsif params[:id].downcase == "change_card"
@@ -313,6 +312,27 @@ protect_from_forgery :except => :payment
         elsif params[:id].downcase == "feedback"
             if current_customer.feedbacks.create(feedback:params[:feedback]) 
                 CustomerMailer.feedback_received(current_customer).deliver
+            end
+        elsif params[:id].downcase == "change_subscription"
+            total_updated_meals = params[:monday_reg_hidden].to_i + params[:monday_grn_hidden].to_i + params[:thursday_reg_hidden].to_i + params[:thursday_grn_hidden].to_i
+            if [2,3,4].include? Date.today.wday
+                adjusted_change_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+            else
+                adjusted_change_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+            end
+            associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+            if ([6,8,10,12,14].include?(total_updated_meals)) && (params[:thursday_grn_hidden].to_i + params[:monday_grn_hidden].to_i < total_updated_meals)
+                current_customer.stop_queues.where("stop_type ilike ?", "change_sub").destroy_all
+                current_customer.stop_queues.create(
+                    stop_type:'change_sub',
+                    associated_cutoff:associated_cutoff,
+                    updated_reg_mon:params[:monday_reg_hidden].to_i, 
+                    updated_reg_thu:params[:thursday_reg_hidden].to_i, 
+                    updated_grn_mon: params[:monday_grn_hidden].to_i, 
+                    updated_grn_thu:params[:thursday_grn_hidden].to_i,
+                    updated_meals:total_updated_meals, 
+                    start_date:adjusted_change_date
+                )
             end
         end
 

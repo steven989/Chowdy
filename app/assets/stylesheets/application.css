@@ -12,3 +12,8 @@
  *= require_tree .
  *= require_tree ../../../vendor/assets/stylesheets/.
  */
+
+
+.datepicker.dropdown-menu {
+    z-index: 10001;
+}

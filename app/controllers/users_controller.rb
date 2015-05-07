@@ -80,9 +80,33 @@ class UsersController < ApplicationController
             @delivery_button = "Update delivery information"
         end
         
+        if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
+            @total_meals = @current_customer.total_meals_per_week.to_i
+            @total_green = @current_customer.number_of_green.to_i
+            @monday_regular = @current_customer.regular_meals_on_monday.to_i
+            @monday_green = @current_customer.green_meals_on_monday.to_i
+            @thursday_regular = @current_customer.regular_meals_on_thursday.to_i
+            @thursday_green = @current_customer.green_meals_on_thursday.to_i
+        else
+            @change_effective_date = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.start_date.strftime("%A %b %e")
+            @total_meals = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_meals.to_i
+            @monday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_mon.to_i
+            @monday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_mon.to_i
+            @thursday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_thu.to_i
+            @thursday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_thu.to_i
+            @total_green = @monday_green + @thursday_green
+        end
+
+
         @delivery_address = @current_customer.delivery_address
         @phone_number = @current_customer.phone_number
         @note = @current_customer.special_delivery_instructions
+
+        if [2,3,4].include? Date.today.wday
+            @earliest_pause_end_date = Chowdy::Application.closest_date(2,1)
+        else
+            @earliest_pause_end_date = Chowdy::Application.closest_date(3,1)
+        end
 
     end
 
