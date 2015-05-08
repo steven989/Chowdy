@@ -123,77 +123,60 @@ $(function(){
     };
 
     pauseDateValidate();
-    // slider
-    
+    // spinner
+
     var total_meal_number = <%= @total_meals %>
     var updated_total_meal_number = total_meal_number
     var total_green = <%= @total_green %>
     var updated_green= total_green
-
-    function updateHiddenMealNumbers() {
-      $('#monday_reg_hidden').val(parseInt($('#disp_reg_mon').html()));
-      $('#monday_grn_hidden').val(parseInt($('#disp_grn_mon').html()));
-      $('#thursday_reg_hidden').val(parseInt($('#disp_reg_thu').html()));
-      $('#thursday_grn_hidden').val(parseInt($('#disp_grn_thu').html()));
-    };
-
-    $('#total_meals_slider').slider({
+                                                    
+    $('#total_meals_spinner').TouchSpin({
       min: 6,
       max: 14,
-      value: updated_total_meal_number,
-      step: 2,
-      tooltip: "show"
-    }).off('slideStop').on('slideStop',function(){
+      step: 2
+    });
+
+      
+    $('#green_meals_spinner').TouchSpin({
+        min: 0,
+        max: updated_total_meal_number,
+        step: 1
+    });
+
+
+    $('#total_meals_spinner').off("change").on("change", function(){
       $('#subscription_change_warning').removeClass("hidden");
-      var updated_value = $(this).slider('getValue');
+      var updated_value = $(this).val();
 
       if (updated_value - updated_green < 0) { 
-          var total_amount_of_green_to_adjust_down = updated_value - updated_green
-          if (total_amount_of_green_to_adjust_down % 2 == 0) {
-            daily_adjustment = total_amount_of_green_to_adjust_down/2;
-            var updated_mon_grn = parseInt($('#disp_grn_mon').html()) + daily_adjustment;
-            var updated_thu_grn = parseInt($('#disp_grn_thu').html()) + daily_adjustment;
-            $('#disp_grn_mon').html(updated_mon_grn);
-            $('#disp_grn_thu').html(updated_thu_grn);
-            updated_green = updated_value;
-          } else {
-            daily_adjustment_low = total_amount_of_green_to_adjust_down/2 - 0.5;
-            daily_adjustment_high = total_amount_of_green_to_adjust_down/2 + 0.5;
-            var updated_mon_grn = parseInt($('#disp_grn_mon').html()) + daily_adjustment_low;
-            var updated_thu_grn = parseInt($('#disp_grn_thu').html()) + daily_adjustment_high;
-            $('#disp_grn_mon').html(updated_mon_grn);
-            $('#disp_grn_thu').html(updated_thu_grn);
-            updated_green = updated_value;
-          };
-            $('#disp_reg_mon').html(0);
-            $('#disp_reg_thu').html(0);  
-            updated_total_meal_number = updated_value;
-            setup_green_slider(); 
+          $('#monday_grn_hidden').val(updated_value/2);
+          $('#thursday_grn_hidden').val(updated_value/2);
+          updated_green = updated_value;          
+          $('#monday_reg_hidden').val(0);
+          $('#thursday_reg_hidden').val(0);  
+          updated_total_meal_number = updated_value;
+          $('#green_meals_spinner').val(updated_green);
+          $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
        } else {
           var regular_meals = updated_value - updated_green
           if (regular_meals % 2 == 0) {
-            $('#disp_reg_mon').html(regular_meals/2);
-            $('#disp_reg_thu').html(regular_meals/2);            
+            $('#monday_reg_hidden').val(regular_meals/2);
+            $('#thursday_reg_hidden').val(regular_meals/2);            
           } else {
-            $('#disp_reg_mon').html(regular_meals/2 - 0.5);
-            $('#disp_reg_thu').html(regular_meals/2 + 0.5); 
+            $('#monday_reg_hidden').val(regular_meals/2 - 0.5);
+            $('#thursday_reg_hidden').val(regular_meals/2 + 0.5); 
           };
           updated_total_meal_number = updated_value;
-          setup_green_slider();  
+          $('#green_meals_spinner').val(updated_green);
+          $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
        }
-       updateHiddenMealNumbers();
+       updateVisibleNumbers();
     });
+              
 
-    function setup_green_slider() {
-      $('#green_meals_slider').slider({
-        min: 0,
-        max: updated_total_meal_number,
-        value: updated_green,
-        step: 1,
-        tooltip: "show"
-      }).off('slideStop').on('slideStop',function(){
+    $('#green_meals_spinner').off("change").on("change",function(){
         $('#subscription_change_warning').removeClass("hidden");
-        var updated_value = $(this).slider('getValue');
+        var updated_value = $(this).val();
         var daily_difference_low;
         var daily_difference_high;
         var updated_mon_reg;
@@ -203,16 +186,16 @@ $(function(){
           daily_difference_high = (updated_value - total_green)/2;
           updated_mon_grn = <%= @monday_green %> + daily_difference_low;
           updated_thu_grn = <%= @thursday_green %> + daily_difference_high;
-          $('#disp_grn_mon').html(updated_mon_grn);
-          $('#disp_grn_thu').html(updated_thu_grn);
+          $('#monday_grn_hidden').val(updated_mon_grn);
+          $('#thursday_grn_hidden').val(updated_thu_grn);
           updated_green = updated_value;
           post_green_total_reg_meals = updated_total_meal_number - updated_value;
           if (post_green_total_reg_meals % 2 == 0) {
-            $('#disp_reg_mon').html(post_green_total_reg_meals/2);
-            $('#disp_reg_thu').html(post_green_total_reg_meals/2);
+            $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
+            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
           } else {
-            $('#disp_reg_mon').html(post_green_total_reg_meals/2-0.5);
-            $('#disp_reg_thu').html(post_green_total_reg_meals/2+0.5);
+            $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
+            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
           };
 
         } else {
@@ -220,22 +203,25 @@ $(function(){
           daily_difference_high = (updated_value - total_green)/2 + 0.5;
           updated_mon_grn = <%= @monday_green %> + daily_difference_low;
           updated_thu_grn = <%= @thursday_green %> + daily_difference_high;
-          $('#disp_grn_mon').html(updated_mon_grn);
-          $('#disp_grn_thu').html(updated_thu_grn);
+          $('#monday_grn_hidden').val(updated_mon_grn);
+          $('#thursday_grn_hidden').val(updated_thu_grn);
           updated_green = updated_value;
           post_green_total_reg_meals = updated_total_meal_number - updated_value;
           if (post_green_total_reg_meals % 2 == 0) {
-            $('#disp_reg_mon').html(post_green_total_reg_meals/2);
-            $('#disp_reg_thu').html(post_green_total_reg_meals/2);
+            $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
+            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
           } else {
-            $('#disp_reg_mon').html(post_green_total_reg_meals/2-0.5);
-            $('#disp_reg_thu').html(post_green_total_reg_meals/2+0.5);
+            $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
+            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
           };
         };
-        updateHiddenMealNumbers();
+        updateVisibleNumbers();
       });
+
+    function updateVisibleNumbers() {
+      $('#disp_reg').html(parseInt($('#monday_reg_hidden').val())+parseInt($('#monday_grn_hidden').val())+parseInt($('#thursday_reg_hidden').val())+parseInt($('#thursday_grn_hidden').val()));
+      $('#disp_grn').html(parseInt($('#monday_grn_hidden').val())+parseInt($('#thursday_grn_hidden').val()));
     };
-    setup_green_slider();
 });
 
 </script>
@@ -404,78 +390,48 @@ $(function(){
                                     <div class="col-sm-12">
                                         <div class="panel b-a">
                                             <div class="row m-n text-center">
-                                                <div class="col-md-3 b-b">
+                                                <div class="col-md-6 b-b">
                                                     <section class="row m-t-md m-b-md">
                                                       
-                                                        <div class="col-md-12 text-center text-muted m-t-n-md">
-                                                              <span class="h2 block" id="disp_reg_mon" ><%= @monday_regular %></span>
-                                                              <small class="text-muted text-u-c">Regular meals on Monday</small>
+                                                        <div class="col-md-12 text-center text-muted m-t-n-md container">
+                                                          <div class="row">
+                                                              <span class="h2 block" id="disp_reg" ><%= @total_meals %></span>
+                                                              <small class="text-muted text-u-c">Total meals</small>
+                                                          </div>
+                                                          <div class="row row-centered">
+                                                            <div class="col-md-6 col-centered" style="float:none; margin-top: -50px;">
+                                                              <input type="text" id="total_meals_spinner" value="<%= @total_meals %>" style="opacity: 0;">
+                                                            </div>
+                                                          </div>
                                                         </div>  
                                                       
                                                     </section>
                                                 </div>
-                                                <div class="col-md-3 b-b">
+                                                <div class="col-md-6 b-b">
                                                     <section class="row m-t-md m-b-md">
                                                       
-                                                        <div class="col-md-12 text-center text-success-lt m-t-n-md">
-                                                              <span class="h2 block" id="disp_grn_mon"><%= @monday_green %></span>
-                                                              <small class="text-muted text-u-c">Green meals on Monday</small>
+                                                        <div class="col-md-12 text-center text-success-lt m-t-n-md container">
+                                                          <div class="row">
+                                                              <span class="h2 block" id="disp_grn"><%= @total_green %></span>
+                                                              <small class="text-muted text-u-c">Green meals</small>
+                                                          </div>
+                                                          <div class="row row-centered">
+                                                            <div class="col-md-6 6 col-centered" style="float:none; margin-top: -50px;">
+                                                              <input type="text" id="green_meals_spinner" value="<%= @total_green %>" style="opacity: 0" >
+                                                            </div>
+                                                          </div>
                                                         </div>  
                                                       
                                                     </section>
                                                 </div>
-                                                <div class="col-md-3 b-b">
-                                                    <section class="row m-t-md m-b-md">
-                                                      
-                                                        <div class="col-md-12 text-center text-muted m-t-n-md">
-                                                              <span class="h2 block" id="disp_reg_thu"><%= @thursday_regular %></span>
-                                                              <small class="text-muted text-u-c">Regular meals on Thursday</small>
-                                                        </div>  
-                                                      
-                                                    </section>
-                                                </div>
-                                                <div class="col-md-3 b-b">
-                                                    <section class="row m-t-md m-b-md">
-                                                      
-                                                        <div class="col-md-12 text-center text-success-lt m-t-n-md">
-                                                              <span class="h2 block" id="disp_grn_thu"><%= @thursday_green %></span>
-                                                              <small class="text-muted text-u-c">Green meals on Thursday</small>
-                                                        </div>  
-                                                      
-                                                    </section>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                              <div class="col-sm-12 text-left padder-v">
-                                                <div class="col-sm-6 m-t-md">
-                                                  <div class="row">
-                                                    <div class="col-sm-4 text-left">
-                                                      <small class="text-muted text-u-c">Change meal plan</small>
-                                                    </div>
-                                                    <div class="col-sm-8" style="cursor:pointer;">
-                                                      <div class="slider slider-horizontal" id="total_meals_slider"></div>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                                <div class="col-sm-6 m-t-md">
-                                                  <div class="row">
-                                                    <div class="col-sm-5 text-left">
-                                                      <small class="text-muted text-u-c">Change number of green meals</small>
-                                                    </div>
-                                                    <div class="col-sm-7" style="cursor:pointer;">
-                                                      <div class="slider slider-horizontal" id="green_meals_slider"></div>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                              </div>
                                             </div>
                                             <div class="row padder">
                                               <div class="col-sm-2 padder-v">
                                                 <%= form_tag update_customer_path("change_subscription"), method: 'POST' do %>
-                                                <%= hidden_field_tag :monday_reg_hidden %>
-                                                <%= hidden_field_tag :monday_grn_hidden %>
-                                                <%= hidden_field_tag :thursday_reg_hidden %>
-                                                <%= hidden_field_tag :thursday_grn_hidden %>
+                                                <%= hidden_field_tag :monday_reg_hidden, @monday_regular %>
+                                                <%= hidden_field_tag :monday_grn_hidden, @monday_green %>
+                                                <%= hidden_field_tag :thursday_reg_hidden, @thursday_regular %>
+                                                <%= hidden_field_tag :thursday_grn_hidden, @thursday_green  %>
                                                 <%= submit_tag 'Update Subscription', class:"btn btn-s-md btn-success" %>          
                                                 <% end %>
                                               </div>
