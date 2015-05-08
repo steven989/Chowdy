@@ -275,13 +275,13 @@ protect_from_forgery :except => :payment
             end
             associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
             
-            if current_customer.stop_queues.order(created_at: :desc).limit(1).take.blank?
+            if current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
                 if ((["Yes","yes"].include? current_customer.active?) && (["Yes","yes"].include? current_customer.paused?)) || (current_customer.active?.blank? || (["No","no"].include? current_customer.active?))
                     current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
                 end
-            elsif ["pause","cancel"].include? current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type
+            elsif ["pause","cancel"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
                 current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
-            elsif ["restart"].include? current_customer.stop_queues.order(created_at: :desc).limit(1).take.stop_type
+            elsif ["restart"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
                     current_customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
                     current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)                
             end

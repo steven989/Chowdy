@@ -290,6 +290,16 @@ $(function(){
                                   </div>
                                 </section>
                               <% end %>
+                                <section class="row m-t-xs">
+                                  <div class="col-sm-12">
+                                    <% if @sub_status %>
+                                      <div class="alert alert-success">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        <%= @sub_status %>
+                                      </div>
+                                    <% end %>
+                                  </div>
+                                </section>
                                 <section class="row m-b-md">
                                     <div class="col-sm-12">
                                         <h3 class="m-b-xs text-muted text-center">

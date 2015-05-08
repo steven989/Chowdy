@@ -24,9 +24,11 @@ class UsersController < ApplicationController
             if @current_customer.paused?.blank? || @current_customer.paused? == "No" || @current_customer.paused? == "no"
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
                     if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'pause'
-                        @current_status = "Active (pause starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")} until #{(@current_customer.stop_queues.order(created_at: :desc).limit(1).take.end_date-1).strftime("%A %B %d, %Y")})"
+                        @current_status = "Active"
+                        @sub_status = "Your account will be paused starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")} until #{(@current_customer.stop_queues.order(created_at: :desc).limit(1).take.end_date-1).strftime("%A %B %d, %Y")}"
                     elsif @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'cancel'
-                        @current_status = "Active (cancel starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
+                        @current_status = "Active"
+                        @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
                     end
                 else
                     @current_status = "Active"
@@ -35,11 +37,13 @@ class UsersController < ApplicationController
             else
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
                     if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
-                        @current_status = "Paused (restarting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
+                        @current_status = "Paused"
+                        @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
                     end
                 else
                     @pause_end = @current_customer.next_pick_up_date.to_date
-                    @current_status = "Paused (restarting on #{@pause_end.strftime("%A %B %d, %Y")})"
+                    @current_status = "Paused "
+                    @sub_status = "Your subscription will resume on #{@pause_end.strftime("%A %B %d, %Y")})"
                 end   
                 
                 
@@ -47,8 +51,9 @@ class UsersController < ApplicationController
         else
             if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
-                    @current_status = "Inactive (restarting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
+                    @current_status = "Inactive"
                     @display_pause = false
+                    @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
                 end
             else
                 @current_status = "Inactive"
