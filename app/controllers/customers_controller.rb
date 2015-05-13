@@ -309,6 +309,22 @@ protect_from_forgery :except => :payment
                 current_customer.update(email:params[:email])
                 current_customer.user.update(email:params[:email])
             end
+        elsif params[:id].downcase == "hub" 
+            if [2,3,4].include? Date.today.wday
+                adjusted_change_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+            else
+                adjusted_change_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+            end
+            associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+
+            current_customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
+            current_customer.stop_queues.create(
+                stop_type:'change_hub',
+                associated_cutoff:associated_cutoff,
+                start_date:adjusted_change_date,
+                cancel_reason: params[:hub] #just using this field to capture any text value
+            )
+
         elsif params[:id].downcase == "delivery" 
             current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery?:"Yes")
         elsif params[:id].downcase == "stop_delivery" 

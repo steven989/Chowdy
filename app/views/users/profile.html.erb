@@ -143,80 +143,96 @@ $(function(){
         step: 1
     });
 
+    var disable_sub_update = <%= @disable_sub_update %>;
 
-    $('#total_meals_spinner').off("change").on("change", function(){
-      $('#subscription_change_warning').removeClass("hidden");
-      var updated_value = $(this).val();
+    if (disable_sub_update == false) {
 
-      if (updated_value - updated_green < 0) { 
-          $('#monday_grn_hidden').val(updated_value/2);
-          $('#thursday_grn_hidden').val(updated_value/2);
-          updated_green = updated_value;          
-          $('#monday_reg_hidden').val(0);
-          $('#thursday_reg_hidden').val(0);  
-          updated_total_meal_number = updated_value;
-          $('#green_meals_spinner').val(updated_green);
-          $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
-       } else {
-          var regular_meals = updated_value - updated_green
-          if (regular_meals % 2 == 0) {
-            $('#monday_reg_hidden').val(regular_meals/2);
-            $('#thursday_reg_hidden').val(regular_meals/2);            
-          } else {
-            $('#monday_reg_hidden').val(regular_meals/2 - 0.5);
-            $('#thursday_reg_hidden').val(regular_meals/2 + 0.5); 
-          };
-          updated_total_meal_number = updated_value;
-          $('#green_meals_spinner').val(updated_green);
-          $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
-       }
-       updateVisibleNumbers();
-    });
-              
-
-    $('#green_meals_spinner').off("change").on("change",function(){
+      $('#total_meals_spinner').off("change").on("change", function(){
+        
         $('#subscription_change_warning').removeClass("hidden");
-        var updated_value = $(this).val();
-        var daily_difference_low;
-        var daily_difference_high;
-        var updated_mon_reg;
-        var updated_thu_reg;
-        if ((updated_value - total_green) % 2 == 0) {
-          daily_difference_low = (updated_value - total_green)/2;
-          daily_difference_high = (updated_value - total_green)/2;
-          updated_mon_grn = <%= @monday_green %> + daily_difference_low;
-          updated_thu_grn = <%= @thursday_green %> + daily_difference_high;
-          $('#monday_grn_hidden').val(updated_mon_grn);
-          $('#thursday_grn_hidden').val(updated_thu_grn);
-          updated_green = updated_value;
-          post_green_total_reg_meals = updated_total_meal_number - updated_value;
-          if (post_green_total_reg_meals % 2 == 0) {
-            $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
-            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
-          } else {
-            $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
-            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
-          };
 
-        } else {
-          daily_difference_low = (updated_value - total_green)/2 - 0.5;
-          daily_difference_high = (updated_value - total_green)/2 + 0.5;
-          updated_mon_grn = <%= @monday_green %> + daily_difference_low;
-          updated_thu_grn = <%= @thursday_green %> + daily_difference_high;
-          $('#monday_grn_hidden').val(updated_mon_grn);
-          $('#thursday_grn_hidden').val(updated_thu_grn);
-          updated_green = updated_value;
-          post_green_total_reg_meals = updated_total_meal_number - updated_value;
-          if (post_green_total_reg_meals % 2 == 0) {
-            $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
-            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
-          } else {
-            $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
-            $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
-          };
-        };
-        updateVisibleNumbers();
+        if (disable_sub_update == false) {
+          $('#change_meal_count input[type=submit]').removeClass("disabled");
+        }
+
+        var updated_value = $(this).val();
+
+
+        if (updated_value - updated_green < 0) { 
+            $('#monday_grn_hidden').val(updated_value/2);
+            $('#thursday_grn_hidden').val(updated_value/2);
+            updated_green = updated_value;          
+            $('#monday_reg_hidden').val(0);
+            $('#thursday_reg_hidden').val(0);  
+            updated_total_meal_number = updated_value;
+            $('#green_meals_spinner').val(updated_green);
+            $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
+         } else {
+            var regular_meals = updated_value - updated_green
+            if (regular_meals % 2 == 0) {
+              $('#monday_reg_hidden').val(regular_meals/2);
+              $('#thursday_reg_hidden').val(regular_meals/2);            
+            } else {
+              $('#monday_reg_hidden').val(regular_meals/2 - 0.5);
+              $('#thursday_reg_hidden').val(regular_meals/2 + 0.5); 
+            };
+            updated_total_meal_number = updated_value;
+            $('#green_meals_spinner').val(updated_green);
+            $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
+         }
+         updateVisibleNumbers();
       });
+                
+
+      $('#green_meals_spinner').off("change").on("change",function(){
+          $('#subscription_change_warning').removeClass("hidden");
+          if (disable_sub_update == false) {
+            $('#change_meal_count input[type=submit]').removeClass("disabled");
+          }
+
+          var updated_value = $(this).val();
+          var daily_difference_low;
+          var daily_difference_high;
+          var updated_mon_reg;
+          var updated_thu_reg;
+          if ((updated_value - total_green) % 2 == 0) {
+            daily_difference_low = (updated_value - total_green)/2;
+            daily_difference_high = (updated_value - total_green)/2;
+            updated_mon_grn = <%= @monday_green %> + daily_difference_low;
+            updated_thu_grn = <%= @thursday_green %> + daily_difference_high;
+            $('#monday_grn_hidden').val(updated_mon_grn);
+            $('#thursday_grn_hidden').val(updated_thu_grn);
+            updated_green = updated_value;
+            post_green_total_reg_meals = updated_total_meal_number - updated_value;
+            if (post_green_total_reg_meals % 2 == 0) {
+              $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
+              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
+            } else {
+              $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
+              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
+            };
+
+          } else {
+            daily_difference_low = (updated_value - total_green)/2 - 0.5;
+            daily_difference_high = (updated_value - total_green)/2 + 0.5;
+            updated_mon_grn = <%= @monday_green %> + daily_difference_low;
+            updated_thu_grn = <%= @thursday_green %> + daily_difference_high;
+            $('#monday_grn_hidden').val(updated_mon_grn);
+            $('#thursday_grn_hidden').val(updated_thu_grn);
+            updated_green = updated_value;
+            post_green_total_reg_meals = updated_total_meal_number - updated_value;
+            if (post_green_total_reg_meals % 2 == 0) {
+              $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
+              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
+            } else {
+              $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
+              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
+            };
+          };
+          updateVisibleNumbers();
+        });
+      
+      };
 
     function updateVisibleNumbers() {
       $('#disp_reg').html(parseInt($('#monday_reg_hidden').val())+parseInt($('#monday_grn_hidden').val())+parseInt($('#thursday_reg_hidden').val())+parseInt($('#thursday_grn_hidden').val()));
@@ -251,14 +267,14 @@ $(function(){
                         </li>
                         <li>
                           <a href="#changePlan" class="b-b padder-v" data-toggle="tab">
-                            <i class="i i-stack icon">
+                            <i class="i i-params icon">
                             </i>
                             <span class="font-bold">Change Subscription</span>
                           </a>
                         </li>
                         <li>
                           <a href="#delivery" class="b-b padder-v"  data-toggle="tab">
-                            <i class="i i-lab icon">
+                            <i class="i i-paperplane icon">
                             </i>
                             <span class="font-bold">Delivery</span>
                           </a>
@@ -292,7 +308,7 @@ $(function(){
                               <% end %>
                                 <section class="row m-t-xs">
                                   <div class="col-sm-12">
-                                    <% if @sub_status %>
+                                    <% unless @sub_status.blank? %>
                                       <div class="alert alert-success">
                                         <button type="button" class="close" data-dismiss="alert">×</button>
                                         <%= @sub_status %>
@@ -311,7 +327,7 @@ $(function(){
                                     <div class="col-sm-12">
                                         <div class="panel b-a">
                                             <div class="row m-n text-center">
-                                                <div class="col-md-4 b-b">
+                                                <div class="col-md-4">
                                                     <section class="row m-t-md m-b-md">
                                                       <a href="#" class="block padder-v hover">
                                                         <div class="col-md-4 col-md-offset-1 text-success-lt text-right">
@@ -327,7 +343,7 @@ $(function(){
                                                       </a>
                                                     </section>
                                                 </div>
-                                                <div class="col-md-4 b-b">
+                                                <div class="col-md-4">
                                                     <section class="row m-t-md m-b-md">
                                                       <a href="#" class="block padder-v hover">
                                                         <div class="col-md-4 col-md-offset-1 text-primary-lt text-right">
@@ -343,7 +359,7 @@ $(function(){
                                                       </a>
                                                     </section>
                                                 </div>
-                                                <div class="col-md-4 b-b">
+                                                <div class="col-md-4">
                                                     <section class="row m-t-md m-b-md">
                                                       <a href="#" class="block padder-v hover">
                                                         <div class="col-md-4 col-md-offset-1 text-info-lt text-right">
@@ -437,12 +453,12 @@ $(function(){
                                             </div>
                                             <div class="row padder">
                                               <div class="col-sm-2 padder-v">
-                                                <%= form_tag update_customer_path("change_subscription"), method: 'POST' do %>
+                                                <%= form_tag update_customer_path("change_subscription"), method: 'POST', id:"change_meal_count" do %>
                                                 <%= hidden_field_tag :monday_reg_hidden, @monday_regular %>
                                                 <%= hidden_field_tag :monday_grn_hidden, @monday_green %>
                                                 <%= hidden_field_tag :thursday_reg_hidden, @thursday_regular %>
                                                 <%= hidden_field_tag :thursday_grn_hidden, @thursday_green  %>
-                                                <%= submit_tag 'Update Subscription', class:"btn btn-s-md btn-success #{"disabled" if @current_status.downcase == "inactive"}" %>          
+                                                <%= submit_tag 'Update Subscription', class:"btn btn-s-md btn-success disabled" %>          
                                                 <% end %>
                                               </div>
                                               <div class="col-sm-3 padder-v hidden" id="subscription_change_warning">
@@ -453,6 +469,33 @@ $(function(){
                                               </div>
   
                                             </div>   
+                                        </div>
+                                    </div>
+                                </section>                           
+                                <section class="row m-b-xs">
+                                    <div class="col-sm-12">
+                                        <h5 class="m-b-xs text-muted text-left">
+                                            Change Pick-up Hub
+                                        </h5>
+                                    </div>
+                                </section>
+                                <section class="row">
+                                    <div class="col-sm-12">
+                                        <div class="panel b-a padder text-left padder-v">
+                                            <%= form_tag update_customer_path("hub"), method: 'POST', class:"m-b-none", id:"hub_change_form" do %>
+                                              <div class="form-group">
+                                                <%= select_tag "hub", options_for_select(@hubs), id:"chosen-select-hub",include_blank: true,data: {placeholder: @requested_hub_to_change_to ? @requested_hub_to_change_to.cancel_reason : @current_customer.hub} %>
+                                                <script>
+                                                  $("#chosen-select-hub").chosen({
+                                                    width: "330px",
+                                                    disable_search: true
+                                                  }).off("change").on("change",function(){
+                                                    $("#hub_change_form input[type=submit]").removeClass("disabled")
+                                                  })
+                                                </script>
+                                              </div>
+                                              <%= submit_tag 'Update Hub', class:"btn btn-s-md btn-success disabled" %>
+                                            <% end %>
                                         </div>
                                     </div>
                                 </section>                           
@@ -658,10 +701,8 @@ $(function(){
           </div>
           <div class="modal-body">
             <div class="form-group">
-              <!-- <div class="chosen-container chosen-container-single"> -->
-                <%= label_tag 'cancel_reason', "Reason for cancellation" %>
-                <%= select_tag "cancel_reason", options_for_select(@cancel_reasons), include_blank: true, class:"chosen-select", data: {placeholder: "Choose one"} %>
-              <!-- </div> -->
+              <%= label_tag 'cancel_reason', "Reason for cancellation" %>
+              <%= select_tag "cancel_reason", options_for_select(@cancel_reasons), include_blank: true, class:"chosen-select", data: {placeholder: "Choose one"} %>
               <script>
                 $(".chosen-select").chosen({
                   width: "75%",
@@ -687,11 +728,6 @@ $(function(){
 
 <!-- Feedback modal -->
 <div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
-<!--   <%= form_tag update_customer_path("feedback"), method: 'POST' do %>
-      <%= label_tag 'feedback', "Submit feedback to help improve Chowdy" %>
-      <p><%= text_area_tag 'feedback', nil,placeholder: "Food, process, etc." %></p>
-      <p><%= submit_tag 'Submit feedback' %></p>
-  <% end %> -->
   <div class="modal-dialog">
       <div class="modal-content">
         <%= form_tag update_customer_path("feedback"), method: 'POST' do %>

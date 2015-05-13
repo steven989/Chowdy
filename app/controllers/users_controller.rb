@@ -17,8 +17,15 @@ class UsersController < ApplicationController
         @display_cancel = true
         @display_pause = true
         @display_restart = true
+        @disable_sub_update = false
 
         @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value} 
+        @hubs =  SystemSetting.where(setting:"hub").map {|hub| hub.setting_value} 
+        
+        unless @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take.blank?
+            @requested_hub_to_change_to = @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take
+            @hub_change_effective_date = @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take.start_date.strftime("%A %b %e")
+        end
 
         @delivery_boundary_coordinates = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"coordinates").take.setting_value
         
@@ -44,28 +51,28 @@ class UsersController < ApplicationController
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
                     if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'pause'
                         @current_status = "Active"
-                        @sub_status = "Your account will be paused starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")} until #{(@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.end_date-1).strftime("%A %B %d, %Y")}#{". Meal count changes will be effective "+@change_effective_date if @change_effective_date}"
+                        @sub_status = "Your account will be paused starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")} until #{(@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.end_date-1).strftime("%A %B %d, %Y")}. #{"Meal count change effective "+@change_effective_date+". " if @change_effective_date}#{"Hub change effective "+@hub_change_effective_date+"." if @requested_hub_to_change_to}"
                     elsif @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'cancel'
                         @current_status = "Active"
-                        @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
+                        @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}."
                         @display_cancel = false
                     end
                 else
                     @current_status = "Active"
-                    @sub_status = "Meal count changes will be effective #{@change_effective_date}" if @change_effective_date
+                    @sub_status = (@change_effective_date ? "Meal count change effective #{@change_effective_date}. " : "") + (@requested_hub_to_change_to ? "Hub change effective "+@hub_change_effective_date+"." : "")
                     @display_restart = false
                 end
             else
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
                     if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
                         @current_status = "Paused"
-                        @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}#{". Meal count changes will be effective when you resume"if @change_effective_date}"
+                        @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. "if @change_effective_date}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
                         @display_restart = false
                     end
                 else
                     @pause_end = @current_customer.next_pick_up_date.to_date
                     @current_status = "Paused"
-                    @sub_status = "Your subscription will resume on #{@pause_end.strftime("%A %B %d, %Y")}#{". Meal count changes will be effective when you resume" if @change_effective_date}"
+                    @sub_status = "Your subscription will resume on #{@pause_end.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. " if @change_effective_date}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
                 end   
                 
                 
@@ -75,13 +82,15 @@ class UsersController < ApplicationController
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
                     @current_status = "Inactive"
                     @display_pause = false
-                    @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
+                    @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. " if @change_effective_date}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
                     @display_restart = false
                 end
             else
                 @current_status = "Inactive"
+                @sub_status = "Hub change effective when you resume." if @requested_hub_to_change_to
                 @display_cancel = false
                 @display_pause = false
+                @disable_sub_update = true
             end   
         end
 

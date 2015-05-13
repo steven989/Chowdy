@@ -39,7 +39,6 @@ namespace :customers do
                         current_customer.update(
                             total_meals_per_week: queue_item.updated_meals, 
                             number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
-                            raw_green_input: "#{current_customer.raw_green_input} (changed on #{Date.today.strftime("%Y-%m-%d")})",
                             regular_meals_on_monday: queue_item.updated_reg_mon, 
                             green_meals_on_monday: queue_item.updated_grn_mon,
                             regular_meals_on_thursday: queue_item.updated_reg_thu,
@@ -50,6 +49,15 @@ namespace :customers do
                 end
             end
         end
+
+        if StopQueue.where(stop_type: ["change_hub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
+            StopQueue.where(stop_type: ["change_hub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
+                if queue_item.customer.update_attributes(hub:queue_item.cancel_reason)
+                    queue_item.destroy
+                end
+            end
+        end
+
         if StopQueue.where(stop_type: ["cancel","pause","restart"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
             StopQueue.where(stop_type: ["cancel","pause","restart"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
@@ -104,8 +112,6 @@ namespace :customers do
                     end
                 end
             end
-        else
-            puts "No pause/cancel/restart request"
         end
         #run this the second time
         if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
@@ -131,15 +137,14 @@ namespace :customers do
                         current_customer.update(
                             total_meals_per_week: queue_item.updated_meals, 
                             number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
-                            raw_green_input: "#{current_customer.raw_green_input} (changed on #{Date.today.strftime("%Y-%m-%d")})",
                             regular_meals_on_monday: queue_item.updated_reg_mon, 
                             green_meals_on_monday: queue_item.updated_grn_mon,
                             regular_meals_on_thursday: queue_item.updated_reg_thu,
                             green_meals_on_thursday: queue_item.updated_grn_thu
                             )
-                            queue_item.destroy
                     end
                 end
+                queue_item.destroy
             end
         end
     end
