@@ -18,32 +18,54 @@ class UsersController < ApplicationController
         @display_pause = true
         @display_restart = true
 
+        @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value} 
+
         @delivery_boundary_coordinates = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"coordinates").take.setting_value
+        
+        if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
+            @total_meals = @current_customer.total_meals_per_week.to_i
+            @total_green = @current_customer.number_of_green.to_i
+            @monday_regular = @current_customer.regular_meals_on_monday.to_i
+            @monday_green = @current_customer.green_meals_on_monday.to_i
+            @thursday_regular = @current_customer.regular_meals_on_thursday.to_i
+            @thursday_green = @current_customer.green_meals_on_thursday.to_i
+        else
+            @change_effective_date = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.start_date.strftime("%A %b %e")
+            @total_meals = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_meals.to_i
+            @monday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_mon.to_i
+            @monday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_mon.to_i
+            @thursday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_thu.to_i
+            @thursday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_thu.to_i
+            @total_green = @monday_green + @thursday_green
+        end
 
         if @current_customer.active?.downcase == "yes" 
             if @current_customer.paused?.blank? || @current_customer.paused? == "No" || @current_customer.paused? == "no"
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
                     if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'pause'
                         @current_status = "Active"
-                        @sub_status = "Your account will be paused starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")} until #{(@current_customer.stop_queues.order(created_at: :desc).limit(1).take.end_date-1).strftime("%A %B %d, %Y")}"
+                        @sub_status = "Your account will be paused starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")} until #{(@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.end_date-1).strftime("%A %B %d, %Y")}#{". Meal count changes will be effective "+@change_effective_date if @change_effective_date}"
                     elsif @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'cancel'
                         @current_status = "Active"
-                        @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
+                        @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
+                        @display_cancel = false
                     end
                 else
                     @current_status = "Active"
+                    @sub_status = "Meal count changes will be effective #{@change_effective_date}" if @change_effective_date
                     @display_restart = false
                 end
             else
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).length > 0
                     if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
                         @current_status = "Paused"
-                        @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
+                        @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}#{". Meal count changes will be effective when you resume"if @change_effective_date}"
+                        @display_restart = false
                     end
                 else
                     @pause_end = @current_customer.next_pick_up_date.to_date
-                    @current_status = "Paused "
-                    @sub_status = "Your subscription will resume on #{@pause_end.strftime("%A %B %d, %Y")})"
+                    @current_status = "Paused"
+                    @sub_status = "Your subscription will resume on #{@pause_end.strftime("%A %B %d, %Y")}#{". Meal count changes will be effective when you resume" if @change_effective_date}"
                 end   
                 
                 
@@ -53,7 +75,8 @@ class UsersController < ApplicationController
                 if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
                     @current_status = "Inactive"
                     @display_pause = false
-                    @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")})"
+                    @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}"
+                    @display_restart = false
                 end
             else
                 @current_status = "Inactive"
@@ -79,34 +102,27 @@ class UsersController < ApplicationController
             current_period_end = stripe_customer.subscriptions.data[0].current_period_end
             @next_billing_date = Time.at(current_period_end).to_datetime + 2.hours
         end
-        if @current_customer.recurring_delivery?.blank?
-            @delivery_note = "You do not currently have scheduled delivery"
-            @delivery_button = "Request delivery"
-            @delivery_color_class = "warning"
+        if ["Inactive","Paused"].include? @current_status
+            if @current_customer.recurring_delivery?.blank?
+                @delivery_note = "You do not currently have scheduled delivery"
+                @delivery_button = "Request delivery"
+                @delivery_color_class = "warning"
+            else 
+                @delivery_note = "You have requested delivery but your account is on hold"
+                @delivery_button = "Update delivery information"
+                @delivery_color_class = "warning"
+            end
         else 
-            @delivery_note = "You have scheduled delivery"
-            @delivery_button = "Update delivery information"
-            @delivery_color_class = "success"
+            if @current_customer.recurring_delivery?.blank?
+                @delivery_note = "You do not currently have scheduled delivery"
+                @delivery_button = "Request delivery"
+                @delivery_color_class = "warning"
+            else 
+                @delivery_note = "You have scheduled delivery"
+                @delivery_button = "Update delivery information"
+                @delivery_color_class = "success"
+            end
         end
-        
-        if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
-            @total_meals = @current_customer.total_meals_per_week.to_i
-            @total_green = @current_customer.number_of_green.to_i
-            @monday_regular = @current_customer.regular_meals_on_monday.to_i
-            @monday_green = @current_customer.green_meals_on_monday.to_i
-            @thursday_regular = @current_customer.regular_meals_on_thursday.to_i
-            @thursday_green = @current_customer.green_meals_on_thursday.to_i
-        else
-            @change_effective_date = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.start_date.strftime("%A %b %e")
-            @total_meals = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_meals.to_i
-            @monday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_mon.to_i
-            @monday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_mon.to_i
-            @thursday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_thu.to_i
-            @thursday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_thu.to_i
-            @total_green = @monday_green + @thursday_green
-        end
-
-
         @delivery_address = @current_customer.delivery_address
         @phone_number = @current_customer.phone_number
         @note = @current_customer.special_delivery_instructions

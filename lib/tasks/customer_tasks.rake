@@ -19,7 +19,7 @@ namespace :customers do
         if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
             StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
-                if queue_item.stop_type == "change_sub"
+                if current_customer.stripe_subscription_id != nil
                     case queue_item.updated_meals
                         when 6
                             meals_per_week = "6mealswk" 
@@ -66,7 +66,7 @@ namespace :customers do
                     stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
                     if stripe_subscription.delete
                         current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
-                        current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date)
+                        current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date,cancel_reason:queue_item.cancel_reason)
                         queue_item.destroy
                     end
                 elsif queue_item.stop_type == 'restart'
@@ -106,6 +106,41 @@ namespace :customers do
             end
         else
             puts "No pause/cancel/restart request"
+        end
+        #run this the second time
+        if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
+            StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
+                current_customer = queue_item.customer
+                if current_customer.stripe_subscription_id != nil
+                    case queue_item.updated_meals
+                        when 6
+                            meals_per_week = "6mealswk" 
+                        when 8
+                            meals_per_week = "8mealswk"
+                        when 10
+                            meals_per_week = "10mealswk"
+                        when 12
+                            meals_per_week = "12mealsweek"
+                        when 14
+                            meals_per_week = "14mealsweek"
+                    end                    
+                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                    stripe_subscription.plan = meals_per_week
+                    stripe_subscription.prorate = false
+                    if stripe_subscription.save
+                        current_customer.update(
+                            total_meals_per_week: queue_item.updated_meals, 
+                            number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
+                            raw_green_input: "#{current_customer.raw_green_input} (changed on #{Date.today.strftime("%Y-%m-%d")})",
+                            regular_meals_on_monday: queue_item.updated_reg_mon, 
+                            green_meals_on_monday: queue_item.updated_grn_mon,
+                            regular_meals_on_thursday: queue_item.updated_reg_thu,
+                            green_meals_on_thursday: queue_item.updated_grn_thu
+                            )
+                            queue_item.destroy
+                    end
+                end
+            end
         end
     end
 

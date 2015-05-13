@@ -303,7 +303,7 @@ $(function(){
                                 <section class="row m-b-md">
                                     <div class="col-sm-12">
                                         <h3 class="m-b-xs text-muted text-center">
-                                    Welcome <%= @current_customer.name.split(/\s/)[0].capitalize %>! Your account is <%= @current_status %> <%= "(restarting on #{@pause_end.strftime("%B %d, %Y")})" if @pause_end %>
+                                    Welcome <%= @current_customer.name.split(/\s/)[0].capitalize %>! Your account is <%= @current_status %>
                                         </h3>
                                     </div>
                                 </section>
@@ -392,7 +392,7 @@ $(function(){
                                 <section class="row m-b-xs m-t-md">
                                     <div class="col-sm-12">
                                         <h5 class="m-b-xs text-muted text-left">
-                                            Subscription Details <% if @change_effective_date %> (effective <%= @change_effective_date %>) <% end %>
+                                            Subscription Details
                                         </h5>
                                     </div>
                                 </section>
@@ -442,7 +442,7 @@ $(function(){
                                                 <%= hidden_field_tag :monday_grn_hidden, @monday_green %>
                                                 <%= hidden_field_tag :thursday_reg_hidden, @thursday_regular %>
                                                 <%= hidden_field_tag :thursday_grn_hidden, @thursday_green  %>
-                                                <%= submit_tag 'Update Subscription', class:"btn btn-s-md btn-success" %>          
+                                                <%= submit_tag 'Update Subscription', class:"btn btn-s-md btn-success #{"disabled" if @current_status.downcase == "inactive"}" %>          
                                                 <% end %>
                                               </div>
                                               <div class="col-sm-3 padder-v hidden" id="subscription_change_warning">
@@ -651,20 +651,34 @@ $(function(){
 <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
   <div class="modal-dialog">
       <div class="modal-content">
-        <%= form_tag update_customer_path("cancel"), method: 'POST' do %>
+        <%= form_tag update_customer_path("cancel"), method: 'POST', id:"cancel_form" do %>
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">Can you let us know the reason for cancellation?</h4>
           </div>
           <div class="modal-body">
             <div class="form-group">
-              <%= label_tag 'feedback', "Your comments" %>
+              <!-- <div class="chosen-container chosen-container-single"> -->
+                <%= label_tag 'cancel_reason', "Reason for cancellation" %>
+                <%= select_tag "cancel_reason", options_for_select(@cancel_reasons), include_blank: true, class:"chosen-select", data: {placeholder: "Choose one"} %>
+              <!-- </div> -->
+              <script>
+                $(".chosen-select").chosen({
+                  width: "75%",
+                  disable_search: true
+                }).off("change").on("change",function(){
+                  $("#cancel_form input[type=submit]").removeClass("disabled");
+                })
+              </script>
+            </div>
+            <div class="form-group">
+              <%= label_tag 'feedback', "Other comments" %>
               <%= text_area_tag 'feedback',nil,class: "input-sm input-s form-control", rows: "6", placeholder: "Type your comments" %>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <%= submit_tag 'Confirm cancellation',class:"btn btn-primary" %>
+            <%= submit_tag 'Confirm cancellation',class:"btn btn-primary disabled" %>
           </div>
         <% end %>
       </div>

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150507193819) do
+ActiveRecord::Schema.define(version: 20150513175222) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -127,6 +127,7 @@ ActiveRecord::Schema.define(version: 20150507193819) do
     t.integer  "updated_reg_thu"
     t.integer  "updated_grn_mon"
     t.integer  "updated_grn_thu"
+    t.string   "cancel_reason"
   end
 
   create_table "stop_requests", force: true do |t|
@@ -136,6 +137,7 @@ ActiveRecord::Schema.define(version: 20150507193819) do
     t.date     "end_date"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "cancel_reason"
   end
 
   create_table "system_settings", force: true do |t|
