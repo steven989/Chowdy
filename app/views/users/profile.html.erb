@@ -10,7 +10,7 @@ $(function(){
     });
 
     GMaps.geocode({
-      address: '<%= @current_customer.hub.sub(/\(.+\)/, "") %>, Toronto',
+      address: '<%= @address_to_show_on_dashboard %>, Toronto',
       callback: function(results, status) {
         if (status == 'OK') {
           var latlng = results[0].geometry.location;
@@ -297,25 +297,47 @@ $(function(){
                     <section class="tab-pane active" id="dashboard" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder">
-                              <% if @number_of_failed_invoices > 0 %>
-                                <section class="row m-t-xs">
-                                  <div class="col-sm-12">
-                                    <div class="alert alert-danger">
-                                      <i class="fa fa-ban-circle"></i>You have <strong><%= @number_of_failed_invoices %> overdue invoice </strong><%= "s" if @number_of_failed_invoices > 1 %> for the week<%= "s" if @number_of_failed_invoices > 1 %> of <%= @failed_weeks.to_sentence %> due to declined credit card. We will re-attempt in a few days. You can also update your card on your profile.
+                                <% if @number_of_failed_invoices > 0 %>
+                                  <section class="row m-t-xs">
+                                    <div class="col-sm-12">
+                                      <div class="alert alert-danger">
+                                        <i class="fa fa-ban-circle"></i>You have <strong><%= @number_of_failed_invoices %> overdue invoice </strong><%= "s" if @number_of_failed_invoices > 1 %> for the week<%= "s" if @number_of_failed_invoices > 1 %> of <%= @failed_weeks.to_sentence %> due to declined credit card. We will re-attempt in a few days. You can also update your card on your profile.
+                                      </div>
                                     </div>
-                                  </div>
-                                </section>
-                              <% end %>
-                                <section class="row m-t-xs">
-                                  <div class="col-sm-12">
-                                    <% unless @sub_status.blank? %>
+                                  </section>
+                                <% end %>
+                                
+                                <% if @current_customer.recurring_delivery?.blank? %>
+                                  <% if @current_customer.hub.scan(/delivery/i).length == 1 && @requested_hub_to_change_to.blank? %>
+                                    <% if @current_customer.delivery_address.blank?  %>
+                                      <section class="row m-t-xs">
+                                        <div class="col-sm-12">
+                                          <div class="alert alert-warning">
+                                            <i class="fa fa-ban-circle"></i>Please enter your delivery address.
+                                          </div>
+                                        </div>
+                                      </section>                                      
+                                    <% else %>
+                                      <section class="row m-t-xs">
+                                        <div class="col-sm-12">
+                                          <div class="alert alert-warning">
+                                            <i class="fa fa-ban-circle"></i>Please choose a pick-up hub.
+                                          </div>
+                                        </div>
+                                      </section> 
+                                    <% end %>                                  
+                                  <% end %>
+                                <% end %>
+                                <% unless @sub_status.blank? %>
+                                  <section class="row m-t-xs">
+                                    <div class="col-sm-12">
                                       <div class="alert alert-success">
                                         <button type="button" class="close" data-dismiss="alert">×</button>
                                         <%= @sub_status %>
                                       </div>
-                                    <% end %>
-                                  </div>
-                                </section>
+                                    </div>
+                                  </section>
+                                <% end %>
                                 <section class="row m-b-md">
                                     <div class="col-sm-12">
                                         <h3 class="m-b-xs text-muted text-center">
@@ -353,7 +375,7 @@ $(function(){
                                                           </span>
                                                         </div>
                                                         <div class="col-md-7 text-left text-primary-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
-                                                              <span class="h2 block"><%= @current_customer.next_pick_up_date.strftime("%b #{@current_customer.next_pick_up_date.day.ordinalize}") unless @current_customer.next_pick_up_date.blank? %></span>
+                                                              <span class="h2 block"><%= @current_customer.next_pick_up_date.blank? ? "-" : @current_customer.next_pick_up_date.strftime("%b #{@current_customer.next_pick_up_date.day.ordinalize}") %></span>
                                                               <small class="text-muted text-u-c">Next pick-up</small>
                                                         </div>  
                                                       </a>
@@ -369,7 +391,7 @@ $(function(){
                                                           </span>
                                                         </div>
                                                         <div class="col-md-7 text-left text-info-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
-                                                              <span class="h2 block"><%= @next_billing_date.strftime("%b #{@next_billing_date.day.ordinalize}") unless @next_billing_date.blank? %></span>
+                                                              <span class="h2 block"><%= @next_billing_date.blank? ? "-" : @next_billing_date.strftime("%b #{@next_billing_date.day.ordinalize}") %></span>
                                                               <small class="text-muted text-u-c">Next billing</small>
                                                         </div>  
                                                       </a>
@@ -382,7 +404,19 @@ $(function(){
                                 <section class="row m-b-md">
                                     <div class="col-sm-12">
                                         <h3 class="m-b-xs text-muted text-center">
-                                          Pick up at <%= @current_customer.hub %>
+                                          <% if @current_customer.recurring_delivery?.blank? %>
+                                            <% if @current_customer.hub.scan(/delivery/i).length == 1 %>
+                                              <% if @current_customer.delivery_address.blank? %>
+                                                Delivery requested
+                                              <% else %>
+                                                No pick-up hub selected
+                                              <% end %>
+                                            <% else %>
+                                              Pick up at <%= @current_customer.hub %>
+                                            <% end %>
+                                          <% else %>
+                                            Delivery to <%= @current_customer.delivery_address %>
+                                          <% end %>
                                         </h3>
                                     </div>
                                 </section>
@@ -648,7 +682,7 @@ $(function(){
                                   <div class="form-group">
                                     <label>Feedback</label>
                                     <p class="form-control-static">
-                                      <div class="btn btn-md btn-success"  data-toggle="modal" data-target="#feedbackModal">Submit Feedback
+                                      <div class="btn btn-md btn-success"  data-toggle="modal" data-target="#feedbackModal">Write a Feedback
                                       </div>
                                     </p>
                                   </div>

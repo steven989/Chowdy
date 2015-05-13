@@ -19,6 +19,9 @@ class UsersController < ApplicationController
         @display_restart = true
         @disable_sub_update = false
 
+        @address_to_show_on_dashboard = @current_customer.recurring_delivery?.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
+        
+
         @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value} 
         @hubs =  SystemSetting.where(setting:"hub").map {|hub| hub.setting_value} 
         
