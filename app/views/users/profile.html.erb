@@ -59,7 +59,9 @@ $(function(){
                   if (contains_location(latlng)) {
                     $('#address_match_warning strong').html("Your location is in our delivery zone!");
                     $('#address_match_warning').addClass("hidden");
-                    $("#delivery_request_form input:submit").removeClass("disabled");
+                    if ($("#delivery_request_form #phone_number").val() != "" ){
+                      $("#delivery_request_form input:submit").removeClass("disabled");
+                    }
                   } else {
                     $('#address_match_warning strong').html("Your location is outside of our delivery zone");
                     $('#address_match_warning').removeClass("hidden");
@@ -595,11 +597,11 @@ $(function(){
                                   <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
                                     <div class="form-group">
                                       <%= label_tag 'phone_number', "Phone number" %>
-                                      <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control", placeholder:"Enter phone number" %>
+                                      <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control" %>
                                     </div>
                                     <div class="form-group">
                                       <%= label_tag 'delivery_address', "Delivery address with unit number" %>
-                                      <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control", placeholder: "Delivery address, including unit number" %>
+                                      <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control" %>
                                       <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
                                           <strong></strong>
                                       </div>
@@ -682,7 +684,7 @@ $(function(){
                                   <div class="form-group">
                                     <label>Feedback</label>
                                     <p class="form-control-static">
-                                      <div class="btn btn-md btn-success"  data-toggle="modal" data-target="#feedbackModal">Write a Feedback
+                                      <div class="btn btn-md btn-success"  data-toggle="modal" data-target="#feedbackModal">Submit a Feedback
                                       </div>
                                     </p>
                                   </div>
