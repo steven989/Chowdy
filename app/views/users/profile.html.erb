@@ -247,12 +247,13 @@ $(function(){
 
 <section class="vbox">
     <header class="bg-black header header-md navbar-fixed-top-xs box-shadow">
-        <div class="navbar-header aside-md dk">Chowdy
+        <div class="navbar-header aside-md">
             <a class="btn btn-link visible-xs" data-toggle="class:show" data-target=".nav-primary">
                       <i class="fa fa-bars"></i>
-                    </a>
+            </a>
+            <%= image_tag "logo-light.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm" %>
         </div>
-      <%= link_to "log out", logout_path %>
+      
     </header>    
     <section>
         <section class="hbox stretch">
@@ -289,11 +290,18 @@ $(function(){
                           </a>
                         </li>
                         <li>
-                          <a href="#settings" class="padder-v" data-toggle="tab">
+                          <a href="#settings" class="b-b padder-v" data-toggle="tab">
                             <i class="i i-settings icon">
                             </i>
                             <span class="font-bold">Settings</span>
                           </a>
+                        </li>
+                        <li>
+                          <%= link_to logout_path, class:"padder-v" do %>
+                            <i class="fa fa-terminal">
+                            </i>
+                            <span class="font-bold">Log out</span>
+                          <% end %>
                         </li>
                     </ul>
                 </nav>
@@ -307,7 +315,7 @@ $(function(){
                         <section class="vbox">
                             <section class="scrollable padder">
                                 <% if @number_of_failed_invoices > 0 %>
-                                  <section class="row m-t-xs">
+                                  <section class="row m-t-md">
                                     <div class="col-sm-12">
                                       <div class="alert alert-danger">
                                         <i class="fa fa-ban-circle"></i>You have <strong><%= @number_of_failed_invoices %> overdue invoice </strong><%= "s" if @number_of_failed_invoices > 1 %> for the week<%= "s" if @number_of_failed_invoices > 1 %> of <%= @failed_weeks.to_sentence %> due to declined credit card. We will re-attempt in a few days. You can also update your card on your profile.
@@ -319,7 +327,7 @@ $(function(){
                                 <% if @current_customer.recurring_delivery?.blank? %>
                                   <% if @current_customer.hub.scan(/delivery/i).length == 1 && @requested_hub_to_change_to.blank? %>
                                     <% if @current_customer.delivery_address.blank?  %>
-                                      <section class="row m-t-xs">
+                                      <section class="row m-t-md">
                                         <div class="col-sm-12">
                                           <div class="alert alert-warning">
                                             <i class="fa fa-ban-circle"></i>Please enter your delivery address.
@@ -327,7 +335,7 @@ $(function(){
                                         </div>
                                       </section>                                      
                                     <% else %>
-                                      <section class="row m-t-xs">
+                                      <section class="row m-t-md">
                                         <div class="col-sm-12">
                                           <div class="alert alert-warning">
                                             <i class="fa fa-ban-circle"></i>Please choose a pick-up hub.
@@ -338,7 +346,7 @@ $(function(){
                                   <% end %>
                                 <% end %>
                                 <% unless @sub_status.blank? %>
-                                  <section class="row m-t-xs">
+                                  <section class="row m-t-md">
                                     <div class="col-sm-12">
                                       <div class="alert alert-success">
                                         <button type="button" class="close" data-dismiss="alert">×</button>
