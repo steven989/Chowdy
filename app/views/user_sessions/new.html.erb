@@ -1,14 +1,22 @@
-<h1>Login</h1>
-<%= form_tag user_sessions_create_path, :method => :post do %>
-  <div class="field">
-    <%= label_tag :email %><br />
-    <%= text_field_tag :email %>
-  </div>
-  <div class="field">
-    <%= label_tag :password %><br />
-    <%= password_field_tag :password %>
-  </div>
-  <div class="actions">
-    <%= submit_tag "Login" %>
-  </div>
-<% end %>
+<section id="content" class="m-t-lg wrapper-md animated fadeInUp">    
+    <div class="container aside-xl" style="width: 360px">
+      <p class="navbar-brand block" style="float:none !important;">Chowdy</p>
+      <section class="m-b-lg">
+        <header class="wrapper text-center" style="color:#788288">
+          <strong>Sign in to manage your subscription</strong>
+        </header>
+        <%= form_tag user_sessions_create_path, :method => :post do %>
+          <div class="list-group">
+            <div class="list-group-item" style="border-color:#eaeef1">
+              <%= text_field_tag :email,nil ,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder: "Email" %>
+            </div>
+            <div class="list-group-item" style="border-color:#eaeef1">
+               <%= password_field_tag :password,nil,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Password" %>
+            </div>
+          </div>
+          <%= submit_tag "Login", class:"btn btn-lg btn-primary btn-block", style:"border-radius: 2px" %>
+          <div class="text-center m-t m-b"><a href="#"><small>Forgot password?</small></a></div>
+        <% end %>
+      </section>
+    </div>
+</section>

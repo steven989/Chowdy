@@ -1,18 +1,26 @@
-<%= form_for @user, url: users_path do |f| %>
-<div class="field">
-    <p>Email: <%= @email %></p>
-    <%= f.hidden_field 'email', options = {value:@email} %>
-</div>
-<div class="field">
-   <%= f.label :password %><br />
-   <%= f.password_field :password %>
-</div>
-<div class="field">
-   <%= f.label :password_confirmation %><br />
-   <%= f.password_field :password_confirmation %>
-</div>
-    <%= f.hidden_field :stripe_customer_id, options = {value:@stripe_customer_id} %>
-<p>
-    <%= f.submit 'Sign up now', class: 'mini ui givrgreen button' %>
-</p>
-<% end %>
+<section id="content" class="m-t-lg wrapper-md animated fadeInUp">    
+    <div class="container aside-xl" style="width: 360px">
+      <p class="navbar-brand block" style="float:none !important;">Chowdy</p>
+      <section class="m-b-lg">
+        <header class="wrapper text-center" style="color:#788288">
+          <strong>Sign up to manage your subscription</strong>
+        </header>
+        <%= form_for @user, url: users_path do |f| %>
+          <div class="list-group">
+            <div class="list-group-item" style="border-color:#eaeef1">
+              <p class = "m-l-sm m-t-xs m-b-none"><%= @email %></p>
+              <%= f.hidden_field 'email', options = {value:@email} %>
+            </div>
+            <div class="list-group-item" style="border-color:#eaeef1">
+               <%= f.password_field :password,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Password" %>
+            </div>
+            <div class="list-group-item" style="border-color:#eaeef1">
+               <%= f.password_field :password_confirmation,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Retype Password" %>
+            </div>
+            <%= f.hidden_field :stripe_customer_id, options = {value:@stripe_customer_id} %>
+          </div>
+            <%= f.submit 'Sign up now', class:"btn btn-lg btn-primary btn-block", style:"border-radius: 2px" %>
+        <% end %>
+      </section>
+    </div>
+</section>
