@@ -257,9 +257,6 @@ protect_from_forgery :except => :payment
     # end
 
     def update #change customer account information from website
-        puts '---------------------------------------------------'
-        puts params.inspect
-        puts '---------------------------------------------------'
 
         current_customer = current_user.customer
         
@@ -280,6 +277,8 @@ protect_from_forgery :except => :payment
                 end
             end
 
+            redirect_to user_profile_path+"#changePlan"
+
         elsif params[:id].downcase == "cancel"    
             if [2,3,4].include? Date.today.wday
                 adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
@@ -299,6 +298,7 @@ protect_from_forgery :except => :payment
                     CustomerMailer.feedback_received(current_customer).deliver
                 end
             end
+            redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "restart"    
             if [2,3,4].include? Date.today.wday
                 adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
@@ -317,6 +317,7 @@ protect_from_forgery :except => :payment
                     current_customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
                     current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)                
             end
+            redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "change_card"
             current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)
             current_stripe_customer.source = params[:stripeToken]
@@ -334,6 +335,7 @@ protect_from_forgery :except => :payment
                     end
                 end
             end
+            redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "email" 
             current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
             current_stripe_customer.email = params[:email]
@@ -341,6 +343,7 @@ protect_from_forgery :except => :payment
                 current_customer.update(email:params[:email])
                 current_customer.user.update(email:params[:email])
             end
+            redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "hub" 
             if [2,3,4].include? Date.today.wday
                 adjusted_change_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
@@ -356,17 +359,21 @@ protect_from_forgery :except => :payment
                 start_date:adjusted_change_date,
                 cancel_reason: params[:hub] #just using this field to capture any text value
             )
-
+            redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "delivery" 
             current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery?:"Yes")
+            redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery?:nil)
+            redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 
             current_customer.update(name:params[:name])
+            redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "feedback"
             if current_customer.feedbacks.create(feedback:params[:feedback], occasion: 'regular') 
                 CustomerMailer.feedback_received(current_customer).deliver
             end
+            redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "change_subscription"
             total_updated_meals = params[:monday_reg_hidden].to_i + params[:monday_grn_hidden].to_i + params[:thursday_reg_hidden].to_i + params[:thursday_grn_hidden].to_i
             if [2,3,4].include? Date.today.wday
@@ -389,9 +396,8 @@ protect_from_forgery :except => :payment
                     start_date:adjusted_change_date
                 )
             end
+            redirect_to user_profile_path+"#changePlan"
         end
-
-        redirect_to user_profile_path
 
         #affect stripe
             #meal count (change plan in Stripe)      

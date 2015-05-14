@@ -26,6 +26,19 @@ $(function(){
       }
     });
 
+    //URL segment
+
+    //retrieve
+    var hash = window.location.hash == "" ? "#dashboard" : window.location.hash;
+    $('#main-nav li a[href='+hash+']').tab("show");
+    $(".nav-main").find(".highlight").removeClass("highlight");
+    $('#main-nav li a[href='+hash+']').parent().addClass("highlight");
+
+    //set
+    $('#main-nav li a').off("click").on("click",function(){
+      window.location.hash = $(this).attr("href");
+    });
+
     // highlight the side navigation bars
     $(".nav-main a").on("click", function(){
      $(".nav-main").find(".highlight").removeClass("highlight");
@@ -260,7 +273,7 @@ $(function(){
             
             <aside class="bg-white aside-md hidden-print b-r" id="nav">
                 <nav class="nav-primary hidden-xs padder-v tabbable">
-                    <ul class="nav nav-main" data-ride="collapse">
+                    <ul class="nav nav-main" data-ride="collapse" id="main-nav">
                         <li class="highlight">
                           <a href="#dashboard" class="auto b-b padder-v" data-toggle="tab">
                             <i class="i i-statistics icon">
@@ -594,8 +607,6 @@ $(function(){
                                 </section>                           
                             </section>
                         </section>
-                  
-                      <p>Meal preferences: <%= @current_customer.meal_preferences %></p>
                     </section> 
 
                     <section class="tab-pane" id="referral" role="tabpanel">
