@@ -603,7 +603,16 @@ $(function(){
                                 <section class="row">
                                     <div class="col-sm-12">
                                         <div class="panel b-a">
-                                          <div class="panel-heading no-border bg-light lt text-center"><h4>Your referral code is: <span class="text-primary-lt"><%= @current_customer.referral_code %></span></div>
+                                          <div class="panel-heading no-border bg-light lt text-center"><h4>Your referral code is: <span class="text-primary-lt"><%= @current_customer.referral_code %></span></h4>
+                                            <div class="row m-l-md m-r-md">
+                                              <p>For every friend who signs up with this code, both you and your friend get $10 in meal credits</p>
+                                            </div>                                            
+                                            <div class="row">
+                                              <a rel="me" href="https://twitter.com/intent/tweet?text=Try%20Chowdy%20with%20referral%20code%20<%= @current_customer.referral_code %>,%20get%20$10%20off&url=http://chowdy.ca" class="btn btn-rounded btn-lg text-info-dk" style="font-size: 25px" target="_blank"><i class="fa fa-twitter"></i></a>
+                                              <a href="https://www.facebook.com/dialog/feed?app_id=<%= ENV["FACEBOOK_APP_ID"] %>&redirect_uri=http://chowdy.ca&link=http://chowdy.ca&caption=Try%20Chowdy%20today&description=Sign%20up%20with%20referral%20code%20<%= @current_customer.referral_code %>,%20get%20$10%20off" class="btn btn-rounded btn-lg text-primary" style="font-size: 25px" target="_blank"><i class="fa fa-facebook"></i></a>
+                                              <a href="mailto:?subject=Try%20Chowdy&body=Sign%20up%20to%20Chowdy%20with%20referral%20code%20<%= @current_customer.referral_code %>,%20get%20$10%20off%0A%0A<%= @current_customer.name.split(/\s/)[0].capitalize %>" class="btn btn-rounded btn-lg text-muted" style="font-size: 25px" ><i class="i i-mail"></i></a>
+                                            </div>
+                                          </div>
                                             <div class="row m-n text-center">
                                                 <div class="col-md-6">
                                                     <section class="row m-t-md m-b-md">
