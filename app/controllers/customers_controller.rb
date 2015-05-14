@@ -46,6 +46,8 @@ protect_from_forgery :except => :payment
             next_pick_up_date: StartDate.first.start_date
             )
 
+        customer.create_referral_code
+
         #add logic to split odd grean meal numbers
         raw_green_input = customer.raw_green_input
         begin
@@ -124,11 +126,13 @@ protect_from_forgery :except => :payment
         stripe_subscription.save
 
         #3) check for referral and try to match up referrals
+        
+
         unless referral.blank?
-            referral_match = Customer.where("name ilike ?", referral.downcase)
-            if referral_match.length == 0
-                manual_checks.push("Referral typed in but no match")
-            elsif referral_match.length == 1
+
+            if Customer.where(referral_code: referral.gsub(" ","").downcase).length == 1 #match code
+                referral_match = Customer.where(referral_code: referral.gsub(" ","").downcase)
+                
                 #referrer discount
                 stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
                 stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
@@ -151,8 +155,36 @@ protect_from_forgery :except => :payment
                 stripe_subscription.prorate = false
                 stripe_subscription.save
                 referral_matched = true
-            elsif referral_match.length > 1
-                manual_checks.push("Referral matched multiple customers")
+            else #match name
+                referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
+                if referral_match.length == 0
+                    manual_checks.push("Referral typed in but no match")
+                elsif referral_match.length == 1
+                    #referrer discount
+                    stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
+                    stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
+                    
+                        #check for existing coupons
+                        if stripe_referral_subscription_match.discount.nil?
+                            stripe_referral_subscription_match.coupon = "referral bonus"
+                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
+                            stripe_referral_subscription_match.coupon = "referral bonus x 2"
+                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
+                            stripe_referral_subscription_match.coupon = "referral bonus x 3"
+                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
+                            stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                        end
+
+                    stripe_referral_subscription_match.prorate = false
+                    stripe_referral_subscription_match.save                
+                    #referree discount
+                    stripe_subscription.coupon = "referral bonus"
+                    stripe_subscription.prorate = false
+                    stripe_subscription.save
+                    referral_matched = true
+                elsif referral_match.length > 1
+                    manual_checks.push("Referral matched multiple customers")
+                end
             end
         end
 
