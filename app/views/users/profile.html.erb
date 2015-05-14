@@ -526,11 +526,21 @@ $(function(){
                                                     width: "330px",
                                                     disable_search: true
                                                   }).off("change").on("change",function(){
-                                                    $("#hub_change_form input[type=submit]").removeClass("disabled")
+                                                    $("#hub_change_form input[type=submit]").removeClass("disabled");
+                                                    $("#hub_change_warning div").removeClass("hidden");
                                                   })
                                                 </script>
                                               </div>
-                                              <%= submit_tag 'Update Hub', class:"btn btn-s-md btn-success disabled" %>
+                                              <div class="row m-b-n-md">
+                                                <div class="col-sm-2 padder-v">
+                                                  <%= submit_tag 'Update Hub', class:"btn btn-s-md btn-success disabled" %>
+                                                </div>
+                                                <div class="col-sm-3 padder-v " id="hub_change_warning">
+                                                  <div class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px;"> 
+                                                    You have unsaved changes
+                                                  </div>
+                                                </div>
+                                              </div>
                                             <% end %>
                                         </div>
                                     </div>
