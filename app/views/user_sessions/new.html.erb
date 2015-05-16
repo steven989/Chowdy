@@ -15,8 +15,34 @@
             </div>
           </div>
           <%= submit_tag "Login", class:"btn btn-lg btn-primary btn-block", style:"border-radius: 2px" %>
-          <div class="text-center m-t m-b"><a href="#"><small>Forgot password?</small></a></div>
+          <div class="text-center m-t m-b"><a href="#" data-toggle="modal" data-target="#resetModal"><small>Forgot password?</small></a></div>
         <% end %>
       </section>
     </div>
 </section>
+
+
+<!-- Reset password modal -->
+<div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
+        <%= form_tag password_resets_path, :method => :post do %>
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Type in your email to reset password</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <%= label_tag :email %>
+              <%= text_field_tag :email,nil,class: "input-sm input-s form-control" %>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <%= submit_tag 'Reset password',class:"btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+  </div>
+</div>
+

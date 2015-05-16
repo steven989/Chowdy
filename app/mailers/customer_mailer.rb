@@ -1,5 +1,6 @@
 class CustomerMailer < ActionMailer::Base
-  default from: "steven989@gmail.com"
+
+  default from: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value
 
   def confirmation_email(customer,hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
     
@@ -49,7 +50,7 @@ class CustomerMailer < ActionMailer::Base
     @customer = customer
     @manual_checks = manual_checks
     mail(
-      to: "steven989@gmail.com", 
+      to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value, 
       subject: 'Customer sign up to look into'
       ) do |format|
         format.text
@@ -60,8 +61,18 @@ class CustomerMailer < ActionMailer::Base
     @customer = customer
     @feedback = customer.feedbacks.last.feedback
     mail(
-      to: "steven989@gmail.com", 
+      to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value,
       subject: 'New customer feedback'
+      ) do |format|
+        format.text
+    end    
+  end
+
+  def stop_delivery_notice(customer)
+    @customer = customer
+    mail(
+      to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value,
+      subject: 'Stop delivery request received'
       ) do |format|
         format.text
     end    
@@ -77,6 +88,13 @@ class CustomerMailer < ActionMailer::Base
         format.text
     end  
 
+  end
+
+  def reset_password_email(user)
+    @user = User.find user.id
+    @url  = edit_password_reset_url(@user.reset_password_token)
+    mail(:to => user.customer.email,
+         :subject => "Reset your password")
   end
 
 end

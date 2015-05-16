@@ -365,6 +365,7 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery?:nil)
+            CustomerMailer.stop_delivery_notice(current_customer).deliver
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 
             current_customer.update(name:params[:name])
