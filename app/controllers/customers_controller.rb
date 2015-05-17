@@ -299,7 +299,7 @@ protect_from_forgery :except => :payment
                 end
             end
             redirect_to user_profile_path+"#changePlan"
-        elsif params[:id].downcase == "restart"    
+        elsif params[:id].downcase == "restart"
             if [2,3,4].include? Date.today.wday
                 adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
             else
@@ -315,7 +315,7 @@ protect_from_forgery :except => :payment
                 current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
             elsif ["restart"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
                     current_customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
-                    current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)                
+                    current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
             end
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "change_card"

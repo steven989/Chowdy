@@ -33,23 +33,26 @@ $(function(){
 
     //URL segment
 
-    //retrieve
-    var hash = window.location.hash == "" ? "#dashboard" : window.location.hash;
-    $('#main-nav li a[href='+hash+']').tab("show");
-    $(".nav-main").find(".highlight").removeClass("highlight");
-    $('#main-nav li a[href='+hash+']').parent().addClass("highlight");
+      //retrieve
+      var hash = window.location.hash == "" ? "#dashboard" : window.location.hash;
+      $('#main-nav li a[href='+hash+']').tab("show");
+      $(".nav-main").find(".highlight").removeClass("highlight");
+      $('#main-nav li a[href='+hash+']').parent().addClass("highlight");
 
-    //set
-    $('#main-nav li a').off("click").on("click",function(){
-      window.location.hash = $(this).attr("href");
-    });
+      //navigation amongst the tabs
+      $('#main-nav li a, .link_to_settings').off("click").on("click",function(){
+        window.location.hash = $(this).attr("href");
+        $(".nav-main").find(".highlight").removeClass("highlight");
+        $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
+      });
 
-    // highlight the side navigation bars
-    $(".nav-main a").on("click", function(){
-     $(".nav-main").find(".highlight").removeClass("highlight");
-     $(this).parent().addClass("highlight");
+    //check for unpaid invoices before allowing to resume
+    var unpaid_invoices = <%= @number_of_failed_invoices %>
+    if (unpaid_invoices > 0) {
+      $('#resume_subscription_button').addClass("disabled");
+      $('#subscription_change_alert').removeClass("hidden");
+    };
 
-    });
 
     // check delivery 
     $('#delivery_request_form input').off("change").on("change", function(){
@@ -593,8 +596,14 @@ $(function(){
                                               <% if @display_restart %>
                                                 <div class="col-sm-2 m-b-md m-t-md">
                                                   <%= form_tag update_customer_path("restart"), method: 'POST' do %>
-                                                      <%= submit_tag 'Resume Subscription', class:"btn btn-s-md btn-success" %>
+                                                      <%= submit_tag 'Resume Subscription', class:"btn btn-s-md btn-success", id: "resume_subscription_button" %>
                                                   <% end %>
+                                                </div>
+                                                <div class="col-sm-6 m-b-md m-t-md hidden" id="subscription_change_alert">
+                                                  <div class="alert alert-warning text-center" style="padding-top:8px; padding-bottom:8px;">
+                                                    
+                                                    You have unpaid invoices. Please <a href="#settings" data-toggle="tab" class="link_to_settings"> update your credit card</a> before resuming.
+                                                  </div>
                                                 </div>
                                               <% end %>
                                               <% if @display_pause %>
