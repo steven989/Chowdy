@@ -1,6 +1,7 @@
 class CustomerMailer < ActionMailer::Base
 
   default from: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value
+  layout 'email'
 
   def confirmation_email(customer,hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
     

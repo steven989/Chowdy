@@ -1,0 +1,317 @@
+        <center>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
+                <tr>
+                    <td align="center" valign="top" id="bodyCell">
+                        <!-- BEGIN TEMPLATE // -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="600" id="templateContainer">
+                            <tr>
+                                <td align="center" valign="top">
+                                    <!-- BEGIN PREHEADER // -->
+                                    <table border="0" cellpadding="0" cellspacing="0" width="600" id="templatePreheader">
+                                        <tr>
+                                            <td valign="top" class="preheaderContainer" style="padding-top:9px;"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnImageBlock">
+    <tbody class="mcnImageBlockOuter">
+            <tr>
+                <td valign="top" style="padding:9px" class="mcnImageBlockInner">
+                    <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" class="mcnImageContentContainer">
+                        <tbody><tr>
+                            <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0;">
+                                
+                                    
+                                        <img align="left" alt="" src="https://gallery.mailchimp.com/09117b1524aee59856df34982/images/e0eb8996-f97e-495e-8344-f22acdf12b05.jpg" width="564" style="max-width:800px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                    
+                                
+                            </td>
+                        </tr>
+                    </tbody></table>
+                </td>
+            </tr>
+    </tbody>
+</table></td>
+                                        </tr>
+                                    </table>
+                                    <!-- // END PREHEADER -->
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center" valign="top">
+                                    <!-- BEGIN HEADER // -->
+                                    <table border="0" cellpadding="0" cellspacing="0" width="600" id="templateHeader">
+                                        <tr>
+                                            <td valign="top" class="headerContainer"></td>
+                                        </tr>
+                                    </table>
+                                    <!-- // END HEADER -->
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center" valign="top">
+                                    <!-- BEGIN BODY // -->
+                                    <table border="0" cellpadding="0" cellspacing="0" width="600" id="templateBody">
+                                        <tr>
+                                            <td valign="top" class="bodyContainer"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnBoxedTextBlock">
+    <tbody class="mcnBoxedTextBlockOuter">
+        <tr>
+            <td valign="top" class="mcnBoxedTextBlockInner">
+                
+                <table align="left" border="0" cellpadding="0" cellspacing="0" width="600" class="mcnBoxedTextContentContainer">
+                    <tbody><tr>
+                        
+                        <td style="padding-top:9px; padding-left:18px; padding-bottom:9px; padding-right:18px;">
+                        
+                            <table border="0" cellpadding="18" cellspacing="0" class="mcnTextContentContainer" width="100%" style="border: 1px solid #E7E7E7;">
+                                <tbody><tr>
+                                    <td valign="top" class="mcnTextContent">
+                                        <h1 class="null" style="color: #222222;font-family: arial, sans-serif;line-height: normal;font-size: 12.7272720336914px;"><span style="color:#000000"><span style="font-size:24px">Your subscription begins on:&nbsp;</span><br>
+<span style="font-size:28px"><%= @start_date.to_time.strftime("%A %B %d, %Y") %></span></span></h1>
+<br>
+<span style="color:#3e753f"><strong style="color: #222222;font-family: arial,sans-serif;font-size: small;line-height: normal;">Hi <%=@name%>, thanks for signing up for Chowdy! This is an ongoing meal service that automatically rebills every week. Please read the instructions below.</strong></span>
+                                    </td>
+                                </tr>
+                            </tbody></table>
+                        </td>
+                    </tr>
+                </tbody></table>
+                
+            </td>
+        </tr>
+    </tbody>
+</table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock">
+    <tbody class="mcnTextBlockOuter">
+        <tr>
+            <td valign="top" class="mcnTextBlockInner">
+                
+                <table align="left" border="0" cellpadding="0" cellspacing="0" width="600" class="mcnTextContentContainer">
+                    <tbody><tr>
+                        
+                        <td valign="top" class="mcnTextContent" style="padding-top:9px; padding-right: 18px; padding-bottom: 9px; padding-left: 18px;">
+                        
+                            <span style="color: #222222;font-family: arial,sans-serif;font-size: small;line-height: normal;"><span style="font-size:19px"><strong>Need to pause your subscription? Change your meals?</strong></span><br>
+<br>
+We've created a login for you to manage your account at <%= link_to create_customer_profile_url(@stripe_customer_id) %>
+<br>
+
+<span style="color: #222222;font-family: arial,sans-serif;font-size: small;line-height: normal;">If you forget to pause your subscription or don't pick up your meals after our chefs have cooked your food, we cannot refund you or give you credits. We don't want to waste food!&nbsp;</span>
+                        </td>
+                    </tr>
+                </tbody></table>
+                
+            </td>
+        </tr>
+    </tbody>
+</table></td>
+                                        </tr>
+                                    </table>
+                                    <!-- // END BODY -->
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center" valign="top">
+                                    <!-- BEGIN FOOTER // -->
+                                    <table border="0" cellpadding="0" cellspacing="0" width="600" id="templateFooter">
+                                        <tr>
+                                            <td valign="top" class="footerContainer" style="padding-bottom:9px;"><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnDividerBlock">
+    <tbody class="mcnDividerBlockOuter">
+        <tr>
+            <td class="mcnDividerBlockInner" style="padding: 18px;">
+                <table class="mcnDividerContent" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top-width: 1px;border-top-style: solid;border-top-color: #DADADA;">
+                    <tbody><tr>
+                        <td>
+                            <span></span>
+                        </td>
+                    </tr>
+                </tbody></table>
+            </td>
+        </tr>
+    </tbody>
+</table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnCaptionBlock">
+    <tbody class="mcnCaptionBlockOuter">
+        <tr>
+            <td class="mcnCaptionBlockInner" valign="top" style="padding:9px;">
+                
+
+<table border="0" cellpadding="0" cellspacing="0" class="mcnCaptionLeftContentOuter" width="100%">
+    <tbody><tr>
+        <td valign="top" class="mcnCaptionLeftContentInner" style="padding:0 9px ;">
+            <table align="right" border="0" cellpadding="0" cellspacing="0" class="mcnCaptionLeftImageContentContainer">
+                <tbody><tr>
+                    <td class="mcnCaptionLeftImageContent" valign="top">
+                    
+                        
+                        <img alt="" src="https://gallery.mailchimp.com/09117b1524aee59856df34982/images/316edca4-7376-411e-a476-d9469f751726.png" width="264" style="max-width:952px;" class="mcnImage">
+                        
+                    
+                    </td>
+                </tr>
+            </tbody></table>
+            <table class="mcnCaptionLeftTextContentContainer" align="left" border="0" cellpadding="0" cellspacing="0" width="264">
+                <tbody><tr>
+                    <td valign="top" class="mcnTextContent">
+                        <br>
+<br>
+<span style="color: #222222;font-family: arial,sans-serif;font-size: small;line-height: normal;"><span style="font-size:18px"><strong>Pick Instructions:&nbsp;</strong></span><br>
+<br>
+Wanda’s Belgium Waffle,&nbsp;Located at&nbsp;<strong>599 Yonge St</strong>&nbsp;<br>
+<br>
+<strong>Hours:</strong>&nbsp;Anytime between 10:30am-midnight<br>
+<br>
+Just let staff know your name and you can grab your meals. That's it!</span>
+                    </td>
+                </tr>
+            </tbody></table>
+        </td>
+    </tr>
+</tbody></table>
+
+
+
+
+
+            </td>
+        </tr>
+    </tbody>
+</table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnTextBlock">
+    <tbody class="mcnTextBlockOuter">
+        <tr>
+            <td valign="top" class="mcnTextBlockInner">
+                
+                <table align="left" border="0" cellpadding="0" cellspacing="0" width="600" class="mcnTextContentContainer">
+                    <tbody><tr>
+                        
+                        <td valign="top" class="mcnTextContent" style="padding-top:9px; padding-right: 18px; padding-bottom: 9px; padding-left: 18px;">
+                        
+                            <span style="color: #222222;font-family: arial,sans-serif;font-size: small;line-height: normal;">Meal batches are available for pick up every Mon through Wed (1st batch) and Thurs through Sat (2nd batch). Try to pick up early for the freshest batch!&nbsp;</span><br style="font-size: small;color: #222222;font-family: arial, sans-serif;line-height: normal;">
+<br style="font-size: small;color: #222222;font-family: arial, sans-serif;line-height: normal;">
+<span style="color: #222222;font-family: arial,sans-serif;font-size: small;line-height: normal;">If you liked your meals and want to continue, simply show up the following Monday. No other action is necessary.&nbsp;</span><br>
+<br style="font-size: small;color: #222222;font-family: arial, sans-serif;line-height: normal;">
+<span style="color: #222222;font-family: arial,sans-serif;font-size: small;line-height: normal;">Thanks and welcome to the Chowdy community! Send us any thoughts or feedback you have.</span><br>
+<br>
+<span style="font-size:19px; line-height:20.7999992370605px"><strong><span style="color: #222222;font-family: arial,sans-serif;line-height: normal;">Refer a friend and you both get $10 off your meals!</span></strong></span><br style="font-size: small;color: #222222;font-family: arial, sans-serif;line-height: normal;">
+&nbsp;
+                        </td>
+                    </tr>
+                </tbody></table>
+                
+            </td>
+        </tr>
+    </tbody>
+</table><table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnShareBlock">
+    <tbody class="mcnShareBlockOuter">
+            <tr>
+                <td valign="top" style="padding:9px" class="mcnShareBlockInner">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnShareContentContainer">
+    <tbody><tr>
+        <td align="center" style="padding-top:0; padding-left:9px; padding-bottom:0; padding-right:9px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mcnShareContent" style="border: 1px solid #EEEEEE;background-color: #FAFAFA;">
+                <tbody><tr>
+                    <td align="center" valign="top" class="mcnShareContentItemContainer" style="padding-top:9px; padding-right:9px; padding-left:9px;">
+                        <table border="0" cellpadding="0" cellspacing="0">
+                            <tbody><tr>
+                                <td align="left" valign="top">
+                                    
+                                        <table align="left" border="0" cellpadding="0" cellspacing="0">
+                                            <tbody><tr>
+                                                <td valign="top" style="padding-right:9px; padding-bottom:9px;" class="mcnShareContentItemContainer">
+                                                    <table border="0" cellpadding="0" cellspacing="0" width="" class="mcnShareContentItem" style="border-collapse: separate;border: 1px solid #CCCCCC;border-radius: 5px;background-color: #FAFAFA;">
+                                                        <tbody><tr>
+                                                            <td align="left" valign="middle" style="padding-top:5px; padding-right:9px; padding-bottom:5px; padding-left:9px;">
+                                                                <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
+                                                                    <tbody><tr>
+                                                                        <td align="center" valign="middle" width="24" class="mcnShareIconContent">
+                                                                            <a href="http://www.facebook.com/sharer/sharer.php?u=*|URL:ARCHIVE_LINK_SHORT|*" target="_blank"><img src="http://cdn-images.mailchimp.com/icons/social-block-v2/color-facebook-48.png" style="display:block;" height="24" width="24" class=""></a>
+                                                                        </td>
+                                                                        <td align="left" valign="middle" class="mcnShareTextContent" style="padding-left:5px;">
+                                                                            <a href="http://www.facebook.com/sharer/sharer.php?u=*|URL:ARCHIVE_LINK_SHORT|*" target="" style="color: #505050;font-family: Arial;font-size: 12px;font-weight: normal;line-height: 100%;text-align: center;text-decoration: none;">Share</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody></table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody></table>
+                                                </td>
+                                            </tr>
+                                        </tbody></table>
+                                <!--[if gte mso 6]>
+                                </td>
+                                <td align="left" valign="top">
+                                <![endif]-->
+                                    
+                                        <table align="left" border="0" cellpadding="0" cellspacing="0">
+                                            <tbody><tr>
+                                                <td valign="top" style="padding-right:9px; padding-bottom:9px;" class="mcnShareContentItemContainer">
+                                                    <table border="0" cellpadding="0" cellspacing="0" width="" class="mcnShareContentItem" style="border-collapse: separate;border: 1px solid #CCCCCC;border-radius: 5px;background-color: #FAFAFA;">
+                                                        <tbody><tr>
+                                                            <td align="left" valign="middle" style="padding-top:5px; padding-right:9px; padding-bottom:5px; padding-left:9px;">
+                                                                <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
+                                                                    <tbody><tr>
+                                                                        <td align="center" valign="middle" width="24" class="mcnShareIconContent">
+                                                                            <a href="http://twitter.com/intent/tweet?text=*|URL:MC_SUBJECT|*: *|URL:ARCHIVE_LINK_SHORT|*" target="_blank"><img src="http://cdn-images.mailchimp.com/icons/social-block-v2/color-twitter-48.png" style="display:block;" height="24" width="24" class=""></a>
+                                                                        </td>
+                                                                        <td align="left" valign="middle" class="mcnShareTextContent" style="padding-left:5px;">
+                                                                            <a href="http://twitter.com/intent/tweet?text=*|URL:MC_SUBJECT|*: *|URL:ARCHIVE_LINK_SHORT|*" target="" style="color: #505050;font-family: Arial;font-size: 12px;font-weight: normal;line-height: 100%;text-align: center;text-decoration: none;">Tweet</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody></table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody></table>
+                                                </td>
+                                            </tr>
+                                        </tbody></table>
+                                <!--[if gte mso 6]>
+                                </td>
+                                <td align="left" valign="top">
+                                <![endif]-->
+                                    
+                                        <table align="left" border="0" cellpadding="0" cellspacing="0">
+                                            <tbody><tr>
+                                                <td valign="top" style="padding-right:0; padding-bottom:9px;" class="mcnShareContentItemContainer">
+                                                    <table border="0" cellpadding="0" cellspacing="0" width="" class="mcnShareContentItem" style="border-collapse: separate;border: 1px solid #CCCCCC;border-radius: 5px;background-color: #FAFAFA;">
+                                                        <tbody><tr>
+                                                            <td align="left" valign="middle" style="padding-top:5px; padding-right:9px; padding-bottom:5px; padding-left:9px;">
+                                                                <table align="left" border="0" cellpadding="0" cellspacing="0" width="">
+                                                                    <tbody><tr>
+                                                                        <td align="center" valign="middle" width="24" class="mcnShareIconContent">
+                                                                            <a href="*|FORWARD|*" target="_blank"><img src="http://cdn-images.mailchimp.com/icons/social-block-v2/color-forwardtofriend-48.png" style="display:block;" height="24" width="24" class=""></a>
+                                                                        </td>
+                                                                        <td align="left" valign="middle" class="mcnShareTextContent" style="padding-left:5px;">
+                                                                            <a href="*|FORWARD|*" target="" style="color: #505050;font-family: Arial;font-size: 12px;font-weight: normal;line-height: 100%;text-align: center;text-decoration: none;">Forward</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody></table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody></table>
+                                                </td>
+                                            </tr>
+                                        </tbody></table>
+                                <!--[if gte mso 6]>
+                                </td>
+                                <td align="left" valign="top">
+                                <![endif]-->
+                                    
+                                </td>
+                            </tr>
+                        </tbody></table>
+                    </td>
+                </tr>
+            </tbody></table>
+        </td>
+    </tr>
+</tbody></table>
+
+                </td>
+            </tr>
+    </tbody>
+</table></td>
+                                        </tr>
+                                    </table>
+                                    <!-- // END FOOTER -->
+                                </td>
+                            </tr>
+                        </table>
+                        <!-- // END TEMPLATE -->
+                    </td>
+                </tr>
+            </table>
+        </center>
