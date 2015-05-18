@@ -48,7 +48,15 @@ module Chowdy
                 reference_date.to_date
             end  
         else 
-            reference_date.to_date
+            if distance.to_i > 0
+                adjusted_distance = distance.to_i
+                reference_date.to_date + days_away + adjusted_distance * 7
+            elsif distance.to_i < 0
+                adjusted_distance = distance.to_i
+                reference_date.to_date + days_away + adjusted_distance * 7
+            else
+                reference_date.to_date
+            end  
         end 
     
     end

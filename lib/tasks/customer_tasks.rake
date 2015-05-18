@@ -1,5 +1,5 @@
 namespace :customers do
-    desc 'push start date to the next next Monday'
+    desc 'push system start date to the next next Monday'
     task :push_start_date, [:number_of_weeks] => [:environment] do |t, args|        
         if StartDate.first.update(start_date: Chowdy::Application.closest_date(args[:number_of_weeks],1))        
             puts "Start date pushed to #{Chowdy::Application.closest_date(args[:number_of_weeks],1)}" 
@@ -13,6 +13,14 @@ namespace :customers do
             customer.update(paused?:'No', pause_end_date:nil,pause_cancel_request:nil)
         end
     end
+
+    desc 'update everyone\'s start date'
+    task :update_individual_start_date, [:number_of_weeks] => [:environment] do |t, args|        
+        Customer.where("next_pick_up_date = ?", Chowdy::Application.closest_date(-1,1)).each do |customer|
+            customer.update_attributes(next_pick_up_date: Chowdy::Application.closest_date(args[:number_of_weeks],1))
+        end
+    end
+
 
     desc 'email list of overdue bills to admin'
     task :email_customers_with_failed_invoices => [:environment] do
