@@ -34,7 +34,7 @@ $(function(){
     //URL segment
 
       //retrieve
-      var hash = window.location.hash == "" ? "#dashboard" : window.location.hash;
+      var hash = (window.location.hash == "" || window.location.hash == "#_=_") ? "#dashboard" : window.location.hash;
       $('#main-nav li a[href='+hash+']').tab("show");
       $(".nav-main").find(".highlight").removeClass("highlight");
       $('#main-nav li a[href='+hash+']').parent().addClass("highlight");

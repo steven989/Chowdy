@@ -1,6 +1,8 @@
 Chowdy::Application.routes.draw do
 
 
+  get "oauths/oauth"
+  get "oauths/callback"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
   
@@ -18,6 +20,10 @@ Chowdy::Application.routes.draw do
   get 'user/profile' => 'users#profile', as: 'user_profile'
 
   resources :password_resets
+
+  post "oauth/callback" => "oauths#callback"
+  get "oauth/callback" => "oauths#callback" # for use with Github, Facebook
+  get "oauth/:provider" => "oauths#oauth", :as => :auth_at_provider
 
   # You can have the root of your site routed with "root"
   # root 'welcome#index'
