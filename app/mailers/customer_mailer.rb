@@ -98,4 +98,10 @@ class CustomerMailer < ActionMailer::Base
          :subject => "Reset your password")
   end
 
+  def failed_invoice_email
+    @all_failed_invoices = FailedInvoice.where(paid:true)
+    mail(:to => SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value,
+         :subject => "Customers with unpaid invoices")
+  end
+
 end

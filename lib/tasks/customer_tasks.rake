@@ -14,6 +14,11 @@ namespace :customers do
         end
     end
 
+    desc 'email list of overdue bills to admin'
+    task :email_customers_with_failed_invoices => [:environment] do
+        CustomerMailer.failed_invoice_email.deliver
+    end
+
     desc 'pause/cancel/restart customers'
     task :execute_pause_cancel_restart_queue, [:distance] => [:environment] do |t, args|
         if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0

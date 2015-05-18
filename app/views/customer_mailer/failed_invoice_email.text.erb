@@ -1,0 +1,8 @@
+<% if @all_failed_invoices.length > 0 %>
+These customers have overdue bills
+    <% @all_failed_invoices.each do |invoice| %>
+    | Invoice: <%= invoice.invoice_number %> | Date: <%= invoice.invoice_date %>  | Customer email: <%= invoice.customer.email %> | Customer name: <%= invoice.customer.name %> | Active: <%= invoice.customer.active? %>, Paused: <%= invoice.customer.paused? %>, Requests: <%= invoice.customer.stop_queues.map { |q| q.stop_type} %> |
+    <% end %>
+<% else %>
+    There are no overdue bills
+<% end %>
