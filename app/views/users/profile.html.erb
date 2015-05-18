@@ -398,7 +398,7 @@ $(function(){
                                                           </span>
                                                         </div>
                                                         <div class="col-md-7 text-left text-success-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
-                                                              <span class="h2 block"><%= @current_customer.total_meals_per_week %></span>
+                                                              <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @current_customer.total_meals_per_week %></span>
                                                               <small class="text-muted text-u-c">Weekly meals</small>
                                                         </div>  
                                                       </div>
@@ -414,8 +414,8 @@ $(function(){
                                                           </span>
                                                         </div>
                                                         <div class="col-md-7 text-left text-primary-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
-                                                              <span class="h2 block"><%= @current_customer.next_pick_up_date.blank? ? "-" : @current_customer.next_pick_up_date.strftime("%b #{@current_customer.next_pick_up_date.day.ordinalize}") %></span>
-                                                              <small class="text-muted text-u-c">Next pick-up</small>
+                                                              <span class="h4 block" style="height: 33px; margin-top: 30px; margin-bottom: 0px;"><%= @current_customer.next_pick_up_date.blank? ? "-" : @current_customer.next_pick_up_date.strftime("%b #{@current_customer.next_pick_up_date.day.ordinalize}") + " - " + (@current_customer.next_pick_up_date + 5.days).strftime("%b #{(@current_customer.next_pick_up_date + 5.days).day.ordinalize}") %></span>
+                                                              <small class="text-muted text-u-c">Pick-up Window This Week</small>
                                                         </div>  
                                                       </div>
                                                     </section>
@@ -430,7 +430,7 @@ $(function(){
                                                           </span>
                                                         </div>
                                                         <div class="col-md-7 text-left text-info-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
-                                                              <span class="h2 block"><%= @next_billing_date.blank? ? "-" : @next_billing_date.strftime("%b #{@next_billing_date.day.ordinalize}") %></span>
+                                                              <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @next_billing_date.blank? ? "-" : @next_billing_date.strftime("%b #{@next_billing_date.day.ordinalize}") %></span>
                                                               <small class="text-muted text-u-c">Next billing</small>
                                                         </div>  
                                                       </div>
