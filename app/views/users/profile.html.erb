@@ -451,7 +451,7 @@ $(function(){
                                                 No pick-up hub selected
                                               <% end %>
                                             <% else %>
-                                              Pick up at <%= @current_customer.hub %>
+                                              Pick up at <%= @current_customer.hub.gsub("\\","") %>
                                             <% end %>
                                           <% else %>
                                             Delivery to <%= @current_customer.delivery_address %>
