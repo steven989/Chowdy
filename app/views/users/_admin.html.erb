@@ -1,0 +1,90 @@
+
+<script>
+
+$(function(){
+
+    //URL segment
+
+      //retrieve
+      var hash = (window.location.hash == "" || window.location.hash == "#_=_") ? "#dashboard" : window.location.hash;
+      $('#main-nav li a[href='+hash+']').tab("show");
+      $(".nav-main").find(".highlight").removeClass("highlight");
+      $('#main-nav li a[href='+hash+']').parent().addClass("highlight");
+
+      //navigation amongst the tabs
+      $('#main-nav li a, .link_to_settings').off("click").on("click",function(){
+        window.location.hash = $(this).attr("href");
+        $(".nav-main").find(".highlight").removeClass("highlight");
+        $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
+      });
+});
+
+</script>
+
+
+<section class="vbox">
+    <header class="bg-black header header-md navbar-fixed-top-xs box-shadow">
+        <div class="navbar-header aside-md">
+            <a class="btn btn-link visible-xs m-t-sm" data-toggle="class:show" data-target=".nav-primary">
+                      <i class="fa fa-bars"></i>
+            </a>
+            <%= image_tag "logo-light.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm" %>
+        </div>
+      
+    </header>    
+    <section>
+        <section class="hbox stretch">
+            
+            <aside class="bg-white aside-md hidden-print b-r" id="nav">
+                <nav class="nav-primary hidden-xs padder-v tabbable">
+                    <ul class="nav nav-main" data-ride="collapse" id="main-nav">
+                        <li class="highlight">
+                          <a href="#dashboard" class="auto b-b padder-v" data-toggle="tab">
+                            <i class="i i-statistics icon">
+                            </i>
+                            <span class="font-bold">Dashboard</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#customers" class="b-b padder-v" data-toggle="tab">
+                            <i class="i i-params icon">
+                            </i>
+                            <span class="font-bold">Customers</span>
+                          </a>
+                        </li>
+                        <li>
+                          <%= link_to logout_path, class:"padder-v" do %>
+                            <i class="fa fa-terminal">
+                            </i>
+                            <span class="font-bold">Log out</span>
+                          <% end %>
+                        </li>
+                    </ul>
+                </nav>
+                
+            </aside>
+
+
+            <section id="content container">
+                <section class="hbox stretch bg-light tab-content">
+                    <section class="tab-pane active" id="dashboard" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder">
+                              Dashboard
+                            </section>
+                        </section>
+                    </section>
+                    
+                    <section class="tab-pane" id="customers" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder">
+                              Customers
+                            </section>
+                        </section>
+                    </section> 
+                </section>
+            </section>
+        
+        </section>
+    </section>
+</section>
