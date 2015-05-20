@@ -81,14 +81,14 @@ namespace :customers do
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
                         current_customer.update(paused?:["yes","Yes"], pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
-                        current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1)
+                        current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1, requested_date: queue_item.created_at)
                         queue_item.destroy
                     end
                 elsif queue_item.stop_type == 'cancel'
                     stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
                     if stripe_subscription.delete
                         current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
-                        current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date,cancel_reason:queue_item.cancel_reason)
+                        current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date,cancel_reason:queue_item.cancel_reason, requested_date: queue_item.created_at)
                         queue_item.destroy
                     end
                 elsif queue_item.stop_type == 'restart'

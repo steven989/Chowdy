@@ -43,7 +43,8 @@ protect_from_forgery :except => :payment
             active?:"Yes",
             first_pick_up_date: StartDate.first.start_date,
             purchase:"Recurring",
-            next_pick_up_date: StartDate.first.start_date
+            next_pick_up_date: StartDate.first.start_date,
+            date_signed_up_for_recurring: Time.now
             )
 
         customer.create_referral_code
@@ -197,8 +198,8 @@ protect_from_forgery :except => :payment
             # -1) check if there has been another customer created within the last two hours, based on
                     #email, #name
                     duplicate_match = Customer.where("email ilike ? and name ilike ? and total_meals_per_week = ? and id <> ? and created_at >= ?", customer_email, customer_name, meal_per_week,customer.id,3.hour.ago)
-                    if Customer.where("email ilike ?", customer_email).length >= 1
-                        manual_checks.push("New sign up email matches an existing customer")
+                    if Customer.where("email ilike ? and (name not ilike ? or total_meals_per_week <> ?) and id <> ?", customer_email, customer_name, meal_per_week,customer.id).length >= 1
+                        manual_checks.push("New sign up email matches an existing customer but name or total meal count are different")
                     end
             # -2) refund payment and delete customer
                     if duplicate_match.length >= 1
