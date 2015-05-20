@@ -100,9 +100,12 @@ $(function(){
       };
 
       
-
-      var sign_up_cancel_plot = $.plot($("#sign_up_cancel_chart"), [sign_ups,cancels],options);
-
+      function plotCharge() {
+        if (window.location.hash == "#dashboard") {
+        var sign_up_cancel_plot = $.plot($("#sign_up_cancel_chart"), [sign_ups,cancels],options);
+        }
+      }
+      plotCharge();
       //ajax
 
       function formRetrievalAjax() {
@@ -447,7 +450,7 @@ $(function(){
                                   <header class="panel-heading">
                                     Sign up and cancellations chart
                                   </header>
-                                  <div id="sign_up_cancel_chart" style="height:240px">
+                                  <div id="sign_up_cancel_chart" style="height:240px;">
                                     
                                   </div>
                                 </div> 

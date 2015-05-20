@@ -82,6 +82,8 @@ class UsersController < ApplicationController
 
             @delivery_boundary_coordinates = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"coordinates").take.setting_value
             
+            @announcements = SystemSetting.where(setting: "announcement", setting_attribute: "all")
+
             if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
                 @total_meals = @current_customer.total_meals_per_week.to_i
                 @total_green = @current_customer.number_of_green.to_i
