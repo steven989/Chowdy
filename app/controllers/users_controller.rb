@@ -55,7 +55,7 @@ class UsersController < ApplicationController
 
             @system_settings = SystemSetting.all
 
-            @signup_timeseries = Customer.select('created_at::date AS day, COUNT(*) as sign_ups').group('day').map {|r| [r.day.to_time.to_i*1000, r.sign_ups]}
+            @signup_timeseries = Customer.select('date_signed_up_for_recurring::date AS day, COUNT(*) as sign_ups').group('day').map {|r| [r.day.to_time.to_i*1000, r.sign_ups]}
             @cancel_timeseries = StopRequest.where(request_type:"cancel",end_date:nil).select('requested_date::date AS day, COUNT(*) as cancels').group('day').map {|r| [r.day.to_time.to_i*1000, r.cancels]}
             @cancel_curr_timeseries = StopQueue.where(stop_type:"cancel").select('created_at::date AS day, COUNT(*) as cancels').group('day').map {|r| [r.day.to_time.to_i*1000, r.cancels]}
             @cancel_curr_timeseries.each {|c| @cancel_timeseries.push c}
