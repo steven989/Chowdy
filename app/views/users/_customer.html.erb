@@ -346,7 +346,7 @@ $(function(){
                                   </section>
                                 <% end %>
                                 
-                                <% if @current_customer.recurring_delivery?.blank? %>
+                                <% if @current_customer.recurring_delivery.blank? %>
                                   <% if @current_customer.hub.scan(/delivery/i).length == 1 && @requested_hub_to_change_to.blank? %>
                                     <% if @current_customer.delivery_address.blank?  %>
                                       <section class="row m-t-md">
@@ -443,7 +443,7 @@ $(function(){
                                 <section class="row m-b-md">
                                     <div class="col-sm-12">
                                         <h3 class="m-b-xs text-muted text-center">
-                                          <% if @current_customer.recurring_delivery?.blank? %>
+                                          <% if @current_customer.recurring_delivery.blank? %>
                                             <% if @current_customer.hub.scan(/delivery/i).length == 1 %>
                                               <% if @current_customer.delivery_address.blank? %>
                                                 Delivery requested
@@ -696,7 +696,7 @@ $(function(){
                             <div class="col-sm-6">
                               <div class="alert alert-<%= @delivery_color_class %> m-t-md padder-v">
                                   <h5><%= @delivery_note %></h5>
-                                  <% unless @current_customer.recurring_delivery?.blank? %>
+                                  <% unless @current_customer.recurring_delivery.blank? %>
                                     <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
                                         <%= submit_tag "Stop delivery", class:"btn btn-sm btn-danger"  %>
                                     <% end %>

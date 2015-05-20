@@ -16,6 +16,38 @@ class UsersController < ApplicationController
 
         @current_user = current_user
         if @current_user.role == "admin"
+            current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+            active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
+            @monday_regular = active_nonpaused_customers.sum(:regular_meals_on_monday).to_i
+                @monday_regular_wandas = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:regular_meals_on_monday).to_i
+                @monday_regular_coffee_bar = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:regular_meals_on_monday).to_i
+                @monday_regular_dekefir = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:regular_meals_on_monday).to_i
+            @monday_green = active_nonpaused_customers.sum(:green_meals_on_monday).to_i
+                @monday_green_wandas = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:green_meals_on_monday).to_i
+                @monday_green_coffee_bar = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:green_meals_on_monday).to_i
+                @monday_green_dekefir = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:green_meals_on_monday).to_i
+            @thursday_regular = active_nonpaused_customers.sum(:regular_meals_on_thursday).to_i
+                @thursday_regular_wandas = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:regular_meals_on_thursday).to_i
+                @thursday_regular_coffee_bar = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:regular_meals_on_thursday).to_i
+                @thursday_regular_dekefir = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:regular_meals_on_thursday).to_i
+            @thursday_green = active_nonpaused_customers.sum(:green_meals_on_thursday).to_i
+                @thursday_green_wandas = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:green_meals_on_thursday).to_i
+                @thursday_green_coffee_bar = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:green_meals_on_thursday).to_i
+                @thursday_green_dekefir = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:green_meals_on_thursday).to_i
+
+            @total_meals = @monday_regular + @monday_green + @thursday_regular + @thursday_green
+
+            # Pauses taking place next week
+            puts @pause_next_week = StopQueue.where(stop_type:"pause").map {|q| q.customer.total_meals_per_week }.inject {|sum, x| sum + x}.to_i
+            puts @cancel_next_week = StopQueue.where(stop_type:"cancel").map {|q| q.customer.total_meals_per_week }.inject {|sum, x| sum + x}.to_i
+            puts @unpause_next_week = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).sum(:total_meals_per_week).to_i
+            puts @restarts_next_week = StopQueue.where(stop_type:"restart").map {|q| q.customer.total_meals_per_week }.inject {|sum, x| sum + x}.to_i
+            puts @meal_count_change = (StopQueue.where("stop_type ilike ? and stripe_customer_id not in (?)", "change_sub", StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}).sum(:updated_meals).to_i - StopQueue.where("stop_type ilike ? and stripe_customer_id not in (?)", "change_sub", StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}).map {|r| r.customer.total_meals_per_week}.inject {|sum, x| sum + x}).to_i
+            puts @new_sign_ups = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).sum(:total_meals_per_week).to_i
+
+            @total_meals_next = @total_meals - @pause_next_week - @cancel_next_week + @unpause_next_week + @restarts_next_week + @meal_count_change + @new_sign_ups 
+
+            @customers_with_missing_info = active_nonpaused_customers.where("(monday_pickup_hub is null and recurring_delivery is null) or (thursday_pickup_hub is null and recurring_delivery is null) or (monday_delivery_hub is null and recurring_delivery is not null) or (thursday_delivery_hub is null and recurring_delivery is not null)")
 
         else
             @current_customer = current_user.customer
@@ -24,7 +56,7 @@ class UsersController < ApplicationController
             @display_restart = true
             @disable_sub_update = false
 
-            @address_to_show_on_dashboard = @current_customer.recurring_delivery?.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
+            @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
             
             @number_of_referrals = Customer.where("referral ilike ?", @current_customer.name).length
             @referral_dollars_earned = @number_of_referrals * 10
@@ -122,7 +154,7 @@ class UsersController < ApplicationController
                 @next_billing_date = Time.at(current_period_end).to_datetime + 2.hours
             end
             if ["Inactive","Paused"].include? @current_status
-                if @current_customer.recurring_delivery?.blank?
+                if @current_customer.recurring_delivery.blank?
                     @delivery_note = "You do not currently have scheduled delivery"
                     @delivery_button = "Request delivery"
                     @delivery_color_class = "warning"
@@ -132,7 +164,7 @@ class UsersController < ApplicationController
                     @delivery_color_class = "warning"
                 end
             else 
-                if @current_customer.recurring_delivery?.blank?
+                if @current_customer.recurring_delivery.blank?
                     @delivery_note = "You do not currently have scheduled delivery"
                     @delivery_button = "Request delivery"
                     @delivery_color_class = "warning"

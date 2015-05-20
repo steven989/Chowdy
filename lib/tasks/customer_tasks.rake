@@ -9,8 +9,8 @@ namespace :customers do
 
     desc 'update status information for customers restarting after pause'
     task :restart_status => [:environment] do
-        Customer.where(paused?: "yes", pause_end_date: [Chowdy::Application.closest_date(1,7), Chowdy::Application.closest_date(1,1)]).each do |customer|
-            customer.update(paused?:'No', pause_end_date:nil,pause_cancel_request:nil)
+        Customer.where(paused?: ["yes","Yes"], pause_end_date: [Chowdy::Application.closest_date(1,7), Chowdy::Application.closest_date(1,1)]).each do |customer|
+            customer.update(paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
         end
     end
 
@@ -19,6 +19,7 @@ namespace :customers do
         Customer.where("next_pick_up_date = ?", Chowdy::Application.closest_date(-1,1)).each do |customer|
             customer.update_attributes(next_pick_up_date: Chowdy::Application.closest_date(args[:number_of_weeks],1))
         end
+        SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.update_attributes(setting_value: Chowdy::Application.closest_date(args[:number_of_weeks],1).to_s)
     end
 
 
@@ -79,7 +80,7 @@ namespace :customers do
                     stripe_subscription.trial_end = queue_item.end_date.to_time.to_i
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
-                        current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
+                        current_customer.update(paused?:["yes","Yes"], pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
                         current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1)
                         queue_item.destroy
                     end
@@ -108,7 +109,7 @@ namespace :customers do
                         start_date_update = queue_item.start_date
                         if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
                             new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
-                            current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                            current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
                             current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
                             queue_item.destroy
                         end
@@ -118,7 +119,7 @@ namespace :customers do
                         paused_subscription.trial_end = start_date_update.to_time.to_i
                         paused_subscription.prorate = false
                         if paused_subscription.save
-                            current_customer.update(next_pick_up_date:start_date_update, paused?:'No', pause_end_date:nil,pause_cancel_request:nil)
+                            current_customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
                             current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
                             queue_item.destroy
                         end

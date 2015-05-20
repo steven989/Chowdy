@@ -48,6 +48,11 @@ protect_from_forgery :except => :payment
 
         customer.create_referral_code
 
+        #assign hubs 
+        if hub.match(/delivery/i).nil?
+            customer.update_attributes(monday_pickup_hub:hub,thursday_pickup_hub:hub)
+        end
+
         #add logic to split odd grean meal numbers
         raw_green_input = customer.raw_green_input
         begin
@@ -203,7 +208,7 @@ protect_from_forgery :except => :payment
                             customer.delete_with_stripe
                         end
                     end
-        #5) send confirmation email. Add a column to indicate that email has been sent
+        #5) send confirmation email
             hub_email = hub.gsub(/\\/,"")
             start_date_email = StartDate.first.start_date
             first_name_email = customer_name.split(/\s/)[0].capitalize
@@ -361,10 +366,12 @@ protect_from_forgery :except => :payment
             )
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "delivery" 
-            current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery?:"Yes")
+            current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery:"Yes")
+            current_customer.update_attributes(monday_delivery_hub: "delivery") if current_customer.monday_delivery_hub.blank?
+            current_customer.update_attributes(thursday_delivery_hub: "delivery") if current_customer.thursday_delivery_hub.blank?
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
-            current_customer.update(recurring_delivery?:nil)
+            current_customer.update(recurring_delivery:nil)
             CustomerMailer.stop_delivery_notice(current_customer).deliver
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 

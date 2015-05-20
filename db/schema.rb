@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150519162029) do
+ActiveRecord::Schema.define(version: 20150519201854) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -70,7 +70,7 @@ ActiveRecord::Schema.define(version: 20150519162029) do
     t.text     "notes"
     t.string   "meal_preferences"
     t.date     "last_surveyed"
-    t.string   "recurring_delivery?"
+    t.string   "recurring_delivery"
     t.string   "delivery_address"
     t.string   "delivery_time"
     t.string   "delivery_set_up?"
@@ -82,6 +82,10 @@ ActiveRecord::Schema.define(version: 20150519162029) do
     t.string   "email"
     t.string   "raw_green_input"
     t.string   "referral_code"
+    t.string   "monday_pickup_hub"
+    t.string   "thursday_pickup_hub"
+    t.string   "monday_delivery_hub"
+    t.string   "thursday_delivery_hub"
   end
 
   create_table "failed_invoice_trackers", force: true do |t|

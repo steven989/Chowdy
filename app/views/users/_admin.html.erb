@@ -17,6 +17,22 @@ $(function(){
         $(".nav-main").find(".highlight").removeClass("highlight");
         $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
       });
+
+      // data tables
+
+       $('#missing_hub_info').DataTable({
+        searching: false
+       });
+
+      //collapse
+
+      $('.meal_details_collapse_control').off("click").on("click",function(){
+        if ($('.meals_details').hasClass("hidden")) {
+          $('.meals_details').removeClass("hidden");
+        } else {
+          $('.meals_details').addClass("hidden");
+        } 
+      });
 });
 
 </script>
@@ -70,7 +86,179 @@ $(function(){
                     <section class="tab-pane active" id="dashboard" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder">
-                              Dashboard
+                              <section class="row">
+                                <div class="col-sm-12">
+                                    <div class="panel panel-default b-a m-t-md">
+                                      <header class="panel-heading text-center">
+                                        <div class="row">
+                                          <div class="col-md-6">
+                                            <span class="h2 block m-r-md text-primary"><%= @total_meals %></span>
+                                            <small class="text-muted text-u-c">Current Week Total</small>
+                                          </div>
+                                          <div class="col-md-6">
+                                            <span class="h2 block text-info"><%= @total_meals_next %></span>
+                                            <small class="text-muted text-u-c">Next Week Total</small>
+                                          </div>
+                                        </div>
+                                      </header>
+                                        <div class="row m-n text-center">
+                                            <div class="col-md-3">
+                                                <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
+                                                    <div class="text-center text-primary">
+                                                          <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_regular %></span>
+                                                          <small class="text-muted text-u-c">Monday Regular</small>
+                                                    </div>  
+                                                </section>
+                                                <div class="meals_details hidden">
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_regular_wandas %></span>
+                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_regular_coffee_bar %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_regular_dekefir %></span>
+                                                            <small class="text-muted text-u-c">deKEFIR</small>
+                                                      </div>  
+                                                  </section>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
+                                                    <div class="text-center text-primary">
+                                                          <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green %></span>
+                                                          <small class="text-muted text-u-c">Monday Green</small>
+                                                    </div>  
+                                                </section>
+                                                <div class="meals_details hidden">
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green_wandas %></span>
+                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green_coffee_bar %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green_dekefir %></span>
+                                                            <small class="text-muted text-u-c">deKEFIR</small>
+                                                      </div>  
+                                                  </section>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
+                                                    <div class="text-center text-primary">
+                                                          <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_regular %></span>
+                                                          <small class="text-muted text-u-c">Thursday Regular</small>
+                                                    </div>  
+                                                </section>
+                                                <div class="meals_details hidden">
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_regular_wandas %></span>
+                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_regular_coffee_bar %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_regular_dekefir %></span>
+                                                            <small class="text-muted text-u-c">deKEFIR</small>
+                                                      </div>  
+                                                  </section>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
+                                                    <div class="text-center text-primary">
+                                                          <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green %></span>
+                                                          <small class="text-muted text-u-c">Thursday Green</small>
+                                                    </div>  
+                                                </section>
+                                                <div class="meals_details hidden">
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green_wandas %></span>
+                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green_coffee_bar %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green_dekefir %></span>
+                                                            <small class="text-muted text-u-c">deKEFIR</small>
+                                                      </div>  
+                                                  </section>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                              </section>
+                              <% if @customers_with_missing_info.length > 0 %>
+                                <section class="row padder">
+                                  <div class="panel panel-default">
+                                    <header class="panel-heading">
+                                      Customers with Missing Hub Information
+                                    </header>
+                                    <div class="table-responsive">
+                                      <table id="missing_hub_info" class="display table table-striped m-b-none" style="font-size: 12px">
+                                        <thead>
+                                          <tr>
+                                            <th>ID</th>
+                                            <th>Customer Name</th>
+                                            <th>Customer Email</th>
+                                            <th>Selected Hub</th>
+                                            <th>Monday Pick-up Hub</th>
+                                            <th>Thursday Pick-up Hub</th>
+                                            <th>Monday Delivery Hub</th>
+                                            <th>Thursday Delivery Hub</th>
+                                            <th>Delivery requested</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          <% @customers_with_missing_info.each do |c| %>
+                                            <tr>
+                                              <td><%= c.id %></td>
+                                              <td><%= c.name %></td>
+                                              <td><%= c.email %></td>
+                                              <td><%= c.hub %></td>
+                                              <td><%= c.monday_pickup_hub %></td>
+                                              <td><%= c.thursday_pickup_hub %></td>
+                                              <td><%= c.monday_delivery_hub %></td>
+                                              <td><%= c.thursday_delivery_hub %></td>
+                                              <td><%= c.recurring_delivery %></td>
+                                            </tr>
+                                          <% end %>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div> 
+                                </section>
+                              <% end %>
                             </section>
                         </section>
                     </section>
