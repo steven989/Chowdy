@@ -24,6 +24,10 @@ $(function(){
         searching: false
        });
 
+       $('#overdue_invoice').DataTable({
+        searching: false
+       });
+
       //collapse
 
       $('.meal_details_collapse_control').off("click").on("click",function(){
@@ -228,7 +232,7 @@ $(function(){
                                       <table id="missing_hub_info" class="display table table-striped m-b-none" style="font-size: 12px">
                                         <thead>
                                           <tr>
-                                            <th>ID</th>
+                                            <th>Customer ID</th>
                                             <th>Customer Name</th>
                                             <th>Customer Email</th>
                                             <th>Selected Hub</th>
@@ -259,6 +263,45 @@ $(function(){
                                   </div> 
                                 </section>
                               <% end %>
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Customers with overdue invoices
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="overdue_invoice" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <th>Customerm ID</th>
+                                          <th>Customer Name</th>
+                                          <th>Customer Email</th>
+                                          <th>Date Joined</th>
+                                          <th>Invoice Number</th>
+                                          <th>Invoice Date</th>
+                                          <th>Number of Attempts</th>
+                                          <th>Invoice Amount</th>
+                                          <th>Last Attempt Date</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @all_failed_invoices.each do |i| %>
+                                          <tr>
+                                            <th><%= i.customer.id %></th>
+                                            <th><%= i.customer.name %></th>
+                                            <th><%= i.customer.email %></th>
+                                            <th><%= i.customer.created_at.strftime("%Y-%m-%d") %></th>
+                                            <th><%= i.invoice_number %></th>
+                                            <th><%= i.invoice_date %></th>
+                                            <th><%= i.number_of_attempts %></th>
+                                            <th>$<%= i.invoice_amount.to_f/100 %></th>
+                                            <th><%= i.latest_attempt_date %></th>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
                             </section>
                         </section>
                     </section>

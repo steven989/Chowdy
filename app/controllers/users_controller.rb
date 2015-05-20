@@ -49,6 +49,8 @@ class UsersController < ApplicationController
 
             @customers_with_missing_info = active_nonpaused_customers.where("(monday_pickup_hub is null and recurring_delivery is null) or (thursday_pickup_hub is null and recurring_delivery is null) or (monday_delivery_hub is null and recurring_delivery is not null) or (thursday_delivery_hub is null and recurring_delivery is not null)")
 
+            @all_failed_invoices = FailedInvoice.where(paid:false)
+
         else
             @current_customer = current_user.customer
             @display_cancel = true
