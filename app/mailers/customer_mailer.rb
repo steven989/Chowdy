@@ -104,4 +104,5 @@ class CustomerMailer < ActionMailer::Base
          :subject => "Customers with unpaid invoices")
   end
 
+
 end

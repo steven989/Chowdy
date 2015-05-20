@@ -1,0 +1,24 @@
+<%= form_for @system_setting do |f| %>
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Setting Attribute</h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+        <%= f.label :setting %>
+        <%= f.text_field :setting, class: "form-control"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :setting_attribute %>
+        <%= f.text_field :setting_attribute, class: "form-control" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :setting_value %>
+        <%= f.text_area :setting_value, class: "form-control", rows: 6 %>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm" %>
+  </div>
+<% end %>

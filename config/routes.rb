@@ -20,6 +20,7 @@ Chowdy::Application.routes.draw do
   get 'user/profile' => 'users#profile', as: 'user_profile'
 
   resources :password_resets
+  resources :system_settings
 
   post "oauth/callback" => "oauths#callback"
   get "oauth/callback" => "oauths#callback" # for use with Github, Facebook

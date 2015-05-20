@@ -51,6 +51,10 @@ class UsersController < ApplicationController
 
             @all_failed_invoices = FailedInvoice.where(paid:false)
 
+            @deliveries = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], recurring_delivery:["Yes","yes"])
+
+            @system_settings = SystemSetting.all
+
         else
             @current_customer = current_user.customer
             @display_cancel = true
