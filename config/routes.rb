@@ -18,6 +18,7 @@ Chowdy::Application.routes.draw do
   get 'customers/:id/create_profile' => 'customers#create_profile', as: 'create_customer_profile'
   resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
   get 'user/profile' => 'users#profile', as: 'user_profile'
+  get 'admin_action/customer_sheet' => 'admin_actions#customer_sheet', as: 'customer_sheet'
 
   resources :password_resets
   resources :system_settings

@@ -50,6 +50,8 @@ gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 #5) Login with Sorcery
 gem 'sorcery'
 
+#6) More complex SQL queries
+gem 'squeel'
 
 
 

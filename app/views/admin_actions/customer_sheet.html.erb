@@ -1,0 +1,98 @@
+<section class="hbox stretch bg-light tab-content">
+    <section class="tab-pane active" id="dashboard" role="tabpanel">
+        <section class="vbox">
+            <section class="scrollable padder"> 
+                    <section class="row">
+                      <div class="col-sm-12">
+                        <div class="panel panel-default">
+                          <header class="panel-heading" style="font-size:12px;">
+                            <b><%= @current_period %> Chowdy customer sheet for <%= @location %> - Chowdy.ca</b><span style="float:right;">Steve: 647-678-3988 | Roman: 647-378-8867</span> 
+                          </header>
+                          <div class="row">
+                            <div class="col-sm-12">
+                              <table class="display table m-b-none text-center" style="font-size: 12px; margin-bottom:0;">
+                                <thead>
+                                  <tr>
+                                    <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;">Menu</th>
+                                    <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;">Monday-Wednesday</th>
+                                    <th class="text-center" style="padding-bottom: 0; padding-top: 0;">Thursday-Saturday</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;">Regular 1</td>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></input></td>
+                                      <td style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></td>
+                                    </tr>
+                                    <tr>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;">Regular 2</td>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></input></td>
+                                      <td style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></td>
+                                    </tr>
+                                    <tr>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;">Regular 3</td>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></input></td>
+                                      <td style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></td>
+                                    </tr>
+                                    <tr>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;">Green 1</td>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></input></td>
+                                      <td style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></td>
+                                    </tr>
+                                    <tr>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;">Green 2</td>
+                                      <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></input></td>
+                                      <td style="padding-bottom: 0; padding-top: 0;"><input type="text" style="border-color: transparent; border-width: 0; box-shadow: none; width:100%;"></td>
+                                    </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="row">
+                      <div class="col-sm-12">
+                        <div class="panel panel-default">
+                          <table id="customer_sheet" class="display table m-b-none text-center" style="font-size: 12px">
+                            <thead>
+                              <tr>
+                                <th style="padding-bottom: 0; padding-top: 0;"></th>
+                                <th style="padding-bottom: 0; padding-top: 0;"></th>
+                                <th class="b-r" style="padding-bottom: 0; padding-top: 0;"></th>
+                                <th colspan="2" class="text-center b-r"style="padding-bottom: 0; padding-top: 0;">Regular Meals</th>
+                                <th colspan="2" class="text-center" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;">Chowdy Green</th>
+                              </tr>
+                              <tr>
+                                <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;"></th>
+                                <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;">Name</th>
+                                <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;">Email</th>
+                                <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;"># Meals (Mon-Wed)</th>
+                                <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;"># Meals (Thur-Sat)</th>
+                                <th class="text-center b-r" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"># Meals (Mon-Wed)</th>
+                                <th class="text-center" style="background-color: #D4DDCB;  padding-bottom: 0; padding-top: 0;"># Meals (Thur-Sat)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+
+                              <% @data.each do |d| %>
+                                <tr>
+                                  <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:id] %></td>
+                                  <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:name] %></td>
+                                  <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:email] %></td>
+                                  <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:reg_mon] %></td>
+                                  <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:reg_thu] %></td>
+                                  <td class="b-r" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"><%= d[:grn_mon] %></td>
+                                  <td style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"><%= d[:grn_thu] %></td>
+                                </tr>
+                                <% @id_iterate += 1 %>
+                              <% end %>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </section>
+            </section>
+        </section>
+    </section>
+</section>

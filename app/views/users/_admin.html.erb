@@ -101,7 +101,7 @@ $(function(){
 
       
       function plotCharge() {
-        if (window.location.hash == "#dashboard") {
+        if (window.location.hash == "#dashboard" || window.location.hash == "") {
         var sign_up_cancel_plot = $.plot($("#sign_up_cancel_chart"), [sign_ups,cancels],options);
         }
       }
@@ -324,6 +324,31 @@ $(function(){
                                     </div>
                                 </div>
                               </section>
+
+                              <section class="row">
+                                <div class="col-sm-12">
+                                  <div class="panel panel-default">
+                                    <header class="panel-heading">
+                                      Create customer sheets
+                                    </header>
+                                    <div class="row padder">
+                                      <div class="col-sm-4 padder-v text-center">
+                                        <%= link_to "Wanda's", customer_sheet_path+"?hub=wandas", class:"btn btn-s-md btn-info btn-rounded" %>
+                                        <%= link_to "CSV", customer_sheet_path(format: :csv)+"?hub=wandas", class:"btn btn-s-md btn-default btn-rounded" %>
+                                      </div>
+                                      <div class="col-sm-4 padder-v text-center">
+                                        <%= link_to "Coffee Bar", customer_sheet_path+"?hub=coffee_bar", class:"btn btn-s-md btn-info btn-rounded" %>
+                                        <%= link_to "CSV", customer_sheet_path(format: :csv)+"?hub=coffee_bar", class:"btn btn-s-md btn-default btn-rounded" %>
+                                      </div>
+                                      <div class="col-sm-4 padder-v text-center">
+                                        <%= link_to "deKEFIR", customer_sheet_path+"?hub=dekefir", class:"btn btn-s-md btn-info btn-rounded" %>
+                                        <%= link_to "CSV", customer_sheet_path(format: :csv)+"?hub=dekefir", class:"btn btn-s-md btn-default btn-rounded" %>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </section>
+
                               <% if @customers_with_missing_info.length > 0 %>
                                 <section class="row padder">
                                   <div class="panel panel-default">
