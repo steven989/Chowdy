@@ -109,7 +109,7 @@ $(function(){
       //ajax
 
       function formRetrievalAjax() {
-              $('.pull_system_setting_form').off("click").on("click",function(){
+              $('.pull_system_setting_form, .pull_next_week_total').off("click").on("click",function(){
                 $.ajax({
                   url: $(this).attr('href'),
                   type: 'GET',
@@ -202,7 +202,7 @@ $(function(){
                                             <small class="text-muted text-u-c">Current Week Total</small>
                                           </div>
                                           <div class="col-md-6">
-                                            <span class="h2 block text-info"><%= @total_meals_next %></span>
+                                            <span class="h2 block text-info pull_next_week_total" style="cursor: pointer;" href="<%= next_week_breakdown_path %>"><%= @total_meals_next %></span>
                                             <small class="text-muted text-u-c">Next Week Total</small>
                                           </div>
                                         </div>

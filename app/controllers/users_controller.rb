@@ -18,34 +18,24 @@ class UsersController < ApplicationController
         if @current_user.role == "admin"
             current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
             active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
-            @monday_regular = active_nonpaused_customers.sum(:regular_meals_on_monday).to_i
-                @monday_regular_wandas = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:regular_meals_on_monday).to_i
-                @monday_regular_coffee_bar = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:regular_meals_on_monday).to_i
-                @monday_regular_dekefir = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:regular_meals_on_monday).to_i
-            @monday_green = active_nonpaused_customers.sum(:green_meals_on_monday).to_i
-                @monday_green_wandas = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:green_meals_on_monday).to_i
-                @monday_green_coffee_bar = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:green_meals_on_monday).to_i
-                @monday_green_dekefir = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:green_meals_on_monday).to_i
-            @thursday_regular = active_nonpaused_customers.sum(:regular_meals_on_thursday).to_i
-                @thursday_regular_wandas = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:regular_meals_on_thursday).to_i
-                @thursday_regular_coffee_bar = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:regular_meals_on_thursday).to_i
-                @thursday_regular_dekefir = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:regular_meals_on_thursday).to_i
-            @thursday_green = active_nonpaused_customers.sum(:green_meals_on_thursday).to_i
-                @thursday_green_wandas = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:green_meals_on_thursday).to_i
-                @thursday_green_coffee_bar = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:green_meals_on_thursday).to_i
-                @thursday_green_dekefir = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:green_meals_on_thursday).to_i
-
-            @total_meals = @monday_regular + @monday_green + @thursday_regular + @thursday_green
-
-            # Pauses taking place next week
-            @pause_next_week = StopQueue.where(stop_type:"pause").map {|q| q.customer.total_meals_per_week }.inject {|sum, x| sum + x}.to_i
-            @cancel_next_week = StopQueue.where(stop_type:"cancel").map {|q| q.customer.total_meals_per_week }.inject {|sum, x| sum + x}.to_i
-            @unpause_next_week = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).sum(:total_meals_per_week).to_i
-            @restarts_next_week = StopQueue.where(stop_type:"restart").map {|q| q.customer.total_meals_per_week }.inject {|sum, x| sum + x}.to_i
-            @meal_count_change = (StopQueue.where("stop_type ilike ? and stripe_customer_id not in (?)", "change_sub", StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}).sum(:updated_meals).to_i - StopQueue.where("stop_type ilike ? and stripe_customer_id not in (?)", "change_sub", StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}).map {|r| r.customer.total_meals_per_week}.inject {|sum, x| sum + x}).to_i
-            @new_sign_ups = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).sum(:total_meals_per_week).to_i
-
-            @total_meals_next = @total_meals - @pause_next_week - @cancel_next_week + @unpause_next_week + @restarts_next_week + @meal_count_change + @new_sign_ups 
+            @monday_regular = Customer.meal_count("monday_regular")
+                @monday_regular_wandas = Customer.meal_count("monday_regular_wandas")
+                @monday_regular_coffee_bar = Customer.meal_count("monday_regular_coffee_bar")
+                @monday_regular_dekefir = Customer.meal_count("monday_regular_dekefir")
+            @monday_green = Customer.meal_count("monday_green")
+                @monday_green_wandas = Customer.meal_count("monday_green_wandas")
+                @monday_green_coffee_bar = Customer.meal_count("monday_green_coffee_bar")
+                @monday_green_dekefir = Customer.meal_count("monday_green_dekefir")
+            @thursday_regular = Customer.meal_count("thursday_regular")
+                @thursday_regular_wandas = Customer.meal_count("thursday_regular_wandas")
+                @thursday_regular_coffee_bar = Customer.meal_count("thursday_regular_coffee_bar")
+                @thursday_regular_dekefir = Customer.meal_count("thursday_regular_dekefir")
+            @thursday_green = Customer.meal_count("thursday_green")
+                @thursday_green_wandas = Customer.meal_count("thursday_green_wandas")
+                @thursday_green_coffee_bar = Customer.meal_count("thursday_green_coffee_bar")
+                @thursday_green_dekefir = Customer.meal_count("thursday_green_dekefir")
+            @total_meals = Customer.meal_count("total_meals")
+            @total_meals_next = Customer.meal_count("total_meals_next")
 
             @customers_with_missing_info = active_nonpaused_customers.where("(monday_pickup_hub is null and recurring_delivery is null) or (thursday_pickup_hub is null and recurring_delivery is null) or (monday_delivery_hub is null and recurring_delivery is not null) or (thursday_delivery_hub is null and recurring_delivery is not null)")
 

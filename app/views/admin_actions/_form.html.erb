@@ -1,0 +1,54 @@
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Next week's meals breakdown</h4>
+  </div>
+  <div class="modal-body">
+      <!-- <div class="panel panel-default"> -->
+        <div class="table-responsive text-center">
+          <table class="display table table-striped m-b-none" style="font-size: 12px">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Monday</th>
+                <th>Thursday</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Regular</td>
+                <td><%= @regular_monday %></td>
+                <td><%= @regular_thursday %></td>
+              </tr>
+              <tr>
+                <td>Green</td>
+                <td><%= @green_monday %></td>
+                <td><%= @green_thursday %></td>
+              </tr>
+              <tr>
+                <td>Wanda's</td>
+                <td><%= @monday_wandas %></td>
+                <td><%= @thursday_wandas %></td>
+              </tr>
+              <tr>
+                <td>Coffee Bar</td>
+                <td><%= @monday_coffee_bar %></td>
+                <td><%= @thursday_coffee_bar %></td>
+              </tr>
+              <tr>
+                <td>deKEFIR</td>
+                <td><%= @monday_dekefir %></td>
+                <td><%= @thursday_dekefir %></td>
+              </tr>
+              <tr>
+                <td>Unassigned</td>
+                <td><%= @monday_unassigned %></td>
+                <td><%= @thursday_unassigned %></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      <!-- </div>      -->
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+  </div>

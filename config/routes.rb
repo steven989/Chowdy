@@ -19,6 +19,7 @@ Chowdy::Application.routes.draw do
   resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
   get 'user/profile' => 'users#profile', as: 'user_profile'
   get 'admin_action/customer_sheet' => 'admin_actions#customer_sheet', as: 'customer_sheet'
+  get 'admin_action/next_week_breakdown' => 'admin_actions#next_week_breakdown', as: 'next_week_breakdown'
 
   resources :password_resets
   resources :system_settings
