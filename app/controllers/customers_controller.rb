@@ -77,10 +77,17 @@ protect_from_forgery :except => :payment
                     customer.update(number_of_green:raw_green_input.scan(/\d+/)[0].to_i)
                     green_number_to_use = [raw_green_input.scan(/\d+/)[0].to_i,meal_per_week].min
                     if green_number_to_use.odd?
-                        customer.update(green_meals_on_monday:green_number_to_use/2+1)
-                        customer.update(green_meals_on_thursday:green_number_to_use/2)
-                        monday_green = green_number_to_use/2+1
-                        thursday_green = green_number_to_use/2
+                        if customer.id.odd? #this is to alternate whether Monday or Thursday gets more green
+                            customer.update(green_meals_on_monday:green_number_to_use/2+1)
+                            customer.update(green_meals_on_thursday:green_number_to_use/2)
+                            monday_green = green_number_to_use/2+1
+                            thursday_green = green_number_to_use/2
+                        else
+                            customer.update(green_meals_on_thursday:green_number_to_use/2+1)
+                            customer.update(green_meals_on_monday:green_number_to_use/2)
+                            thursday_green = green_number_to_use/2+1
+                            monday_green = green_number_to_use/2
+                        end
                     else
                         customer.update(green_meals_on_monday:green_number_to_use/2)
                         customer.update(green_meals_on_thursday:green_number_to_use/2)                    
