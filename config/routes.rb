@@ -23,6 +23,8 @@ Chowdy::Application.routes.draw do
 
   resources :password_resets
   resources :system_settings
+  resources :promotions
+  put 'promotions/:id/activate' => 'promotions#activate', as: 'activate_promotion'
 
   post "oauth/callback" => "oauths#callback"
   get "oauth/callback" => "oauths#callback" # for use with Github, Facebook

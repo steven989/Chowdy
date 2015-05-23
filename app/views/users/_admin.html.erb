@@ -168,6 +168,13 @@ $(function(){
                           </a>
                         </li>
                         <li>
+                          <a href="#promotions" class="b-b padder-v" data-toggle="tab">
+                            <i class="i i-params icon">
+                            </i>
+                            <span class="font-bold">Promotions</span>
+                          </a>
+                        </li>
+                        <li>
                           <a href="#system_settings" class="b-b padder-v" data-toggle="tab">
                             <i class="i i-params icon">
                             </i>
@@ -489,6 +496,57 @@ $(function(){
                         <section class="vbox">
                             <section class="scrollable padder">
                               Customers
+                            </section>
+                        </section>
+                    </section> 
+                    <section class="tab-pane" id="promotions" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder padder-v">
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Manage promotions
+                                    <button class="btn btn-s-md btn-info btn-rounded pull_system_setting_form" href="<%= new_promotion_path %>">Create a new promotion</button>
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="system_setting" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <th>ID</th>
+                                          <th>Active?</th>
+                                          <th>Date Promo Started</th>
+                                          <th>Date Promo Ended</th>
+                                          <th>Redeption Code</th>
+                                          <th>Stripe Coupon ID</th>
+                                          <th>Immediate Refund?</th>
+                                          <th>Number of Redeptions</th>
+                                          <th>Edit</th>
+                                          <th>Start/Stop Promotion</th>
+                                          <th>Delete</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @promotions.each do |p| %>
+                                          <tr>
+                                            <th><%= p.id %></th>
+                                            <th><%= p.active %></th>
+                                            <th><%= p.start_date.strftime("%Y-%m-%d") unless p.start_date.nil? %></th>
+                                            <th><%= p.end_date.strftime("%Y-%m-%d") unless p.end_date.nil? %></th>
+                                            <th><%= p.code %></th>
+                                            <th><%= p.stripe_coupon_id %></th>
+                                            <th><%= p.immediate_refund %></th>
+                                            <th><%= p.redemptions %></th>
+                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_promotion_path(p) %>" style="min-width: 0px;width: 60px;">Edit</button></th>
+                                            <% @coupon_activate_button = p.active ? "Stop" : "Start" %>
+                                            <th><%= link_to @coupon_activate_button, activate_promotion_path(p), method: :put, class: "btn btn-s-md btn-warning btn-rounded", style:"min-width: 0px;width: 60px;" %></th>
+                                            <th><%= link_to "Delete", promotion_path(p), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style: "min-width: 0px;width: 60px;" %></th>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
                             </section>
                         </section>
                     </section> 

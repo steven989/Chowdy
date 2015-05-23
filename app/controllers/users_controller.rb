@@ -50,6 +50,8 @@ class UsersController < ApplicationController
             @cancel_curr_timeseries = StopQueue.where(stop_type:"cancel").select('created_at::date AS day, COUNT(*) as cancels').group('day').map {|r| [r.day.to_time.to_i*1000, r.cancels]}
             @cancel_curr_timeseries.each {|c| @cancel_timeseries.push c}
 
+            @promotions = Promotion.all.order(created_at: :asc)
+
         else
             @current_customer = current_user.customer
             @display_cancel = true

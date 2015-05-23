@@ -161,6 +161,20 @@ protect_from_forgery :except => :payment
                 stripe_subscription.prorate = false
                 stripe_subscription.save
                 referral_matched = true
+            
+            elsif Promotion.where(code: referral.gsub(" ",""),active:true).length == 1 #match promo code
+                promotion = Promotion.where(code: referral.gsub(" ","")).take
+                    if promotion.immediate_refund
+                        charge = Stripe::Charge.all(customer:customer_id, limit: 1)
+                        charge.refunds.create(amount: promotion.amount_in_cents)
+                        promotion.update_attribute(:redemptions, promotion.redeptions.to_i + 1)
+                    else 
+                        stripe_subscription.coupon = promotion.stripe_coupon_id
+                        stripe_subscription.prorate = false
+                        stripe_subscription.save
+                        promotion.update_attribute(:redemptions, promotion.redeptions.to_i + 1)
+                    end
+
             else #match name
                 referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
                 if referral_match.length == 0

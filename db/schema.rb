@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150520212242) do
+ActiveRecord::Schema.define(version: 20150522234133) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -116,6 +116,20 @@ ActiveRecord::Schema.define(version: 20150520212242) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "occasion"
+  end
+
+  create_table "promotions", force: true do |t|
+    t.date     "start_date"
+    t.date     "end_date"
+    t.string   "code"
+    t.string   "stripe_coupon_id"
+    t.boolean  "immediate_refund"
+    t.boolean  "active"
+    t.integer  "redemptions"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "amount_in_cents"
+    t.boolean  "pause"
   end
 
   create_table "start_date_tables", force: true do |t|
