@@ -69,11 +69,12 @@ class CustomerMailer < ActionMailer::Base
     end    
   end
 
-  def stop_delivery_notice(customer)
+  def stop_delivery_notice(customer,type)
     @customer = customer
+    @type = type
     mail(
       to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value,
-      subject: 'Stop delivery request received'
+      subject: 'Change delivery request received'
       ) do |format|
         format.text
     end    

@@ -384,10 +384,11 @@ protect_from_forgery :except => :payment
             current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery:"Yes")
             current_customer.update_attributes(monday_delivery_hub: "delivery") if current_customer.monday_delivery_hub.blank?
             current_customer.update_attributes(thursday_delivery_hub: "delivery") if current_customer.thursday_delivery_hub.blank?
+            CustomerMailer.stop_delivery_notice(current_customer, "Start Delivery").deliver
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery:nil)
-            CustomerMailer.stop_delivery_notice(current_customer).deliver
+            CustomerMailer.stop_delivery_notice(current_customer, "Stop Delivery").deliver
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 
             current_customer.update(name:params[:name])
