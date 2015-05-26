@@ -13,7 +13,7 @@ protect_from_forgery :except => :payment
         green_number = params[:data][:object][:metadata][:green_meals_number] 
         customer_email = params[:data][:object][:email]
         customer_name = params[:data][:object][:metadata][:name]
-        hub = params[:data][:object][:metadata][:hub]
+        hub = params[:data][:object][:metadata][:hub].gsub(/\\/,"")
         referral = params[:data][:object][:metadata][:referral]
         
         subscription_id = params[:data][:object][:subscriptions][:data][0][:id]

@@ -63,6 +63,8 @@ class AdminActionsController < ApplicationController
         @customer = Customer.where(id:params[:id]).take
         @interval = @customer.interval.blank? ? "week" : @customer.interval
         @interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
+        @hubs =  SystemSetting.where(setting:"hub").map {|hub| hub.setting_value} 
+
         respond_to do |format|
           format.html {
             render partial: 'individual_customer_edit'
@@ -136,6 +138,18 @@ class AdminActionsController < ApplicationController
                     end
                 end
             end
+        elsif params[:todo] == "hub"
+            monday_pickup_hub = params[:customer][:monday_pickup_hub]
+            thursday_pickup_hub = params[:customer][:thursday_pickup_hub]
+            monday_delivery_hub = params[:customer][:monday_delivery_hub]
+            thursday_delivery_hub = params[:customer][:thursday_delivery_hub]
+            @customer.monday_pickup_hub = monday_pickup_hub unless monday_pickup_hub.blank?
+            @customer.thursday_pickup_hub = thursday_pickup_hub unless thursday_pickup_hub.blank?
+            @customer.monday_delivery_hub = monday_delivery_hub unless monday_delivery_hub.blank?
+            @customer.thursday_delivery_hub = thursday_delivery_hub unless thursday_delivery_hub.blank?
+
+            @customer.save
+
         end
         redirect_to user_profile_path+"#customers"
     end

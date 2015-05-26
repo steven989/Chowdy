@@ -77,6 +77,38 @@
       </div>
     <%= f.submit "Update meal count", class: "btn btn-md btn-default m-t-sm" %>
     <% end %>
+      <div class="line line-dashed b-b line-lg pull-in"></div>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=hub", method: :put do |f| %>
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+              <%= f.label :monday_pickup_hub %>
+              <%= f.select :monday_pickup_hub, options_for_select(@hubs, @customer.monday_pickup_hub),include_blank: true, class:"chosen-select" %>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+              <%= f.label :thursday_pickup_hub %>
+              <%= f.select :thursday_pickup_hub, options_for_select(@hubs, @customer.thursday_pickup_hub), include_blank: true, class:"chosen-select" %>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="form-group">
+              <%= f.label :monday_delivery_hub %>
+              <%= f.select :monday_delivery_hub, options_for_select(@hubs, @customer.monday_delivery_hub),include_blank: true, class:"chosen-select" %>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="form-group">
+              <%= f.label :thursday_delivery_hub %>
+              <%= f.select :thursday_delivery_hub, options_for_select(@hubs, @customer.thursday_delivery_hub), include_blank: true, class:"chosen-select" %>
+          </div>
+        </div>
+      </div>
+    <%= f.submit "Update hub", class: "btn btn-md btn-default m-t-sm" %>
+    <% end %>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
