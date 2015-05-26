@@ -150,6 +150,19 @@ class AdminActionsController < ApplicationController
 
             @customer.save
 
+        elsif params[:todo] == "delivery_info"
+            @customer.update_attributes(delivery_info_params)
+            @customer.update_attribute(:delivery_set_up?,params[:customer][:delivery_set_up])
+        elsif params[:todo] == "delivery_toggle"
+            if ["Yes","yes"].include? @customer.recurring_delivery
+                @customer.update_attributes(recurring_delivery: nil)
+                CustomerMailer.stop_delivery_notice(@customer, "Stop Delivery").deliver
+            else
+                @customer.update_attributes(recurring_delivery: "yes")
+                @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
+                @customer.update_attributes(thursday_delivery_hub: "delivery") if @customer.thursday_delivery_hub.blank?                
+                CustomerMailer.stop_delivery_notice(@customer, "Start Delivery").deliver
+            end
         end
         redirect_to user_profile_path+"#customers"
     end
@@ -157,7 +170,11 @@ class AdminActionsController < ApplicationController
     private 
 
     def individual_attributes_params
-        params.require(:customer).permit(:name,:phone_number,:notes,:delivery_address,:delivery_time,:special_delivery_instructions,:referral_code)
+        params.require(:customer).permit(:name,:next_pick_up_date,:phone_number,:notes,:delivery_address,:delivery_time,:special_delivery_instructions,:referral_code)
+    end
+
+    def delivery_info_params
+        params.require(:customer).permit(:delivery_address,:delivery_time, :special_delivery_instructions)
     end
 
 end
