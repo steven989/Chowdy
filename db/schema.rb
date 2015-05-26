@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150522234133) do
+ActiveRecord::Schema.define(version: 20150526202551) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -86,6 +86,8 @@ ActiveRecord::Schema.define(version: 20150522234133) do
     t.string   "thursday_pickup_hub"
     t.string   "monday_delivery_hub"
     t.string   "thursday_delivery_hub"
+    t.string   "interval"
+    t.integer  "interval_count"
   end
 
   create_table "failed_invoice_trackers", force: true do |t|
@@ -166,6 +168,15 @@ ActiveRecord::Schema.define(version: 20150522234133) do
     t.datetime "updated_at"
     t.string   "cancel_reason"
     t.datetime "requested_date"
+  end
+
+  create_table "subscriptions", force: true do |t|
+    t.integer  "weekly_meals"
+    t.string   "stripe_plan_id"
+    t.string   "interval"
+    t.integer  "interval_count"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "system_settings", force: true do |t|

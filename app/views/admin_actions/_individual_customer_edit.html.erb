@@ -1,0 +1,84 @@
+
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Customer details</h4>
+  </div>
+  <div class="modal-body">
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=info", method: :put do |f| %>
+      <div class="form-group">
+          <%= f.label :name %>
+          <%= f.text_field :name, class: "form-control" %>
+      </div>
+      <div class="form-group">
+          <%= f.label :phone_number %>
+          <%= f.text_field :phone_number, class: "form-control" %>
+      </div>
+      <div class="form-group">
+          <%= f.label :notes %>
+          <%= f.text_field :notes, class: "form-control" %>
+      </div>
+      <div class="form-group">
+          <%= f.label :delivery_address %>
+          <%= f.text_field :delivery_address, class: "form-control" %>
+      </div>
+      <div class="form-group">
+          <%= f.label :delivery_time %>
+          <%= f.text_field :delivery_time, class: "form-control" %>
+      </div>
+      <div class="form-group">
+          <%= f.label :special_delivery_instructions %>
+          <%= f.text_field :special_delivery_instructions, class: "form-control" %>
+      </div>
+      <div class="form-group">
+          <%= f.label :referral_code %>
+          <%= f.text_field :referral_code, class: "form-control" %>
+      </div>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm" %>
+    <% end %>
+      <div class="line line-dashed b-b line-lg pull-in"></div>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=meal_count", method: :put do |f| %>
+      <div class="row">
+        <div class="col-sm-2">
+          <div class="form-group">
+              <%= f.label :regular_meals_on_monday %>
+              <%= f.number_field :regular_meals_on_monday, class: "form-control" %>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+              <%= f.label :green_meals_on_monday %>
+              <%= f.number_field :green_meals_on_monday, class: "form-control" %>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+              <%= f.label :regular_meals_on_thursday %>
+              <%= f.number_field :regular_meals_on_thursday, class: "form-control" %>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+              <%= f.label :green_meals_on_thursday %>
+              <%= f.number_field :green_meals_on_thursday, class: "form-control" %>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+              <%= label_tag :interval, "Interval (billing unit)" %>
+              <%= select_tag :interval, options_for_select(["day","week","month","year"], @interval), class:"chosen-select" %>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <div class="form-group">
+              <%= label_tag :interval_count, "Interval count (frequency)" %>
+              <%= number_field_tag :interval_count,@interval_count, class: "form-control" %>
+          </div>
+        </div>
+      </div>
+    <%= f.submit "Update meal count", class: "btn btn-md btn-default m-t-sm" %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+    
+  </div>

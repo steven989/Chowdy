@@ -93,19 +93,11 @@ namespace :customers do
                     end
                 elsif queue_item.stop_type == 'restart'
                     if current_customer.stripe_subscription_id.blank?
-                        case current_customer.total_meals_per_week
-                            when 6
-                                meals_per_week = "6mealswk" 
-                            when 8
-                                meals_per_week = "8mealswk"
-                            when 10
-                                meals_per_week = "10mealswk"
-                            when 12
-                                meals_per_week = "12mealsweek"
-                            when 14
-                                meals_per_week = "14mealsweek"
-                        end
-
+                        
+                        current_customer_interval = current_customer.interval.blank? ? "week" : current_customer.interval
+                        current_customer_interval_count = current_customer.interval_count.blank? ? 1 : current_customer.interval_count
+                        meals_per_week = Subscription.where(weekly_meals:current_customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                        
                         start_date_update = queue_item.start_date
                         if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
                             new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
