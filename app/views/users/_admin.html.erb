@@ -28,10 +28,15 @@ $(function(){
         searching: false
        });
 
+       $('#all_customers').DataTable({
+        scrollX: true,
+        scrollY: Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 300,
+        paging: false
+       });
+
        $('#deliveries').DataTable({
         searching: false
        });
-
 
       //collapse
 
@@ -169,7 +174,7 @@ $(function(){
                         </li>
                         <li>
                           <a href="#promotions" class="b-b padder-v" data-toggle="tab">
-                            <i class="i i-params icon">
+                            <i class="i i-star2 icon">
                             </i>
                             <span class="font-bold">Promotions</span>
                           </a>
@@ -494,8 +499,36 @@ $(function(){
                     
                     <section class="tab-pane" id="customers" role="tabpanel">
                         <section class="vbox">
-                            <section class="scrollable padder">
-                              Customers
+                            <section class="scrollable padder padder-v">
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Manage customers
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="all_customers" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <% @customer_column_names.each do |c| %>
+                                          <th><%= c %></th>
+                                          <% end %>
+                                          <th>Edit</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @all_customers.each do |s| %>
+                                          <tr>
+                                            <% @customer_column_names.each do |c| %>
+                                              <th><%= s.send(c.to_sym) %></th>
+                                            <% end %>
+                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_system_setting_path(s) %>">Edit</button></th>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
                             </section>
                         </section>
                     </section> 

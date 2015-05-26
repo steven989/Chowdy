@@ -52,6 +52,9 @@ class UsersController < ApplicationController
 
             @promotions = Promotion.all.order(created_at: :asc)
 
+            @customer_column_names = Customer.columns.map {|c| c.name}
+            @all_customers = Customer.all
+
         else
             @current_customer = current_user.customer
             @display_cancel = true
