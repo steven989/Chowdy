@@ -364,13 +364,15 @@ protect_from_forgery :except => :payment
             end
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "email" 
-            current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
-            current_stripe_customer.email = params[:email]
-            if current_stripe_customer.save
-                current_customer.update(email:params[:email])
-                current_customer.user.update(email:params[:email])
+            unless params[:email].blank?
+                current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
+                current_stripe_customer.email = params[:email]
+                if current_stripe_customer.save
+                    current_customer.update(email:params[:email])
+                    current_customer.user.update(email:params[:email])
+                end
+                redirect_to user_profile_path+"#settings"
             end
-            redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "hub" 
             if [2,3,4].include? Date.today.wday
                 adjusted_change_date = Chowdy::Application.closest_date(1,1) #upcoming Monday

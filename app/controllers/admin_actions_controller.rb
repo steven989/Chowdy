@@ -76,6 +76,14 @@ class AdminActionsController < ApplicationController
         @customer = Customer.where(id:params[:id]).take
         if params[:todo] == "info"
             @customer.update_attributes(individual_attributes_params)
+            if (params[:customer][:email] != @customer.email) && (!params[:customer][:email].blank?)
+                current_stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)   
+                current_stripe_customer.email = params[:customer][:email]
+                if current_stripe_customer.save
+                    @customer.update(email:params[:customer][:email])
+                    @customer.user.update(email:params[:customer][:email])
+                end
+            end
         elsif params[:todo] == "meal_count"
             monday_regular = params[:customer][:regular_meals_on_monday].to_i
             monday_green = params[:customer][:green_meals_on_monday].to_i
