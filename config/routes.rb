@@ -25,6 +25,8 @@ Chowdy::Application.routes.draw do
 
   resources :password_resets
   resources :system_settings
+  get 'announcement/new' => 'system_settings#new_announcement', as: 'new_announcement'
+  post 'announcement/create' => 'system_settings#create_announcement', as: 'create_announcement'
   resources :promotions
   put 'promotions/:id/activate' => 'promotions#activate', as: 'activate_promotion'
 

@@ -31,6 +31,23 @@ class SystemSettingsController < ApplicationController
     redirect_to user_profile_path+"#system_settings"
   end
 
+  def new_announcement
+    @hubs =  SystemSetting.where(setting:"hub").map {|hub| hub.setting_value} 
+    @system_setting = SystemSetting.new
+    respond_to do |format|
+      format.html {
+        render partial: 'new_announcement_form'
+      }
+    end    
+  end
+
+  def create_announcement
+    @scope = params[:system_setting][:setting_attribute].blank? ? "all" : params[:system_setting][:setting_attribute]
+    @system_setting = SystemSetting.new(setting:"announcement", setting_attribute:@scope, setting_value: params[:system_setting][:setting_value])
+    @system_setting.save
+    redirect_to user_profile_path+"#system_settings"
+  end
+
   def destroy
     system_setting = SystemSetting.find(params[:id])
     system_setting.destroy
