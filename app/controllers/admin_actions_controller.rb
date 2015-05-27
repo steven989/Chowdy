@@ -67,6 +67,8 @@ class AdminActionsController < ApplicationController
         @meals_refunded_this_week = Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).group(:internal_refund_id).maximum(:meals_refunded).values.sum {|e| e}
         @amount_refunded_this_week = (Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).sum(:amount_refunded).to_f)/100.00
         @active_coupons = Promotion.where(active:true).map {|p| p.code }
+        @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value}.push("Non-payment")
+        @requests = @customer.stop_queues.map {|r| r.stop_type}.join(", ")
 
         respond_to do |format|
           format.html {
@@ -149,7 +151,6 @@ class AdminActionsController < ApplicationController
                             end
                         end
                     end
-
                 end
             else
                 if (total_meals == @customer.total_meals_per_week) && (params[:interval] == (@customer.interval.blank? ? "week" : @customer.interval)) && (params[:interval_count].to_i == (@customer.interval_count.blank? ? 1 : @customer.interval))
@@ -357,6 +358,121 @@ class AdminActionsController < ApplicationController
                         if stripe_subscription.save
                             @customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10)
                         end
+                    end
+                end
+            end
+        elsif params[:todo] == "stop" 
+            if params[:stop_type].downcase == "pause" 
+                end_date = params[:pause_end].to_date  
+                if params[:immediate_effect] == "1"
+                    unless end_date.blank?
+                        adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                        if @customer.stripe_subscription_id.blank?
+                            @customer.update(paused?:"yes", pause_end_date:adjusted_pause_end_date-1, next_pick_up_date:adjusted_pause_end_date)
+                            @customer.stop_requests.create(request_type:'pause',start_date:Date.today, end_date:adjusted_pause_end_date-1, requested_date: Date.today)
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        else
+                            stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                            stripe_subscription.trial_end = adjusted_pause_end_date.to_time.to_i
+                            stripe_subscription.prorate = false
+                            if stripe_subscription.save
+                                @customer.update(paused?:"yes", pause_end_date:adjusted_pause_end_date-1, next_pick_up_date:adjusted_pause_end_date)
+                                @customer.stop_requests.create(request_type:'pause',start_date:Date.today, end_date:adjusted_pause_end_date-1, requested_date: Date.today)
+                                @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            end
+                        end
+                    end
+                else
+                    associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    unless end_date.blank?
+                        adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                        if [2,3,4].include? Date.today.wday
+                            adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+                        else
+                            adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+                        end
+                        if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? @customer.active?) && !(["Yes","yes"].include? @customer.paused?)
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            @customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
+                        end
+                    end
+                end
+            elsif params[:stop_type].downcase == "cancel"    
+                if params[:immediate_effect] == "1"
+                    if @customer.stripe_subscription_id.blank?
+                        @customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                        @customer.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)                      
+                        @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                    else
+                        stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                        if stripe_subscription.delete
+                            @customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                            @customer.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        end
+                    end
+                else
+                    if [2,3,4].include? Date.today.wday
+                        adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+                    else
+                        adjusted_cancel_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+                    end
+                    associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    if ["Yes","yes"].include? @customer.active?
+                        @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        @customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:params[:cancel_reason])
+                    else
+                        @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                    end
+                end
+            elsif params[:stop_type].downcase == "restart"
+                if params[:immediate_effect] == "1"
+                    if @customer.stripe_subscription_id.blank?
+                        start_date_update = Chowdy::Application.closest_date(1,1)
+                        if @customer.sponsored?
+                            @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
+                            @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)                       
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        else
+                            current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
+                            current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
+                            meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                            
+                            if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
+                                new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
+                                @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                                @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                                @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            end
+                        end
+                    else 
+                        start_date_update = Chowdy::Application.closest_date(1,1)
+                        paused_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                        paused_subscription.trial_end = start_date_update.to_time.to_i
+                        paused_subscription.prorate = false
+                        if paused_subscription.save
+                            @customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
+                            @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        end
+                    end
+                else
+                    if [2,3,4].include? Date.today.wday
+                        adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+                    else
+                        adjusted_restart_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+                    end
+                    associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    
+                    if @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
+                        if ((["Yes","yes"].include? @customer.active?) && (["Yes","yes"].include? @customer.paused?)) || (@customer.active?.blank? || (["No","no"].include? @customer.active?))
+                            @customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+                        end
+                    elsif ["pause","cancel"].include? @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
+                        @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
+                    elsif ["restart"].include? @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
+                            @customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
+                            @customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
                     end
                 end
             end

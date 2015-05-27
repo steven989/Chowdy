@@ -6,6 +6,9 @@
   <div class="modal-body">
     <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=info", method: :put do |f| %>
       <div class="form-group">
+          <p>Active: <%= @customer.active? %> | Paused: <%= @customer.paused? %></p>
+      </div>
+      <div class="form-group">
           <%= f.label :name %>
           <%= f.text_field :name, class: "form-control" %>
       </div>
@@ -65,7 +68,7 @@
         <div class="col-sm-2">
           <div class="form-group">
               <%= label_tag :interval, "Interval (billing unit)" %>
-              <%= select_tag :interval, options_for_select(["day","week","month","year"], @interval), class:"chosen-select" %>
+              <%= select_tag :interval, options_for_select(["day","week","month","year"], @interval), class:"form-control" %>
           </div>
         </div>
         <div class="col-sm-2">
@@ -83,13 +86,13 @@
         <div class="col-sm-6">
           <div class="form-group">
               <%= f.label :monday_pickup_hub %>
-              <%= f.select :monday_pickup_hub, options_for_select(@hubs, @customer.monday_pickup_hub),include_blank: true, class:"chosen-select" %>
+              <%= f.select :monday_pickup_hub, options_for_select(@hubs, @customer.monday_pickup_hub),include_blank: true, class:"form-control" %>
           </div>
         </div>
         <div class="col-sm-6">
           <div class="form-group">
               <%= f.label :thursday_pickup_hub %>
-              <%= f.select :thursday_pickup_hub, options_for_select(@hubs, @customer.thursday_pickup_hub), include_blank: true, class:"chosen-select" %>
+              <%= f.select :thursday_pickup_hub, options_for_select(@hubs, @customer.thursday_pickup_hub), include_blank: true, class:"form-control" %>
           </div>
         </div>
       </div>
@@ -97,13 +100,13 @@
         <div class="col-sm-6">
           <div class="form-group">
               <%= f.label :monday_delivery_hub %>
-              <%= f.select :monday_delivery_hub, options_for_select(@hubs, @customer.monday_delivery_hub),include_blank: true, class:"chosen-select" %>
+              <%= f.select :monday_delivery_hub, options_for_select(@hubs, @customer.monday_delivery_hub),include_blank: true, class:"form-control" %>
           </div>
         </div>
         <div class="col-sm-6">
           <div class="form-group">
               <%= f.label :thursday_delivery_hub %>
-              <%= f.select :thursday_delivery_hub, options_for_select(@hubs, @customer.thursday_delivery_hub), include_blank: true, class:"chosen-select" %>
+              <%= f.select :thursday_delivery_hub, options_for_select(@hubs, @customer.thursday_delivery_hub), include_blank: true, class:"form-control" %>
           </div>
         </div>
       </div>
@@ -161,7 +164,7 @@
             <div class="form-group">
                 <%= label_tag :coupon_code %>
                 <div class="">
-                <%= select_tag :coupon_code, options_for_select(@active_coupons), class:"chosen-select" %>
+                <%= select_tag :coupon_code, options_for_select(@active_coupons), include_blank: true, class:"form-control" %>
                 </div>
             </div>
       <%= f.submit "Attach coupon", class: "btn btn-md btn-default m-t-sm" %>
@@ -177,7 +180,29 @@
       <% end %>
       </div>
     </div>
-
+    <div class="line line-dashed b-b line-lg pull-in"></div>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=stop", method: :put do |f| %>
+      <div class="form-group">
+        <p>Outstanding requests for this week: <%= @requests %></p>
+      </div>
+      <div class="form-group">
+          <%= label_tag :stop_type %>
+          <%= select_tag :stop_type, options_for_select(["pause","cancel","restart"]), class:"form-control" %>
+      </div>
+      <div class="form-group">
+          <%= label_tag :pause_end %>
+          <%= date_field_tag :pause_end, class:"form-control" %>
+      </div>
+      <div class="form-group">
+          <%= label_tag :cancel_reason %>
+          <%= select_tag :cancel_reason, options_for_select(@cancel_reasons), class:"form-control" %>
+      </div>
+      <div class="form-group">
+          <%= label_tag :immediate_effect, "Immediate effect (force change after Thursday deadline but before billing. This does not result in refund. For restarts, it's effective starting the upcoming Monday.)" %>
+          <%= check_box_tag :immediate_effect,"1",false,class: "form-control"%>
+      </div>
+    <%= f.submit "Request", class: "btn btn-md btn-danger m-t-sm" %>
+    <% end %>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>

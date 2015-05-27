@@ -31,7 +31,8 @@ $(function(){
        $('#all_customers').DataTable({
         scrollX: true,
         scrollY: Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 300,
-        paging: false
+        paging: false,
+        order: [[4, "asc"]]
        });
 
        $('#deliveries').DataTable({
