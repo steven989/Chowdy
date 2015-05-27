@@ -47,7 +47,9 @@ namespace :customers do
                             meals_per_week = "14mealsweek"
                     end                    
                     stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                    _current_period_end = stripe_subscription.current_period_end
                     stripe_subscription.plan = meals_per_week
+                    stripe_subscription.trial_end = _current_period_end
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
                         current_customer.update(
@@ -156,7 +158,9 @@ namespace :customers do
                             meals_per_week = "14mealsweek"
                     end                    
                     stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                    _current_period_end = stripe_subscription.current_period_end
                     stripe_subscription.plan = meals_per_week
+                    stripe_subscription.trial_end = _current_period_end
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
                         current_customer.update(

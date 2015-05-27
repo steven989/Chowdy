@@ -137,7 +137,9 @@ class AdminActionsController < ApplicationController
                             @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
                         else
                             subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                            _current_period_end = subscription.current_period_end
                             subscription.plan = plan_match.stripe_plan_id
+                            subscription.trial_end = _current_period_end
                             subscription.prorate = false  
                             if subscription.save                      
                                 @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
@@ -160,7 +162,9 @@ class AdminActionsController < ApplicationController
                         @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
                     else
                         subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                        _current_period_end = subscription.current_period_end
                         subscription.plan = plan_match.take.stripe_plan_id
+                        subscription.trial_end = _current_period_end
                         subscription.prorate = false  
                         if subscription.save                      
                             @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
