@@ -476,6 +476,8 @@ class AdminActionsController < ApplicationController
                     end
                 end
             end
+        elsif params[:todo] == "destroy" 
+            @customer.delete_with_stripe
         end
         redirect_to user_profile_path+"#customers"
     end
