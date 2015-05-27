@@ -5,6 +5,9 @@ class Customer < ActiveRecord::Base
     has_many :stop_requests, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :stop_queues, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :failed_invoices, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :refunds, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+
+    validates :email, uniqueness: true
 
     def delete_with_stripe
         customer = Stripe::Customer.retrieve(stripe_customer_id)
@@ -24,6 +27,7 @@ class Customer < ActiveRecord::Base
         end
         self.update_attribute(:referral_code, code_candidate)
     end
+
 
     def self.meal_count(count_type)
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date

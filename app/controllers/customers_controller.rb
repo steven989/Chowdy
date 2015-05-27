@@ -146,47 +146,7 @@ protect_from_forgery :except => :payment
             if Customer.where(referral_code: referral.gsub(" ","").downcase).length == 1 #match code
                 referral_match = Customer.where(referral_code: referral.gsub(" ","").downcase)
                 
-                #referrer discount
-                stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
-                stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
-                
-                    #check for existing coupons
-                    if stripe_referral_subscription_match.discount.nil?
-                        stripe_referral_subscription_match.coupon = "referral bonus"
-                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
-                        stripe_referral_subscription_match.coupon = "referral bonus x 2"
-                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
-                        stripe_referral_subscription_match.coupon = "referral bonus x 3"
-                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
-                        stripe_referral_subscription_match.coupon = "referral bonus x 4"
-                    end
-
-                stripe_referral_subscription_match.prorate = false
-                stripe_referral_subscription_match.save                
-                #referree discount
-                stripe_subscription.coupon = "referral bonus"
-                stripe_subscription.prorate = false
-                stripe_subscription.save
-                referral_matched = true
-            
-            elsif Promotion.where(code: referral.gsub(" ",""),active:true).length == 1 #match promo code
-                promotion = Promotion.where(code: referral.gsub(" ","")).take
-                    if promotion.immediate_refund
-                        charge = Stripe::Charge.all(customer:customer_id, limit: 1)
-                        charge.refunds.create(amount: promotion.amount_in_cents)
-                        promotion.update_attribute(:redemptions, promotion.redeptions.to_i + 1)
-                    else 
-                        stripe_subscription.coupon = promotion.stripe_coupon_id
-                        stripe_subscription.prorate = false
-                        stripe_subscription.save
-                        promotion.update_attribute(:redemptions, promotion.redeptions.to_i + 1)
-                    end
-
-            else #match name
-                referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
-                if referral_match.length == 0
-                    manual_checks.push("Referral typed in but no match")
-                elsif referral_match.length == 1
+                unless referral_match.take.stripe_subscription_id.blank?
                     #referrer discount
                     stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
                     stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
@@ -203,11 +163,66 @@ protect_from_forgery :except => :payment
                         end
 
                     stripe_referral_subscription_match.prorate = false
-                    stripe_referral_subscription_match.save                
+                    if stripe_referral_subscription_match.save                
+                        referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                    end
+                end                
+                #referree discount
+                stripe_subscription.coupon = "referral bonus"
+                stripe_subscription.prorate = false
+                if stripe_subscription.save
+                    customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: customer.referral_bonus_referree.to_i + 10)
+                end
+                referral_matched = true
+            
+            elsif Promotion.where(code: referral.gsub(" ",""),active:true).length == 1 #match promo code
+                promotion = Promotion.where(code: referral.gsub(" ","")).take
+                    if promotion.immediate_refund
+                        charge = Stripe::Charge.all(customer:customer_id, limit: 1)
+                        if charge.refunds.create(amount: promotion.amount_in_cents)
+                            promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                        end
+                    else 
+                        stripe_subscription.coupon = promotion.stripe_coupon_id
+                        stripe_subscription.prorate = false
+                        if stripe_subscription.save
+                            promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                        end
+                    end
+
+            else #match name
+                referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
+                if referral_match.length == 0
+                    manual_checks.push("Referral typed in but no match")
+                elsif referral_match.length == 1
+                    unless referral_match.take.stripe_subscription_id.blank?
+                        #referrer discount
+                        stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
+                        stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
+                        
+                            #check for existing coupons
+                            if stripe_referral_subscription_match.discount.nil?
+                                stripe_referral_subscription_match.coupon = "referral bonus"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 2"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 3"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                            end
+
+                        stripe_referral_subscription_match.prorate = false
+                        if stripe_referral_subscription_match.save                
+                            referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                        end
+                    end
+
                     #referree discount
                     stripe_subscription.coupon = "referral bonus"
                     stripe_subscription.prorate = false
-                    stripe_subscription.save
+                    if stripe_subscription.save
+                        customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: customer.referral_bonus_referree.to_i + 10)
+                    end
                     referral_matched = true
                 elsif referral_match.length > 1
                     manual_checks.push("Referral matched multiple customers")

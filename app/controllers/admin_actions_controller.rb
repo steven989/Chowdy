@@ -64,6 +64,9 @@ class AdminActionsController < ApplicationController
         @interval = @customer.interval.blank? ? "week" : @customer.interval
         @interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
         @hubs =  SystemSetting.where(setting:"hub").map {|hub| hub.setting_value} 
+        @meals_refunded_this_week = Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).group(:internal_refund_id).maximum(:meals_refunded).values.sum {|e| e}
+        @amount_refunded_this_week = (Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).sum(:amount_refunded).to_f)/100.00
+        @active_coupons = Promotion.where(active:true).map {|p| p.code }
 
         respond_to do |format|
           format.html {
@@ -74,6 +77,7 @@ class AdminActionsController < ApplicationController
 
     def individual_customer_update
         @customer = Customer.where(id:params[:id]).take
+        _sponsor = @customer.sponsored? ? "1" : "0"
         if params[:todo] == "info"
             @customer.update_attributes(individual_attributes_params)
             if (params[:customer][:email] != @customer.email) && (!params[:customer][:email].blank?)
@@ -82,6 +86,29 @@ class AdminActionsController < ApplicationController
                 if current_stripe_customer.save
                     @customer.update(email:params[:customer][:email])
                     @customer.user.update(email:params[:customer][:email])
+                end
+            end
+
+
+            if (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "1")
+                unless @customer.stripe_subscription_id.blank?
+                    stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                    if stripe_subscription.delete
+                        @customer.update_attributes(stripe_subscription_id:nil)
+                    end
+                end
+            elsif (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "0")
+                if @customer.stripe_subscription_id.blank?
+                    current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
+                    current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
+                    meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                    
+                    effective_date = StartDate.first.start_date
+
+                    if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:effective_date.to_time.to_i)                
+                        new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
+                        @customer.update(stripe_subscription_id: new_subscription_id) 
+                    end
                 end
             end
         elsif params[:todo] == "meal_count"
@@ -171,6 +198,164 @@ class AdminActionsController < ApplicationController
                 @customer.update_attributes(thursday_delivery_hub: "delivery") if @customer.thursday_delivery_hub.blank?                
                 CustomerMailer.stop_delivery_notice(@customer, "Start Delivery").deliver
             end
+        elsif params[:todo] == "refund"
+            recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
+            amount = (params[:refund][:meals_refunded].to_i * 6.99 * 1.13 * 100).round
+            refund_list = []
+            recent_charges.each do |charge_id|
+                charge = Stripe::Charge.retrieve(charge_id)
+                net_amount = charge.amount - charge.amount_refunded
+                if net_amount - amount >= 0
+                    refund_list.push({charge_id.to_sym => amount})
+                    break
+                else
+                    refund_list.push({charge_id.to_sym => net_amount}) unless net_amount == 0
+                    amount -= net_amount
+                end
+            end
+
+            refund_week = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+            internal_refund_id = nil
+            refund_list.each do |refund_li|
+                charge_id = refund_li.keys[0].to_s
+                list_refund_amount = refund_li.values[0]
+                charge = Stripe::Charge.retrieve(charge_id)
+                if stripe_refund_response = charge.refunds.create(amount:list_refund_amount) 
+                    newly_created_refund = Refund.create(stripe_customer_id: @customer.stripe_customer_id, refund_week:refund_week, charge_week:Time.at(charge.created).to_date,charge_id: charge.id, meals_refunded:params[:refund][:meals_refunded].to_i, amount_refunded: list_refund_amount, refund_reason: params[:refund][:refund_reason], stripe_refund_id: stripe_refund_response.id)
+                    newly_created_refund.internal_refund_id = internal_refund_id.nil? ? newly_created_refund.id : internal_refund_id
+                    if newly_created_refund.save
+                        internal_refund_id ||= newly_created_refund.id
+                    end
+                end     
+
+            end
+        elsif params[:todo] == "attach_coupon"
+            promotion = Promotion.where(code: params[:coupon_code]).take
+            stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)
+            stripe_subscription = stripe_customer.subscriptions.retrieve(@customer.stripe_subscription_id)
+
+            unless promotion.nil?
+                if promotion.immediate_refund
+                    recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
+                    amount = promotion.amount_in_cents
+                    refund_list = []
+                    recent_charges.each do |charge_id|
+                        charge = Stripe::Charge.retrieve(charge_id)
+                        net_amount = charge.amount - charge.amount_refunded
+                        if net_amount - amount >= 0
+                            refund_list.push({charge_id.to_sym => amount})
+                            break
+                        else
+                            refund_list.push({charge_id.to_sym => net_amount}) unless net_amount == 0
+                            amount -= net_amount
+                        end
+                    end
+
+                    refund_list.each do |refund_li|
+                        charge_id = refund_li.keys[0].to_s
+                        list_refund_amount = refund_li.values[0]
+                        charge = Stripe::Charge.retrieve(charge_id)
+                        charge.refunds.create(amount:list_refund_amount) 
+                    end
+
+                    promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                else 
+                    stripe_subscription.coupon = promotion.stripe_coupon_id
+                    stripe_subscription.prorate = false
+                    if stripe_subscription.save
+                        promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                    end
+                end
+            end
+
+        elsif params[:todo] == "apply_referral"
+            unless @customer.stripe_subscription_id.blank?
+                stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)
+                stripe_subscription = stripe_customer.subscriptions.retrieve(@customer.stripe_subscription_id)
+
+                referral = params[:referral_code]
+                if Customer.where(referral_code: referral.gsub(" ","").downcase).length == 1 #match code
+                    referral_match = Customer.where(referral_code: referral.gsub(" ","").downcase)
+                    
+                    unless referral_match.take.stripe_subscription_id.blank?
+                        #referrer discount
+                        stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
+                        stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
+                        
+                            #check for existing coupons
+                            if stripe_referral_subscription_match.discount.nil?
+                                stripe_referral_subscription_match.coupon = "referral bonus"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 2"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 3"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                            end
+
+                        stripe_referral_subscription_match.prorate = false
+                        if stripe_referral_subscription_match.save                
+                            referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                        end
+                    end
+                    #referree discount
+                    if stripe_subscription.discount.nil?
+                        stripe_subscription.coupon = "referral bonus"
+                    elsif stripe_subscription.discount.coupon.id == "referral bonus"
+                        stripe_subscription.coupon = "referral bonus x 2"
+                    elsif stripe_subscription.discount.coupon.id == "referral bonus x 2"
+                        stripe_subscription.coupon = "referral bonus x 3"
+                    elsif stripe_subscription.discount.coupon.id == "referral bonus x 3"
+                        stripe_subscription.coupon = "referral bonus x 4"
+                    end
+                    stripe_subscription.prorate = false
+                    if stripe_subscription.save
+                        @customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10)
+                    end
+                
+                else #match name
+                    referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
+                    if referral_match.length == 1
+                        
+                        unless referral_match.take.stripe_subscription_id.blank?
+                            #referrer discount
+                            stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
+                            stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
+                            
+                                #check for existing coupons
+                                if stripe_referral_subscription_match.discount.nil?
+                                    stripe_referral_subscription_match.coupon = "referral bonus"
+                                elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
+                                    stripe_referral_subscription_match.coupon = "referral bonus x 2"
+                                elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
+                                    stripe_referral_subscription_match.coupon = "referral bonus x 3"
+                                elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
+                                    stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                                end
+
+                            stripe_referral_subscription_match.prorate = false
+                            if stripe_referral_subscription_match.save                
+                                referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                            end
+                        end             
+                        #referree discount
+                        if stripe_subscription.discount.nil?
+                            stripe_subscription.coupon = "referral bonus"
+                        elsif stripe_subscription.discount.coupon.id == "referral bonus"
+                            stripe_subscription.coupon = "referral bonus x 2"
+                        elsif stripe_subscription.discount.coupon.id == "referral bonus x 2"
+                            stripe_subscription.coupon = "referral bonus x 3"
+                        elsif stripe_subscription.discount.coupon.id == "referral bonus x 3"
+                            stripe_subscription.coupon = "referral bonus x 4"
+                        end
+
+                        stripe_subscription.prorate = false
+                        if stripe_subscription.save
+                            @customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10)
+                        end
+                    end
+                end
+            end
         end
         redirect_to user_profile_path+"#customers"
     end
@@ -178,7 +363,7 @@ class AdminActionsController < ApplicationController
     private 
 
     def individual_attributes_params
-        params.require(:customer).permit(:name,:next_pick_up_date,:phone_number,:notes,:delivery_address,:delivery_time,:special_delivery_instructions,:referral_code)
+        params.require(:customer).permit(:name,:next_pick_up_date,:phone_number,:notes,:delivery_address,:delivery_time,:special_delivery_instructions,:referral_code, :sponsored)
     end
 
     def delivery_info_params

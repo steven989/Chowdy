@@ -76,34 +76,53 @@ namespace :customers do
             StopQueue.where(stop_type: ["cancel","pause","restart"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
                 if queue_item.stop_type == 'pause'
-                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                    stripe_subscription.trial_end = queue_item.end_date.to_time.to_i
-                    stripe_subscription.prorate = false
-                    if stripe_subscription.save
-                        current_customer.update(paused?:["yes","Yes"], pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
+
+                    if current_customer.stripe_subscription_id.blank?
+                        current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
                         current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1, requested_date: queue_item.created_at)
                         queue_item.destroy
+                    else
+                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                        stripe_subscription.trial_end = queue_item.end_date.to_time.to_i
+                        stripe_subscription.prorate = false
+                        if stripe_subscription.save
+                            current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
+                            current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1, requested_date: queue_item.created_at)
+                            queue_item.destroy
+                        end
                     end
+
                 elsif queue_item.stop_type == 'cancel'
-                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                    if stripe_subscription.delete
+                    if current_customer.stripe_subscription_id.blank?
                         current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
                         current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date,cancel_reason:queue_item.cancel_reason, requested_date: queue_item.created_at)
-                        queue_item.destroy
+                        queue_item.destroy                        
+                    else
+                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                        if stripe_subscription.delete
+                            current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                            current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date,cancel_reason:queue_item.cancel_reason, requested_date: queue_item.created_at)
+                            queue_item.destroy
+                        end
                     end
                 elsif queue_item.stop_type == 'restart'
                     if current_customer.stripe_subscription_id.blank?
-                        
-                        current_customer_interval = current_customer.interval.blank? ? "week" : current_customer.interval
-                        current_customer_interval_count = current_customer.interval_count.blank? ? 1 : current_customer.interval_count
-                        meals_per_week = Subscription.where(weekly_meals:current_customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
-                        
                         start_date_update = queue_item.start_date
-                        if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
-                            new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
-                            current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                        if current_customer.sponsored?
+                            current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
                             current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
-                            queue_item.destroy
+                            queue_item.destroy                            
+                        else
+                            current_customer_interval = current_customer.interval.blank? ? "week" : current_customer.interval
+                            current_customer_interval_count = current_customer.interval_count.blank? ? 1 : current_customer.interval_count
+                            meals_per_week = Subscription.where(weekly_meals:current_customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                            
+                            if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
+                                new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
+                                current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                                current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                                queue_item.destroy
+                            end
                         end
                     else 
                         start_date_update = queue_item.start_date

@@ -509,19 +509,22 @@ $(function(){
                                     <table id="all_customers" class="display table table-striped m-b-none" style="font-size: 12px">
                                       <thead>
                                         <tr>
+                                          <th>Edit</th>
+                                          <th>Account registered?</th>
                                           <% @customer_column_names.each do |c| %>
                                           <th><%= c %></th>
                                           <% end %>
-                                          <th>Edit</th>
+
                                         </tr>
                                       </thead>
                                       <tbody>
                                         <% @all_customers.each do |s| %>
                                           <tr>
+                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= admin_edit_customer_path(s) %>">Edit</button></th>
+                                            <th><%= s.user.blank? ? "No" : "Yes" %></th>
                                             <% @customer_column_names.each do |c| %>
                                               <th><%= s.send(c.to_sym) %></th>
                                             <% end %>
-                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= admin_edit_customer_path(s) %>">Edit</button></th>
                                           </tr>
                                         <% end %>
                                       </tbody>
@@ -547,6 +550,7 @@ $(function(){
                                         <tr>
                                           <th>ID</th>
                                           <th>Active?</th>
+                                          <th>Amount (in cents)</th>
                                           <th>Date Promo Started</th>
                                           <th>Date Promo Ended</th>
                                           <th>Redeption Code</th>
@@ -563,6 +567,7 @@ $(function(){
                                           <tr>
                                             <th><%= p.id %></th>
                                             <th><%= p.active %></th>
+                                            <th><%= p.amount_in_cents %></th>
                                             <th><%= p.start_date.strftime("%Y-%m-%d") unless p.start_date.nil? %></th>
                                             <th><%= p.end_date.strftime("%Y-%m-%d") unless p.end_date.nil? %></th>
                                             <th><%= p.code %></th>
