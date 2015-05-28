@@ -34,6 +34,9 @@ Chowdy::Application.routes.draw do
   get "oauth/callback" => "oauths#callback" # for use with Github, Facebook
   get "oauth/:provider" => "oauths#oauth", :as => :auth_at_provider
 
+  get 'start_date/edit' => 'start_dates#edit', as: 'edit_start_date'
+  put 'start_date/update' => 'start_dates#update', as: 'update_start_date'
+
   # You can have the root of your site routed with "root"
   # root 'welcome#index'
 

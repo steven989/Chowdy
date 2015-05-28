@@ -134,7 +134,7 @@ protect_from_forgery :except => :payment
 
         stripe_customer = Stripe::Customer.retrieve(customer_id)
         stripe_subscription = stripe_customer.subscriptions.retrieve(subscription_id)
-        stripe_subscription.trial_end = (StartDate.first.start_date+7.days).to_time.to_i
+        stripe_subscription.trial_end = (StartDate.first.start_date+7.days+(23.5).hours).to_time.to_i
         stripe_subscription.prorate = false
         stripe_subscription.save
 
