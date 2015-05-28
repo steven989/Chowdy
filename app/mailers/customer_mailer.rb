@@ -1,10 +1,10 @@
 class CustomerMailer < ActionMailer::Base
 
   default from: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value
-  layout 'email'
 
   def confirmation_email(customer,hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
     
+    @current_customer = customer
     @total_monday = monday_regular.to_i + monday_green.to_i
     @total_thursday = thursday_regular.to_i + thursday_green.to_i
     @green_monday = monday_green
@@ -21,7 +21,23 @@ class CustomerMailer < ActionMailer::Base
                     when !@hub.match(/dekefir/i).nil?
                         "Monday - Friday, 7:00am to 6:00pm (closed on weekends and holidays)"
                     when !@hub.match(/coffee/i).nil? 
-                        "Monday - Saturday, 7:00am to 9:00pm (open 9am on Saturday)"
+                        "Monday - Saturday, 7:00am to 8:00pm (open 9am on Saturday)"
+                end
+    @proper_hub_name = case 
+                    when !@hub.match(/wanda/i).nil?
+                        "Wanda's Belgium Waffle"
+                    when !@hub.match(/dekefir/i).nil?
+                        "deKEFIR"
+                    when !@hub.match(/coffee/i).nil? 
+                        "Coffee Bar Inc."
+                end
+    @hub_address = case 
+                    when !@hub.match(/wanda/i).nil?
+                        "599 Younge Street"
+                    when !@hub.match(/dekefir/i).nil?
+                        "333 Bay Street (PATH level beneath Bay Adelaide Centre)"
+                    when !@hub.match(/coffee/i).nil? 
+                        "346 Front Street West"
                 end
     @name = name
     @start_date = start_date
@@ -29,9 +45,9 @@ class CustomerMailer < ActionMailer::Base
 
     mail(
       to: customer_email, 
-      subject: 'Chowdy confirmation email'
+      subject: 'Your Chowdy subscription is confirmed'
       ) do |format|
-        format.text
+        format.html
     end
   end
 
@@ -89,7 +105,6 @@ class CustomerMailer < ActionMailer::Base
       ) do |format|
         format.text
     end  
-
   end
 
   def reset_password_email(user)
