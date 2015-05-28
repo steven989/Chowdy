@@ -64,7 +64,7 @@ class UsersController < ApplicationController
 
             @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
             
-            @number_of_referrals = Customer.where("referral ilike ?", @current_customer.name).length
+            @number_of_referrals = Customer.where("matched_referrers_code ilike ?", @current_customer.referral_code).length
             @referral_dollars_earned = @number_of_referrals * 10
 
             @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value} 

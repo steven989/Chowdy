@@ -171,7 +171,7 @@ protect_from_forgery :except => :payment
                 stripe_subscription.coupon = "referral bonus"
                 stripe_subscription.prorate = false
                 if stripe_subscription.save
-                    customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: customer.referral_bonus_referree.to_i + 10)
+                    customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: customer.referral_bonus_referree.to_i + 10)
                 end
                 referral_matched = true
             
@@ -221,7 +221,7 @@ protect_from_forgery :except => :payment
                     stripe_subscription.coupon = "referral bonus"
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
-                        customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: customer.referral_bonus_referree.to_i + 10)
+                        customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: customer.referral_bonus_referree.to_i + 10)
                     end
                     referral_matched = true
                 elsif referral_match.length > 1

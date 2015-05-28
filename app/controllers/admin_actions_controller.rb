@@ -315,7 +315,7 @@ class AdminActionsController < ApplicationController
                     end
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
-                        @customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10)
+                        @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10)
                     end
                 
                 else #match name
@@ -356,7 +356,7 @@ class AdminActionsController < ApplicationController
 
                         stripe_subscription.prorate = false
                         if stripe_subscription.save
-                            @customer.update_attributes(referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10)
+                            @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10)
                         end
                     end
                 end
