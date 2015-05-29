@@ -1,4 +1,4 @@
-/*
+    /*
  * This is a manifest file that'll be compiled into application.css, which will include all the files
  * listed below.
  *
@@ -23,7 +23,7 @@
 }
 .col-centered {
     display:inline-block;
-    float:none!;
+    float:none;
     /* reset the text-align */
     text-align:left;
     /* inline-block space fix */
