@@ -53,6 +53,11 @@ gem 'sorcery'
 #6) More complex SQL queries
 gem 'squeel'
 
+#7) Asset pipeline
+group :production do
+  gem "rails_12factor"
+end
+
 
 
 # Use ActiveModel has_secure_password
