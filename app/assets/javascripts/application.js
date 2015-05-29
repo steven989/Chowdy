@@ -16,7 +16,7 @@
 //= require_tree ../../../vendor/assets/javascripts/.
 //= require_tree .
 
-alert("hiii");
+console.log("hiii");
 
 /* vim: set noexpandtab tabstop=4 shiftwidth=4 autoindent: */
 
