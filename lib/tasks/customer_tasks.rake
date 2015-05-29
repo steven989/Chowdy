@@ -182,3 +182,17 @@ namespace :customers do
 
 
 end
+
+
+namespace :app do
+    desc 'create chowdy admin'
+    task :create_admin, [:email, :password] => [:environment] do |t, args|        
+        user = User.new(email:args[:email], password:args[:password],password_confirmation:args[:password])
+        if user.save
+            user.update_attributes(role:"admin")
+            puts "User successfully created"
+        else
+            puts "User could not be created"
+        end
+    end 
+end
