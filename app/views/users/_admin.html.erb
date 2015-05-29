@@ -112,31 +112,31 @@ $(function(){
 //         }
 //       }
 //       plotCharge();
-//       //ajax
+      //ajax
 
-//       function formRetrievalAjax() {
-//               $('.pull_system_setting_form, .pull_next_week_total').off("click").on("click",function(){
-//                 $.ajax({
-//                   url: $(this).attr('href'),
-//                   type: 'GET',
-//                   dataType: 'html'
-//                 }).done(function(data){
-//                   $('#formModal .modal-content').html(data);
-//                   $('#formModal').modal('toggle')
-//                 });
-//               });
-//       };
+      function formRetrievalAjax() {
+              $('.pull_system_setting_form, .pull_next_week_total').off("click").on("click",function(){
+                $.ajax({
+                  url: $(this).attr('href'),
+                  type: 'GET',
+                  dataType: 'html'
+                }).done(function(data){
+                  $('#formModal .modal-content').html(data);
+                  $('#formModal').modal('toggle')
+                });
+              });
+      };
 
-//       formRetrievalAjax();
+      formRetrievalAjax();
 
-//        var system_setting_table = $('#system_setting').DataTable({
-//         searching: false,
-//         paging:false
-//        });
+       var system_setting_table = $('#system_setting').DataTable({
+        searching: false,
+        paging:false
+       });
 
-//        system_setting_table.on('page', function () {
-//           formRetrievalAjax();
-//         } );
+       system_setting_table.on('page', function () {
+          formRetrievalAjax();
+        } );
 
 });
 
