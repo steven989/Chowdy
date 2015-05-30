@@ -405,10 +405,16 @@ protect_from_forgery :except => :payment
             )
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "delivery" 
+            _current_delivery = (["Yes","yes"].include? current_customer.recurring_delivery) ? true : false
             current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery:"yes")
             current_customer.update_attributes(monday_delivery_hub: "delivery") if current_customer.monday_delivery_hub.blank?
             current_customer.update_attributes(thursday_delivery_hub: "delivery") if current_customer.thursday_delivery_hub.blank?
-            CustomerMailer.stop_delivery_notice(current_customer, "Start Delivery").deliver
+            
+            if _current_delivery
+                CustomerMailer.stop_delivery_notice(current_customer, "Change delivery info").deliver
+            else
+                CustomerMailer.stop_delivery_notice(current_customer, "Start Delivery").deliver
+            end
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery:nil)

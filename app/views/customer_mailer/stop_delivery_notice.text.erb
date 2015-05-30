@@ -1,1 +1,9 @@
 Change delivery request received from <%= @customer.name %> (<%= @customer.email %>). The request is to <%= @type %>.
+
+<% if @type == "Change delivery info" %>
+The new delivery information is
+------------------------------------
+<%= @customer.delivery_address %>
+<%= @customer.phone_number %>
+<%= @customer.special_delivery_instructions %>
+<% end %>
