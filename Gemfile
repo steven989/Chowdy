@@ -61,6 +61,9 @@ end
 #8) New Relic
 gem 'newrelic_rpm'
 
+#9) To invoke rake tasks from within the app 
+gem 'rake'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

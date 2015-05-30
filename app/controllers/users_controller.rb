@@ -44,6 +44,7 @@ class UsersController < ApplicationController
             @deliveries = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], recurring_delivery:["Yes","yes"])
 
             @system_settings = SystemSetting.all
+            @scheduled_tasks = ScheduledTask.all
 
             @signup_timeseries = Customer.select('date_signed_up_for_recurring::date AS day, COUNT(*) as sign_ups').group('day').map {|r| [r.day.to_time.to_i*1000, r.sign_ups]}
             @cancel_timeseries = StopRequest.where(request_type:"cancel",end_date:nil).select('requested_date::date AS day, COUNT(*) as cancels').group('day').map {|r| [r.day.to_time.to_i*1000, r.cancels]}

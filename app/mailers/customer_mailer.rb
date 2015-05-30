@@ -115,9 +115,20 @@ class CustomerMailer < ActionMailer::Base
   end
 
   def failed_invoice_email
-    @all_failed_invoices = FailedInvoice.where(paid:true)
+    @all_failed_invoices = FailedInvoice.where(paid:false)
     mail(:to => SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value,
          :subject => "Customers with unpaid invoices")
+  end
+
+  def scheduled_task_report(report)
+    @report = report
+    mail(
+      to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value, 
+      subject: 'Scheduled task report'
+      ) do |format|
+        format.text
+    end 
+    
   end
 
 

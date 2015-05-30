@@ -1,0 +1,6 @@
+Here is the status of the jobs that just finished running
+============================================================
+
+<% @report.each do |r| %>
+    <%= r.keys[0] %>: <%= r.values[0] %> 
+<% end %>

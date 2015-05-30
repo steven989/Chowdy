@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150528181629) do
+ActiveRecord::Schema.define(version: 20150530000630) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -148,6 +148,22 @@ ActiveRecord::Schema.define(version: 20150528181629) do
     t.datetime "updated_at"
     t.string   "stripe_refund_id"
     t.integer  "internal_refund_id"
+  end
+
+  create_table "scheduled_tasks", force: true do |t|
+    t.string   "task_name"
+    t.integer  "day_of_week"
+    t.integer  "hour_of_day"
+    t.datetime "last_successful_run"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "parameter_1"
+    t.string   "parameter_1_type"
+    t.string   "parameter_2"
+    t.string   "parameter_2_type"
+    t.string   "parameter_3"
+    t.string   "parameter_3_type"
+    t.datetime "last_attempt_date"
   end
 
   create_table "start_date_tables", force: true do |t|

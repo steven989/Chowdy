@@ -1,3 +1,4 @@
+
 namespace :customers do
     desc 'push system start date to the next next Monday'
     task :push_start_date, [:number_of_weeks] => [:environment] do |t, args|        
@@ -185,7 +186,7 @@ end
 
 
 namespace :app do
-    desc 'create chowdy admin'
+    desc 'create admin'
     task :create_admin, [:email, :password] => [:environment] do |t, args|        
         user = User.new(email:args[:email], password:args[:password],password_confirmation:args[:password])
         if user.save
@@ -195,4 +196,44 @@ namespace :app do
             puts "User could not be created"
         end
     end 
+
+    desc 'Run scheduled tasks'
+    task :run_scheduled_tasks => [:environment] do |t, args|        
+        report = []
+        tasks = ScheduledTask.where(day_of_week: Date.today.wday, hour_of_day: Time.now.hour)
+        if tasks.length > 0
+            tasks.each do |t|
+                begin
+                    if t.parameter_1.blank?
+                        Rake::Task[t.task_name].invoke
+                    else
+                        if t.parameter_2.blank?
+                            parameter_1 = t.parameter_1_type == "int" ? t.parameter_1.to_i : t.parameter_1
+                            Rake::Task[t.task_name].invoke(parameter_1)
+                        else 
+                            if t.parameter_3.blank?
+                                parameter_1 = t.parameter_1_type == "int" ? t.parameter_1.to_i : t.parameter_1
+                                parameter_2 = t.parameter_2_type == "int" ? t.parameter_2.to_i : t.parameter_2
+                                Rake::Task[t.task_name].invoke(parameter_1,parameter_2)
+                            else 
+                                parameter_1 = t.parameter_1_type == "int" ? t.parameter_1.to_i : t.parameter_1
+                                parameter_2 = t.parameter_2_type == "int" ? t.parameter_2.to_i : t.parameter_2
+                                parameter_3 = t.parameter_3_type == "int" ? t.parameter_3.to_i : t.parameter_3
+                                Rake::Task[t.task_name].invoke(parameter_1,parameter_2,parameter_3)
+                            end
+                        end
+                    end
+                rescue
+                    report.push({t.task_name.to_sym => "fail"})
+                else 
+                    report.push({t.task_name.to_sym => "success"})
+                    t.update_attributes(last_successful_run: Time.now)
+                end
+                t.update_attributes(last_attempt_date: Time.now)
+            end
+            CustomerMailer.scheduled_task_report(report).deliver
+        end 
+    end 
+
+
 end

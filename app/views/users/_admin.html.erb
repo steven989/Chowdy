@@ -39,6 +39,13 @@ $(function(){
         searching: false
        });
 
+       $('#scheduled_tasks').DataTable({
+        searching: false,
+        scrollX: true,
+        paging: false
+       });
+
+
       //collapse
 
       $('.meal_details_collapse_control').off("click").on("click",function(){
@@ -630,8 +637,61 @@ $(function(){
                                   </div>
                                 </div> 
                               </section>
-                            </section>
+
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Scheduled tasks
+                                    <button class="btn btn-s-md btn-info btn-rounded pull_system_setting_form" href="<%= new_scheduled_task_path %>">Schedule new task</button>
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="scheduled_tasks" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <th>ID</th>
+                                          <th>Task name</th>
+                                          <th>Day of week</th>
+                                          <th>Hour of day</th>
+                                          <th>Parameter 1</th>
+                                          <th>Parameter 1 Type</th>
+                                          <th>Parameter 2</th>
+                                          <th>Parameter 2 Type</th>
+                                          <th>Parameter 3</th>
+                                          <th>Parameter 3 Type</th>
+                                          <th>Last attempted run</th>
+                                          <th>Last successful run</th>
+                                          <th>Edit</th>
+                                          <th>Delete</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @scheduled_tasks.each do |t| %>
+                                          <tr>
+                                            <th><%= t.id %></th>
+                                            <th><%= t.task_name %></th>
+                                            <th><%= t.day_of_week %></th>
+                                            <th><%= t.hour_of_day %></th>
+                                            <th><%= t.parameter_1 %></th>
+                                            <th><%= t.parameter_1_type %></th>
+                                            <th><%= t.parameter_2 %></th>
+                                            <th><%= t.parameter_2_type %></th>
+                                            <th><%= t.parameter_3 %></th>
+                                            <th><%= t.parameter_3_type %></th>
+                                            <th><%= t.last_attempt_date %></th>
+                                            <th><%= t.last_successful_run %></th>
+                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_scheduled_task_path(t) %>">Edit</button></th>
+                                            <th><%= link_to "Delete", scheduled_task_path(t), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %></th>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
+
+                            </section>                            
                         </section>
+
                     </section> 
                 </section>
             </section>
