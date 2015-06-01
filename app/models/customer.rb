@@ -24,6 +24,8 @@ class Customer < ActiveRecord::Base
                 puts "Error occured while deleting customer from Stripe"
                 puts '---------------------------------------------------'
             else
+                self.stop_queues.delete_all
+                self.user.destroy
                 self.destroy
             end
         end
