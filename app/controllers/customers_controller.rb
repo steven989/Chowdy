@@ -177,7 +177,8 @@ protect_from_forgery :except => :payment
             elsif Promotion.where(code: referral.gsub(" ",""),active:true).length == 1 #match promo code
                 promotion = Promotion.where(code: referral.gsub(" ","")).take
                     if promotion.immediate_refund
-                        charge = Stripe::Charge.all(customer:customer_id, limit: 1)
+                        charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
+                        charge = Stripe::Charge.retrieve(charge_id)
                         if charge.refunds.create(amount: promotion.amount_in_cents)
                             promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
                         end
