@@ -81,24 +81,29 @@ class UsersController < ApplicationController
 
             @delivery_boundary_coordinates = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"coordinates").take.setting_value
 
-            @monday_pickup_hub_match_string = case 
-                            when !@current_customer.monday_pickup_hub.match(/wanda/i).nil?
-                                "wanda"
-                            when !@current_customer.monday_pickup_hub.match(/dekefir/i).nil?
-                                "dekefir"
-                            when !@current_customer.monday_pickup_hub.match(/coffee/i).nil? 
-                                "coffee"
-                        end
+            if ["Yes","yes"].include? @current_customer.recurring_delivery
+                @monday_pickup_hub_match_string = "delivery"
+                @thursday_pickup_hub_match_string = "delivery"
+            else
+                @monday_pickup_hub_match_string = case 
+                                when !@current_customer.monday_pickup_hub.match(/wanda/i).nil?
+                                    "wanda"
+                                when !@current_customer.monday_pickup_hub.match(/dekefir/i).nil?
+                                    "dekefir"
+                                when !@current_customer.monday_pickup_hub.match(/coffee/i).nil? 
+                                    "coffee"
+                            end
 
-            @thursday_pickup_hub_match_string = case 
-                            when !@current_customer.thursday_pickup_hub.match(/wanda/i).nil?
-                                "wanda"
-                            when !@current_customer.thursday_pickup_hub.match(/dekefir/i).nil?
-                                "dekefir"
-                            when !@current_customer.thursday_pickup_hub.match(/coffee/i).nil? 
-                                "coffee"
-                        end
+                @thursday_pickup_hub_match_string = case 
+                                when !@current_customer.thursday_pickup_hub.match(/wanda/i).nil?
+                                    "wanda"
+                                when !@current_customer.thursday_pickup_hub.match(/dekefir/i).nil?
+                                    "dekefir"
+                                when !@current_customer.thursday_pickup_hub.match(/coffee/i).nil? 
+                                    "coffee"
+                            end
 
+            end
             
             @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{@monday_pickup_hub_match_string}%")| (setting_attribute =~ "%#{@thursday_pickup_hub_match_string}%") ) }
             
