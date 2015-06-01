@@ -660,6 +660,7 @@ $(function(){
                                           <th>Parameter 3 Type</th>
                                           <th>Last attempted run</th>
                                           <th>Last successful run</th>
+                                          <th>Run now</th>
                                           <th>Edit</th>
                                           <th>Delete</th>
                                         </tr>
@@ -679,6 +680,7 @@ $(function(){
                                             <th><%= t.parameter_3_type %></th>
                                             <th><%= t.last_attempt_date %></th>
                                             <th><%= t.last_successful_run %></th>
+                                            <th><a class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= run_task_path(t) %>">Run now</a></th>
                                             <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_scheduled_task_path(t) %>">Edit</button></th>
                                             <th><%= link_to "Delete", scheduled_task_path(t), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %></th>
                                           </tr>

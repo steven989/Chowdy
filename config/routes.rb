@@ -27,6 +27,8 @@ Chowdy::Application.routes.draw do
   resources :password_resets
   resources :system_settings
   resources :scheduled_tasks
+  get 'scheduled_task/:id/run' => 'scheduled_tasks#run', as: 'run_task'
+
   get 'announcement/new' => 'system_settings#new_announcement', as: 'new_announcement'
   post 'announcement/create' => 'system_settings#create_announcement', as: 'create_announcement'
   resources :promotions
