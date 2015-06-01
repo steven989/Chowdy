@@ -64,6 +64,8 @@ class UsersController < ApplicationController
             @display_restart = true
             @disable_sub_update = false
 
+            @current_pick_up_window_caption = (Date.today < @current_customer.first_pick_up_date) ? "Pick-up Window Next Week" : "Pick-up Window This Week"
+
             @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
             
             @number_of_referrals = Customer.where("matched_referrers_code ilike ?", @current_customer.referral_code).length

@@ -428,7 +428,7 @@ $(function(){
                                                         </div>
                                                         <div class="col-md-7 text-left text-primary-lt" style="margin-top: -25px; margin-left: -10px; padding-left: 0px;">
                                                               <span class="h4 block" style="height: 33px; margin-top: 30px; margin-bottom: 0px;"><%= @current_customer.next_pick_up_date.blank? ? "-" : @current_customer.next_pick_up_date.strftime("%b #{@current_customer.next_pick_up_date.day.ordinalize}") + " - " + (@current_customer.next_pick_up_date + 5.days).strftime("%b #{(@current_customer.next_pick_up_date + 5.days).day.ordinalize}") %></span>
-                                                              <small class="text-muted text-u-c">Pick-up Window This Week</small>
+                                                              <small class="text-muted text-u-c"><%= @current_pick_up_window_caption %></small>
                                                         </div>  
                                                       </div>
                                                     </section>
