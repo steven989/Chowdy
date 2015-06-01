@@ -18,7 +18,7 @@ class Customer < ActiveRecord::Base
 
     def create_referral_code
         base = self.name.split(/\s/)[0].downcase
-        base_last = self.name.split(/\s/)[1][0..3].downcase
+        base_last = self.name.split(/\s/)[1][0..3].downcase unless self.name.split(/\s/)[1].nil?
         numerical = Customer.where("name ilike ?", "%#{base}%").length
         code_candidate = base.to_s + base_last.to_s + (numerical*rand(5..10)).to_s
         while Customer.where(referral_code: code_candidate).length > 0 do

@@ -140,7 +140,6 @@ protect_from_forgery :except => :payment
 
         #3) check for referral and try to match up referrals
         
-
         unless referral.blank?
 
             if Customer.where(referral_code: referral.gsub(" ","").downcase).length == 1 #match code
