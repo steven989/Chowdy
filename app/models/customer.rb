@@ -12,17 +12,19 @@ class Customer < ActiveRecord::Base
     def delete_with_stripe
         begin 
             customer = Stripe::Customer.retrieve(stripe_customer_id)    
-        rescue
+        rescue => error
             puts '---------------------------------------------------'
             puts "Error occured while retrieving customer from Stripe"
             puts '---------------------------------------------------'
+            CustomerMailer.rescued_error(self,error.message).deliver
         else
             begin 
                 customer.delete
-            rescue
+            rescue => error
                 puts '---------------------------------------------------'
                 puts "Error occured while deleting customer from Stripe"
                 puts '---------------------------------------------------'            
+                CustomerMailer.rescued_error(self,error.message).deliver
             ensure
                 self.stop_queues.delete_all if self.stop_queues.length > 0
                 self.user.destroy unless self.user.nil?

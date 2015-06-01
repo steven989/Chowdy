@@ -128,7 +128,17 @@ class CustomerMailer < ActionMailer::Base
       ) do |format|
         format.text
     end 
-    
+  end
+
+  def rescued_error(customer,message)
+    @customer = customer
+    @message = message
+    mail(
+      to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value, 
+      subject: 'A rescued error has occurred'
+      ) do |format|
+        format.text
+    end 
   end
 
 

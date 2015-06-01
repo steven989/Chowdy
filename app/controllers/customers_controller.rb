@@ -131,12 +131,20 @@ protect_from_forgery :except => :payment
         #add an additional column to track Monday vs. Thursday hubs
 
         #2) system to update the trial end date in stripe using the StartDate model
-
-        stripe_customer = Stripe::Customer.retrieve(customer_id)
-        stripe_subscription = stripe_customer.subscriptions.retrieve(subscription_id)
-        stripe_subscription.trial_end = (StartDate.first.start_date+7.days+(23.5).hours).to_time.to_i
-        stripe_subscription.prorate = false
-        stripe_subscription.save
+        
+        begin
+            stripe_customer = Stripe::Customer.retrieve(customer_id)
+            stripe_subscription = stripe_customer.subscriptions.retrieve(subscription_id)
+            stripe_subscription.trial_end = (StartDate.first.start_date+7.days+(23.5).hours).to_time.to_i
+            stripe_subscription.prorate = false
+            stripe_subscription.save
+        rescue => error
+            puts '---------------------------------------------------'
+            puts "something went wrong trying to update Stripe subscription after customer is created"
+            puts error.message
+            puts '---------------------------------------------------' 
+            CustomerMailer.rescued_error(customer,error.message).deliver
+        end
 
         #3) check for referral and try to match up referrals
         
@@ -147,23 +155,31 @@ protect_from_forgery :except => :payment
                 
                 unless referral_match.take.stripe_subscription_id.blank?
                     #referrer discount
-                    stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
-                    stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
-                    
-                        #check for existing coupons
-                        if stripe_referral_subscription_match.discount.nil?
-                            stripe_referral_subscription_match.coupon = "referral bonus"
-                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
-                            stripe_referral_subscription_match.coupon = "referral bonus x 2"
-                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
-                            stripe_referral_subscription_match.coupon = "referral bonus x 3"
-                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
-                            stripe_referral_subscription_match.coupon = "referral bonus x 4"
-                        end
+                    begin
+                        stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
+                        stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
+                        
+                            #check for existing coupons
+                            if stripe_referral_subscription_match.discount.nil?
+                                stripe_referral_subscription_match.coupon = "referral bonus"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 2"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 3"
+                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
+                                stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                            end
 
-                    stripe_referral_subscription_match.prorate = false
-                    if stripe_referral_subscription_match.save                
-                        referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                        stripe_referral_subscription_match.prorate = false
+                        if stripe_referral_subscription_match.save                
+                            referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                        end
+                    rescue => error
+                        puts '---------------------------------------------------'
+                        puts 'Something went wrong while updating Stripe referral code'
+                        puts error.message
+                        puts '---------------------------------------------------'
+                        CustomerMailer.rescued_error(customer,error.message).deliver
                     end
                 end                
                 #referree discount
@@ -177,14 +193,16 @@ protect_from_forgery :except => :payment
             elsif Promotion.where(code: referral.gsub(" ",""),active:true).length == 1 #match promo code
                 promotion = Promotion.where(code: referral.gsub(" ","")).take
                     if promotion.immediate_refund
-                        charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
-                        charge = Stripe::Charge.retrieve(charge_id)
                         begin 
+                            charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
+                            charge = Stripe::Charge.retrieve(charge_id)
                             charge.refunds.create(amount: promotion.amount_in_cents)
-                        rescue
+                        rescue => error
                             puts '---------------------------------------------------'
                             puts "Refund cannot be completed"
+                            puts error.message
                             puts '---------------------------------------------------'
+                            CustomerMailer.rescued_error(customer,error.message).deliver
                         else
                             promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
                         end
@@ -203,6 +221,7 @@ protect_from_forgery :except => :payment
                 elsif referral_match.length == 1
                     unless referral_match.take.stripe_subscription_id.blank?
                         #referrer discount
+                        begin
                         stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
                         stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
                         
@@ -220,6 +239,10 @@ protect_from_forgery :except => :payment
                         stripe_referral_subscription_match.prorate = false
                         if stripe_referral_subscription_match.save                
                             referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                        end
+
+                        rescue => error
+                            CustomerMailer.rescued_error(customer,error.message).deliver
                         end
                     end
 
@@ -245,14 +268,16 @@ protect_from_forgery :except => :payment
                     end
             # -2) refund payment and delete customer
                     if duplicate_match.length >= 1
-                        charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
-                        charge = Stripe::Charge.retrieve(charge_id)
                         begin 
+                            charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
+                            charge = Stripe::Charge.retrieve(charge_id)
                             charge.refunds.create 
-                        rescue
+                        rescue => error
                             puts '---------------------------------------------------'
                             puts "Refund cannot be completed"
+                            puts error.message
                             puts '---------------------------------------------------'
+                            CustomerMailer.rescued_error(customer,error.message).deliver
                         else
                             customer.delete_with_stripe
                         end
@@ -373,30 +398,44 @@ protect_from_forgery :except => :payment
             end
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "change_card"
-            current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)
-            current_stripe_customer.source = params[:stripeToken]
-            if current_stripe_customer.save
-                #attempt to pay back overdue invoices
-                if current_customer.failed_invoices.where("number_of_attempts > ? and paid = ?", 1, false).length > 0 
-                    current_customer.failed_invoices.where("number_of_attempts > ? and paid = ?", 1, false).each do |failed_invoice| 
-                        begin 
-                            Stripe::Invoice.retrieve(failed_invoice.invoice_number).pay
-                        rescue
-                            puts "Card delined"
-                        else
-                            failed_invoice.update_attributes(paid:true,date_paid:Date.today)
+            begin
+                current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)
+                current_stripe_customer.source = params[:stripeToken]
+                if current_stripe_customer.save
+                    #attempt to pay back overdue invoices
+                    if current_customer.failed_invoices.where("number_of_attempts > ? and paid = ?", 1, false).length > 0 
+                        current_customer.failed_invoices.where("number_of_attempts > ? and paid = ?", 1, false).each do |failed_invoice| 
+                            begin 
+                                Stripe::Invoice.retrieve(failed_invoice.invoice_number).pay
+                            rescue
+                                puts "Card delined"
+                            else
+                                failed_invoice.update_attributes(paid:true,date_paid:Date.today)
+                            end
                         end
                     end
                 end
+            rescue => error
+                puts '---------------------------------------------------'
+                puts "some error occured when customer tried to update credit card"
+                puts error.message
+                puts '---------------------------------------------------'
             end
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "email" 
             unless params[:email].blank?
-                current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
-                current_stripe_customer.email = params[:email]
-                if current_stripe_customer.save
-                    current_customer.update(email:params[:email])
-                    current_customer.user.update(email:params[:email])
+                begin
+                    current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
+                    current_stripe_customer.email = params[:email]
+                    if current_stripe_customer.save
+                        current_customer.update(email:params[:email])
+                        current_customer.user.update(email:params[:email])
+                    end
+                rescue => error
+                    puts '---------------------------------------------------'
+                    puts "some Stripe error occured when customer tried to change email"
+                    puts error.message
+                    puts '---------------------------------------------------'
                 end
                 redirect_to user_profile_path+"#settings"
             end
