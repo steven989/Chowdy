@@ -179,7 +179,13 @@ protect_from_forgery :except => :payment
                     if promotion.immediate_refund
                         charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
                         charge = Stripe::Charge.retrieve(charge_id)
-                        if charge.refunds.create(amount: promotion.amount_in_cents)
+                        begin 
+                            charge.refunds.create(amount: promotion.amount_in_cents)
+                        rescue
+                            puts '---------------------------------------------------'
+                            puts "Refund cannot be completed"
+                            puts '---------------------------------------------------'
+                        else
                             promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
                         end
                     else 
@@ -241,7 +247,13 @@ protect_from_forgery :except => :payment
                     if duplicate_match.length >= 1
                         charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
                         charge = Stripe::Charge.retrieve(charge_id)
-                        if charge.refunds.create 
+                        begin 
+                            charge.refunds.create 
+                        rescue
+                            puts '---------------------------------------------------'
+                            puts "Refund cannot be completed"
+                            puts '---------------------------------------------------'
+                        else
                             customer.delete_with_stripe
                         end
                     end
