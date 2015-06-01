@@ -491,6 +491,16 @@ $(function(){
                                   </div>
                                 </section>
                               <% end %>
+                              <% unless @sub_status.blank? %>
+                                <section class="row m-t-md">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-success" style="margin-bottom:0 !important;">
+                                      <button type="button" class="close" data-dismiss="alert">×</button>
+                                      <%= @sub_status %>
+                                    </div>
+                                  </div>
+                                </section>
+                              <% end %>
                                 <section class="row m-b-xs m-t-md">
                                     <div class="col-sm-12">
                                         <h5 class="m-b-xs text-muted text-left">
