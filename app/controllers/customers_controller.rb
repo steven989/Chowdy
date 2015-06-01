@@ -291,6 +291,7 @@ protect_from_forgery :except => :payment
                                 CustomerMailer.rescued_error(customer,error.message).deliver
                             else
                                 customer.delete_with_stripe
+                                CustomerMailer.duplicate_signup_email(first_name_email,customer_email).deliver
                             end
                         end
             #5) send confirmation email
@@ -305,9 +306,7 @@ protect_from_forgery :except => :payment
 
                 referral_name_email = referral.titlecase if referral_matched
 
-                if duplicate_match.length >= 1
-                    CustomerMailer.duplicate_signup_email(first_name_email,customer_email).deliver
-                else 
+                unless duplicate_match.length >= 1
                     CustomerMailer.confirmation_email(customer,hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
                 end
 
