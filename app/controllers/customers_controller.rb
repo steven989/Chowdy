@@ -31,7 +31,7 @@ protect_from_forgery :except => :payment
                 meal_per_week = 14
         end
 
-        # unless Customer.where(stripe_customer_id:customer_id).length > 0 #this is so that Stripe doens't ceaselessly create new customers 
+        unless Customer.where(stripe_customer_id:customer_id).length > 0 #this is so that Stripe doens't ceaselessly create new customers 
 
             customer = Customer.create(
                 stripe_customer_id:customer_id, 
@@ -322,7 +322,7 @@ protect_from_forgery :except => :payment
                 if manual_checks.length >= 1 && duplicate_match.length < 1
                     CustomerMailer.manual_check_for_signup(customer,manual_checks).deliver 
                 end
-        # end
+        end
 
         render nothing:true, status:200, content_type:'text/html'
 
