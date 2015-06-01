@@ -10,9 +10,22 @@ class Customer < ActiveRecord::Base
     validates :email, uniqueness: true
 
     def delete_with_stripe
-        customer = Stripe::Customer.retrieve(stripe_customer_id)
-        if customer.delete
-            self.destroy
+        begin 
+            customer = Stripe::Customer.retrieve(stripe_customer_id)    
+        rescue
+            puts '---------------------------------------------------'
+            puts "Error occured while retrieving customer from Stripe"
+            puts '---------------------------------------------------'
+        else
+            begin 
+                customer.delete
+            rescue
+                puts '---------------------------------------------------'
+                puts "Error occured while deleting customer from Stripe"
+                puts '---------------------------------------------------'
+            else
+                self.destroy
+            end
         end
     end
 
