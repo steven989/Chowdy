@@ -97,7 +97,6 @@ class AdminActionsController < ApplicationController
                         @customer.user.update(email:params[:customer][:email])
                     end
                     @customer.update(email:params[:customer][:email])
-                    @customer.user.update(email:params[:customer][:email])
                 end
             end
 
