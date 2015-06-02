@@ -130,6 +130,18 @@ class AdminActionsController < ApplicationController
                     end
                 end
             end
+
+            no_beef = (params[:customer][:no_beef].blank? || params[:customer][:no_beef] == "0") ? false : true
+            no_pork = (params[:customer][:no_pork].blank? || params[:customer][:no_pork] == "0") ? false : true
+            no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
+            send_notification = (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry)
+            @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
+            if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
+                CustomerMailer.stop_delivery_notice(@customer, "Meal preference has changed").deliver
+            end
+
+
+
         elsif params[:todo] == "meal_count"
             monday_regular = params[:customer][:regular_meals_on_monday].to_i
             monday_green = params[:customer][:green_meals_on_monday].to_i

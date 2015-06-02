@@ -24,6 +24,26 @@
           <%= f.label :phone_number %>
           <%= f.text_field :phone_number, class: "form-control" %>
       </div>
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="form-group">
+              <%= f.label :no_pork %>
+              <%= f.check_box :no_pork, class: "form-control" %>
+          </div>          
+        </div>
+        <div class="col-sm-4">
+          <div class="form-group">
+              <%= f.label :no_beef %>
+              <%= f.check_box :no_beef, class: "form-control" %>
+          </div>          
+        </div>
+        <div class="col-sm-4">
+          <div class="form-group">
+              <%= f.label :no_poultry %>
+              <%= f.check_box :no_poultry, class: "form-control" %>
+          </div>          
+        </div>
+      </div>
       <div class="form-group">
           <%= f.label :notes %>
           <%= f.text_area :notes, class: "form-control", rows:"6" %>
