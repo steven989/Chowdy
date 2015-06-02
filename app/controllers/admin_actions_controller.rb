@@ -83,9 +83,18 @@ class AdminActionsController < ApplicationController
         if params[:todo] == "info"
             @customer.update_attributes(individual_attributes_params)
             if (params[:customer][:email] != @customer.email) && (!params[:customer][:email].blank?)
-                current_stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)   
-                current_stripe_customer.email = params[:customer][:email]
-                if current_stripe_customer.save
+                begin
+                    current_stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)   
+                    current_stripe_customer.email = params[:customer][:email]
+                    current_stripe_customer.save
+                rescue => error
+                    puts '---------------------------------------------------'
+                    puts "Email could not be updated"
+                    puts '---------------------------------------------------'
+                else
+                    if @customer.user
+                        @customer.user.update(email:params[:customer][:email])
+                    end
                     @customer.update(email:params[:customer][:email])
                     @customer.user.update(email:params[:customer][:email])
                 end
