@@ -11,26 +11,36 @@ $(function(){
         lng: 79.4
       });
 
-      GMaps.geocode({
-        address: '<%= @address_to_show_on_dashboard %>, Toronto',
-        callback: function(results, status) {
-          if (status == 'OK') {
-            var latlng = results[0].geometry.location;
-            map.setCenter(latlng.lat(), latlng.lng());
-            var marker = map.addMarker({
-                        lat: latlng.lat(),
-                        lng: latlng.lng(),
-                        infoWindow: {
-                          content: '<p>Store hours: <%= @pick_up_maps_info_text %></p>'
-                        }
-                      });
-            var infowindow = new google.maps.InfoWindow({
-                                  content: '<p>Store hours: <%= @pick_up_maps_info_text %></p>'
-                              });
-            infowindow.open(map,marker);
+      var addresses_to_display = <%= raw @address_to_show_on_dashboard.to_json %>
+
+      var latlngbounds = new google.maps.LatLngBounds();
+
+      addresses_to_display.forEach(function(a){
+        GMaps.geocode({
+          address: a.location+', Toronto',
+          callback: function(results, status) {
+            if (status == 'OK') {
+              var latlng = results[0].geometry.location;
+              latlngbounds.extend(latlng);
+              map.setCenter(latlng.lat(), latlng.lng());
+              var marker = map.addMarker({
+                          lat: latlng.lat(),
+                          lng: latlng.lng()
+                        });
+              <% if @show_pick_up_info_window %>
+              var infowindow = new google.maps.InfoWindow({
+                                    content: '<p>Hub hours: '+a.hours
+                                });
+              infowindow.open(map,marker);
+              <% end %>
+            }
           }
-        }
+        });
       });
+
+      map.setZoom(13);
+      map.panToBounds(latlngbounds);
+
     };
 
     create_hub_map();
@@ -468,7 +478,7 @@ $(function(){
                                                 No pick-up hub selected
                                               <% end %>
                                             <% else %>
-                                              Pick up at <%= @current_customer.hub.gsub("\\","") %>
+                                              Pick up at <%= @pick_up_text %>
                                             <% end %>
                                           <% else %>
                                             Delivery to <%= @current_customer.delivery_address %>
@@ -734,7 +744,7 @@ $(function(){
                           <div class="row">
                             <div class="col-sm-6">
                               <section class="panel panel-default">
-                                <header class="panel-heading font-bold">Delivery request form - note that default delivery time is every Monday and Thursday between 11am and noon</header>
+                                <header class="panel-heading font-bold">Delivery request form - note that default delivery time is every Monday and Thursday between 11am and noon unless otherwise requested</header>
                                 <div class="panel-body">
                                   <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
                                     <div class="form-group">
