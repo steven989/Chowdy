@@ -447,6 +447,7 @@ protect_from_forgery :except => :payment
                     puts "some Stripe error occured when customer tried to change email"
                     puts error.message
                     puts '---------------------------------------------------'
+                    CustomerMailer.rescued_error(current_customer,error.message).deliver
                 end
                 redirect_to user_profile_path+"#settings"
             end

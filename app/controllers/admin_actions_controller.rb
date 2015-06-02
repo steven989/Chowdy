@@ -91,6 +91,7 @@ class AdminActionsController < ApplicationController
                     puts '---------------------------------------------------'
                     puts "Email could not be updated"
                     puts '---------------------------------------------------'
+                    CustomerMailer.rescued_error(@customer,error.message).deliver
                 else
                     if @customer.user
                         @customer.user.update(email:params[:customer][:email])
