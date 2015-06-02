@@ -100,8 +100,13 @@ class AdminActionsController < ApplicationController
                 end
             end
 
-            if (params[:customer][:referral_code] != @customer.referral_code) && (!params[:customer][:referral_code].blank?)
-                @customer.update(referral_code:params[:customer][:referral_code])
+            if (params[:customer][:referral_code].gsub(" ","") != @customer.referral_code) && (!params[:customer][:referral_code].blank?)
+                _old_referral_code = @customer.referral_code
+                if @customer.update(referral_code:params[:customer][:referral_code].gsub(" ",""))
+                    Customer.where(matched_referrers_code:_old_referral_code).each do |c|
+                        c.update_attributes(matched_referrers_code:params[:customer][:referral_code].gsub(" ",""))
+                    end
+                end
             end
 
             if (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "1")
