@@ -570,6 +570,22 @@ protect_from_forgery :except => :payment
         render nothing:true, status:200, content_type:'text/html'
     end
 
+    def resend_sign_up_link_form
+        @customer = Customer.where(id:params[:id]).take
+        respond_to do |format|
+          format.html {
+            render partial: 'resend_sign_up_link_form'
+          }
+        end  
+    end
+
+    def resend_sign_up_link
+        customer = Customer.where(id:params[:id]).take
+        target_email = params[:target_email].blank? ? customer.email : params[:target_email]
+        CustomerMailer.resend_profile_link(target_email,customer).deliver
+        redirect_to user_profile_path+"#customers"
+    end
+
     def stripe_destroy #delete customer account through Stripe webhook
         #delete on system and Stripe
     end

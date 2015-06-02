@@ -520,6 +520,7 @@ $(function(){
                                           <th>Edit</th>
                                           <th>Link to Stripe dashboard</th>
                                           <th>Account registered?</th>
+                                          <th>Resend signup link</th>
                                           <% @customer_column_names.each do |c| %>
                                           <th><%= c %></th>
                                           <% end %>
@@ -532,6 +533,7 @@ $(function(){
                                             <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= admin_edit_customer_path(s) %>" style="min-width: 0px;width: 60px;">Edit</button></th>
                                             <th><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{s.stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></th>
                                             <th><%= s.user.blank? ? "No" : "Yes" %></th>
+                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= resend_sign_up_link_form_path(s) %>" style="min-width: 0px;width: 60px;">Send</button></th>
                                             <% @customer_column_names.each do |c| %>
                                               <th><%= s.send(c.to_sym) %></th>
                                             <% end %>

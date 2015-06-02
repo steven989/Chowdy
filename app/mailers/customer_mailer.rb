@@ -130,6 +130,17 @@ class CustomerMailer < ActionMailer::Base
     end 
   end
 
+
+  def resend_profile_link(target_email,customer)
+    @customer = customer
+    mail(
+      to: target_email, 
+      subject: 'Your link to create online profile'
+      ) do |format|
+        format.text
+    end 
+  end
+
   def rescued_error(customer,message)
     @customer = customer
     @message = message
