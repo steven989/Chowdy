@@ -67,7 +67,7 @@ class UsersController < ApplicationController
             @current_pick_up_window_caption = (Date.today < @current_customer.first_pick_up_date) ? "Pick-up Window Next Week" : "Pick-up Window This Week"
 
             @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
-            
+
             @number_of_referrals = Customer.where("matched_referrers_code ilike ?", @current_customer.referral_code).length
             @referral_dollars_earned = @number_of_referrals * 10
 
@@ -105,6 +105,17 @@ class UsersController < ApplicationController
 
             end
             
+            
+
+            @pick_up_maps_info_text =  case 
+                            when !@current_customer.monday_pickup_hub.match(/wanda/i).nil?
+                                SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").blank?
+                            when !@current_customer.monday_pickup_hub.match(/dekefir/i).nil?
+                                SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").blank?
+                            when !@current_customer.monday_pickup_hub.match(/coffee/i).nil? 
+                                SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").blank?
+                        end
+
             @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{@monday_pickup_hub_match_string}%")| (setting_attribute =~ "%#{@thursday_pickup_hub_match_string}%") ) }
             
             if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?

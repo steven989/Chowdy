@@ -17,16 +17,18 @@ $(function(){
           if (status == 'OK') {
             var latlng = results[0].geometry.location;
             map.setCenter(latlng.lat(), latlng.lng());
-            map.addMarker({
-              lat: latlng.lat(),
-              lng: latlng.lng(),
-              infoWindow: {
-                content: '<p>Store hours:</p>'
-              }
-            });
+            marker = map.addMarker({
+                        lat: latlng.lat(),
+                        lng: latlng.lng(),
+                        infoWindow: {
+                          content: '<p>Store hours: <%= @pick_up_maps_info_text %></p>'
+                        }
+                      });
+            infowindow.open(map,marker);
           }
         }
       });
+      
     };
 
     create_hub_map();
