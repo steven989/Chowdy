@@ -7,7 +7,7 @@ class Customer < ActiveRecord::Base
     has_many :failed_invoices, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :refunds, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
-    validates :email, uniqueness: true
+    # validates :email, uniqueness: true
 
     def delete_with_stripe
         begin 
