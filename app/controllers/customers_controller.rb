@@ -513,6 +513,18 @@ protect_from_forgery :except => :payment
                     start_date:adjusted_change_date
                 )
             end
+
+            #meal preferences
+
+            no_beef = params[:no_beef].blank? ? false : true
+            no_pork = params[:no_pork].blank? ? false : true
+            no_poultry = params[:no_poultry].blank? ? false : true
+            send_notification = (no_beef != current_customer.no_beef) || (no_pork != current_customer.no_pork) || (no_poultry != current_customer.no_poultry)
+            current_customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
+            if (["Yes","yes"].include? current_customer.recurring_delivery) && (send_notification)
+                CustomerMailer.stop_delivery_notice(current_customer, "Meal preference has changed").deliver
+            end
+
             redirect_to user_profile_path+"#changePlan"
         end
 

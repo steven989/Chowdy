@@ -1,9 +1,12 @@
 Change delivery request received from <%= @customer.name %> (<%= @customer.email %>). The request is to <%= @type %>.
 
-<% if @type == "Change delivery info" %>
+<% if @type == "Change delivery info" || @type == "Meal preference has changed" %>
 The new delivery information is
 ------------------------------------
-<%= @customer.delivery_address %>
-<%= @customer.phone_number %>
-<%= @customer.special_delivery_instructions %>
+Address: <%= @customer.delivery_address %>
+Phone number: <%= @customer.phone_number %>
+Special delivery instruction: <%= @customer.special_delivery_instructions %>
+No pork: <%= @customer.no_pork %>
+No beef: <%= @customer.no_beef %>
+No poultry: <%= @customer.no_poultry %>
 <% end %>

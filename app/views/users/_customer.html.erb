@@ -161,6 +161,19 @@ $(function(){
     };
 
     pauseDateValidate();
+
+
+
+    // checkboxes for meal preferences
+    var disable_sub_update = <%= @disable_sub_update %>;
+
+    $('#no_beef, #no_pork, #no_poultry').off("change").on("change",function(){
+      $('#subscription_change_warning').removeClass("hidden");
+      if (disable_sub_update == false) {
+          $('#change_meal_count input[type=submit]').removeClass("disabled");
+        }
+    });
+
     // spinner
 
     var total_meal_number = <%= @total_meals %>
@@ -181,7 +194,7 @@ $(function(){
         step: 1
     });
 
-    var disable_sub_update = <%= @disable_sub_update %>;
+    
 
     if (disable_sub_update == false) {
 
@@ -561,24 +574,60 @@ $(function(){
                                                     </section>
                                                 </div>
                                             </div>
-                                            <div class="row padder">
-                                              <div class="col-sm-2 padder-v">
-                                                <%= form_tag update_customer_path("change_subscription"), method: 'POST', id:"change_meal_count" do %>
-                                                <%= hidden_field_tag :monday_reg_hidden, @monday_regular %>
-                                                <%= hidden_field_tag :monday_grn_hidden, @monday_green %>
-                                                <%= hidden_field_tag :thursday_reg_hidden, @thursday_regular %>
-                                                <%= hidden_field_tag :thursday_grn_hidden, @thursday_green  %>
-                                                <%= submit_tag 'Update Subscription', class:"btn btn-s-md btn-success disabled" %>          
-                                                <% end %>
-                                              </div>
-                                              <div class="col-sm-3 padder-v hidden" id="subscription_change_warning">
-                                                <div class="alert alert-warning alert-block text-center" style="height:34px; padding-top:8px;">
-                                                  
-                                                  You have unsaved changes
+                                            
+                                              <%= form_tag update_customer_path("change_subscription"), method: 'POST', id:"change_meal_count" do %>
+                                                <div class="row padder m-t-sm">
+                                                  <div class="col-sm-8">
+                                                    <div class="row">
+                                                      <div class="col-sm-4">
+                                                        <div class="checkbox i-checks">
+                                                          <%= label_tag :no_pork do %>
+                                                            <%= check_box_tag :no_pork,nil,@current_customer.no_pork %>
+                                                            <i></i>
+                                                            No Pork
+                                                          <% end %>
+                                                        </div>
+                                                      </div>  
+                                                      <div class="col-sm-4">
+                                                        <div class="checkbox i-checks">
+                                                          <%= label_tag :no_beef do %>
+                                                            <%= check_box_tag :no_beef,nil,@current_customer.no_beef %>
+                                                            <i></i>
+                                                            No Beef
+                                                          <% end %>
+                                                        </div>
+                                                      </div>  
+                                                      <div class="col-sm-4">
+                                                        <div class="checkbox i-checks">
+                                                          <%= label_tag :no_poultry do %>
+                                                            <%= check_box_tag :no_poultry,nil,@current_customer.no_poultry %>
+                                                            <i></i>
+                                                            No Poultry
+                                                          <% end %>
+                                                        </div>
+                                                      </div>  
+                                                    </div>
+                                                  </div>
                                                 </div>
-                                              </div>
-  
-                                            </div>   
+                                                <div class="row padder">
+                                                  <div class="col-sm-2 padder-v">
+                                                  
+                                                    <%= hidden_field_tag :monday_reg_hidden, @monday_regular %>
+                                                    <%= hidden_field_tag :monday_grn_hidden, @monday_green %>
+                                                    <%= hidden_field_tag :thursday_reg_hidden, @thursday_regular %>
+                                                    <%= hidden_field_tag :thursday_grn_hidden, @thursday_green  %>
+                                                    <%= submit_tag 'Update Subscription', class:"btn btn-s-md btn-success disabled" %>          
+                                                  </div>
+                                                  <div class="col-sm-3 padder-v hidden" id="subscription_change_warning">
+                                                    <div class="alert alert-warning alert-block text-center" style="height:34px; padding-top:8px;">
+                                                      
+                                                      You have unsaved changes
+                                                    </div>
+                                                  </div>
+                                                </div>  
+                                              <% end %>
+                
+                                             
                                         </div>
                                     </div>
                                 </section>                           

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150530000630) do
+ActiveRecord::Schema.define(version: 20150602212416) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -90,6 +90,9 @@ ActiveRecord::Schema.define(version: 20150530000630) do
     t.integer  "interval_count"
     t.boolean  "sponsored"
     t.string   "matched_referrers_code"
+    t.boolean  "no_beef"
+    t.boolean  "no_pork"
+    t.boolean  "no_poultry"
   end
 
   create_table "failed_invoice_trackers", force: true do |t|
