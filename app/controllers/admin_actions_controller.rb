@@ -100,6 +100,9 @@ class AdminActionsController < ApplicationController
                 end
             end
 
+            if (params[:customer][:referral_code] != @customer.referral_code) && (!params[:customer][:referral_code].blank?)
+                @customer.update(referral_code:params[:customer][:referral_code])
+            end
 
             if (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "1")
                 unless @customer.stripe_subscription_id.blank?
@@ -494,7 +497,7 @@ class AdminActionsController < ApplicationController
     private 
 
     def individual_attributes_params
-        params.require(:customer).permit(:name,:next_pick_up_date,:phone_number,:notes,:delivery_address,:delivery_time,:special_delivery_instructions,:referral_code, :sponsored)
+        params.require(:customer).permit(:name,:next_pick_up_date,:phone_number,:notes,:delivery_address,:delivery_time,:special_delivery_instructions, :sponsored)
     end
 
     def delivery_info_params

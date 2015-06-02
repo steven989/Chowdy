@@ -8,6 +8,7 @@ class Customer < ActiveRecord::Base
     has_many :refunds, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
     # validates :email, uniqueness: true
+    validates :referral_code, uniqueness: true
 
     def delete_with_stripe
         begin 
