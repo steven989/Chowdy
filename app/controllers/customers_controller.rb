@@ -482,6 +482,7 @@ protect_from_forgery :except => :payment
             current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address], special_delivery_instructions:params[:note], recurring_delivery:"yes")
             current_customer.update_attributes(monday_delivery_hub: "delivery") if current_customer.monday_delivery_hub.blank?
             current_customer.update_attributes(thursday_delivery_hub: "delivery") if current_customer.thursday_delivery_hub.blank?
+            current_customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
             
             if _current_delivery
                 CustomerMailer.stop_delivery_notice(current_customer, "Change delivery info").deliver

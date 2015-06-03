@@ -238,6 +238,7 @@ class AdminActionsController < ApplicationController
                 @customer.update_attributes(recurring_delivery: "yes")
                 @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
                 @customer.update_attributes(thursday_delivery_hub: "delivery") if @customer.thursday_delivery_hub.blank?                
+                @customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
                 CustomerMailer.stop_delivery_notice(@customer, "Start Delivery").deliver
             end
         elsif params[:todo] == "refund"
