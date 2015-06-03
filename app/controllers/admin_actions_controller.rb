@@ -357,12 +357,12 @@ class AdminActionsController < ApplicationController
                     elsif stripe_subscription.discount.coupon.id == "referral bonus x 4"
                         stripe_subscription.coupon = "referral bonus x 5"
                     else
-                        do_not_increment_referral = true
+                        do_not_increment_referral_referree = true
                         CustomerMailer.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)").deliver                                                    
                     end
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
-                        @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10) unless do_not_increment_referral
+                        @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10) unless do_not_increment_referral_referree
                     end
                 
                 else #match name
@@ -407,13 +407,13 @@ class AdminActionsController < ApplicationController
                         elsif stripe_subscription.discount.coupon.id == "referral bonus x 4"
                             stripe_subscription.coupon = "referral bonus x 5"
                         else
-                            do_not_increment_referral = true
+                            do_not_increment_referral_referree = true
                             CustomerMailer.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)").deliver                                                    
                         end
 
                         stripe_subscription.prorate = false
                         if stripe_subscription.save
-                            @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10) unless do_not_increment_referral
+                            @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10) unless do_not_increment_referral_referree
                         end
                     end
                 end
