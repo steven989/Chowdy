@@ -164,9 +164,9 @@ class UsersController < ApplicationController
                         end   
 
             # @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
-            @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? (@current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? [{location:@current_customer.monday_pickup_hub.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday}] : [{location: @current_customer.monday_pickup_hub.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday},{location:@current_customer.thursday_pickup_hub.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_thursday}]) : [{location:@current_customer.delivery_address.sub(/\(.+\)/, "").to_s}]
+            @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? (@current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? [{location:@current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday}] : [{location: @current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday},{location:@current_customer.thursday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_thursday}]) : [{location:@current_customer.delivery_address.to_s.sub(/\(.+\)/, "").to_s}]
 
-            @pick_up_text = @current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? @current_customer.monday_pickup_hub.gsub("\\","") : (@current_customer.monday_pickup_hub.gsub("\\","")+" on Monday and "+@current_customer.thursday_pickup_hub.gsub("\\","")+" on Thursday")
+            @pick_up_text = @current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? @current_customer.monday_pickup_hub.to_s.gsub("\\","") : (@current_customer.monday_pickup_hub.to_s.gsub("\\","")+" on Monday and "+@current_customer.thursday_pickup_hub.to_s.gsub("\\","")+" on Thursday")
 
             @show_pick_up_info_window = @current_customer.recurring_delivery.blank? ? true : false
 
