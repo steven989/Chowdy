@@ -170,11 +170,16 @@ protect_from_forgery :except => :payment
                                     stripe_referral_subscription_match.coupon = "referral bonus x 3"
                                 elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
                                     stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                                elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
+                                    stripe_referral_subscription_match.coupon = "referral bonus x 5"
+                                else
+                                    do_not_increment_referral = true
+                                    CustomerMailer.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)").deliver
                                 end
 
                             stripe_referral_subscription_match.prorate = false
                             if stripe_referral_subscription_match.save                
-                                referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                                referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10) unless do_not_increment_referral
                             end
                         rescue => error
                             puts '---------------------------------------------------'
@@ -245,11 +250,16 @@ protect_from_forgery :except => :payment
                                     stripe_referral_subscription_match.coupon = "referral bonus x 3"
                                 elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
                                     stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                                elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
+                                    stripe_referral_subscription_match.coupon = "referral bonus x 5"
+                                else
+                                    do_not_increment_referral = true
+                                    CustomerMailer.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)").deliver
                                 end
 
                             stripe_referral_subscription_match.prorate = false
                             if stripe_referral_subscription_match.save                
-                                referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)
+                                referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10)  unless do_not_increment_referral
                             end
 
                             rescue => error
