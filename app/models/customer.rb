@@ -80,7 +80,6 @@ class Customer < ActiveRecord::Base
 
         total_meals_next = total_meals - pause_next_week - cancel_next_week + unpause_next_week + restarts_next_week + meal_count_change + new_sign_ups 
 
-
         if count_type == "monday_regular"
             monday_regular
         elsif count_type == "monday_regular_wandas"
@@ -117,6 +116,132 @@ class Customer < ActiveRecord::Base
             total_meals
         elsif count_type == "total_meals_next"
             total_meals_next
+        elsif count_type == "neg_adjustment_pork_monday_wandas"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_pork_monday_coffee_bar"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_pork_monday_dekefir"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_pork_monday"
+            neg_adjustment_pork_monday_wandas = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_pork_monday_coffee_bar = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_pork_monday_dekefir = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_pork_monday_wandas + neg_adjustment_pork_monday_coffee_bar + neg_adjustment_pork_monday_dekefir
+        elsif count_type == "neg_adjustment_pork_thursday_wandas"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_pork_thursday_coffee_bar"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_pork_thursday_dekefir"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_pork_thursday"
+            neg_adjustment_pork_thursday_wandas = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_pork_thursday_coffee_bar = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_pork_thursday_dekefir = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_pork is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_pork is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_pork_thursday_wandas + neg_adjustment_pork_thursday_coffee_bar + neg_adjustment_pork_thursday_dekefir
+        elsif count_type == "neg_adjustment_beef_monday_wandas"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_beef_monday_coffee_bar"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_beef_monday_dekefir"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_beef_monday"
+            neg_adjustment_beef_monday_wandas = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_beef_monday_coffee_bar = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_beef_monday_dekefir = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_beef_monday_wandas + neg_adjustment_beef_monday_coffee_bar + neg_adjustment_beef_monday_dekefir
+        elsif count_type == "neg_adjustment_beef_thursday_wandas"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_beef_thursday_coffee_bar"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_beef_thursday_dekefir"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_beef_thursday"
+            neg_adjustment_beef_thursday_wandas = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_beef_thursday_coffee_bar = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_beef_thursday_dekefir = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_beef is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_beef is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_beef_thursday_wandas + neg_adjustment_beef_thursday_coffee_bar + neg_adjustment_beef_thursday_dekefir
+        elsif count_type == "neg_adjustment_poultry_monday_wandas"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_poultry_monday_coffee_bar"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_poultry_monday_dekefir"
+            (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3)
+        elsif count_type == "neg_adjustment_poultry_monday"
+            neg_adjustment_poultry_monday_wandas = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%wanda%").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_poultry_monday_coffee_bar = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_poultry_monday_dekefir = (active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3) + (active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_monday).to_i/3)
+            neg_adjustment_poultry_monday_wandas + neg_adjustment_poultry_monday_coffee_bar + neg_adjustment_poultry_monday_dekefir
+        elsif count_type == "neg_adjustment_poultry_thursday_wandas"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_poultry_thursday_coffee_bar"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_poultry_thursday_dekefir"
+            (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3)
+        elsif count_type == "neg_adjustment_poultry_thursday"        
+            neg_adjustment_poultry_thursday_wandas = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%wanda%").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_poultry_thursday_coffee_bar = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "coffee%bar").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_poultry_thursday_dekefir = (active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3) + (active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null and no_poultry is true", "%dekefir%").sum(:regular_meals_on_thursday).to_i/3)
+            neg_adjustment_poultry_thursday_wandas + neg_adjustment_poultry_thursday_coffee_bar + neg_adjustment_poultry_thursday_dekefir
+        elsif count_type == "neg_adjustment_poultry_next_monday"        
+            current_customers = active_nonpaused_customers.map {|c| c.stripe_customer_id} #in
+            pausing_customers = StopQueue.where(stop_type:"pause").map {|q| q.stripe_customer_id} #not in
+            canceling_customers = StopQueue.where(stop_type:"cancel").map {|q| q.stripe_customer_id} #not in
+            unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
+            restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
+            new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+            
+            preference_negs_master_subset.where(no_poultry:true).sum(:regular_meals_on_monday).to_i/3
+        elsif count_type == "neg_adjustment_beef_next_monday"
+            current_customers = active_nonpaused_customers.map {|c| c.stripe_customer_id} #in
+            pausing_customers = StopQueue.where(stop_type:"pause").map {|q| q.stripe_customer_id} #not in
+            canceling_customers = StopQueue.where(stop_type:"cancel").map {|q| q.stripe_customer_id} #not in
+            unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
+            restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
+            new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+
+            preference_negs_master_subset.where(no_beef:true).sum(:regular_meals_on_monday).to_i/3
+        elsif count_type == "neg_adjustment_pork_next_monday"
+            current_customers = active_nonpaused_customers.map {|c| c.stripe_customer_id} #in
+            pausing_customers = StopQueue.where(stop_type:"pause").map {|q| q.stripe_customer_id} #not in
+            canceling_customers = StopQueue.where(stop_type:"cancel").map {|q| q.stripe_customer_id} #not in
+            unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
+            restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
+            new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+
+            preference_negs_master_subset.where(no_pork:true).sum(:regular_meals_on_monday).to_i/3
+        elsif count_type == "neg_adjustment_poultry_next_thursday"        
+            current_customers = active_nonpaused_customers.map {|c| c.stripe_customer_id} #in
+            pausing_customers = StopQueue.where(stop_type:"pause").map {|q| q.stripe_customer_id} #not in
+            canceling_customers = StopQueue.where(stop_type:"cancel").map {|q| q.stripe_customer_id} #not in
+            unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
+            restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
+            new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+
+            preference_negs_master_subset.where(no_poultry:true).sum(:regular_meals_on_thursday).to_i/3
+        elsif count_type == "neg_adjustment_beef_next_thursday"
+            current_customers = active_nonpaused_customers.map {|c| c.stripe_customer_id} #in
+            pausing_customers = StopQueue.where(stop_type:"pause").map {|q| q.stripe_customer_id} #not in
+            canceling_customers = StopQueue.where(stop_type:"cancel").map {|q| q.stripe_customer_id} #not in
+            unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
+            restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
+            new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+
+            preference_negs_master_subset.where(no_beef:true).sum(:regular_meals_on_thursday).to_i/3
+        elsif count_type == "neg_adjustment_pork_next_thursday"
+            current_customers = active_nonpaused_customers.map {|c| c.stripe_customer_id} #in
+            pausing_customers = StopQueue.where(stop_type:"pause").map {|q| q.stripe_customer_id} #not in
+            canceling_customers = StopQueue.where(stop_type:"cancel").map {|q| q.stripe_customer_id} #not in
+            unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
+            restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
+            new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+
+            preference_negs_master_subset.where(no_pork:true).sum(:regular_meals_on_thursday).to_i/3
         elsif count_type == "regular_meals_next_monday"
             pause_next_monday_regular = StopQueue.where(stop_type:"pause").map {|q| q.customer.regular_meals_on_monday.to_i }.inject {|sum, x| sum + x}.to_i
             cancel_next_monday_regular = StopQueue.where(stop_type:"cancel").map {|q| q.customer.regular_meals_on_monday.to_i }.inject {|sum, x| sum + x}.to_i
@@ -126,7 +251,6 @@ class Customer < ActiveRecord::Base
             new_sign_ups_next_monday_regular = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).sum(:regular_meals_on_monday).to_i
             
             regular_meals_next_monday = monday_regular - pause_next_monday_regular - cancel_next_monday_regular + unpause_next_monday_regular + restarts_next_monday_regular + meal_count_change_next_monday_regular + new_sign_ups_next_monday_regular
-
 
         elsif count_type == "regular_meals_next_thursday"
             pause_next_thursday_regular = StopQueue.where(stop_type:"pause").map {|q| q.customer.regular_meals_on_thursday.to_i }.inject {|sum, x| sum + x}.to_i
@@ -250,14 +374,6 @@ class Customer < ActiveRecord::Base
             hub_unassigned_meals_next_thursday = thursday_hub_unassigned - pause_next_thursday_hub_unassigned - cancel_next_thursday_hub_unassigned + unpause_next_thursday_hub_unassigned + restarts_next_thursday_hub_unassigned + meal_count_change_next_thursday_hub_unassigned + new_sign_ups_next_thursday_hub_unassigned + hub_change_next_thursday_hub_unassigned
 
         end
-
-            #template for meal count change calculation
-            # - StopQueue.joins{customer}.where{(stop_queues.stop_type =~ "change_hub") & (stop_queues.stripe_customer_id << StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}) & (stop_queues.stripe_customer_id >> StopQueue.where(stop_type:["change_sub"]).map {|s| s.stripe_customer_id}) & ((customers.monday_pickup_hub =~ '%wanda%') | (customers.monday_delivery_hub =~ '%wanda%'))}.to_a.sum{|e| e.updated_reg_mon.to_i + e.updated_grn_mon.to_i} #all current wanda's customers who is changing subscription
-            # - StopQueue.joins{customer}.where{(stop_queues.stop_type =~ "change_hub") & (stop_queues.stripe_customer_id << StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}) & (stop_queues.stripe_customer_id << StopQueue.where(stop_type:["change_sub"]).map {|s| s.stripe_customer_id}) & ((customers.monday_pickup_hub =~ '%wanda%') | (customers.monday_delivery_hub =~ '%wanda%'))}.to_a.sum{|e| e.customer.regular_meals_on_monday.to_i + e.customer.green_meals_on_monday.to_i} #all current wanda's customers who is not changing subscription
-            # + StopQueue.where{(stop_type =~ "change_hub") & (stripe_customer_id << StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}) & (cancel_reason =~ "%wanda%") & (stripe_customer_id >> StopQueue.where(stop_type:["change_sub"]).map {|s| s.stripe_customer_id})}.to_a.sum{|e| e.updated_reg_mon.to_i + e.updated_grn_mon.to_i} #all future wanda's customers who is changing subscription
-            # + StopQueue.where{(stop_type =~ "change_hub") & (stripe_customer_id << StopQueue.where(stop_type:["pause","cancel"]).map {|s| s.stripe_customer_id}) & (cancel_reason =~ "%wanda%") & (stripe_customer_id << StopQueue.where(stop_type:["change_sub"]).map {|s| s.stripe_customer_id})}.to_a.sum{|e| e.customer.regular_meals_on_monday.to_i + e.customer.green_meals_on_monday.to_i} #all future wanda's customers who is not changing subscription
-
-
     end
 
 end

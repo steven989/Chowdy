@@ -15,6 +15,7 @@ class UsersController < ApplicationController
     def profile
 
         @current_user = current_user
+
         if @current_user.role == "admin"
             current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
             active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
@@ -36,6 +37,46 @@ class UsersController < ApplicationController
                 @thursday_green_dekefir = Customer.meal_count("thursday_green_dekefir")
             @total_meals = Customer.meal_count("total_meals")
             @total_meals_next = Customer.meal_count("total_meals_next")
+
+            @neg_adjustment_pork_monday = -Customer.meal_count("neg_adjustment_pork_monday").to_i
+            @neg_adjustment_beef_monday = -Customer.meal_count("neg_adjustment_pork_monday").to_i
+            @neg_adjustment_poultry_monday = -Customer.meal_count("neg_adjustment_pork_monday").to_i
+
+            @neg_adjustment_pork_monday_wandas = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+            @neg_adjustment_beef_monday_wandas = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+            @neg_adjustment_poultry_monday_wandas = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+
+            @neg_adjustment_pork_monday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+            @neg_adjustment_beef_monday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+            @neg_adjustment_poultry_monday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+
+            @neg_adjustment_pork_monday_dekefir = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+            @neg_adjustment_beef_monday_dekefir = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+            @neg_adjustment_poultry_monday_dekefir = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
+
+            @neg_adjustment_pork_thursday = -Customer.meal_count("neg_adjustment_pork_thursday").to_i
+            @neg_adjustment_beef_thursday = -Customer.meal_count("neg_adjustment_pork_thursday").to_i
+            @neg_adjustment_poultry_thursday = -Customer.meal_count("neg_adjustment_pork_thursday").to_i
+
+            @neg_adjustment_pork_thursday = -Customer.meal_count("neg_adjustment_pork_thursday").to_i
+            @neg_adjustment_beef_thursday = -Customer.meal_count("neg_adjustment_pork_thursday").to_i
+            @neg_adjustment_poultry_thursday = -Customer.meal_count("neg_adjustment_pork_thursday").to_i
+
+            @neg_adjustment_pork_thursday_wandas = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+            @neg_adjustment_beef_thursday_wandas = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+            @neg_adjustment_poultry_thursday_wandas = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+
+            @neg_adjustment_pork_thursday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+            @neg_adjustment_beef_thursday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+            @neg_adjustment_poultry_thursday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+
+            @neg_adjustment_pork_thursday_dekefir = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+            @neg_adjustment_beef_thursday_dekefir = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+            @neg_adjustment_poultry_thursday_dekefir = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
+
+
+
+
 
             active_nonpaused_customers_include_new_signups = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:[current_pick_up_date,StartDate.first.start_date.to_date])
             @customers_with_missing_info = active_nonpaused_customers_include_new_signups.where("((monday_pickup_hub is null or monday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((thursday_pickup_hub is null or thursday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((monday_delivery_hub is null or monday_delivery_hub ilike '%delivery%') and recurring_delivery is not null) or ((thursday_delivery_hub is null or thursday_delivery_hub ilike '%delivery%') and recurring_delivery is not null)")

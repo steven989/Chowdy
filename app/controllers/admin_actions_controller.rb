@@ -51,7 +51,15 @@ class AdminActionsController < ApplicationController
         @thursday_dekefir = Customer.meal_count("dekefir_meals_next_thursday")
         @monday_unassigned = Customer.meal_count("hub_unassigned_meals_next_monday")
         @thursday_unassigned = Customer.meal_count("hub_unassigned_meals_next_thursday")
-        
+
+        @neg_adjustment_pork_next_monday = -Customer.meal_count("neg_adjustment_pork_next_monday").to_i
+        @neg_adjustment_beef_next_monday = -Customer.meal_count("neg_adjustment_beef_next_monday").to_i
+        @neg_adjustment_poultry_next_monday = -Customer.meal_count("neg_adjustment_poultry_next_monday").to_i
+
+        @neg_adjustment_pork_next_thursday = -Customer.meal_count("neg_adjustment_pork_next_thursday").to_i
+        @neg_adjustment_beef_next_thursday = -Customer.meal_count("neg_adjustment_beef_next_thursday").to_i
+        @neg_adjustment_poultry_next_thursday = -Customer.meal_count("neg_adjustment_poultry_next_thursday").to_i        
+
         respond_to do |format|
           format.html {
             render partial: 'form'
