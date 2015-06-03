@@ -168,7 +168,7 @@ class UsersController < ApplicationController
 
             @pick_up_text = @current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? @current_customer.monday_pickup_hub.to_s.gsub("\\","") : (@current_customer.monday_pickup_hub.to_s.gsub("\\","")+" on Monday and "+@current_customer.thursday_pickup_hub.to_s.gsub("\\","")+" on Thursday")
 
-            @show_pick_up_info_window = @current_customer.recurring_delivery.blank? ? true : false
+            @show_pick_up_info_window = (@current_customer.recurring_delivery.blank? && !@current_customer.monday_pickup_hub.nil? && !@current_customer.thursday_pickup_hub.nil?) ? true : false
 
             @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{@monday_pickup_hub_match_string}%")| (setting_attribute =~ "%#{@thursday_pickup_hub_match_string}%") ) }
             
