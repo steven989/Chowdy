@@ -161,8 +161,19 @@ class UsersController < ApplicationController
                                 SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").blank?
                         end   
 
+            if @current_customer.stop_queues.where(stop_type:"change_hub").length == 1
+                pick_up_maps_info_text_next_week =  case 
+                                when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/wanda/i).nil?
+                                    SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").blank?
+                                when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/dekefir/i).nil?
+                                    SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").blank?
+                                when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/coffee/i).nil? 
+                                    SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").blank?
+                            end   
+            end
+
             # @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
-            @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? (@current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? [{location:@current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday}] : [{location: @current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday},{location:@current_customer.thursday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_thursday}]) : [{location:@current_customer.delivery_address.to_s.sub(/\(.+\)/, "").to_s}]
+            @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ?  ( @current_customer.monday_pickup_hub.blank? ?  ( @current_customer.stop_queues.where(stop_type:"change_hub").length == 1 ? {location: @current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.to_s.sub(/\(.+\)/, "").to_s, hours:pick_up_maps_info_text_next_week} : {location: "", hours:""} ) : (@current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? [{location:@current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday}] : [{location: @current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday},{location:@current_customer.thursday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_thursday}]) ) : [{location:@current_customer.delivery_address.to_s.sub(/\(.+\)/, "").to_s, hours:""}]
 
             @pick_up_text = @current_customer.monday_pickup_hub.blank? ? (@current_customer.stop_queues.where(stop_type: "change_hub").length == 1 ? @current_customer.stop_queues.where(stop_type: "change_hub").take.cancel_reason : "" ) : (@current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? @current_customer.monday_pickup_hub.to_s.gsub("\\","") : (@current_customer.monday_pickup_hub.to_s.gsub("\\","")+" on Monday and "+@current_customer.thursday_pickup_hub.to_s.gsub("\\","")+" on Thursday"))
 
