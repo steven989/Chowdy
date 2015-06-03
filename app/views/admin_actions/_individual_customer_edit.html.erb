@@ -194,7 +194,7 @@
       <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=apply_referral", method: :put do |f| %>
             <div class="form-group">
                 <%= label_tag :referral_code %>
-                <%= text_field_tag :referral_code,nil,class: "form-control" %>
+                <%= text_field_tag :referral_code,@customer.matched_referrers_code,class: "form-control" %>
             </div>
       <%= f.submit "Apply referral", class: "btn btn-md btn-default m-t-sm" %>
       <% end %>
