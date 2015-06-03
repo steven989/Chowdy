@@ -559,6 +559,7 @@ $(function(){
                                     <table id="deliveries" class="display table table-striped m-b-none" style="font-size: 12px">
                                       <thead>
                                         <tr>
+                                          <th>Hub change requested?</th>
                                           <th>Customerm ID</th>
                                           <th>Customer Name</th>
                                           <th>Customer Email</th>
@@ -576,6 +577,7 @@ $(function(){
                                       <tbody>
                                         <% @deliveries.each do |c| %>
                                           <tr>
+                                            <th><%= (@customer_requesting_to_switch_to_pickup.include? c.stripe_customer_id) ? "Yes" : "No" %></th>
                                             <th><%= c.id %></th>
                                             <th><%= c.name %></th>
                                             <th><%= c.email %></th>

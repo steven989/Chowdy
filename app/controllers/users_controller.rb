@@ -75,15 +75,13 @@ class UsersController < ApplicationController
             @neg_adjustment_poultry_thursday_dekefir = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
 
 
-
-
-
             active_nonpaused_customers_include_new_signups = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:[current_pick_up_date,StartDate.first.start_date.to_date])
             @customers_with_missing_info = active_nonpaused_customers_include_new_signups.where("((monday_pickup_hub is null or monday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((thursday_pickup_hub is null or thursday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((monday_delivery_hub is null or monday_delivery_hub ilike '%delivery%') and recurring_delivery is not null) or ((thursday_delivery_hub is null or thursday_delivery_hub ilike '%delivery%') and recurring_delivery is not null)")
 
             @all_failed_invoices = FailedInvoice.where(paid:false)
 
-            @deliveries = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], recurring_delivery:["Yes","yes"])
+            @customer_requesting_to_switch_to_pickup = StopQueue.where{(stop_type == "change_hub") & ((cancel_reason =~ "%wanda%") |(cancel_reason =~ "%coffee%")|(cancel_reason =~ "%dekefir%"))}.map{|s| s.stripe_customer_id}
+            @deliveries = Customer.where{(active? >> ["Yes","yes"]) & (paused? >> [nil,"No","no"]) & ((recurring_delivery >> ["Yes","yes"])|((hub =~ "%delivery%") &(monday_pickup_hub == nil)))}
 
             @system_settings = SystemSetting.all
             @scheduled_tasks = ScheduledTask.all
@@ -111,7 +109,7 @@ class UsersController < ApplicationController
             @referral_dollars_earned = @number_of_referrals * 10
 
             @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value} 
-            @hubs =  SystemSetting.where(setting:"hub").map {|hub| hub.setting_value} 
+            @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3"]).map {|hub| hub.setting_value} 
             
             unless @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take.blank?
                 @requested_hub_to_change_to = @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take
@@ -166,7 +164,7 @@ class UsersController < ApplicationController
             # @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? @current_customer.hub.sub(/\(.+\)/, "").to_s : @current_customer.delivery_address.to_s
             @address_to_show_on_dashboard = @current_customer.recurring_delivery.blank? ? (@current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? [{location:@current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday}] : [{location: @current_customer.monday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_monday},{location:@current_customer.thursday_pickup_hub.to_s.sub(/\(.+\)/, "").to_s, hours:@pick_up_maps_info_text_thursday}]) : [{location:@current_customer.delivery_address.to_s.sub(/\(.+\)/, "").to_s}]
 
-            @pick_up_text = @current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? @current_customer.monday_pickup_hub.to_s.gsub("\\","") : (@current_customer.monday_pickup_hub.to_s.gsub("\\","")+" on Monday and "+@current_customer.thursday_pickup_hub.to_s.gsub("\\","")+" on Thursday")
+            @pick_up_text = @current_customer.monday_pickup_hub.blank? ? (@current_customer.stop_queues.where(stop_type: "change_hub").length == 1 ? @current_customer.stop_queues.where(stop_type: "change_hub").take.cancel_reason : "" ) : (@current_customer.monday_pickup_hub == @current_customer.thursday_pickup_hub ? @current_customer.monday_pickup_hub.to_s.gsub("\\","") : (@current_customer.monday_pickup_hub.to_s.gsub("\\","")+" on Monday and "+@current_customer.thursday_pickup_hub.to_s.gsub("\\","")+" on Thursday"))
 
             @show_pick_up_info_window = (@current_customer.recurring_delivery.blank? && !@current_customer.monday_pickup_hub.nil? && !@current_customer.thursday_pickup_hub.nil?) ? true : false
 
