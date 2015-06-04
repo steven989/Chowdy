@@ -35,24 +35,32 @@ namespace :customers do
             StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
                 if current_customer.stripe_subscription_id != nil
-                    case queue_item.updated_meals
-                        when 6
-                            meals_per_week = "6mealswk" 
-                        when 8
-                            meals_per_week = "8mealswk"
-                        when 10
-                            meals_per_week = "10mealswk"
-                        when 12
-                            meals_per_week = "12mealsweek"
-                        when 14
-                            meals_per_week = "14mealsweek"
-                    end                    
-                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                    _current_period_end = stripe_subscription.current_period_end
-                    stripe_subscription.plan = meals_per_week
-                    stripe_subscription.trial_end = _current_period_end
-                    stripe_subscription.prorate = false
-                    if stripe_subscription.save
+                    begin
+                        case queue_item.updated_meals
+                            when 6
+                                meals_per_week = "6mealswk" 
+                            when 8
+                                meals_per_week = "8mealswk"
+                            when 10
+                                meals_per_week = "10mealswk"
+                            when 12
+                                meals_per_week = "12mealsweek"
+                            when 14
+                                meals_per_week = "14mealsweek"
+                        end                    
+                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                        _current_period_end = stripe_subscription.current_period_end
+                        stripe_subscription.plan = meals_per_week
+                        stripe_subscription.trial_end = _current_period_end
+                        stripe_subscription.prorate = false
+                        stripe_subscription.save
+                    rescue => error
+                        puts '---------------------------------------------------'
+                        puts "something went wrong trying to change subscription during weekly task"
+                        puts error.message
+                        puts '---------------------------------------------------' 
+                        CustomerMailer.rescued_error(current_customer,error.message).deliver
+                    else
                         current_customer.update(
                             total_meals_per_week: queue_item.updated_meals, 
                             number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
@@ -63,6 +71,16 @@ namespace :customers do
                             )
                             queue_item.destroy
                     end
+                else
+                    current_customer.update(
+                        total_meals_per_week: queue_item.updated_meals, 
+                        number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
+                        regular_meals_on_monday: queue_item.updated_reg_mon, 
+                        green_meals_on_monday: queue_item.updated_grn_mon,
+                        regular_meals_on_thursday: queue_item.updated_reg_thu,
+                        green_meals_on_thursday: queue_item.updated_grn_thu
+                        )
+                        queue_item.destroy                    
                 end
             end
         end
@@ -146,24 +164,32 @@ namespace :customers do
             StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
                 if current_customer.stripe_subscription_id != nil
-                    case queue_item.updated_meals
-                        when 6
-                            meals_per_week = "6mealswk" 
-                        when 8
-                            meals_per_week = "8mealswk"
-                        when 10
-                            meals_per_week = "10mealswk"
-                        when 12
-                            meals_per_week = "12mealsweek"
-                        when 14
-                            meals_per_week = "14mealsweek"
-                    end                    
-                    stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                    _current_period_end = stripe_subscription.current_period_end
-                    stripe_subscription.plan = meals_per_week
-                    stripe_subscription.trial_end = _current_period_end
-                    stripe_subscription.prorate = false
-                    if stripe_subscription.save
+                    begin
+                        case queue_item.updated_meals
+                            when 6
+                                meals_per_week = "6mealswk" 
+                            when 8
+                                meals_per_week = "8mealswk"
+                            when 10
+                                meals_per_week = "10mealswk"
+                            when 12
+                                meals_per_week = "12mealsweek"
+                            when 14
+                                meals_per_week = "14mealsweek"
+                        end                    
+                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                        _current_period_end = stripe_subscription.current_period_end
+                        stripe_subscription.plan = meals_per_week
+                        stripe_subscription.trial_end = _current_period_end
+                        stripe_subscription.prorate = false
+                        stripe_subscription.save
+                    rescue => error
+                        puts '---------------------------------------------------'
+                        puts "something went wrong trying to change subscription during weekly task"
+                        puts error.message
+                        puts '---------------------------------------------------' 
+                        CustomerMailer.rescued_error(current_customer,error.message).deliver
+                    else
                         current_customer.update(
                             total_meals_per_week: queue_item.updated_meals, 
                             number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
@@ -171,8 +197,18 @@ namespace :customers do
                             green_meals_on_monday: queue_item.updated_grn_mon,
                             regular_meals_on_thursday: queue_item.updated_reg_thu,
                             green_meals_on_thursday: queue_item.updated_grn_thu
-                            )
+                            )      
                     end
+
+                else
+                    current_customer.update(
+                        total_meals_per_week: queue_item.updated_meals, 
+                        number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
+                        regular_meals_on_monday: queue_item.updated_reg_mon, 
+                        green_meals_on_monday: queue_item.updated_grn_mon,
+                        regular_meals_on_thursday: queue_item.updated_reg_thu,
+                        green_meals_on_thursday: queue_item.updated_grn_thu
+                        )                    
                 end
                 queue_item.destroy
             end
