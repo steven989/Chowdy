@@ -534,7 +534,7 @@ $(function(){
                                       <tbody>
                                         <% @all_failed_invoices.each do |i| %>
                                           <tr>
-                                            <th><%= link_to "Close", mark_failed_invoice_as_paid_path(i), class: "btn btn-s-md btn-warning btn-rounded" %></th>
+                                            <th><%= link_to "Close", mark_failed_invoice_as_paid_path(i), class: "btn btn-s-md btn-warning btn-rounded", style: "min-width: 0px;width: 60px;" %></th>
                                             <th><%= i.customer.id %></th>
                                             <th><%= i.customer.name %></th>
                                             <th><%= i.customer.email %></th>
