@@ -87,7 +87,29 @@ class AdminActionsController < ApplicationController
 
     def mark_failed_invoice_as_paid
         if invoice = FailedInvoice.where(id: params[:id]).take
-            invoice.update_attributes(paid:true)
+            begin
+                stripe_invoice = Stripe::Invoice.retrieve(invoice.invoice_number)
+                stripe_invoice.closed = true
+                stripe_invoice.save
+            rescue Stripe::InvalidRequestError => error
+                if error.message.scan(/paid/i).length > 0
+                    invoice.update_attributes(paid:true, next_attempt:nil, date_paid: Date.today)
+                else
+                    puts '---------------------------------------------------'
+                    puts 'Something went wrong trying to close an invoice'
+                    puts error.message
+                    puts '---------------------------------------------------'
+                    CustomerMailer.rescued_error(invoice.customer,error.message).deliver                    
+                end
+            rescue => error
+                puts '---------------------------------------------------'
+                puts 'Something went wrong trying to close an invoice'
+                puts error.message
+                puts '---------------------------------------------------'
+                CustomerMailer.rescued_error(invoice.customer,error.message).deliver
+            else
+                invoice.update_attributes(paid:true, next_attempt:nil, date_paid: Date.today)
+            end
         end
     end
 

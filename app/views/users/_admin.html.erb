@@ -519,7 +519,7 @@ $(function(){
                                     <table id="overdue_invoice" class="display table table-striped m-b-none" style="font-size: 12px">
                                       <thead>
                                         <tr>
-                                          <th>Mark as paid</th>  
+                                          <th>Close invoice</th>  
                                           <th>Customerm ID</th>
                                           <th>Customer Name</th>
                                           <th>Customer Email</th>
@@ -534,7 +534,7 @@ $(function(){
                                       <tbody>
                                         <% @all_failed_invoices.each do |i| %>
                                           <tr>
-                                            <th><%= link_to "Paid", mark_failed_invoice_as_paid_path(i), class: "btn btn-s-md btn-warning btn-rounded" %></th>
+                                            <th><%= link_to "Close", mark_failed_invoice_as_paid_path(i), class: "btn btn-s-md btn-warning btn-rounded" %></th>
                                             <th><%= i.customer.id %></th>
                                             <th><%= i.customer.name %></th>
                                             <th><%= i.customer.email %></th>
