@@ -62,7 +62,11 @@
       <div class="line line-dashed b-b line-lg pull-in"></div>
     <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=meal_count", method: :put do |f| %>
       <div class="row">
-        <p>Outstanding requests: <%= @requests %></p>
+        <div class="col-sm-12">
+          <p>Outstanding requests: <%= @requests %></p>
+        </div>
+      </div>
+      <div class="row">
         <div class="col-sm-2">
           <div class="form-group">
               <%= f.label :regular_meals_on_monday %>
@@ -105,7 +109,12 @@
       <div class="line line-dashed b-b line-lg pull-in"></div>
     <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=hub", method: :put do |f| %>
       <div class="row">
-        <p>Outstanding requests: <%= @requests %></p>
+        <div class="col-sml12">
+          <p>Outstanding requests: <%= @requests %></p>  
+        </div>
+      </div>
+      <div class="row">
+        
         <div class="col-sm-6">
           <div class="form-group">
               <%= f.label :monday_pickup_hub %>
