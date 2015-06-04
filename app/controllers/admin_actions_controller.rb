@@ -111,6 +111,7 @@ class AdminActionsController < ApplicationController
                 invoice.update_attributes(paid:true, next_attempt:nil, date_paid: Date.today)
             end
         end
+        redirect_to user_profile_path+"#dashboard"
     end
 
     def individual_customer_update
