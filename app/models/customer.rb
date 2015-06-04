@@ -37,7 +37,7 @@ class Customer < ActiveRecord::Base
     def formatted_request_queues
         iterator = 1
         output_array = []
-        c.stop_queues.each do |sq|
+        self.stop_queues.each do |sq|
             if sq.stop_type == "change_sub"
                 if sq.updated_meals.to_i  < sq.customer.total_meals_per_week
                     output_array.push("#{iterator}: decrease to #{sq.updated_meals.to_i} meals")
