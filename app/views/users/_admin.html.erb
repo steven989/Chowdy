@@ -25,6 +25,7 @@ $(function(){
        });
 
        $('#overdue_invoice').DataTable({
+        scrollX: true,
         searching: false
        });
 
@@ -479,6 +480,7 @@ $(function(){
                                       <table id="missing_hub_info" class="display table table-striped m-b-none" style="font-size: 12px">
                                         <thead>
                                           <tr>
+                                            <th>Edit</th>
                                             <th>Customer ID</th>
                                             <th>Customer Name</th>
                                             <th>Customer Email</th>
@@ -493,6 +495,7 @@ $(function(){
                                         <tbody>
                                           <% @customers_with_missing_info.each do |c| %>
                                             <tr>
+                                              <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= admin_edit_customer_path(c) %>" style="min-width: 0px;width: 60px;">Edit</button></td>
                                               <td><%= c.id %></td>
                                               <td><%= c.name %></td>
                                               <td><%= c.email %></td>
@@ -519,6 +522,7 @@ $(function(){
                                     <table id="overdue_invoice" class="display table table-striped m-b-none" style="font-size: 12px">
                                       <thead>
                                         <tr>
+                                          <th>Stripe</th>
                                           <th>Close invoice</th>  
                                           <th>Customerm ID</th>
                                           <th>Customer Name</th>
@@ -534,16 +538,17 @@ $(function(){
                                       <tbody>
                                         <% @all_failed_invoices.each do |i| %>
                                           <tr>
-                                            <th><%= link_to "Close", mark_failed_invoice_as_paid_path(i), class: "btn btn-s-md btn-warning btn-rounded", style: "min-width: 0px;width: 60px;" %></th>
-                                            <th><%= i.customer.id %></th>
-                                            <th><%= i.customer.name %></th>
-                                            <th><%= i.customer.email %></th>
-                                            <th><%= i.customer.created_at.strftime("%Y-%m-%d") %></th>
-                                            <th><%= i.invoice_number %></th>
-                                            <th><%= i.invoice_date %></th>
-                                            <th><%= i.number_of_attempts %></th>
-                                            <th>$<%= i.invoice_amount.to_f/100 %></th>
-                                            <th><%= i.latest_attempt_date %></th>
+                                            <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{i.customer.stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
+                                            <td><%= link_to "Close", mark_failed_invoice_as_paid_path(i), class: "btn btn-s-md btn-warning btn-rounded", style: "min-width: 0px;width: 60px;" %></td>
+                                            <td><%= i.customer.id %></td>
+                                            <td><%= i.customer.name %></td>
+                                            <td><%= i.customer.email %></td>
+                                            <td><%= i.customer.created_at.strftime("%Y-%m-%d") %></td>
+                                            <td><%= i.invoice_number %></td>
+                                            <td><%= i.invoice_date %></td>
+                                            <td><%= i.number_of_attempts %></td>
+                                            <td>$<%= i.invoice_amount.to_f/100 %></td>
+                                            <td><%= i.latest_attempt_date %></td>
                                           </tr>
                                         <% end %>
                                       </tbody>
@@ -579,19 +584,19 @@ $(function(){
                                       <tbody>
                                         <% @deliveries.each do |c| %>
                                           <tr>
-                                            <th><%= (@customer_requesting_to_switch_to_pickup.include? c.stripe_customer_id) ? "Yes" : "No" %></th>
-                                            <th><%= c.id %></th>
-                                            <th><%= c.name %></th>
-                                            <th><%= c.email %></th>
-                                            <th><%= c.phone_number %></th>
-                                            <th><%= c.delivery_address %></th>
-                                            <th><%= c.hub %></th>
-                                            <th><%= c.monday_delivery_hub %></th>
-                                            <th><%= c.thursday_delivery_hub %></th>
-                                            <th><%= c.no_pork %></th>
-                                            <th><%= c.no_beef %></th>
-                                            <th><%= c.no_poultry %></th>
-                                            <th><%= c.special_delivery_instructions %></th>
+                                            <td><%= (@customer_requesting_to_switch_to_pickup.include? c.stripe_customer_id) ? "Yes" : "No" %></td>
+                                            <td><%= c.id %></td>
+                                            <td><%= c.name %></td>
+                                            <td><%= c.email %></td>
+                                            <td><%= c.phone_number %></td>
+                                            <td><%= c.delivery_address %></td>
+                                            <td><%= c.hub %></td>
+                                            <td><%= c.monday_delivery_hub %></td>
+                                            <td><%= c.thursday_delivery_hub %></td>
+                                            <td><%= c.no_pork %></td>
+                                            <td><%= c.no_beef %></td>
+                                            <td><%= c.no_poultry %></td>
+                                            <td><%= c.special_delivery_instructions %></td>
                                           </tr>
                                         <% end %>
                                       </tbody>
@@ -641,13 +646,13 @@ $(function(){
                                       <tbody>
                                         <% @all_customers.each do |s| %>
                                           <tr>
-                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= admin_edit_customer_path(s) %>" style="min-width: 0px;width: 60px;">Edit</button></th>
-                                            <th><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{s.stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></th>
-                                            <th><%= s.user.blank? ? "No" : "Yes" %></th>
-                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= resend_sign_up_link_form_path(s) %>" style="min-width: 0px;width: 60px;">Send</button></th>
-                                            <th><%= s.formatted_request_queues %></th>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= admin_edit_customer_path(s) %>" style="min-width: 0px;width: 60px;">Edit</button></td>
+                                            <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{s.stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
+                                            <td><%= s.user.blank? ? "No" : "Yes" %></td>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= resend_sign_up_link_form_path(s) %>" style="min-width: 0px;width: 60px;">Send</button></td>
+                                            <td><%= s.formatted_request_queues %></td>
                                             <% @customer_column_names.each do |c| %>
-                                              <th><%= s.send(c.to_sym) %></th>
+                                              <td><%= s.send(c.to_sym) %></td>
                                             <% end %>
                                           </tr>
                                         <% end %>
@@ -689,19 +694,19 @@ $(function(){
                                       <tbody>
                                         <% @promotions.each do |p| %>
                                           <tr>
-                                            <th><%= p.id %></th>
-                                            <th><%= p.active %></th>
-                                            <th><%= p.amount_in_cents %></th>
-                                            <th><%= p.start_date.strftime("%Y-%m-%d") unless p.start_date.nil? %></th>
-                                            <th><%= p.end_date.strftime("%Y-%m-%d") unless p.end_date.nil? %></th>
-                                            <th><%= p.code %></th>
-                                            <th><%= p.stripe_coupon_id %></th>
-                                            <th><%= p.immediate_refund %></th>
-                                            <th><%= p.redemptions %></th>
-                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_promotion_path(p) %>" style="min-width: 0px;width: 60px;">Edit</button></th>
+                                            <td><%= p.id %></td>
+                                            <td><%= p.active %></td>
+                                            <td><%= p.amount_in_cents %></td>
+                                            <td><%= p.start_date.strftime("%Y-%m-%d") unless p.start_date.nil? %></td>
+                                            <td><%= p.end_date.strftime("%Y-%m-%d") unless p.end_date.nil? %></td>
+                                            <td><%= p.code %></td>
+                                            <td><%= p.stripe_coupon_id %></td>
+                                            <td><%= p.immediate_refund %></td>
+                                            <td><%= p.redemptions %></td>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_promotion_path(p) %>" style="min-width: 0px;width: 60px;">Edit</button></td>
                                             <% @coupon_activate_button = p.active ? "Stop" : "Start" %>
-                                            <th><%= link_to @coupon_activate_button, activate_promotion_path(p), method: :put, class: "btn btn-s-md btn-warning btn-rounded", style:"min-width: 0px;width: 60px;" %></th>
-                                            <th><%= link_to "Delete", promotion_path(p), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style: "min-width: 0px;width: 60px;" %></th>
+                                            <td><%= link_to @coupon_activate_button, activate_promotion_path(p), method: :put, class: "btn btn-s-md btn-warning btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
+                                            <td><%= link_to "Delete", promotion_path(p), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style: "min-width: 0px;width: 60px;" %></td>
                                           </tr>
                                         <% end %>
                                       </tbody>
@@ -738,12 +743,12 @@ $(function(){
                                       <tbody>
                                         <% @system_settings.each do |s| %>
                                           <tr>
-                                            <th><%= s.id %></th>
-                                            <th><%= s.setting %></th>
-                                            <th><%= s.setting_attribute %></th>
-                                            <th><%= s.setting_value %></th>
-                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_system_setting_path(s) %>">Edit</button></th>
-                                            <th><%= link_to "Delete", system_setting_path(s), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %></th>
+                                            <td><%= s.id %></td>
+                                            <td><%= s.setting %></td>
+                                            <td><%= s.setting_attribute %></td>
+                                            <td><%= s.setting_value %></td>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_system_setting_path(s) %>">Edit</button></td>
+                                            <td><%= link_to "Delete", system_setting_path(s), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %></td>
                                           </tr>
                                         <% end %>
                                       </tbody>
@@ -782,21 +787,21 @@ $(function(){
                                       <tbody>
                                         <% @scheduled_tasks.each do |t| %>
                                           <tr>
-                                            <th><%= t.id %></th>
-                                            <th><%= t.task_name %></th>
-                                            <th><%= t.day_of_week %></th>
-                                            <th><%= t.hour_of_day %></th>
-                                            <th><%= t.parameter_1 %></th>
-                                            <th><%= t.parameter_1_type %></th>
-                                            <th><%= t.parameter_2 %></th>
-                                            <th><%= t.parameter_2_type %></th>
-                                            <th><%= t.parameter_3 %></th>
-                                            <th><%= t.parameter_3_type %></th>
-                                            <th><%= t.last_attempt_date %></th>
-                                            <th><%= t.last_successful_run %></th>
-                                            <th><a class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= run_task_path(t) %>">Run now</a></th>
-                                            <th><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_scheduled_task_path(t) %>">Edit</button></th>
-                                            <th><%= link_to "Delete", scheduled_task_path(t), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %></th>
+                                            <td><%= t.id %></td>
+                                            <td><%= t.task_name %></td>
+                                            <td><%= t.day_of_week %></td>
+                                            <td><%= t.hour_of_day %></td>
+                                            <td><%= t.parameter_1 %></td>
+                                            <td><%= t.parameter_1_type %></td>
+                                            <td><%= t.parameter_2 %></td>
+                                            <td><%= t.parameter_2_type %></td>
+                                            <td><%= t.parameter_3 %></td>
+                                            <td><%= t.parameter_3_type %></td>
+                                            <td><%= t.last_attempt_date %></td>
+                                            <td><%= t.last_successful_run %></td>
+                                            <td><a class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= run_task_path(t) %>">Run now</a></td>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_scheduled_task_path(t) %>">Edit</button></td>
+                                            <td><%= link_to "Delete", scheduled_task_path(t), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %></td>
                                           </tr>
                                         <% end %>
                                       </tbody>
