@@ -49,7 +49,7 @@ class Customer < ActiveRecord::Base
             elsif sq.stop_type == "pause"
                 output_array.push("#{iterator}: pause until #{sq.end_date}")
             elsif sq.stop_type == "change_hub"
-                output_array.push("#{iterator}: change hub to #{sq.cancel_Reason}")
+                output_array.push("#{iterator}: change hub to #{sq.cancel_reason}")
             elsif sq.stop_type == "restart"
                 output_array.push("#{iterator}: restart")
             else
