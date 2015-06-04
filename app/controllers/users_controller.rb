@@ -119,10 +119,10 @@ class UsersController < ApplicationController
             @delivery_boundary_coordinates = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"coordinates").take.setting_value
 
             if ["Yes","yes"].include? @current_customer.recurring_delivery
-                @monday_pickup_hub_match_string = "delivery"
-                @thursday_pickup_hub_match_string = "delivery"
+                monday_pickup_hub_match_string = "delivery"
+                thursday_pickup_hub_match_string = "delivery"
             else
-                @monday_pickup_hub_match_string = case 
+                monday_pickup_hub_match_string = case 
                                 when !@current_customer.monday_pickup_hub.match(/wanda/i).nil?
                                     "wanda"
                                 when !@current_customer.monday_pickup_hub.match(/dekefir/i).nil?
@@ -131,7 +131,7 @@ class UsersController < ApplicationController
                                     "coffee"
                             end
 
-                @thursday_pickup_hub_match_string = case 
+                thursday_pickup_hub_match_string = case 
                                 when !@current_customer.thursday_pickup_hub.match(/wanda/i).nil?
                                     "wanda"
                                 when !@current_customer.thursday_pickup_hub.match(/dekefir/i).nil?
@@ -141,7 +141,6 @@ class UsersController < ApplicationController
                             end
 
             end
-            
          
             @pick_up_maps_info_text_monday =  case 
                             when !@current_customer.monday_pickup_hub.match(/wanda/i).nil?
@@ -162,6 +161,17 @@ class UsersController < ApplicationController
                         end   
 
             if @current_customer.stop_queues.where(stop_type:"change_hub").length == 1
+
+                next_week_hub_match_string = case 
+                    when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/wanda/i).nil?
+                        "wanda"
+                    when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/dekefir/i).nil?
+                        "dekefir"
+                    when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/coffee/i).nil? 
+                        "coffee"
+                end
+
+
                 pick_up_maps_info_text_next_week =  case 
                                 when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/wanda/i).nil?
                                     SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").blank?
@@ -179,7 +189,7 @@ class UsersController < ApplicationController
 
             @show_pick_up_info_window = (@current_customer.recurring_delivery.blank? && ((!@current_customer.monday_pickup_hub.nil? && !@current_customer.thursday_pickup_hub.nil?) || (@current_customer.stop_queues.where(stop_type:"change_hub").length == 1))) ? true : false
 
-            @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{@monday_pickup_hub_match_string}%")| (setting_attribute =~ "%#{@thursday_pickup_hub_match_string}%") ) }
+            @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{monday_pickup_hub_match_string}%")|(setting_attribute =~ "%#{thursday_pickup_hub_match_string}%") | (setting_attribute =~ "%#{next_week_hub_match_string}%") ) }
             
             if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
                 @total_meals = @current_customer.total_meals_per_week.to_i
