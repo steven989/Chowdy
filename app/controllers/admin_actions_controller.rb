@@ -85,6 +85,12 @@ class AdminActionsController < ApplicationController
         end 
     end
 
+    def mark_failed_invoice_as_paid
+        if invoice = FailedInvoice.where(id: params[:id]).take
+            invoice.update_attributes(paid:true)
+        end
+    end
+
     def individual_customer_update
         @customer = Customer.where(id:params[:id]).take
         _sponsor = @customer.sponsored? ? "1" : "0"

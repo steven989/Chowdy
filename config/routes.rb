@@ -25,6 +25,7 @@ Chowdy::Application.routes.draw do
   get 'admin_action/next_week_breakdown' => 'admin_actions#next_week_breakdown', as: 'next_week_breakdown'
   get 'admin_action/customer/:id/edit' => 'admin_actions#individual_customer_edit', as: 'admin_edit_customer'
   put 'admin_action/customer/:id/update' => 'admin_actions#individual_customer_update', as: 'admin_update_customer'
+  get 'admin_action/failed_invoice/:id/mark_as_paid' => 'admin_actions#mark_failed_invoice_as_paid', as: 'mark_failed_invoice_as_paid'
 
   resources :password_resets
   resources :system_settings
