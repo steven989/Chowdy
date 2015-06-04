@@ -32,7 +32,7 @@ class SystemSettingsController < ApplicationController
   end
 
   def new_announcement
-    @hubs =  SystemSetting.where(setting:"hub").map {|hub| hub.setting_value} 
+    @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3"]).map {|hub| hub.setting_value} 
     @hubs.push("Delivery")
     @system_setting = SystemSetting.new
     respond_to do |format|
