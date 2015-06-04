@@ -189,7 +189,8 @@ class UsersController < ApplicationController
 
             @show_pick_up_info_window = (@current_customer.recurring_delivery.blank? && ((!@current_customer.monday_pickup_hub.nil? && !@current_customer.thursday_pickup_hub.nil?) || (@current_customer.stop_queues.where(stop_type:"change_hub").length == 1))) ? true : false
 
-            @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{monday_pickup_hub_match_string}%")|(setting_attribute =~ "%#{thursday_pickup_hub_match_string}%") | (setting_attribute =~ "%#{next_week_hub_match_string}%") ) }
+            @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{monday_pickup_hub_match_string}%")|(setting_attribute =~ "%#{thursday_pickup_hub_match_string}%") | (setting_attribute =~ "%#{next_week_hub_match_string ||= "xxxx"}%"))}
+
             
             if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
                 @total_meals = @current_customer.total_meals_per_week.to_i
