@@ -34,6 +34,32 @@ class Customer < ActiveRecord::Base
         end
     end
 
+    def formatted_request_queues
+        iterator = 1
+        output_array = []
+        c.stop_queues.each do |sq|
+            if sq.stop_type == "change_sub"
+                if sq.updated_meals.to_i  < sq.customer.total_meals_per_week
+                    output_array.push("#{iterator}: decrease to #{sq.updated_meals.to_i} meals")
+                else
+                    output_array.push("#{iterator}: increase to #{sq.updated_meals.to_i} meals")
+                end
+            elsif sq.stop_type == "cancel"
+                output_array.push("#{iterator}: cancel")
+            elsif sq.stop_type == "pause"
+                output_array.push("#{iterator}: pause until #{sq.end_date}")
+            elsif sq.stop_type == "change_hub"
+                output_array.push("#{iterator}: change hub to #{sq.cancel_Reason}")
+            elsif sq.stop_type == "restart"
+                output_array.push("#{iterator}: restart")
+            else
+                output_array.push("#{iterator}: "+sq.stop_type.capitalize)
+            end
+            iterator += 1
+        end
+        output_array.join(", ")
+    end
+
     def create_referral_code
         base = self.name.split(/\s/)[0].downcase
         base_last = self.name.split(/\s/)[1][0..3].downcase unless self.name.split(/\s/)[1].nil?

@@ -76,7 +76,7 @@ class AdminActionsController < ApplicationController
         @amount_refunded_this_week = (Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).sum(:amount_refunded).to_f)/100.00
         @active_coupons = Promotion.where(active:true).map {|p| p.code }
         @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value}.push("Non-payment")
-        @requests = @customer.stop_queues.map {|r| r.stop_type}.join(", ")
+        @requests = @customer.formatted_request_queues
 
         respond_to do |format|
           format.html {
