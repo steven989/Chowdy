@@ -11,30 +11,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150602212416) do
+ActiveRecord::Schema.define(version: 20150605202413) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "authentications", force: true do |t|
-    t.integer  "user_id",    null: false
-    t.string   "provider",   null: false
-    t.string   "uid",        null: false
+  create_table "authentications", force: :cascade do |t|
+    t.integer  "user_id",                null: false
+    t.string   "provider",   limit: 255, null: false
+    t.string   "uid",        limit: 255, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "customers", force: true do |t|
+  create_table "customers", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "name"
-    t.string   "gender"
-    t.string   "race"
-    t.string   "phone_number"
-    t.string   "hub"
-    t.string   "hub_note"
-    t.string   "purchase"
-    t.string   "active?"
+    t.string   "name",                                 limit: 255
+    t.string   "gender",                               limit: 255
+    t.string   "race",                                 limit: 255
+    t.string   "phone_number",                         limit: 255
+    t.string   "hub",                                  limit: 255
+    t.string   "hub_note",                             limit: 255
+    t.string   "purchase",                             limit: 255
+    t.string   "active?",                              limit: 255
     t.date     "first_pick_up_date"
     t.date     "last_pick_up_date"
     t.integer  "total_meals_per_week"
@@ -54,82 +54,98 @@ ActiveRecord::Schema.define(version: 20150602212416) do
     t.integer  "regular_meals_on_thursday"
     t.integer  "green_meals_on_thursday"
     t.integer  "plus_meals_on_thursday"
-    t.string   "paused?"
+    t.string   "paused?",                              limit: 255
     t.date     "pause_start_date"
     t.date     "pause_end_date"
-    t.string   "openmat_member?"
-    t.string   "one_time_fee_paid?"
-    t.string   "referral"
+    t.string   "openmat_member?",                      limit: 255
+    t.string   "one_time_fee_paid?",                   limit: 255
+    t.string   "referral",                             limit: 255
     t.integer  "referral_bonus_referrer"
     t.integer  "referral_bonus_referree"
     t.integer  "referral_bonus_paid"
     t.date     "date_signed_up_for_recurring"
     t.date     "date_cancelled"
-    t.string   "pause_cancel_request"
-    t.string   "cancellation_reason"
+    t.string   "pause_cancel_request",                 limit: 255
+    t.string   "cancellation_reason",                  limit: 255
     t.text     "notes"
-    t.string   "meal_preferences"
+    t.string   "meal_preferences",                     limit: 255
     t.date     "last_surveyed"
-    t.string   "recurring_delivery"
-    t.string   "delivery_address"
-    t.string   "delivery_time"
-    t.string   "delivery_set_up?"
-    t.string   "special_delivery_instructions"
+    t.string   "recurring_delivery",                   limit: 255
+    t.string   "delivery_address",                     limit: 255
+    t.string   "delivery_time",                        limit: 255
+    t.string   "delivery_set_up?",                     limit: 255
+    t.string   "special_delivery_instructions",        limit: 255
     t.integer  "delivery_charge_accrued"
     t.integer  "delivery_charge_paid"
-    t.string   "stripe_customer_id"
-    t.string   "stripe_subscription_id"
-    t.string   "email"
-    t.string   "raw_green_input"
-    t.string   "referral_code"
-    t.string   "monday_pickup_hub"
-    t.string   "thursday_pickup_hub"
-    t.string   "monday_delivery_hub"
-    t.string   "thursday_delivery_hub"
-    t.string   "interval"
+    t.string   "stripe_customer_id",                   limit: 255
+    t.string   "stripe_subscription_id",               limit: 255
+    t.string   "email",                                limit: 255
+    t.string   "raw_green_input",                      limit: 255
+    t.string   "referral_code",                        limit: 255
+    t.string   "monday_pickup_hub",                    limit: 255
+    t.string   "thursday_pickup_hub",                  limit: 255
+    t.string   "monday_delivery_hub",                  limit: 255
+    t.string   "thursday_delivery_hub",                limit: 255
+    t.string   "interval",                             limit: 255
     t.integer  "interval_count"
     t.boolean  "sponsored"
-    t.string   "matched_referrers_code"
+    t.string   "matched_referrers_code",               limit: 255
     t.boolean  "no_beef"
     t.boolean  "no_pork"
     t.boolean  "no_poultry"
   end
 
-  create_table "failed_invoice_trackers", force: true do |t|
-    t.string  "invoice_number"
+  create_table "delayed_jobs", force: :cascade do |t|
+    t.integer  "priority",   default: 0, null: false
+    t.integer  "attempts",   default: 0, null: false
+    t.text     "handler",                null: false
+    t.text     "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string   "locked_by"
+    t.string   "queue"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
+
+  create_table "failed_invoice_trackers", force: :cascade do |t|
+    t.string  "invoice_number",      limit: 255
     t.date    "invoice_date"
     t.integer "number_of_attempts"
     t.date    "latest_attempt_date"
     t.date    "next_attempt"
   end
 
-  create_table "failed_invoices", force: true do |t|
-    t.string   "invoice_number"
+  create_table "failed_invoices", force: :cascade do |t|
+    t.string   "invoice_number",      limit: 255
     t.date     "invoice_date"
     t.integer  "number_of_attempts"
     t.date     "latest_attempt_date"
     t.date     "next_attempt"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "stripe_customer_id"
+    t.string   "stripe_customer_id",  limit: 255
     t.integer  "invoice_amount"
-    t.boolean  "paid",                default: false
+    t.boolean  "paid",                            default: false
     t.date     "date_paid"
   end
 
-  create_table "feedbacks", force: true do |t|
-    t.string   "stripe_customer_id"
+  create_table "feedbacks", force: :cascade do |t|
+    t.string   "stripe_customer_id", limit: 255
     t.text     "feedback"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "occasion"
+    t.string   "occasion",           limit: 255
   end
 
-  create_table "promotions", force: true do |t|
+  create_table "promotions", force: :cascade do |t|
     t.date     "start_date"
     t.date     "end_date"
-    t.string   "code"
-    t.string   "stripe_coupon_id"
+    t.string   "code",             limit: 255
+    t.string   "stripe_coupon_id", limit: 255
     t.boolean  "immediate_refund"
     t.boolean  "active"
     t.integer  "redemptions"
@@ -139,49 +155,49 @@ ActiveRecord::Schema.define(version: 20150602212416) do
     t.boolean  "pause"
   end
 
-  create_table "refunds", force: true do |t|
-    t.string   "stripe_customer_id"
+  create_table "refunds", force: :cascade do |t|
+    t.string   "stripe_customer_id", limit: 255
     t.date     "refund_week"
     t.date     "charge_week"
-    t.string   "charge_id"
+    t.string   "charge_id",          limit: 255
     t.integer  "amount_refunded"
     t.integer  "meals_refunded"
-    t.string   "refund_reason"
+    t.string   "refund_reason",      limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "stripe_refund_id"
+    t.string   "stripe_refund_id",   limit: 255
     t.integer  "internal_refund_id"
   end
 
-  create_table "scheduled_tasks", force: true do |t|
-    t.string   "task_name"
+  create_table "scheduled_tasks", force: :cascade do |t|
+    t.string   "task_name",           limit: 255
     t.integer  "day_of_week"
     t.integer  "hour_of_day"
     t.datetime "last_successful_run"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "parameter_1"
-    t.string   "parameter_1_type"
-    t.string   "parameter_2"
-    t.string   "parameter_2_type"
-    t.string   "parameter_3"
-    t.string   "parameter_3_type"
+    t.string   "parameter_1",         limit: 255
+    t.string   "parameter_1_type",    limit: 255
+    t.string   "parameter_2",         limit: 255
+    t.string   "parameter_2_type",    limit: 255
+    t.string   "parameter_3",         limit: 255
+    t.string   "parameter_3_type",    limit: 255
     t.datetime "last_attempt_date"
   end
 
-  create_table "start_date_tables", force: true do |t|
+  create_table "start_date_tables", force: :cascade do |t|
   end
 
-  create_table "start_dates", force: true do |t|
+  create_table "start_dates", force: :cascade do |t|
     t.datetime "start_date"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "stop_queues", force: true do |t|
+  create_table "stop_queues", force: :cascade do |t|
     t.date     "associated_cutoff"
-    t.string   "stop_type"
-    t.string   "stripe_customer_id"
+    t.string   "stop_type",          limit: 255
+    t.string   "stripe_customer_id", limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
     t.date     "end_date"
@@ -191,49 +207,49 @@ ActiveRecord::Schema.define(version: 20150602212416) do
     t.integer  "updated_reg_thu"
     t.integer  "updated_grn_mon"
     t.integer  "updated_grn_thu"
-    t.string   "cancel_reason"
+    t.string   "cancel_reason",      limit: 255
   end
 
-  create_table "stop_requests", force: true do |t|
-    t.string   "stripe_customer_id"
-    t.string   "request_type"
+  create_table "stop_requests", force: :cascade do |t|
+    t.string   "stripe_customer_id", limit: 255
+    t.string   "request_type",       limit: 255
     t.date     "start_date"
     t.date     "end_date"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "cancel_reason"
+    t.string   "cancel_reason",      limit: 255
     t.datetime "requested_date"
   end
 
-  create_table "subscriptions", force: true do |t|
+  create_table "subscriptions", force: :cascade do |t|
     t.integer  "weekly_meals"
-    t.string   "stripe_plan_id"
-    t.string   "interval"
+    t.string   "stripe_plan_id", limit: 255
+    t.string   "interval",       limit: 255
     t.integer  "interval_count"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "system_settings", force: true do |t|
-    t.string   "setting"
-    t.string   "setting_attribute"
+  create_table "system_settings", force: :cascade do |t|
+    t.string   "setting",           limit: 255
+    t.string   "setting_attribute", limit: 255
     t.text     "setting_value"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "users", force: true do |t|
-    t.string   "email"
-    t.string   "crypted_password"
-    t.string   "salt"
-    t.string   "stripe_customer_id"
+  create_table "users", force: :cascade do |t|
+    t.string   "email",                           limit: 255
+    t.string   "crypted_password",                limit: 255
+    t.string   "salt",                            limit: 255
+    t.string   "stripe_customer_id",              limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "reset_password_token"
+    t.string   "reset_password_token",            limit: 255
     t.datetime "reset_password_token_expires_at"
     t.datetime "reset_password_email_sent_at"
-    t.string   "facebook_email"
-    t.string   "role"
+    t.string   "facebook_email",                  limit: 255
+    t.string   "role",                            limit: 255
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

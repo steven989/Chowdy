@@ -70,6 +70,10 @@ gem 'puma'
 #11) Timeout
 gem 'rack-timeout'
 
+#12) Delayed jobs for long processing items
+gem 'delayed_job_active_record'
+gem 'hirefire'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

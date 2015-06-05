@@ -232,16 +232,19 @@ namespace :app do
         end
     end 
 
-    desc 'Run scheduled tasks'
-    task :run_scheduled_tasks => [:environment] do |t, args|        
+    desc 'Run scheduled tasks on the hour'
+    task :run_scheduled_events => [:environment] do |t, args|        
         report = []
-        tasks = ScheduledTask.where(day_of_week: Date.today.wday, hour_of_day: Time.now.hour)
-        if tasks.length > 0
-            tasks.each do |t|
+        sch_tasks = ScheduledTask.where(day_of_week: Date.today.wday, hour_of_day: Time.now.hour)
+        if sch_tasks.length > 0
+            sch_tasks.each do |t|
                 report.push(t.run)
             end
             CustomerMailer.scheduled_task_report(report).deliver
+        else
+            puts "No schedueld job right now"
         end 
+
     end 
 
 

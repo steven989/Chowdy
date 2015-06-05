@@ -1,5 +1,5 @@
 class ScheduledTask < ActiveRecord::Base
-    Chowdy::Application.load_tasks
+    # Chowdy::Application.load_tasks
 
     def run
         begin
