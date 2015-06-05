@@ -67,7 +67,8 @@ gem 'rake'
 #10) Use Puma as the server
 gem 'puma'
 
-
+#11) Timeout
+gem 'rack-timeout'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
