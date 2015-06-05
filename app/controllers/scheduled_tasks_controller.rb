@@ -27,9 +27,8 @@ class ScheduledTasksController < ApplicationController
 
   def run
     scheduled_task = ScheduledTask.find(params[:id])
-    if scheduled_task.run
-      redirect_to user_profile_path+"#system_settings"
-    end
+    scheduled_task.delay.run
+    redirect_to user_profile_path+"#system_settings"
   end
 
   def update
