@@ -26,7 +26,7 @@ namespace :customers do
 
     desc 'email list of overdue bills to admin'
     task :email_customers_with_failed_invoices => [:environment] do
-        CustomerMailer.failed_invoice_email.deliver
+        CustomerMailer.delay.failed_invoice_email.deliver
     end
 
     desc 'pause/cancel/restart customers'
