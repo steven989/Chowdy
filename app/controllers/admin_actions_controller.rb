@@ -28,15 +28,12 @@ class AdminActionsController < ApplicationController
         respond_to do |format|
             format.html
             format.csv { 
-                puts '---------------------------------------------------'
                 disposition = "attachment; filename='customer_sheet_#{params[:hub]}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}'"
-                puts disposition
-                puts '---------------------------------------------------'
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]} 
+                    send_data  CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "customer_sheet_#{params[:hub]}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}"
                 else 
-                    send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values} } 
+                    send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "customer_sheet_#{params[:hub]}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}"
                 end
             }
         end
