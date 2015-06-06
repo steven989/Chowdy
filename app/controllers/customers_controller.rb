@@ -22,7 +22,7 @@ protect_from_forgery :except => :payment
 
         Customer.delay.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
         
-        #----------------------------------------------------------------------------
+        #--------------- Commented out because this section is abstrated to the Customer model
 
         # case plan
         #     when "6mealswk" 
