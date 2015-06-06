@@ -28,6 +28,8 @@ class AdminActionsController < ApplicationController
         respond_to do |format|
             format.html
             format.csv { 
+                headers['Content-Disposition'] = "attachment; filename=\"customer_sheet_#{params[:hub]}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}\""
+                headers['Content-Type'] ||= 'text/csv'
                 if @data.blank?
                     send_data  CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]} 
                 else 
