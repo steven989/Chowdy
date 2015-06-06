@@ -1,5 +1,5 @@
 System encountered an error that was rescued
 =============================================
 
-For: <%= @customer.email %>
+For: <%= @customer ? @customer.email : "No customer" %>
 Error: <%= @message %>

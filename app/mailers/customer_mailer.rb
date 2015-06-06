@@ -141,7 +141,7 @@ class CustomerMailer < ActionMailer::Base
     end 
   end
 
-  def rescued_error(customer,message)
+  def rescued_error(customer=nil,message)
     @customer = customer
     @message = message
     mail(

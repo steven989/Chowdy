@@ -99,14 +99,14 @@ class AdminActionsController < ApplicationController
                     puts 'Something went wrong trying to close an invoice'
                     puts error.message
                     puts '---------------------------------------------------'
-                    CustomerMailer.rescued_error(invoice.customer,error.message).deliver                    
+                    CustomerMailer.delay.rescued_error(invoice.customer,'Something went wrong trying to close an invoice: '+error.message.inspect)
                 end
             rescue => error
                 puts '---------------------------------------------------'
                 puts 'Something went wrong trying to close an invoice'
                 puts error.message
                 puts '---------------------------------------------------'
-                CustomerMailer.rescued_error(invoice.customer,error.message).deliver
+                CustomerMailer.delay.rescued_error(invoice.customer,'Something went wrong trying to close an invoice: '+error.message.inspect)
             else
                 invoice.update_attributes(paid:true, next_attempt:nil, date_paid: Date.today)
             end
@@ -128,7 +128,7 @@ class AdminActionsController < ApplicationController
                     puts '---------------------------------------------------'
                     puts "Email could not be updated"
                     puts '---------------------------------------------------'
-                    CustomerMailer.rescued_error(@customer,error.message).deliver
+                    CustomerMailer.delay.rescued_error(@customer,"Email could not be updated: "+error.message)
                 else
                     if @customer.user
                         @customer.user.update(email:params[:customer][:email])
@@ -174,7 +174,7 @@ class AdminActionsController < ApplicationController
             send_notification = (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry)
             @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
             if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
-                CustomerMailer.stop_delivery_notice(@customer, "Meal preference has changed").deliver
+                CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
             end
 
 
@@ -262,13 +262,13 @@ class AdminActionsController < ApplicationController
         elsif params[:todo] == "delivery_toggle"
             if ["Yes","yes"].include? @customer.recurring_delivery
                 @customer.update_attributes(recurring_delivery: nil)
-                CustomerMailer.stop_delivery_notice(@customer, "Stop Delivery").deliver
+                CustomerMailer.delay.stop_delivery_notice(@customer, "Stop Delivery")
             else
                 @customer.update_attributes(recurring_delivery: "yes")
                 @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
                 @customer.update_attributes(thursday_delivery_hub: "delivery") if @customer.thursday_delivery_hub.blank?                
                 @customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
-                CustomerMailer.stop_delivery_notice(@customer, "Start Delivery").deliver
+                CustomerMailer.delay.stop_delivery_notice(@customer, "Start Delivery")
             end
         elsif params[:todo] == "refund"
             recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
@@ -367,7 +367,7 @@ class AdminActionsController < ApplicationController
                                 stripe_referral_subscription_match.coupon = "referral bonus x 5"
                             else
                                 do_not_increment_referral = true
-                                CustomerMailer.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)").deliver                            
+                                CustomerMailer.delay.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)")
                             end
 
                         stripe_referral_subscription_match.prorate = false
@@ -388,7 +388,7 @@ class AdminActionsController < ApplicationController
                         stripe_subscription.coupon = "referral bonus x 5"
                     else
                         do_not_increment_referral_referree = true
-                        CustomerMailer.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)").deliver                                                    
+                        CustomerMailer.delay.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)")
                     end
                     stripe_subscription.prorate = false
                     if stripe_subscription.save
@@ -417,7 +417,7 @@ class AdminActionsController < ApplicationController
                                     stripe_referral_subscription_match.coupon = "referral bonus x 5"
                                 else
                                     do_not_increment_referral = true
-                                    CustomerMailer.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)").deliver                            
+                                    CustomerMailer.delay.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)")
                                 end
 
                             stripe_referral_subscription_match.prorate = false
@@ -438,7 +438,7 @@ class AdminActionsController < ApplicationController
                             stripe_subscription.coupon = "referral bonus x 5"
                         else
                             do_not_increment_referral_referree = true
-                            CustomerMailer.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)").deliver                                                    
+                            CustomerMailer.delay.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)")
                         end
 
                         stripe_subscription.prorate = false
