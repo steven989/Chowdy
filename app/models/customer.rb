@@ -568,7 +568,7 @@ class Customer < ActiveRecord::Base
             unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
             restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
             new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
-            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) & (stripe_customer_id << pausing_customers) & (stripe_customer_id << canceling_customers)) | (stripe_customer_id >> unpausing_customers) | (stripe_customer_id >> restarting_customers) | (stripe_customer_id >> new_customers)}
             
             preference_negs_master_subset.where(no_poultry:true).sum(:regular_meals_on_monday).to_i/3
         elsif count_type == "neg_adjustment_beef_next_monday"
@@ -578,7 +578,7 @@ class Customer < ActiveRecord::Base
             unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
             restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
             new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
-            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) & (stripe_customer_id << pausing_customers) & (stripe_customer_id << canceling_customers)) | (stripe_customer_id >> unpausing_customers) | (stripe_customer_id >> restarting_customers) | (stripe_customer_id >> new_customers)}
 
             preference_negs_master_subset.where(no_beef:true).sum(:regular_meals_on_monday).to_i/3
         elsif count_type == "neg_adjustment_pork_next_monday"
@@ -588,7 +588,7 @@ class Customer < ActiveRecord::Base
             unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
             restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
             new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
-            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) & (stripe_customer_id << pausing_customers) & (stripe_customer_id << canceling_customers)) | (stripe_customer_id >> unpausing_customers) | (stripe_customer_id >> restarting_customers) | (stripe_customer_id >> new_customers)}
 
             preference_negs_master_subset.where(no_pork:true).sum(:regular_meals_on_monday).to_i/3
         elsif count_type == "neg_adjustment_poultry_next_thursday"        
@@ -598,7 +598,7 @@ class Customer < ActiveRecord::Base
             unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
             restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
             new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
-            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) & (stripe_customer_id << pausing_customers) & (stripe_customer_id << canceling_customers)) | (stripe_customer_id >> unpausing_customers) | (stripe_customer_id >> restarting_customers) | (stripe_customer_id >> new_customers)}
 
             preference_negs_master_subset.where(no_poultry:true).sum(:regular_meals_on_thursday).to_i/3
         elsif count_type == "neg_adjustment_beef_next_thursday"
@@ -608,7 +608,7 @@ class Customer < ActiveRecord::Base
             unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
             restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
             new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
-            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) & (stripe_customer_id << pausing_customers) & (stripe_customer_id << canceling_customers)) | (stripe_customer_id >> unpausing_customers) | (stripe_customer_id >> restarting_customers) | (stripe_customer_id >> new_customers)}
 
             preference_negs_master_subset.where(no_beef:true).sum(:regular_meals_on_thursday).to_i/3
         elsif count_type == "neg_adjustment_pork_next_thursday"
@@ -618,7 +618,7 @@ class Customer < ActiveRecord::Base
             unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
             restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
             new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
-            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) && (stripe_customer_id << pausing_customers) && (stripe_customer_id << canceling_customers)) || (stripe_customer_id >> unpausing_customers) || (stripe_customer_id >> restarting_customers) || (stripe_customer_id >> new_customers)}
+            preference_negs_master_subset = Customer.where{((stripe_customer_id >> current_customers) & (stripe_customer_id << pausing_customers) & (stripe_customer_id << canceling_customers)) | (stripe_customer_id >> unpausing_customers) | (stripe_customer_id >> restarting_customers) | (stripe_customer_id >> new_customers)}
 
             preference_negs_master_subset.where(no_pork:true).sum(:regular_meals_on_thursday).to_i/3
         elsif count_type == "regular_meals_next_monday"
