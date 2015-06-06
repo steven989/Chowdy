@@ -26,7 +26,8 @@ $(function(){
 
        $('#overdue_invoice').DataTable({
         scrollX: true,
-        searching: false
+        searching: false,
+        order: [[5, "asc"]]
        });
 
        $('#all_customers').DataTable({
@@ -527,9 +528,9 @@ $(function(){
                                           <th>Customerm ID</th>
                                           <th>Customer Name</th>
                                           <th>Customer Email</th>
+                                          <th>Invoice Date</th>
                                           <th>Date Joined</th>
                                           <th>Invoice Number</th>
-                                          <th>Invoice Date</th>
                                           <th>Number of Attempts</th>
                                           <th>Invoice Amount</th>
                                           <th>Last Attempt Date</th>
@@ -543,9 +544,9 @@ $(function(){
                                             <td><%= i.customer.id %></td>
                                             <td><%= i.customer.name %></td>
                                             <td><%= i.customer.email %></td>
+                                            <td><%= i.invoice_date %></td>
                                             <td><%= i.customer.created_at.strftime("%Y-%m-%d") %></td>
                                             <td><%= i.invoice_number %></td>
-                                            <td><%= i.invoice_date %></td>
                                             <td><%= i.number_of_attempts %></td>
                                             <td>$<%= i.invoice_amount.to_f/100 %></td>
                                             <td><%= i.latest_attempt_date %></td>
