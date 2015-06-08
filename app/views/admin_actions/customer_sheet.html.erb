@@ -1,4 +1,4 @@
-<section class="hbox stretch bg-light tab-content">
+<section class="hbox stretch bg-light tab-content" id="customer_sheet_container">
     <section class="tab-pane active" id="dashboard" role="tabpanel">
         <section class="vbox">
             <section class="scrollable padder"> 
@@ -61,7 +61,7 @@
                                 <th style="padding-bottom: 0; padding-top: 0;"></th>
                                 <th class="b-r" style="padding-bottom: 0; padding-top: 0;"></th>
                                 <th colspan="2" class="text-center b-r"style="padding-bottom: 0; padding-top: 0;">Regular Meals</th>
-                                <th colspan="2" class="text-center" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;">Chowdy Green</th>
+                                <th colspan="2" class="text-center green_background" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;">Chowdy Green</th>
                               </tr>
                               <tr>
                                 <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;"></th>
@@ -69,8 +69,8 @@
                                 <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;">Email</th>
                                 <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;"># Meals (Mon-Wed)</th>
                                 <th class="text-center b-r" style="padding-bottom: 0; padding-top: 0;"># Meals (Thur-Sat)</th>
-                                <th class="text-center b-r" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"># Meals (Mon-Wed)</th>
-                                <th class="text-center" style="background-color: #D4DDCB;  padding-bottom: 0; padding-top: 0;"># Meals (Thur-Sat)</th>
+                                <th class="text-center b-r green_background" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"># Meals (Mon-Wed)</th>
+                                <th class="text-center green_background" style="background-color: #D4DDCB;  padding-bottom: 0; padding-top: 0;"># Meals (Thur-Sat)</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -82,8 +82,8 @@
                                   <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:email] %></td>
                                   <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:reg_mon] %></td>
                                   <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:reg_thu] %></td>
-                                  <td class="b-r" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"><%= d[:grn_mon] %></td>
-                                  <td style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"><%= d[:grn_thu] %></td>
+                                  <td class="b-r green_background" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"><%= d[:grn_mon] %></td>
+                                  <td class="green_background" style="background-color: #D4DDCB; padding-bottom: 0; padding-top: 0;"><%= d[:grn_thu] %></td>
                                 </tr>
                                 <% @id_iterate += 1 %>
                               <% end %>

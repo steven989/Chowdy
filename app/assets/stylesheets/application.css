@@ -33,16 +33,28 @@
 
 #customer_sheet_menu {
     border: 1px solid black;
+    -webkit-print-color-adjust:exact;
 }
 
 #customer_sheet_menu td, #customer_sheet_menu th {
     border: 1px solid black;
+    -webkit-print-color-adjust:exact;
 }
 
 #customer_sheet {
     border: 1px solid black;
+    -webkit-print-color-adjust:exact;
 }
 
 #customer_sheet td, #customer_sheet th {
     border: 1px solid black;
+    -webkit-print-color-adjust:exact;
+}
+
+@media print {
+
+
+    #customer_sheet .green_background {
+        background-color: #D4DDCB !important;
+    }
 }
