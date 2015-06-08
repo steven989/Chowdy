@@ -155,7 +155,7 @@ $(function(){
 <section class="vbox">
     <header class="bg-black header header-md navbar-fixed-top-xs box-shadow">
         <div class="navbar-header aside-md">
-            <a class="btn btn-link visible-xs m-t-sm" data-toggle="class:show" data-target=".nav-primary">
+            <a class="btn btn-link visible-xs m-t-sm" data-toggle="class:nav-off-screen" data-target="#nav">
                       <i class="fa fa-bars"></i>
             </a>
             <%= image_tag "logo-light.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm" %>
@@ -167,6 +167,7 @@ $(function(){
             
             <aside class="bg-white aside-md hidden-print b-r" id="nav">
                 <nav class="nav-primary hidden-xs padder-v tabbable">
+                    <div class="visible-xs" style="height: 65px;"></div>
                     <ul class="nav nav-main" data-ride="collapse" id="main-nav">
                         <li class="highlight">
                           <a href="#dashboard" class="auto b-b padder-v" data-toggle="tab">
