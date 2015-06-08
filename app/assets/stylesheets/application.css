@@ -10,7 +10,6 @@
  *
  *= require_self
  *= require_tree .
- *= require_tree font-awesome
  *= require_tree ../../../vendor/assets/stylesheets/.
  */
 
@@ -31,3 +30,19 @@
     margin-right:-4px;
 }
 
+
+#customer_sheet_menu {
+    border: 1px solid black;
+}
+
+#customer_sheet_menu td, #customer_sheet_menu th {
+    border: 1px solid black;
+}
+
+#customer_sheet {
+    border: 1px solid black;
+}
+
+#customer_sheet td, #customer_sheet th {
+    border: 1px solid black;
+}
