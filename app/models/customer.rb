@@ -459,7 +459,19 @@ class Customer < ActiveRecord::Base
 
         total_meals_next = total_meals - pause_next_week - cancel_next_week + unpause_next_week + restarts_next_week + meal_count_change + new_sign_ups 
 
-        if count_type == "monday_regular"
+        if count_type == "total_customer"
+            active_nonpaused_customers.length.to_i
+        elsif count_type == "total_customer_next_week"
+            current_customers = active_nonpaused_customers.map {|c| c.stripe_customer_id} #in
+            pausing_customers = StopQueue.where(stop_type:"pause").map {|q| q.stripe_customer_id} #not in
+            canceling_customers = StopQueue.where(stop_type:"cancel").map {|q| q.stripe_customer_id} #not in
+            unpausing_customers = Customer.where(paused?: ["Yes","yes"], pause_end_date: [Chowdy::Application.closest_date(1,0,current_pick_up_date),Chowdy::Application.closest_date(1,1,current_pick_up_date)]).map {|c| c.stripe_customer_id} #in
+            restarting_customers = StopQueue.where(stop_type:"restart").map {|q| q.stripe_customer_id} #in
+            new_customers = Customer.where(active?:["Yes","yes"], next_pick_up_date: Chowdy::Application.closest_date(1,1,current_pick_up_date)).map {|c| c.stripe_customer_id} #in
+            next_week_customers = Customer.where{((stripe_customer_id >> current_customers) & (stripe_customer_id << pausing_customers) & (stripe_customer_id << canceling_customers)) | (stripe_customer_id >> unpausing_customers) | (stripe_customer_id >> restarting_customers) | (stripe_customer_id >> new_customers)}
+
+            next_week_customers.length.to_i
+        elsif count_type == "monday_regular"
             monday_regular
         elsif count_type == "monday_regular_wandas"
             monday_regular_wandas

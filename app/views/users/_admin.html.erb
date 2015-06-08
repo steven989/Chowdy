@@ -220,11 +220,11 @@ $(function(){
                                       <header class="panel-heading text-center">
                                         <div class="row">
                                           <div class="col-md-6">
-                                            <span class="h2 block m-r-md text-primary"><%= @total_meals %></span>
+                                            <span class="h2 block m-r-md text-primary"><%= @total_meals %> meals & <%= @current_customers_count %> customers</span>
                                             <small class="text-muted text-u-c">Current Week Total</small>
                                           </div>
                                           <div class="col-md-6">
-                                            <span class="h2 block text-info pull_next_week_total" style="cursor: pointer;" href="<%= next_week_breakdown_path %>"><%= @total_meals_next %></span>
+                                            <span class="h2 block text-info pull_next_week_total" style="cursor: pointer;" href="<%= next_week_breakdown_path %>"><%= @total_meals_next %> meals & <%= @next_week_customers_count %> customers</span>
                                             <small class="text-muted text-u-c">Next Week Total</small>
                                           </div>
                                         </div>

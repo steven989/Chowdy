@@ -19,6 +19,8 @@ class UsersController < ApplicationController
         if @current_user.role == "admin"
             current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
             active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
+            @current_customers_count = Customer.meal_count("total_customer")
+            @next_week_customers_count = Customer.meal_count("total_customer_next_week")
             @monday_regular = Customer.meal_count("monday_regular")
                 @monday_regular_wandas = Customer.meal_count("monday_regular_wandas")
                 @monday_regular_coffee_bar = Customer.meal_count("monday_regular_coffee_bar")
