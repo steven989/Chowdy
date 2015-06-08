@@ -73,8 +73,7 @@ gem 'rack-timeout'
 #12) Delayed jobs for long processing items
 gem 'delayed_job_active_record'
 
-#13) Font awesome
-gem 'font-awesome-rails'
+
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
