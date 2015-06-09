@@ -748,7 +748,7 @@ $(function(){
                                             <td><%= s.id %></td>
                                             <td><%= s.setting %></td>
                                             <td><%= s.setting_attribute %></td>
-                                            <td><%= s.setting_value %></td>
+                                            <td><%=h truncate(s.setting_value, length: 100) %></td>
                                             <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_system_setting_path(s) %>">Edit</button></td>
                                             <td><%= link_to "Delete", system_setting_path(s), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %></td>
                                           </tr>
