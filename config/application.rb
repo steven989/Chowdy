@@ -13,6 +13,9 @@ module Chowdy
     config.assets.paths << Rails.root.join("app", "assets", "fonts")
     config.time_zone = 'Eastern Time (US & Canada)'
     config.active_job.queue_adapter = :delayed_job
+    config.action_dispatch.default_headers = {
+        'X-Frame-Options' => 'ALLOWALL'
+        }
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
