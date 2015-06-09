@@ -19,7 +19,7 @@
             </div>
             <%= f.hidden_field :stripe_customer_id, options = {value:@stripe_customer_id} %>
           </div>
-            <%= f.submit 'Sign up', class:"btn btn-lg btn-primary btn-block", style:"border-radius: 2px" %>
+            <%= f.submit 'Sign up', class:"btn btn-lg btn-info btn-block", style:"border-radius: 2px" %>
         <% end %>
         <div class="text-center m-t m-b"><%= link_to auth_at_provider_path(provider: :facebook, stripe_customer_id:@stripe_customer_id), class: "btn btn-lg btn-primary btn-block", style:"border-radius: 2px" do %>
                 <i class="fa fa-facebook pull-left"></i>
