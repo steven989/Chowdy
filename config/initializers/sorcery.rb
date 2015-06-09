@@ -111,7 +111,7 @@ Rails.application.config.sorcery.configure do |config|
   #
   config.facebook.key = ENV['FACEBOOK_APP_ID']
   config.facebook.secret = ENV['FACEBOOK_SECRET_KEY']
-  config.facebook.callback_url = "http://chowdy.herokuapp.com/oauth/callback?provider=facebook"
+  config.facebook.callback_url = "http://members.chowdy.ca/oauth/callback?provider=facebook"
   config.facebook.user_info_mapping = {:facebook_email => "email"}
   config.facebook.access_permissions = ["email"]
   config.facebook.display = "popup"

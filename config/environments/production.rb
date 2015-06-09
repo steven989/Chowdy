@@ -36,7 +36,7 @@ Chowdy::Application.configure do
   config.assets.version = '1.1'
 
   # Default host for Action Mailer
-  config.action_mailer.default_url_options = {host: 'http://chowdy.herokuapp.com'}
+  config.action_mailer.default_url_options = {host: 'http://members.chowdy.ca'}
 
 
   # Specifies the header that your server uses for sending files.
