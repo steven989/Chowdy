@@ -298,9 +298,10 @@ class Customer < ActiveRecord::Base
                                     CustomerMailer.rescued_error(customer,"Refund cannot be completed: "+error.message.inspect).deliver
                                 else
                                     customer.delete_with_stripe
-                                    CustomerMailer.duplicate_signup_email(first_name_email,customer_email).deliver
+                                    CustomerMailer.duplicate_signup_email(customer_name.split(/\s/)[0].capitalize,customer_email).deliver
                                 end
                             end
+                            
                 #5) send confirmation email
                     hub_email = hub.gsub(/\\/,"")
                     start_date_email = StartDate.first.start_date
