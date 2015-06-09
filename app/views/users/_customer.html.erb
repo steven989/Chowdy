@@ -423,7 +423,7 @@ $(function(){
                                 <section class="row m-b-md">
                                     <div class="col-sm-12">
                                         <h3 class="m-b-xs text-muted text-center">
-                                    Welcome <%= @current_customer.name.split(/\s/)[0].capitalize %>! Your account is <%= @current_status %>
+                                    Welcome <%= @current_customer.name.split(/\s/)[0].capitalize %>! Your account is <span class="<%= @current_status_color %>"><%= @current_status %></span>
                                         </h3>
                                     </div>
                                 </section>
