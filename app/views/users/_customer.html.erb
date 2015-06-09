@@ -37,7 +37,9 @@ $(function(){
           }
         });
       });
-
+      map.setOptions({
+        scrollwheel: false
+      });
       map.setZoom(13);
       map.panToBounds(latlngbounds);
 
@@ -886,7 +888,7 @@ $(function(){
                                   <div class="form-group">
                                     <label>Feedback</label>
                                     <p class="form-control-static">
-                                      <div class="btn btn-md btn-success"  data-toggle="modal" data-target="#feedbackModal">Submit a Feedback
+                                      <div class="btn btn-md btn-success"  data-toggle="modal" data-target="#feedbackModal">Provide Feedback
                                       </div>
                                     </p>
                                   </div>
