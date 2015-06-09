@@ -4,24 +4,18 @@
 </head>
 <body>
     <p>Hi <%= @name %>, thanks for signing up for Chowdy!</p>
-    <br>
     <p>This is an ongoing meal service that automatically rebills every week, so please read the instructions bellow to make sure your subscription goes smoothly.</p>
-    <br>
     <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %></b></p>
-    <br>
     <% if @delivery %>
         <p>You've indicated that you want delivery, please log in to your account using the link below, and put in the delivery address as soon as possible.</p>
     <% else %>
         <p>Pick up your meals at <%= @hub %>, the store hours of this hub is <%= @op_hours %>. Just let staff know your name and you can grab your meals. That's it!</p>
     <% end %>
-    <br>
     <p><b>Please create an account to pause or make changes to your subscription at: <%= create_customer_profile_url(@stripe_customer_id) %></b></p>
-    <br>
     <p>If you forget to pause your subscription or don't pick up your meals after the chefs have cooked your food, we cannot refund you or give you credits. Let's minimize food waste together!</p>
-    <br>
-    <p>Refer a friend and you both get $10 off your meals!</p>
-    <br>
+    <p>Refer a friend using <%= @current_customer.referral_code %> and you both get $10 off your meals!</p>
     <p>That's it, welcome to the Chowdy community.</p>
+    <p>- the Chowdy team</p>
 </body>
 
 </html>
