@@ -14,8 +14,11 @@
                <%= password_field_tag :password,nil,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Password" %>
             </div>
           </div>
-          <%= submit_tag "Login", class:"btn btn-lg btn-primary btn-block", style:"border-radius: 2px" %>
-          <div class="text-center m-t m-b"><%= link_to auth_at_provider_path(provider: :facebook) do %><small>Login with Facebook</small><% end %></div>
+          <%= submit_tag "Sign in", class:"btn btn-lg btn-info btn-block", style:"border-radius: 2px" %>
+          <div class="text-center m-t m-b"><%= link_to auth_at_provider_path(provider: :facebook), class: "btn btn-lg btn-primary btn-block", style:"border-radius: 2px" do %>
+                <i class="fa fa-facebook pull-left"></i>
+                <small>Sign in with Facebook</small>
+            <% end %></div>
           <div class="text-center m-t m-b"><a href="#" data-toggle="modal" data-target="#resetModal"><small>Forgot password?</small></a></div>
         <% end %>
       </section>
