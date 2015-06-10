@@ -9,6 +9,8 @@ class UsersController < ApplicationController
             auto_login(@user)
             redirect_to user_profile_path
         else
+            @error_messages = @user.errors.full_messages.join(", ") if @user.errors.any?
+            flash[:signup_error] = "Login could not be completed. #{@error_messages}"
             redirect_to create_customer_profile_path(@user.stripe_customer_id)
         end
     end

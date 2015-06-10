@@ -5,6 +5,11 @@
         <header class="wrapper text-center" style="color:#788288">
           <strong>Sign in to manage your subscription</strong>
         </header>
+        <% if flash[:login_error] %>
+          <div class="alert alert-danger">
+            <%= flash[:login_error] %>
+          </div>
+        <% end %>
         <%= form_tag user_sessions_create_path, :method => :post do %>
           <div class="list-group">
             <div class="list-group-item" style="border-color:#eaeef1">

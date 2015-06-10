@@ -5,26 +5,48 @@
         <header class="wrapper text-center" style="color:#788288">
           <strong>Sign up to manage your subscription</strong>
         </header>
-        <%= form_for @user, url: users_path do |f| %>
-          <div class="list-group">
-            <div class="list-group-item" style="border-color:#eaeef1">
-              <p class = "m-l-sm m-t-xs m-b-xs"><%= @email %></p>
-              <%= f.hidden_field 'email', options = {value:@email} %>
-            </div>
-            <div class="list-group-item" style="border-color:#eaeef1">
-               <%= f.password_field :password,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Password" %>
-            </div>
-            <div class="list-group-item" style="border-color:#eaeef1">
-               <%= f.password_field :password_confirmation,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Retype Password" %>
-            </div>
-            <%= f.hidden_field :stripe_customer_id, options = {value:@stripe_customer_id} %>
+        <% if @user_exists %>
+          <div class="alert alert-danger">
+            You have already created an account. <%= link_to "Log in", login_path %> to your account.
           </div>
-            <%= f.submit 'Sign up', class:"btn btn-lg btn-info btn-block", style:"border-radius: 2px" %>
+        <% else %>
+          <% if @customer_not_found %>
+            <div class="alert alert-danger">
+              <p>Cannot find your subscription. You must <%= link_to "sign up", "http://chowdy.ca/signup" %> for a subscription to create an account.</p>
+
+              <p>If you have alreay signed up for a subscription, please use the link provided in your confirmation email to create your account.</p>
+            </div>
+          <% else %>
+            <% if flash[:signup_error] %>
+              <div class="alert alert-danger">
+                <%= flash[:signup_error] %>
+              </div>
+            <% end %>
+            <%= form_for @user, url: users_path do |f| %>
+              <div class="list-group">
+                <div class="list-group-item" style="border-color:#eaeef1">
+                  <p class = "m-l-sm m-t-xs m-b-xs"><%= @email %></p>
+                  <%= f.hidden_field 'email', options = {value:@email} %>
+                </div>
+                <div class="list-group-item" style="border-color:#eaeef1">
+                   <%= f.password_field :password,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Password" %>
+                </div>
+                <div class="list-group-item" style="border-color:#eaeef1">
+                   <%= f.password_field :password_confirmation,class:"form-control no-border", style:"border-color: transparent; border-width: 0; box-shadow: none;", placeholder:"Retype Password" %>
+                </div>
+                <%= f.hidden_field :stripe_customer_id, options = {value:@stripe_customer_id} %>
+              </div>
+                <%= f.submit 'Sign up', class:"btn btn-lg btn-info btn-block", style:"border-radius: 2px" %>
+            <% end %>
+
+            <div class="text-center m-t m-b">
+              <%= link_to auth_at_provider_path(provider: :facebook, stripe_customer_id:@stripe_customer_id), class: "btn btn-lg btn-primary btn-block", style:"border-radius: 2px" do %>
+                    <i class="fa fa-facebook pull-left"></i>
+                    <small>Sign up with Facebook</small>
+              <% end %>
+            </div>
+          <% end %>
         <% end %>
-        <div class="text-center m-t m-b"><%= link_to auth_at_provider_path(provider: :facebook, stripe_customer_id:@stripe_customer_id), class: "btn btn-lg btn-primary btn-block", style:"border-radius: 2px" do %>
-                <i class="fa fa-facebook pull-left"></i>
-                <small>Sign up with Facebook</small>
-        <% end %></div>
       </section>
     </div>
 </section>

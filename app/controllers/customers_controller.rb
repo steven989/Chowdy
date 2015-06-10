@@ -25,13 +25,16 @@ protect_from_forgery :except => :payment
     def create_profile
         customer = Customer.where(stripe_customer_id:params[:id]).take
         if customer
-            @user = User.new
-            @stripe_customer_id = params[:id]
-            @email = customer.email
+            if customer.user
+                @user_exists = true
+            else
+                @user = User.new
+                @stripe_customer_id = params[:id]
+                @email = customer.email
+            end
         else
-            #add a code to render something to the effect of customer not found
+            @customer_not_found = true
         end
-
     end
 
     # def stripe_update #change customer account information through Stripe webhook
