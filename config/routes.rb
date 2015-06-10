@@ -20,6 +20,7 @@ Chowdy::Application.routes.draw do
   get 'customers/:id/create_profile' => 'customers#create_profile', as: 'create_customer_profile'
   get 'customers/:id/resend_sign_up_link_form' => 'customers#resend_sign_up_link_form', as: 'resend_sign_up_link_form'
   post 'customers/:id/resend_sign_up_link' => 'customers#resend_sign_up_link', as: 'resend_sign_up_link'
+  get 'customers/resend_sign_up_link' => 'customers#resend_sign_up_link_customer_request', as: 'resend_sign_up_link_customer_request'
   resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
   get 'user/profile' => 'users#profile', as: 'user_profile'
   get 'admin_action/customer_sheet' => 'admin_actions#customer_sheet', as: 'customer_sheet'

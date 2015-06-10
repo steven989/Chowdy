@@ -329,6 +329,17 @@ protect_from_forgery :except => :payment
         redirect_to user_profile_path+"#customers"
     end
 
+    def resend_sign_up_link_customer_request
+        email = params[:email].downcase
+        customer = Customer.where(email:email).take
+        target_email = params[:target_email].blank? ? customer.email : params[:target_email]
+        CustomerMailer.delay.resend_profile_link(target_email,customer)
+        
+        flash[:status] = "success"
+        flash[:login_error] = "We just emailed you the link to create your profile"
+        redirect_to login_path
+    end
+
     def stripe_destroy #delete customer account through Stripe webhook
         #delete on system and Stripe
     end
