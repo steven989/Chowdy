@@ -107,26 +107,31 @@ protect_from_forgery :except => :payment
             begin
                 current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)
                 current_stripe_customer.source = params[:stripeToken]
-                if current_stripe_customer.save
-                    #attempt to pay back overdue invoices
-                    if current_customer.failed_invoices.where(paid:false).length > 0 
-                        current_customer.failed_invoices.where(paid:false).each do |failed_invoice| 
-                            begin 
-                                Stripe::Invoice.retrieve(failed_invoice.invoice_number).pay
-                            rescue
-                                puts "Card declined"
-                            else
-                                failed_invoice.update_attributes(paid:true,date_paid:Date.today)
-                            end
+                current_stripe_customer.save
+                #attempt to pay back overdue invoices
+                if current_customer.failed_invoices.where(paid:false).length > 0 
+                    current_customer.failed_invoices.where(paid:false).each do |failed_invoice| 
+                        begin 
+                            Stripe::Invoice.retrieve(failed_invoice.invoice_number).pay
+                        rescue
+                            puts "Card declined"
+                        else
+                            failed_invoice.update_attributes(paid:true,date_paid:Date.today)
                         end
                     end
                 end
+                notice_status = "success"
+                notice_message = "Credit card updated"
             rescue => error
                 puts '---------------------------------------------------'
                 puts "some error occured when customer tried to update credit card"
                 puts error.message
                 puts '---------------------------------------------------'
+                notice_status = "fail"
+                notice_message = "Credit card could not be updated. #{error.message}"
             end
+            flash[:status] = notice_status
+            flash[:notice_customer_setting] = notice_message
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "email" 
             _old_email = current_customer.email
@@ -202,7 +207,7 @@ protect_from_forgery :except => :payment
                 notice_status = "fail"
                 notice_message = "Name could not be updated #{current_customers.errors.full_messages.join(", ")}"
             else
-                notice_status = "fail"
+                notice_status = "success"
                 notice_message = "Name updated"
             end
 
@@ -211,6 +216,8 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "feedback"
             current_customer.feedbacks.create(feedback:params[:feedback], occasion: 'regular') 
+            flash[:status] = "success"
+            flash[:notice_customer_setting] = "Feedback received. We appreciate it!"
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "change_subscription"
             total_updated_meals = params[:monday_reg_hidden].to_i + params[:monday_grn_hidden].to_i + params[:thursday_reg_hidden].to_i + params[:thursday_grn_hidden].to_i
