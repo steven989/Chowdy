@@ -5,6 +5,7 @@ class UsersController < ApplicationController
     def create
         @user = User.new(user_params)
         if @user.save
+            @user.update_attribute(email:@user.email.downcase)
             auto_login(@user)
             redirect_to user_profile_path
         else

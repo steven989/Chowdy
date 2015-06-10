@@ -124,7 +124,7 @@ class AdminActionsController < ApplicationController
             if (params[:customer][:email] != @customer.email) && (!params[:customer][:email].blank?)
                 begin
                     current_stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)   
-                    current_stripe_customer.email = params[:customer][:email]
+                    current_stripe_customer.email = params[:customer][:email].downcase
                     current_stripe_customer.save
                 rescue => error
                     puts '---------------------------------------------------'
@@ -133,9 +133,9 @@ class AdminActionsController < ApplicationController
                     CustomerMailer.delay.rescued_error(@customer,"Email could not be updated: "+error.message)
                 else
                     if @customer.user
-                        @customer.user.update(email:params[:customer][:email])
+                        @customer.user.update(email:params[:customer][:email].downcase)
                     end
-                    @customer.update(email:params[:customer][:email])
+                    @customer.update(email:params[:customer][:email].downcase)
                 end
             end
 
