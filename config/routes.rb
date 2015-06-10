@@ -11,7 +11,7 @@ Chowdy::Application.routes.draw do
   get "user_sessions/destroy"
   get 'login' => 'user_sessions#new', :as => :login
   get 'logout' => 'user_sessions#destroy', :as => :logout
-  # match '/:id' => "shortener/shortened_urls#show"
+  match '/:id' => "shortener/shortened_urls#show", via: [:get]
 
   post 'customers/create' => 'customers#create', as: 'create_customer'
   post 'customers/failed_invoice' => 'customers#fail', as: 'failed_invoice'
