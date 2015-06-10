@@ -26,7 +26,7 @@ class OauthsController < ApplicationController
             redirect_to user_profile_path, :notice => "Logged in from #{provider.titleize}!"
         end
       rescue => error
-        flash[:login_error] = "Some error occured. #{error.message.inspect}"
+        flash[:login_error] = "An error has occurred."
         redirect_to login_path, :alert => "Failed to login from #{provider.titleize}!"
       end
     end
