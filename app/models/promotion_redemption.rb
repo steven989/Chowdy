@@ -16,10 +16,10 @@ class PromotionRedemption < ActiveRecord::Base
                     if (["No","no",nil].include? customer.active?) || (customer.stripe_subscription_id.blank?)
                         {result:false, message:'Promo code cannot be applied as you do not current have an active subscription'}
                     else
-                        if Promotion.where(code:promo_code, active:true).take.immediate_refund?
-                            {result:true, message:'Promo code applied. You will see your refund shortly.'}
+                        if promotion.immediate_refund?
+                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} will be refunded to you shortly."}
                         else
-                            {result:true, message:'Promo code applied. You will see the discount on your next bill.'}
+                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} discount will be applie to your next bill."}
                         end
 
                     end
