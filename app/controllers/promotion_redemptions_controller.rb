@@ -1,6 +1,8 @@
 class PromotionRedemptionsController < ApplicationController
 
     def redeem
+        current_customer = current_user.customer
+        
         check_result = PromotionRedemption.check_eligibility(current_customer,params[:promo_code])
         if check_result[:result]
             PromotionRedemption.delay.redeem(current_customer,params[:promo_code])
