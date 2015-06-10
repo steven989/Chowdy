@@ -19,7 +19,7 @@ class PromotionRedemption < ActiveRecord::Base
                         if Promotion.where(code:promo_code, active:true).take.immediate_refund?
                             {result:true, message:'Promo code applied. You will see your refund shortly.'}
                         else
-                            {result:true, message:'Promo code applied. You will see a discount on your next bill.'}
+                            {result:true, message:'Promo code applied. You will see the discount on your next bill.'}
                         end
 
                     end
@@ -58,6 +58,8 @@ class PromotionRedemption < ActiveRecord::Base
 
                 promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
             else 
+                stripe_subscription = Stripe::Customer.retrieve(customer.stripe_customer_id).subscriptions.retrieve(customer.stripe_subscription_id)
+
                 stripe_subscription.coupon = promotion.stripe_coupon_id
                 stripe_subscription.prorate = false
                 if stripe_subscription.save
