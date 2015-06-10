@@ -355,7 +355,7 @@ class UsersController < ApplicationController
                     @delivery_color_class = "warning"
                     @do_not_disable_delivery_button_initially = true unless (@current_customer.delivery_address.blank? || @current_customer.phone_number.blank?)
                 else 
-                    @delivery_note = "You have requested delivery but your account is on hold"
+                    @delivery_note = "You have requested delivery but your account is on hold. Delivery will start when your subscription resumes."
                     @delivery_button = "Update delivery information"
                     @delivery_color_class = "warning"
                 end
