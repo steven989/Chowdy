@@ -73,6 +73,8 @@ gem 'rack-timeout'
 #12) Delayed jobs for long processing items
 gem 'delayed_job_active_record'
 
+#13) link shortener
+gem 'shortener'
 
 
 # Use ActiveModel has_secure_password
