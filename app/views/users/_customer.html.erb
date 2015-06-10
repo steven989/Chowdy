@@ -37,7 +37,11 @@ $(function(){
           }
         });
       });
+
+      var isDraggable = $(document).width() > 800 ? true : false; // If 
+
       map.setOptions({
+        draggable: isDraggable,
         scrollwheel: false
       });
       map.setZoom(13);
