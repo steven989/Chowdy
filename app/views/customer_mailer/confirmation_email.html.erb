@@ -13,7 +13,7 @@
     <% end %>
     <p><b>Please create an account to pause or make changes to your subscription at: <%= create_customer_profile_url(@stripe_customer_id) %></b></p>
     <p>If you forget to pause your subscription or don't pick up your meals after the chefs have cooked your food, we cannot refund you or give you credits. Let's minimize food waste together!</p>
-    <p>Refer a friend using <%= @current_customer.referral_code %> and you both get $10 off your meals!</p>
+    <p>Refer a friend using <b><%= @current_customer.referral_code %><b> and you both get $10 off your meals!</p>
     <p>That's it, welcome to the Chowdy community.</p>
     <p>- the Chowdy team</p>
 </body>
