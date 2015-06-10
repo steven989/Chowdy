@@ -56,7 +56,7 @@ $(function(){
       $('#main-nav li a[href='+hash+']').parent().addClass("highlight");
 
       //navigation amongst the tabs
-      $('#main-nav li a, .link_to_settings').off("click").on("click",function(){
+      $('#main-nav li a, .link_to_settings, #logo').off("click").on("click",function(){
         window.location.hash = $(this).attr("href");
         $(".nav-main").find(".highlight").removeClass("highlight");
         $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
@@ -302,7 +302,9 @@ $(function(){
             <a class="btn btn-link visible-xs m-t-sm" data-toggle="class:nav-off-screen" data-target="#nav">
                       <i class="fa fa-bars"></i>
             </a>
-            <%= image_tag "logo-light.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm" %>
+            <a href="#dashboard" data-toggle="tab" id="logo">
+              <%= image_tag "logo-light.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm" %>
+            </a>
         </div>
       
     </header>    
