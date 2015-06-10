@@ -26,6 +26,7 @@ class OauthsController < ApplicationController
             redirect_to user_profile_path, :notice => "Logged in from #{provider.titleize}!"
         end
       rescue
+        flash[:login_error] = "Cannot find your subscription. You must #{link_to "sign up", "http://chowdy.ca/signup"} for a subscription to create an account."
         redirect_to login_path, :alert => "Failed to login from #{provider.titleize}!"
       end
     end
