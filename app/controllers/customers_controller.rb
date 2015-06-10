@@ -137,9 +137,11 @@ protect_from_forgery :except => :payment
                     if current_stripe_customer.save
                         current_customer.update(email:params[:email].downcase)
                         current_customer.user.update(email:params[:email].downcase)
-                        if current_customer.errors.any?
+                        if current_customer.errors.any? || current_customer.user.errors.any?
                             current_stripe_customer.email = _old_email
                             current_stripe_customer.save
+                            current_customer.update(email:_old_email)
+                            current_customer.user.update(email:_old_email)
                             notice_message = "Email could not be updated. #{current_customer.errors.full_messages.join(", ")}"
                             notice_status = "fail"    
                         else 

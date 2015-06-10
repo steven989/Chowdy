@@ -9,6 +9,7 @@ class Customer < ActiveRecord::Base
 
     # validates :email, uniqueness: true
     validates :referral_code, uniqueness: true
+    validates :email, uniqueness: true
 
     def self.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
 
@@ -301,7 +302,7 @@ class Customer < ActiveRecord::Base
                                     CustomerMailer.duplicate_signup_email(customer_name.split(/\s/)[0].capitalize,customer_email).deliver
                                 end
                             end
-                            
+
                 #5) send confirmation email
                     hub_email = hub.gsub(/\\/,"")
                     start_date_email = StartDate.first.start_date
