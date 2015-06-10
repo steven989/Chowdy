@@ -11,7 +11,7 @@
     <% else %>
         <p>Pick up your meals at <%= @hub %>, the store hours of this hub is <%= @op_hours %>. Just let staff know your name and you can grab your meals. That's it!</p>
     <% end %>
-    <p><b>Please create an account to pause or make changes to your subscription at: <%= create_customer_profile_path(@stripe_customer_id) %></b></p>
+    <p><b>Please create an account to pause or make changes to your subscription at: <%= short_url(create_customer_profile_url(@stripe_customer_id)) %></b></p>
     <p>If you forget to pause your subscription or don't pick up your meals after the chefs have cooked your food, we cannot refund you or give you credits. Let's minimize food waste together!</p>
     <p>Refer a friend using <b><%= @current_customer.referral_code %><b> and you both get $10 off your meals!</p>
     <p>That's it, welcome to the Chowdy community.</p>

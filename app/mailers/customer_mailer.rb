@@ -1,6 +1,5 @@
 class CustomerMailer < ActionMailer::Base
 
-  register_interceptor Shortener::ShortenUrlInterceptor.new
   default from: "help@chowdy.ca"
 
   def confirmation_email(customer,hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
