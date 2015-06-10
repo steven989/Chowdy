@@ -304,7 +304,7 @@ class AdminActionsController < ApplicationController
 
             end
         elsif params[:todo] == "attach_coupon"
-            check_result = PromotionRedemption.check_eligibility(current_customer,params[:coupon_code])
+            check_result = PromotionRedemption.check_eligibility(@customer,params[:coupon_code])
             if check_result[:result]
                 PromotionRedemption.delay.redeem(@customer,params[:coupon_code])
                 flash[:status] = check_result[:result] ? "success" : "fail"
