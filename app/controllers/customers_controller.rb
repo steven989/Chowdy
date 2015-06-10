@@ -142,7 +142,7 @@ protect_from_forgery :except => :payment
                             current_stripe_customer.save
                             current_customer.update(email:_old_email)
                             current_customer.user.update(email:_old_email)
-                            notice_message = "Email could not be updated. #{current_customer.errors.full_messages.join(", ")}"
+                            notice_message = "Email could not be updated. #{current_customer.errors.full_messages.join(", ")} #{current_customer.user.errors.full_messages.join(", ")}"
                             notice_status = "fail"    
                         else 
                             notice_message = "Email updated"
@@ -196,7 +196,18 @@ protect_from_forgery :except => :payment
             CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 
-            current_customer.update(name:params[:name])
+            current_customer.update_attributes(name:params[:name])
+
+            if current_customer.errors.any?
+                notice_status = "fail"
+                notice_message = "Name could not be updated #{current_customers.errors.full_messages.join(", ")}"
+            else
+                notice_status = "fail"
+                notice_message = "Name updated"
+            end
+
+            flash[:status] = notice_status
+            flash[:notice_customer_setting] = notice_message
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "feedback"
             current_customer.feedbacks.create(feedback:params[:feedback], occasion: 'regular') 
