@@ -6,6 +6,7 @@ class Customer < ActiveRecord::Base
     has_many :stop_queues, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id, dependent: :destroy 
     has_many :failed_invoices, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id, dependent: :destroy 
     has_many :refunds, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :promotion_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
     validates :email, uniqueness: true
     validates :referral_code, uniqueness: true
@@ -218,13 +219,13 @@ class Customer < ActiveRecord::Base
                                     puts '---------------------------------------------------'
                                     CustomerMailer.rescued_error(customer,"Refund cannot be completed: "+error.message).deliver
                                 else
-                                    promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                                    PromotionRedemption.create(stripe_customer_id:customer.stripe_customer_id,promotion_id:promotion.id)
                                 end
                             else 
                                 stripe_subscription.coupon = promotion.stripe_coupon_id
                                 stripe_subscription.prorate = false
                                 if stripe_subscription.save
-                                    promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                                    PromotionRedemption.create(stripe_customer_id:customer.stripe_customer_id,promotion_id:promotion.id)
                                 end
                             end
 

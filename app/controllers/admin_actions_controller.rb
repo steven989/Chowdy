@@ -304,44 +304,15 @@ class AdminActionsController < ApplicationController
 
             end
         elsif params[:todo] == "attach_coupon"
-            promotion = Promotion.where(code: params[:coupon_code]).take
-            stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)
-            stripe_subscription = stripe_customer.subscriptions.retrieve(@customer.stripe_subscription_id)
-
-            unless promotion.nil?
-                if promotion.immediate_refund
-                    recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
-                    amount = promotion.amount_in_cents
-                    refund_list = []
-                    recent_charges.each do |charge_id|
-                        charge = Stripe::Charge.retrieve(charge_id)
-                        net_amount = charge.amount - charge.amount_refunded
-                        if net_amount - amount >= 0
-                            refund_list.push({charge_id.to_sym => amount})
-                            break
-                        else
-                            refund_list.push({charge_id.to_sym => net_amount}) unless net_amount == 0
-                            amount -= net_amount
-                        end
-                    end
-
-                    refund_list.each do |refund_li|
-                        charge_id = refund_li.keys[0].to_s
-                        list_refund_amount = refund_li.values[0]
-                        charge = Stripe::Charge.retrieve(charge_id)
-                        charge.refunds.create(amount:list_refund_amount) 
-                    end
-
-                    promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
-                else 
-                    stripe_subscription.coupon = promotion.stripe_coupon_id
-                    stripe_subscription.prorate = false
-                    if stripe_subscription.save
-                        promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
-                    end
-                end
+            check_result = PromotionRedemption.check_eligibility(current_customer,params[:coupon_code])
+            if check_result[:result]
+                PromotionRedemption.delay.redeem(@customer,params[:coupon_code])
+                flash[:status] = check_result[:result] ? "success" : "fail"
+                flash[:notice_customers] = check_result[:message]
+            else
+                flash[:status] = check_result[:result] ? "success" : "fail"
+                flash[:notice_customers] = check_result[:message]            
             end
-
         elsif params[:todo] == "apply_referral"
             unless @customer.stripe_subscription_id.blank?
                 stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)

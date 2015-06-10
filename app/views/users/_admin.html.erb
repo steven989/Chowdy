@@ -666,6 +666,15 @@ $(function(){
                     <section class="tab-pane" id="customers" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder padder-v">
+                              <% if flash[:notice_customers] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_customers] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
                               <section class="row padder">
                                 <div class="panel panel-default">
                                   <header class="panel-heading">

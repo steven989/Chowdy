@@ -722,6 +722,15 @@ $(function(){
                     <section class="tab-pane" id="referral" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder">
+                              <% if flash[:notice_referral] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_referral] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
                                 <section class="row m-b-xs m-t-md">
                                     <div class="col-sm-12">
                                         <h5 class="m-b-xs text-muted text-left">
@@ -779,6 +788,35 @@ $(function(){
                                         </div>
                                     </div>
                                 </section>
+
+                                <section class="row m-b-xs">
+                                    <div class="col-sm-12">
+                                        <h5 class="m-b-xs text-muted text-left">
+                                            Apply promo code
+                                        </h5>
+                                    </div>
+                                </section>
+                                <section class="row">
+                                    <div class="col-sm-12">
+                                        <div class="panel b-a padder text-left padder-v">
+                                            <%= form_tag redeem_promo_path, method: 'POST', class:"m-b-none" do %>
+                                              <div class="row">
+                                                <div class="col-sm-4">
+                                                  <div class="form-group">
+                                                    <%= text_field_tag 'promo_code', nil, class:"form-control" %>
+                                                  </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                  <%= submit_tag 'Apply code', class:"btn btn-s-md btn-success" %>
+                                                </div>
+                                                </div>
+                                              </div>
+                                            <% end %>
+                                        </div>
+                                    </div>
+                                </section>                           
+
+
                             </section>
                         </section>
                     </section>

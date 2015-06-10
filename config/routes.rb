@@ -45,6 +45,8 @@ Chowdy::Application.routes.draw do
   get 'start_date/edit' => 'start_dates#edit', as: 'edit_start_date'
   put 'start_date/update' => 'start_dates#update', as: 'update_start_date'
 
+  post 'redeem_promo' => 'promotion_redemptions#redeem', as: 'redeem_promo'
+
   # You can have the root of your site routed with "root"
   # root 'welcome#index'
 
