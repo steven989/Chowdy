@@ -24,7 +24,9 @@ $(function(){
         searching: false
        });
 
-       $('#system_setting').DataTable();
+       $('#system_setting_table').DataTable({
+        iDisplayLength: 25
+       });
 
        $('#feedback').DataTable({
         searching: false
@@ -770,7 +772,7 @@ $(function(){
                                     <button class="btn btn-s-md btn-default btn-rounded pull_system_setting_form" href="<%= edit_start_date_path %>">Change sign-up date (currently <%= StartDate.first.start_date.strftime("%Y-%m-%d") %>)</button>
                                   </header>
                                   <div class="table-responsive">
-                                    <table id="system_setting" class="display table table-striped m-b-none" style="font-size: 12px">
+                                    <table id="system_setting_table" class="display table table-striped m-b-none" style="font-size: 12px">
                                       <thead>
                                         <tr>
                                           <th>ID</th>
