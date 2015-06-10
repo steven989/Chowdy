@@ -845,8 +845,12 @@ $(function(){
                       <section class="vbox">
                         <section class="scrollable padder"> 
                           <% if flash[:notice_customer_setting] %>
-                            <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>">
-                              <%= flash[:notice_customer_setting] %>
+                            <div class="row m-t-xs">
+                              <div class="col-sm-12">
+                                <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>">
+                                  <%= flash[:notice_customer_setting] %>
+                                </div>
+                              </div>
                             </div>
                           <% end %>
                           <% if @number_of_failed_invoices > 0 %>
