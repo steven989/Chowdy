@@ -754,7 +754,7 @@ $(function(){
                                             <td><%= p.code %></td>
                                             <td><%= p.stripe_coupon_id %></td>
                                             <td><%= p.immediate_refund %></td>
-                                            <td><%= p.redemptions %></td>
+                                            <td><%= p.promotion_redemptions.length %></td>
                                             <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_promotion_path(p) %>" style="min-width: 0px;width: 60px;">Edit</button></td>
                                             <% @coupon_activate_button = p.active ? "Stop" : "Start" %>
                                             <td><%= link_to @coupon_activate_button, activate_promotion_path(p), method: :put, class: "btn btn-s-md btn-warning btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
