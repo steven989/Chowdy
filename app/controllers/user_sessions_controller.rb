@@ -14,7 +14,11 @@ class UserSessionsController < ApplicationController
           flash[:login_error] = "Please log in with Facebook"
         end
       else
-        flash[:login_error] = "Incorrect email or password entered. Please try again."
+        if Customer.where(email:params[:email].downcase).length > 0
+          flash[:login_error] = "Please use the link in your confirmation email to create an account. If you do not have the email, please email help@chowdy.ca to get the link."
+        else
+          flash[:login_error] = "Incorrect email or password entered. Please try again."
+        end
       end
       redirect_to login_path
     end
