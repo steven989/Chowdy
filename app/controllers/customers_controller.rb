@@ -336,7 +336,7 @@ protect_from_forgery :except => :payment
         CustomerMailer.delay.resend_profile_link(target_email,customer)
         
         flash[:status] = "success"
-        flash[:login_error] = "We just emailed you the link to create your profile. If you don't get it shortly please email us at <a href='mailto:help@chowdy.ca'>help@chowdy.ca</a>."
+        flash[:login_error] = "We just emailed you the link to create your profile. If you don't get it shortly please email us at <a href='mailto:help@chowdy.ca?Subject=Please%20email%20my%20sign%20up%20link'>help@chowdy.ca</a>"
         redirect_to login_path
     end
 
