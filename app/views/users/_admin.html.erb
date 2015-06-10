@@ -24,11 +24,11 @@ $(function(){
         searching: false
        });
 
-       $('#system_setting').DataTable({
-        iDisplayLength: 25
-       });
+       $('#system_setting').DataTable();
 
-       $('#feedback').DataTable();
+       $('#feedback').DataTable({
+        searching: false
+       });
 
        $('#overdue_invoice').DataTable({
         scrollX: true,
