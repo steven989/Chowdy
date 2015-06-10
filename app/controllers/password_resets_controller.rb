@@ -7,6 +7,7 @@ skip_before_filter :require_login
     # This line sends an email to the user with instructions on how to reset their password (a url with a random token)
     if @user
       @user.deliver_reset_password_instructions! 
+      flash[:status] = "success"
       message = "Instructions have been sent to your email."
     else
       message = "We could not find your email address. Please <a href='http://chowdy.ca/signup'>sign up</a> for a subscription."
@@ -41,7 +42,9 @@ skip_before_filter :require_login
     @user.password_confirmation = params[:user][:password_confirmation]
     # the next line clears the temporary token and updates the password
     if @user.change_password!(params[:user][:password])
-      redirect_to(login_path, :notice => 'Password was successfully updated.')
+      flash[:login_error] = "Password successfully updated. Please log in"
+      flash[:status] = "success"
+      redirect_to login_path
     else
       render :action => "edit"
     end
