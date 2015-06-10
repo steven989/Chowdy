@@ -6,7 +6,7 @@
           <strong>Log in to manage your subscription</strong>
         </header>
         <% if flash[:login_error] %>
-          <div class="alert alert-<%= flash[:status] == "success" ? "danger" : "success" %>">
+          <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>">
             <%= raw flash[:login_error] %>
           </div>
         <% end %>
