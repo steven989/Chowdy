@@ -5,11 +5,17 @@ skip_before_filter :require_login
     @user = User.find_by_email(params[:email])
 
     # This line sends an email to the user with instructions on how to reset their password (a url with a random token)
-    @user.deliver_reset_password_instructions! if @user
+    if @user
+      @user.deliver_reset_password_instructions! 
+      message = "Instructions have been sent to your email."
+    else
+      message = "We could not find your email address. Please <a href='http://chowdy.ca/signup'>sign up</a> for a subscription."
+    end
 
     # Tell the user instructions have been sent whether or not email was found.
     # This is to not leak information to attackers about which emails exist in the system.
-    redirect_to(login_path, :notice => 'Instructions have been sent to your email.')
+    flash[:login_error] = message
+    redirect_to login_path
   end
 
   def edit
