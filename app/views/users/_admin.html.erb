@@ -25,8 +25,7 @@ $(function(){
        });
 
        $('#system_setting').DataTable({
-        iDisplayLength: 25,
-        order: [[1, "asc"],[2, "asc"]]
+        iDisplayLength: 25
        });
 
        $('#feedback').DataTable();
@@ -623,7 +622,7 @@ $(function(){
                                     Customer Feedback
                                   </header>
                                   <div class="table-responsive">
-                                    <table id="deliveries" class="display table table-striped m-b-none" style="font-size: 12px">
+                                    <table id="feedback" class="display table table-striped m-b-none" style="font-size: 12px">
                                       <thead>
                                         <tr>
                                           <th>Stripe Customer ID</th>

@@ -82,9 +82,10 @@ class UsersController < ApplicationController
             @customer_requesting_to_switch_to_pickup = StopQueue.where{(stop_type == "change_hub") & ((cancel_reason =~ "%wanda%") |(cancel_reason =~ "%coffee%")|(cancel_reason =~ "%dekefir%"))}.map{|s| s.stripe_customer_id}
             @deliveries = Customer.where{(active? >> ["Yes","yes"]) & (paused? >> [nil,"No","no"]) & ((recurring_delivery >> ["Yes","yes"])|((hub =~ "%delivery%") &(monday_pickup_hub == nil)))}
 
-            @feedback = Feedback.all.limit(30).order(created_at: :desc)
+            feedback_limit = SystemSetting.where(setting:"feedback", setting_attribute:"display_limit").blank? 30 : SystemSetting.where(setting:"feedback", setting_attribute:"display_limit").take.setting_value
+            @feedback = Feedback.all.limit(feedback_limit).order(created_at: :desc)
 
-            @system_settings = SystemSetting.all
+            @system_settings = SystemSetting.all.order(setting: :asc, setting_attribute: :asc)
             @scheduled_tasks = ScheduledTask.all
 
             @signup_timeseries = Customer.select('date_signed_up_for_recurring::date AS day, COUNT(*) as sign_ups').group('day').order('day asc').map {|r| [r.day.to_time.to_i*1000, r.sign_ups]}
