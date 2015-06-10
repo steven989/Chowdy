@@ -129,6 +129,7 @@ protect_from_forgery :except => :payment
             end
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "email" 
+            _old_email = current_customer.email
             unless params[:email].blank?
                 begin
                     current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
@@ -136,6 +137,15 @@ protect_from_forgery :except => :payment
                     if current_stripe_customer.save
                         current_customer.update(email:params[:email].downcase)
                         current_customer.user.update(email:params[:email].downcase)
+                        if current_customer.errors.any?
+                            current_stripe_customer.email = _old_email
+                            current_stripe_customer.save
+                            notice_message = "Email could not be updated. #{current_customer.errors.full_messages.join(", ")}"
+                            notice_status = "fail"    
+                        else 
+                            notice_message = "Email updated"
+                            notice_status = "success"                            
+                        end
                     end
                 rescue => error
                     puts '---------------------------------------------------'
@@ -143,7 +153,11 @@ protect_from_forgery :except => :payment
                     puts error.message
                     puts '---------------------------------------------------'
                     CustomerMailer.delay.rescued_error(current_customer,"Some Stripe error occured when customer tried to change email: "+error.message.inspect)
+                    notice_message = "Email could not be updated. #{error.message}"
+                    notice_status = "fail"
                 end
+                flash[:status] = notice_status
+                flash[:notice_customer_setting] = notice_message
                 redirect_to user_profile_path+"#settings"
             end
         elsif params[:id].downcase == "hub" 

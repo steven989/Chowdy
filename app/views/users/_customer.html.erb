@@ -844,6 +844,21 @@ $(function(){
                     <section class="tab-pane" id="settings" role="tabpanel">
                       <section class="vbox">
                         <section class="scrollable padder"> 
+                          <% if flash[:notice_customer_setting] %>
+                            <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>">
+                              <%= flash[:notice_customer_setting] %>
+                            </div>
+                          <% end %>
+                          <% if @number_of_failed_invoices > 0 %>
+                            <section class="row m-t-xs">
+                              <div class="col-sm-12">
+                                <div class="alert alert-danger" style="margin-bottom:0 !important;">
+                                  <i class="fa fa-ban-circle"></i>You have <strong><%= @number_of_failed_invoices %> overdue invoice </strong><%= "s" if @number_of_failed_invoices > 1 %> for the week<%= "s" if @number_of_failed_invoices > 1 %> of <%= @failed_weeks.to_sentence %> due to declined credit card. We will re-attempt in a few days. You can also<a href="#settings" data-toggle="tab" class="link_to_settings"> update your card</a> on your profile.
+                                </div>
+                              </div>
+                            </section>
+                          <% end %>
+
                           <div class="row m-t-md">
                             <div class="col-sm-6">
                               <section class="panel panel-default">
