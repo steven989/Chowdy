@@ -13,6 +13,7 @@ class OauthsController < ApplicationController
       begin
         stripe_customer_id = params[:state]
         if stripe_customer_id.blank?
+            flash[:login_error] = "Cannot find your subscription. You must #{link_to "sign up", "http://chowdy.ca/signup"} for a subscription to create an account."
             redirect_to login_path, :alert => "You must first sign up for your subscription first at chowdy.ca/signup"
         else
             email = Customer.where(stripe_customer_id:stripe_customer_id).take.email 
