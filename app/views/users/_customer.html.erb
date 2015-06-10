@@ -847,7 +847,7 @@ $(function(){
                           <% if flash[:notice_customer_setting] %>
                             <div class="row m-t-xs">
                               <div class="col-sm-12">
-                                <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>">
+                                <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
                                   <%= flash[:notice_customer_setting] %>
                                 </div>
                               </div>

@@ -135,8 +135,8 @@ protect_from_forgery :except => :payment
                     current_stripe_customer = Stripe::Customer.retrieve(current_customer.stripe_customer_id)   
                     current_stripe_customer.email = params[:email].downcase
                     if current_stripe_customer.save
-                        current_customer.update(email:params[:email].downcase)
-                        current_customer.user.update(email:params[:email].downcase)
+                        current_customer.update_attributes(email:params[:email].downcase)
+                        current_customer.user.update_attributes(email:params[:email].downcase)
                         if current_customer.errors.any? || current_customer.user.errors.any?
                             current_stripe_customer.email = _old_email
                             current_stripe_customer.save

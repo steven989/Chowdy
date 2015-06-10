@@ -7,9 +7,8 @@ class Customer < ActiveRecord::Base
     has_many :failed_invoices, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id, dependent: :destroy 
     has_many :refunds, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
-    # validates :email, uniqueness: true
-    validates :referral_code, uniqueness: true
     validates :email, uniqueness: true
+    validates :referral_code, uniqueness: true
 
     def self.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
 
