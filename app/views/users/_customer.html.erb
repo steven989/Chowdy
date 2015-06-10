@@ -822,7 +822,7 @@ $(function(){
                                     </div>
                                     <div class="row">
                                       <div class="col-sm-5 m-t-md">
-                                        <%= submit_tag @delivery_button, class:"btn btn-md btn-default disabled", id: "request_delivery_submit" %>
+                                        <%= submit_tag @delivery_button, class:"btn btn-md btn-default #{disabled unless @do_not_disable_delivery_button_initially}", id: "request_delivery_submit" %>
                                       </div>
                                       <div class="col-sm-7 m-t-md">
                                         <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
