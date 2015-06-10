@@ -82,6 +82,8 @@ class UsersController < ApplicationController
             @customer_requesting_to_switch_to_pickup = StopQueue.where{(stop_type == "change_hub") & ((cancel_reason =~ "%wanda%") |(cancel_reason =~ "%coffee%")|(cancel_reason =~ "%dekefir%"))}.map{|s| s.stripe_customer_id}
             @deliveries = Customer.where{(active? >> ["Yes","yes"]) & (paused? >> [nil,"No","no"]) & ((recurring_delivery >> ["Yes","yes"])|((hub =~ "%delivery%") &(monday_pickup_hub == nil)))}
 
+            @feedback = Feedback.all.limit(30).order(created_at: :desc)
+
             @system_settings = SystemSetting.all
             @scheduled_tasks = ScheduledTask.all
 

@@ -78,9 +78,7 @@ protect_from_forgery :except => :payment
             end
             
             unless params[:feedback].blank?        
-                if current_customer.feedbacks.create(feedback:params[:feedback], occasion:"cancel") 
-                    CustomerMailer.delay.feedback_received(current_customer)
-                end
+                current_customer.feedbacks.create(feedback:params[:feedback], occasion:"cancel") 
             end
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "restart"
@@ -182,9 +180,7 @@ protect_from_forgery :except => :payment
             current_customer.update(name:params[:name])
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "feedback"
-            if current_customer.feedbacks.create(feedback:params[:feedback], occasion: 'regular') 
-                CustomerMailer.delay.feedback_received(current_customer)
-            end
+            current_customer.feedbacks.create(feedback:params[:feedback], occasion: 'regular') 
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "change_subscription"
             total_updated_meals = params[:monday_reg_hidden].to_i + params[:monday_grn_hidden].to_i + params[:thursday_reg_hidden].to_i + params[:thursday_grn_hidden].to_i

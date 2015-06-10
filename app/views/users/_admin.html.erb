@@ -24,6 +24,13 @@ $(function(){
         searching: false
        });
 
+       $('#system_setting').DataTable({
+        iDisplayLength: 25,
+        order: [[1, "asc"],[2, "asc"]]
+       });
+
+       $('#feedback').DataTable();
+
        $('#overdue_invoice').DataTable({
         scrollX: true,
         searching: false,
@@ -38,6 +45,7 @@ $(function(){
        });
 
        $('#deliveries').DataTable({
+        scrollX: true,
         searching: false
        });
 
@@ -601,6 +609,36 @@ $(function(){
                                             <td><%= c.no_beef %></td>
                                             <td><%= c.no_poultry %></td>
                                             <td><%= c.special_delivery_instructions %></td>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
+
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Customer Feedback
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="deliveries" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <th>Stripe Customer ID</th>
+                                          <th>Date received</th>
+                                          <th>Feedback Type</th>
+                                          <th>Feedback</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @feedback.each do |f| %>
+                                          <tr>
+                                            <td><%= f.stripe_customer_id %></td>
+                                            <td><%= f.created_at.strftime("%Y-%m-%d") %></td>
+                                            <td><%= f.occasion %></td>
+                                            <td><%= f.feedback %></td>
                                           </tr>
                                         <% end %>
                                       </tbody>
