@@ -15,6 +15,7 @@ class OauthsController < ApplicationController
         facebook_email = @user_hash[:user_info][:email].downcase
 
         puts '---------------------------------------------------'
+        puts @user_hash.inspect
         puts facebook_email.inspect
         puts '---------------------------------------------------'
         if User.where(email:facebook_email).length == 1 #if someone created an account without facebook, loggin in using Facebook still works
