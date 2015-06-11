@@ -17,16 +17,16 @@ class PromotionRedemption < ActiveRecord::Base
                         {result:false, message:'Promo code cannot be applied as you do not current have an active subscription'}
                     else
                         if promotion.immediate_refund?
-                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} will be refunded to you shortly."}
+                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} will be refunded to you shortly"}
                         else
-                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} discount will be applied to your next bill."}
+                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} discount will be applied to your next bill"}
                         end
 
                     end
                 end
             end
         else
-            {result:false, message:'Promotion cannot be found'}
+            {result:false, message:'Promotion not found'}
         end        
     end
 
