@@ -9,6 +9,13 @@ class OauthsController < ApplicationController
     provider = auth_params[:provider]
 
     if @user = login_from(provider)
+      puts '---------------------------------------------------'
+      puts '---------------------------------------------------'
+      puts 'this is after login'
+      puts '---------------------------------------------------'
+      puts @user_hash.inspect
+      puts '---------------------------------------------------'
+      puts '---------------------------------------------------'
       redirect_to user_profile_path, :notice => "Logged in from #{provider.titleize}!"
     else
       begin
