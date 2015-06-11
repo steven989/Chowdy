@@ -7,13 +7,7 @@ class OauthsController < ApplicationController
   def callback
     stripe_customer_id = params[:state]
     provider = auth_params[:provider]
-    puts '---------------------------------------------------'
-    puts '---------------------------------------------------'
-    puts params.inspect
-    puts '---------------------------------------------------'
-    puts auth_params.inspect
-    puts '---------------------------------------------------'
-    puts '---------------------------------------------------'
+
     if @user = login_from(provider)
       redirect_to user_profile_path, :notice => "Logged in from #{provider.titleize}!"
     else
