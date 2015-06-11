@@ -19,7 +19,7 @@ class PromotionRedemption < ActiveRecord::Base
                         if promotion.immediate_refund?
                             {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} will be refunded to you shortly."}
                         else
-                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} discount will be applie to your next bill."}
+                            {result:true, message:"Promo code applied. $#{promotion.amount_in_cents/100} discount will be applied to your next bill."}
                         end
 
                     end
