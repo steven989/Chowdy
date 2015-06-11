@@ -12,20 +12,10 @@ class OauthsController < ApplicationController
       redirect_to user_profile_path, :notice => "Logged in from #{provider.titleize}!"
     else
       begin
-        puts '---------------------------------------------------'
-        puts @user_hash.inspect
-        puts facebook_email.inspect
-        puts '---------------------------------------------------'
+        facebook_email = @user_hash[:user_info]["email"].downcase
         
-        facebook_email = @user_hash[:user_info][:email].downcase
-
-
         if User.where(email:facebook_email).length == 1 #if someone created an account without facebook, loggin in using Facebook still works
             @user = User.where(email:facebook_email).take
-
-            puts '---------------------------------------------------'
-            puts @user.inspect
-            puts '---------------------------------------------------'
 
             auto_login(@user)
             redirect_to user_profile_path
