@@ -14,8 +14,16 @@ class OauthsController < ApplicationController
       begin
         facebook_email = @user_hash[:user_info][:email].downcase
 
+        puts '---------------------------------------------------'
+        puts facebook_email.inspect
+        puts '---------------------------------------------------'
         if User.where(email:facebook_email).length == 1 #if someone created an account without facebook, loggin in using Facebook still works
             @user = User.where(email:facebook_email).take
+
+            puts '---------------------------------------------------'
+            puts @user.inspect
+            puts '---------------------------------------------------'
+
             auto_login(@user)
             redirect_to user_profile_path
         else
@@ -45,6 +53,9 @@ class OauthsController < ApplicationController
         end
       rescue => error
         flash[:login_error] = "An error has occurred."
+        puts '---------------------------------------------------'
+        puts error.message
+        puts '---------------------------------------------------'
         redirect_to login_path, :alert => "Failed to login from #{provider.titleize}!"
       end
     end
