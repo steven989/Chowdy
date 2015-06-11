@@ -22,7 +22,7 @@ class OauthsController < ApplicationController
           stripe_customer_id = params[:state]
           if stripe_customer_id.blank? #if on the login page
             if Customer.where(email:facebook_email).length > 0
-              flash[:login_error] = "Please use the link in your confirmation email to create an account. If you did not receive the confirmation email, <a href='#{resend_sign_up_link_customer_request_path+"?email="+facebook_email}'>click here</a> to get the link sent to your email again"
+              flash[:login_error] = "Please use the link in your confirmation email to create an account first. If you did not receive the confirmation email, <a href='#{resend_sign_up_link_customer_request_path+"?email="+facebook_email}'>click here</a> to get the link sent to your email again"
               redirect_to login_path
             else
               flash[:login_error] = "Cannot find your subscription. You must <a href='http://chowdy.ca/signup'>sign up</a> for a subscription first to create an account"
@@ -40,7 +40,7 @@ class OauthsController < ApplicationController
           end
         end
       rescue => error
-        flash[:login_error] = "An error has occurred."
+        flash[:login_error] = "An error has occurred while logging in with Facebook. Please email <a href='mailto:help@chowdy.ca?subject=Facebook%20sign%20up%20error%3A%20'>help@chowdy.ca</a>. Please reference the email address you used to sign up"
         puts '---------------------------------------------------'
         puts error.message
         puts '---------------------------------------------------'

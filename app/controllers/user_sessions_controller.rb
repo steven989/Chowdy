@@ -15,7 +15,7 @@ class UserSessionsController < ApplicationController
         end
       else
         if Customer.where(email:params[:email].downcase).length > 0
-          flash[:login_error] = "Please use the link in your confirmation email to create an account. If you did not receive the confirmation email, <a href='#{resend_sign_up_link_customer_request_path+"?email="+params[:email].downcase}'>click here</a> to get the link sent to your email again"
+          flash[:login_error] = "Please use the link in your confirmation email to create an account first. If you did not receive the confirmation email, <a href='#{resend_sign_up_link_customer_request_path+"?email="+params[:email].downcase}'>click here</a> to get the link sent to your email again"
         else
           flash[:login_error] = "Cannot find your subscription. You must <a href='http://chowdy.ca/signup'>sign up</a> for a subscription first to create an account"
         end
