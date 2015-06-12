@@ -9,7 +9,7 @@ class Customer < ActiveRecord::Base
     has_many :promotion_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
     validates :email, uniqueness: true
-    validates :referral_code, uniqueness: true
+    validates :referral_code, uniqueness: true, allow_nil: :true, allow_blank: :true
 
     def self.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
 
