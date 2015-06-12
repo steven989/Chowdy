@@ -18,10 +18,28 @@ $(function(){
         $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
       });
 
+      // ajax
+
+      function formRetrievalAjax() {
+              $('.pull_system_setting_form, .pull_next_week_total').off("click").on("click",function(){
+                $.ajax({
+                  url: $(this).attr('href'),
+                  type: 'GET',
+                  dataType: 'html'
+                }).done(function(data){
+                  $('#formModal .modal-content').html(data);
+                  $('#formModal').modal('toggle')
+                });
+              });
+      };
+
       // data tables
 
        $('#missing_hub_info').DataTable({
-        searching: false
+        searching: false,
+        fnDrawCallback: function(oSettings){
+          formRetrievalAjax();
+        }
        });
 
        $('#system_setting_table').DataTable({
@@ -42,7 +60,10 @@ $(function(){
         iDisplayLength: 10,
         scrollX: true,
         scrollY: Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 300,
-        order: [[73, "desc"]]
+        order: [[73, "desc"]],
+        fnDrawCallback: function(oSettings){
+          formRetrievalAjax();
+        }
        });
 
        $('#deliveries').DataTable({
@@ -130,20 +151,6 @@ $(function(){
         }
       }
       plotCharge();
-      // ajax
-
-      function formRetrievalAjax() {
-              $('.pull_system_setting_form, .pull_next_week_total').off("click").on("click",function(){
-                $.ajax({
-                  url: $(this).attr('href'),
-                  type: 'GET',
-                  dataType: 'html'
-                }).done(function(data){
-                  $('#formModal .modal-content').html(data);
-                  $('#formModal').modal('toggle')
-                });
-              });
-      };
 
       formRetrievalAjax();
 
