@@ -6,13 +6,22 @@ class DailySnapshot < ActiveRecord::Base
         active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
         active_customers = Customer.where(active?: ["Yes","yes"], next_pick_up_date:current_pick_up_date)
 
-        date_info = DailySnapshot.new(date:Date.today)
-        if date_info.save
-            date_info.update_attributes(
+        exiting_date = DailySnapshot.retrieve_snapshot(Date.today)
+        if existing_date
+            existing_date.update_attributes(
                 active_customers_including_pause: active_customers.length,
                 active_customers_excluding_pause: active_nonpaused_customers.length,
                 total_meals: MealStatistic.retrieve("total_meals") 
             )
+        else
+            date_info = DailySnapshot.new(date:Date.today)
+            if date_info.save
+                date_info.update_attributes(
+                    active_customers_including_pause: active_customers.length,
+                    active_customers_excluding_pause: active_nonpaused_customers.length,
+                    total_meals: MealStatistic.retrieve("total_meals") 
+                )
+            end
         end
     end    
 

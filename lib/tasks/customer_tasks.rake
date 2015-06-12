@@ -254,8 +254,7 @@ namespace :app do
 
     desc 'Take a daily snapshot of keys information that cannot be reconstructed later'
     task :take_daily_snapshot => [:environment] do 
-        ScheduledTask.delay.run_all_tasks
+        DailySnapshot.take_snapshot
     end 
-
 
 end
