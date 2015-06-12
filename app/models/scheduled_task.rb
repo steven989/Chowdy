@@ -4,7 +4,7 @@ class ScheduledTask < ActiveRecord::Base
     def self.run_all_tasks
         report = []
 
-        sch_tasks = ScheduledTask.where{((day_of_week == Date.today.wday) & (hour_of_day == Time.now.hour)) | ((day_of_week == nil) & (hour_of_day == Time.now.hour)) }
+        sch_tasks = ScheduledTask.where{((day_of_week == Date.today.wday) & (hour_of_day == Time.now.hour)) | ((day_of_week == nil) & (hour_of_day == Time.now.hour)) | ((day_of_week == nil) & (hour_of_day == nil)) }
         if sch_tasks.length > 0
             sch_tasks.each do |t|
                 report.push(t.run)
