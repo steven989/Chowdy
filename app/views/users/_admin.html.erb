@@ -39,9 +39,9 @@ $(function(){
        });
 
        $('#all_customers').DataTable({
+        iDisplayLength: 10,
         scrollX: true,
         scrollY: Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 300,
-        paging: false,
         order: [[73, "asc"]]
        });
 
