@@ -538,25 +538,9 @@ class AdminActionsController < ApplicationController
             end
         elsif params[:todo] == "destroy" 
             if params[:confirm_delete] == "on"
-                begin
-                    if @customer.delete_with_stripe
-                        flash[:status] = "success"
-                        flash[:notice_customers] = "Customer and user successfully deleted"
-                    else 
-                        flash[:status] = "fail"
-                        flash[:notice_customers] = "Could not delete customer/user/stripe customer: #{@customer.errors.full_messages.join(", ")}"
-                    end
-                rescue
-                    puts '---------------------------------------------------'
-                    puts 'Something went wrong when deleting a customer'
-                    puts error.message
-                    puts '---------------------------------------------------'
-                    CustomerMailer.delay.rescued_error(@customer,'Something went wrong when deleting a customer: '+error.message.inspect)
-                    flash[:status] = "fail"
-                    flash[:notice_customers] = "Could not delete customer/user/stripe customer: "+error.message.inspect
-                else
-                    puts "no error"
-                end
+                result = @customer.delete_with_stripe
+                flash[:status] = result[:status] ? "success" : "fail"
+                flash[:notice_customers] = result[:message]
             else
                 flash[:status] = "fail"
                 flash[:notice_customers] = "Delete confirmation box must be checked to delete a customer"

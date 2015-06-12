@@ -37,12 +37,6 @@ protect_from_forgery :except => :payment
         end
     end
 
-    # def stripe_update #change customer account information through Stripe webhook
-    #     #meal count (use customer.subscription.updated hook)
-    #     #pause (use customer.subscription.updated hook)
-    #     #active/inactive (use customer.subscription.deleted hook)
-    # end
-
     def update #change customer account information from website
 
         current_customer = current_user.customer
@@ -256,18 +250,6 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#changePlan"
         end
 
-        #affect stripe
-            #meal count (change plan in Stripe)      
-            #email (change in Stripe)
-            #credit card
-            #pause (change trial date)
-            #active/inactive (add/delete subscriptions; new subscriptions to have trial end date associated with it)
-        #all database fields
-            #hub (Monday vs. Thursday)
-            #name
-            #meal split between Monday, Thursdan, regular, green; regular preference
-            #delivery
-
     end
 
     def customer_sheet
@@ -276,39 +258,12 @@ protect_from_forgery :except => :payment
 
     def fail #failed charges
         Customer.delay.handle_failed_payment(params[:data][:object][:customer],params[:data][:object][:id],params[:data][:object][:attempt_count].to_i,Time.at(params[:data][:object][:next_payment_attempt]).to_date,params[:data][:object][:lines][:data][0][:amount].to_i,Date.today,Time.at(params[:data][:object][:date]).to_date)
-        # stripe_customer_id = params[:data][:object][:customer]
-        # invoice_number = params[:data][:object][:id]
-        # attempts = params[:data][:object][:attempt_count].to_i
-        # next_attempt = Time.at(params[:data][:object][:next_payment_attempt]).to_date
-        # invoice_amount = params[:data][:object][:lines][:data][0][:amount].to_i
-        # latest_attempt_date = Date.today
-        # invoice_date = Time.at(params[:data][:object][:date]).to_date
-
-        # existing_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
-
-        # if existing_invoice.blank?
-        #     if FailedInvoice.create(invoice_number: invoice_number, invoice_date:invoice_date, number_of_attempts:attempts, latest_attempt_date:latest_attempt_date, next_attempt:next_attempt, stripe_customer_id: stripe_customer_id, invoice_amount: invoice_amount)
-        #         CustomerMailer.failed_invoice(FailedInvoice.where(invoice_number: invoice_number).take).deliver
-        #     end
-        # else 
-        #     existing_invoice.update_attributes(
-        #         number_of_attempts:attempts, 
-        #         latest_attempt_date:latest_attempt_date, 
-        #         next_attempt:next_attempt, 
-        #         invoice_amount: invoice_amount
-        #         )
-        # end
-
         render nothing:true, status:200, content_type:'text/html'
     end
 
     def payment
         Customer.delay.handle_payments(params[:data][:object][:id])
-        # if params[:data][:object][:attempt_count].to_i > 1
-        #     invoice_number = params[:data][:object][:id]
-        #     failed_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
-        #     failed_invoice.update_attributes(paid:true,date_paid:Date.today) unless failed_invoice.blank?
-        # end
+
         render nothing:true, status:200, content_type:'text/html'
     end
 

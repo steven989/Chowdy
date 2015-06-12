@@ -441,24 +441,45 @@ class Customer < ActiveRecord::Base
 
     def delete_with_stripe
         begin 
-            customer = Stripe::Customer.retrieve(stripe_customer_id)    
+            customer = Stripe::Customer.retrieve(stripe_customer_id)
         rescue => error
-            puts '---------------------------------------------------'
-            puts "Error occured while retrieving customer from Stripe"
-            puts '---------------------------------------------------'
-            CustomerMailer.delay.rescued_error(self,error.message)
-        else
-            begin 
-                customer.delete
-            rescue => error
-                puts '---------------------------------------------------'
-                puts "Error occured while deleting customer from Stripe"
-                puts '---------------------------------------------------'            
-                CustomerMailer.delay.rescued_error(self,error.message)
-            ensure
+            begin
                 self.stop_queues.delete_all if self.stop_queues.length > 0
                 self.user.destroy unless self.user.nil?
                 self.destroy
+            rescue => e2
+                puts '---------------------------------------------------'
+                puts "Error occured while retrieving customer from Stripe for deletion, and deleting customer locally"
+                puts '---------------------------------------------------'
+                CustomerMailer.delay.rescued_error(self,"Error occured while retrieving customer from Stripe for deletion, and deleting customer locally: "+error.message+". Local error message: "+e2.message)
+                {status:false, message:"Error occured while retrieving customer from Stripe: "+error.message+". Something went wrong trying to delete customer on the local server: "+e2.message}
+            else
+                CustomerMailer.delay.rescued_error(self,"Error occured while retrieving customer from Stripe for deletion, and deleting customer locally: "+error.message+". Customer is completedly deleted on the local server")
+                {status:false, message:"Error occured while retrieving customer from Stripe: "+error.message+". Customer is completed deleted on the local server."}
+            end
+        else
+            begin
+                customer.delete
+            rescue => error
+                puts '---------------------------------------------------'
+                puts "Error occured while deleting retrieved customer from Stripe"
+                puts '---------------------------------------------------'            
+                CustomerMailer.delay.rescued_error(self,"Error occured while deleting the retrieved customer from Stripe: "+error.message+". Local server customer not deleted.")
+                {status:false, message:"Error occured while deleting the retrieved customer from Stripe: "+error.message+". Local server customer not deleted."}
+            else
+                begin
+                    self.stop_queues.delete_all if self.stop_queues.length > 0
+                    self.user.destroy unless self.user.nil?
+                    self.destroy
+                rescue => e2
+                    puts '---------------------------------------------------'
+                    puts "Customer deleted on Stripe but could not be deleted on local server"
+                    puts '---------------------------------------------------'
+                    CustomerMailer.delay.rescued_error(self,"Customer deleted on Stripe but could not be deleted on local server: "+e2.message)
+                    {status:false, message:"Customer deleted on Stripe but could not be deleted on local server: "+e2.message}
+                else
+                    {status:true, message:"Customer successfully deleted from Stripe and local server"}
+                end
             end
         end
     end
