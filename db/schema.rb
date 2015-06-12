@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150612174740) do
+ActiveRecord::Schema.define(version: 20150612204342) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -93,6 +93,15 @@ ActiveRecord::Schema.define(version: 20150612174740) do
     t.boolean  "no_beef"
     t.boolean  "no_pork"
     t.boolean  "no_poultry"
+  end
+
+  create_table "daily_snapshots", force: :cascade do |t|
+    t.date     "date"
+    t.integer  "active_customers_including_pause"
+    t.integer  "active_customers_excluding_pause"
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+    t.integer  "total_meals"
   end
 
   create_table "delayed_jobs", force: :cascade do |t|
