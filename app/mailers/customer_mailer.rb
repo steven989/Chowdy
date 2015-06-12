@@ -97,6 +97,7 @@ class CustomerMailer < ActionMailer::Base
   end
 
   def failed_invoice(invoice)
+    @customer = invoice.customer
     @name = invoice.customer.name.split(/\s/)[0].capitalize
 
     mail(
