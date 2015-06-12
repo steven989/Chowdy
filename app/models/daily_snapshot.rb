@@ -17,6 +17,7 @@ class DailySnapshot < ActiveRecord::Base
     end    
 
     def self.retrieve_snapshot(date=Date.today)
+        date.to_date
         if DailySnapshot.where(date:date).length == 1
             DailySnapshot.where(date:date).take
         else
