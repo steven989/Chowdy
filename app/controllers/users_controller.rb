@@ -162,7 +162,7 @@ class UsersController < ApplicationController
 
 
 
-            @all_customers = Customer.all
+            @all_customers = Customer.all.order(created_at: :desc)
 
         else
             @current_customer = current_user.customer
