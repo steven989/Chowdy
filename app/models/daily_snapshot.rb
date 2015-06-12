@@ -6,7 +6,7 @@ class DailySnapshot < ActiveRecord::Base
         active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
         active_customers = Customer.where(active?: ["Yes","yes"], next_pick_up_date:current_pick_up_date)
 
-        exiting_date = DailySnapshot.retrieve_snapshot(Date.today)
+        existing_date = DailySnapshot.retrieve_snapshot(Date.today)
         if existing_date
             existing_date.update_attributes(
                 active_customers_including_pause: active_customers.length,
