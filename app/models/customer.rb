@@ -344,6 +344,78 @@ class Customer < ActiveRecord::Base
     end
 
 
+    def meals_split
+        raw_green_input = self.raw_green_input
+        begin
+            Integer(self.raw_green_input)
+        rescue
+            if raw_green_input.nil? || raw_green_input == "null" || raw_green_input.blank?
+                    monday_green = 0
+                    thursday_green = 0
+            else
+                if raw_green_input.scan(/^all|\ball/i).length == 1 #if the string contains the text "all" at either the beginning of string or preceded by a white space
+                    self.update(number_of_green:self.total_meals_per_week)
+                    self.update(green_meals_on_monday:self.total_meals_per_week/2)
+                    self.update(green_meals_on_thursday:self.total_meals_per_week/2)
+                    monday_green = self.total_meals_per_week/2
+                    thursday_green = self.total_meals_per_week/2
+                elsif raw_green_input.scan(/^none|\bnone/i).length == 1 #if the string contains the text "none" at either the beginning of string or preceded by a white space
+                    self.update(number_of_green:0)
+                    monday_green = 0
+                    thursday_green = 0
+                elsif raw_green_input.scan(/\d+/).length == 1 #if the string contains one number
+                    self.update(number_of_green:raw_green_input.scan(/\d+/)[0].to_i)
+                    green_number_to_use = [raw_green_input.scan(/\d+/)[0].to_i,self.total_meals_per_week].min
+                    if green_number_to_use.odd?
+                        if self.id.odd? #this is to alternate whether Monday or Thursday gets more green
+                            self.update(green_meals_on_monday:green_number_to_use/2+1)
+                            self.update(green_meals_on_thursday:green_number_to_use/2)
+                            monday_green = green_number_to_use/2+1
+                            thursday_green = green_number_to_use/2
+                        else
+                            self.update(green_meals_on_thursday:green_number_to_use/2+1)
+                            self.update(green_meals_on_monday:green_number_to_use/2)
+                            thursday_green = green_number_to_use/2+1
+                            monday_green = green_number_to_use/2
+                        end
+                    else
+                        self.update(green_meals_on_monday:green_number_to_use/2)
+                        self.update(green_meals_on_thursday:green_number_to_use/2)                    
+                        monday_green = green_number_to_use/2
+                        thursday_green = green_number_to_use/2
+                    end  
+                else 
+                    monday_green = 0
+                    thursday_green = 0
+                end
+            end
+        else 
+            green_number_to_use = [raw_green_input.to_i,self.total_meals_per_week].min
+            customer.update(number_of_green:green_number_to_use)
+                if green_number_to_use.odd?
+                    customer.update(green_meals_on_monday:green_number_to_use/2+1)
+                    customer.update(green_meals_on_thursday:green_number_to_use/2)
+                    monday_green = green_number_to_use/2+1
+                    thursday_green = green_number_to_use/2
+                else
+                    customer.update(green_meals_on_monday:green_number_to_use/2)
+                    customer.update(green_meals_on_thursday:green_number_to_use/2)                    
+                    monday_green = green_number_to_use/2
+                    thursday_green = green_number_to_use/2
+                end
+        end
+
+        #logic to split meal count into Mondays and Thursdays
+            if self.total_meals_per_week.odd?
+                customer.update(regular_meals_on_monday:self.total_meals_per_week/2+1-monday_green.to_i)
+                customer.update(regular_meals_on_thursday:self.total_meals_per_week/2-thursday_green.to_i)
+            else 
+                customer.update(regular_meals_on_monday:self.total_meals_per_week/2-monday_green.to_i)
+                customer.update(regular_meals_on_thursday:self.total_meals_per_week/2-thursday_green.to_i)
+            end        
+    end
+
+
     def self.handle_failed_payment(stripe_customer_id,invoice_number,attempts,next_attempt,invoice_amount,latest_attempt_date,invoice_date)
         existing_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
 
