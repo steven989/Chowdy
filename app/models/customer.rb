@@ -391,15 +391,15 @@ class Customer < ActiveRecord::Base
             end
         else 
             green_number_to_use = [raw_green_input.to_i,self.total_meals_per_week].min
-            customer.update(number_of_green:green_number_to_use)
+            self.update(number_of_green:green_number_to_use)
                 if green_number_to_use.odd?
-                    customer.update(green_meals_on_monday:green_number_to_use/2+1)
-                    customer.update(green_meals_on_thursday:green_number_to_use/2)
+                    self.update(green_meals_on_monday:green_number_to_use/2+1)
+                    self.update(green_meals_on_thursday:green_number_to_use/2)
                     monday_green = green_number_to_use/2+1
                     thursday_green = green_number_to_use/2
                 else
-                    customer.update(green_meals_on_monday:green_number_to_use/2)
-                    customer.update(green_meals_on_thursday:green_number_to_use/2)                    
+                    self.update(green_meals_on_monday:green_number_to_use/2)
+                    self.update(green_meals_on_thursday:green_number_to_use/2)                    
                     monday_green = green_number_to_use/2
                     thursday_green = green_number_to_use/2
                 end
@@ -407,11 +407,11 @@ class Customer < ActiveRecord::Base
 
         #logic to split meal count into Mondays and Thursdays
             if self.total_meals_per_week.odd?
-                customer.update(regular_meals_on_monday:self.total_meals_per_week/2+1-monday_green.to_i)
-                customer.update(regular_meals_on_thursday:self.total_meals_per_week/2-thursday_green.to_i)
+                self.update(regular_meals_on_monday:self.total_meals_per_week/2+1-monday_green.to_i)
+                self.update(regular_meals_on_thursday:self.total_meals_per_week/2-thursday_green.to_i)
             else 
-                customer.update(regular_meals_on_monday:self.total_meals_per_week/2-monday_green.to_i)
-                customer.update(regular_meals_on_thursday:self.total_meals_per_week/2-thursday_green.to_i)
+                self.update(regular_meals_on_monday:self.total_meals_per_week/2-monday_green.to_i)
+                self.update(regular_meals_on_thursday:self.total_meals_per_week/2-thursday_green.to_i)
             end        
     end
 
