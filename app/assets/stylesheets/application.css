@@ -13,6 +13,9 @@
  *= require_tree ../../../vendor/assets/stylesheets/.
  */
 
+#login_logo:hover {
+    opacity: 0.7;
+}
 
 .datepicker.dropdown-menu {
     z-index: 10001;

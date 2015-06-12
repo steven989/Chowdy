@@ -1,6 +1,10 @@
 <section id="content" class="m-t-lg wrapper-md animated fadeInUp">    
     <div class="container aside-xl" style="width: 360px">
-      <p class="navbar-brand block" style="float:none !important;"><%= image_tag "logo-dark.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm" %></p>
+      <p class="navbar-brand block" style="float:none !important;">
+        <%= link_to "http://chowdy.ca" do %>
+          <%= image_tag "logo-dark.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm", id: "login_logo" %>
+        <% end %>
+      </p>
       <section class="m-b-lg">
         <header class="wrapper text-center" style="color:#788288">
           <strong>Log in to manage your subscription</strong>
