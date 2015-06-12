@@ -22,58 +22,58 @@ class UsersController < ApplicationController
         if @current_user.role == "admin"
             current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
             active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
-            @current_customers_count = Customer.meal_count("total_customer")
-            @next_week_customers_count = Customer.meal_count("total_customer_next_week")
-            @monday_regular = Customer.meal_count("monday_regular")
-                @monday_regular_wandas = Customer.meal_count("monday_regular_wandas")
-                @monday_regular_coffee_bar = Customer.meal_count("monday_regular_coffee_bar")
-                @monday_regular_dekefir = Customer.meal_count("monday_regular_dekefir")
-            @monday_green = Customer.meal_count("monday_green")
-                @monday_green_wandas = Customer.meal_count("monday_green_wandas")
-                @monday_green_coffee_bar = Customer.meal_count("monday_green_coffee_bar")
-                @monday_green_dekefir = Customer.meal_count("monday_green_dekefir")
-            @thursday_regular = Customer.meal_count("thursday_regular")
-                @thursday_regular_wandas = Customer.meal_count("thursday_regular_wandas")
-                @thursday_regular_coffee_bar = Customer.meal_count("thursday_regular_coffee_bar")
-                @thursday_regular_dekefir = Customer.meal_count("thursday_regular_dekefir")
-            @thursday_green = Customer.meal_count("thursday_green")
-                @thursday_green_wandas = Customer.meal_count("thursday_green_wandas")
-                @thursday_green_coffee_bar = Customer.meal_count("thursday_green_coffee_bar")
-                @thursday_green_dekefir = Customer.meal_count("thursday_green_dekefir")
-            @total_meals = Customer.meal_count("total_meals")
-            @total_meals_next = Customer.meal_count("total_meals_next")
+            @current_customers_count = MealStatistic.retrieve("total_customer")
+            @next_week_customers_count = MealStatistic.retrieve("total_customer_next_week")
+            @monday_regular = MealStatistic.retrieve("monday_regular")
+                @monday_regular_wandas = MealStatistic.retrieve("monday_regular_wandas")
+                @monday_regular_coffee_bar = MealStatistic.retrieve("monday_regular_coffee_bar")
+                @monday_regular_dekefir = MealStatistic.retrieve("monday_regular_dekefir")
+            @monday_green = MealStatistic.retrieve("monday_green")
+                @monday_green_wandas = MealStatistic.retrieve("monday_green_wandas")
+                @monday_green_coffee_bar = MealStatistic.retrieve("monday_green_coffee_bar")
+                @monday_green_dekefir = MealStatistic.retrieve("monday_green_dekefir")
+            @thursday_regular = MealStatistic.retrieve("thursday_regular")
+                @thursday_regular_wandas = MealStatistic.retrieve("thursday_regular_wandas")
+                @thursday_regular_coffee_bar = MealStatistic.retrieve("thursday_regular_coffee_bar")
+                @thursday_regular_dekefir = MealStatistic.retrieve("thursday_regular_dekefir")
+            @thursday_green = MealStatistic.retrieve("thursday_green")
+                @thursday_green_wandas = MealStatistic.retrieve("thursday_green_wandas")
+                @thursday_green_coffee_bar = MealStatistic.retrieve("thursday_green_coffee_bar")
+                @thursday_green_dekefir = MealStatistic.retrieve("thursday_green_dekefir")
+            @total_meals = MealStatistic.retrieve("total_meals")
+            @total_meals_next = MealStatistic.retrieve("total_meals_next")
 
-            @neg_adjustment_pork_monday = -Customer.meal_count("neg_adjustment_pork_monday").to_i
-            @neg_adjustment_beef_monday = -Customer.meal_count("neg_adjustment_beef_monday").to_i
-            @neg_adjustment_poultry_monday = -Customer.meal_count("neg_adjustment_poultry_monday").to_i
+            @neg_adjustment_pork_monday = -MealStatistic.retrieve("neg_adjustment_pork_monday").to_i
+            @neg_adjustment_beef_monday = -MealStatistic.retrieve("neg_adjustment_beef_monday").to_i
+            @neg_adjustment_poultry_monday = -MealStatistic.retrieve("neg_adjustment_poultry_monday").to_i
 
-            @neg_adjustment_pork_monday_wandas = -Customer.meal_count("neg_adjustment_pork_monday_wandas").to_i
-            @neg_adjustment_beef_monday_wandas = -Customer.meal_count("neg_adjustment_beef_monday_wandas").to_i
-            @neg_adjustment_poultry_monday_wandas = -Customer.meal_count("neg_adjustment_poultry_monday_wandas").to_i
+            @neg_adjustment_pork_monday_wandas = -MealStatistic.retrieve("neg_adjustment_pork_monday_wandas").to_i
+            @neg_adjustment_beef_monday_wandas = -MealStatistic.retrieve("neg_adjustment_beef_monday_wandas").to_i
+            @neg_adjustment_poultry_monday_wandas = -MealStatistic.retrieve("neg_adjustment_poultry_monday_wandas").to_i
 
-            @neg_adjustment_pork_monday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_monday_coffee_bar").to_i
-            @neg_adjustment_beef_monday_coffee_bar = -Customer.meal_count("neg_adjustment_beef_monday_coffee_bar").to_i
-            @neg_adjustment_poultry_monday_coffee_bar = -Customer.meal_count("neg_adjustment_poultry_monday_coffee_bar").to_i
+            @neg_adjustment_pork_monday_coffee_bar = -MealStatistic.retrieve("neg_adjustment_pork_monday_coffee_bar").to_i
+            @neg_adjustment_beef_monday_coffee_bar = -MealStatistic.retrieve("neg_adjustment_beef_monday_coffee_bar").to_i
+            @neg_adjustment_poultry_monday_coffee_bar = -MealStatistic.retrieve("neg_adjustment_poultry_monday_coffee_bar").to_i
 
-            @neg_adjustment_pork_monday_dekefir = -Customer.meal_count("neg_adjustment_pork_monday_dekefir").to_i
-            @neg_adjustment_beef_monday_dekefir = -Customer.meal_count("neg_adjustment_beef_monday_dekefir").to_i
-            @neg_adjustment_poultry_monday_dekefir = -Customer.meal_count("neg_adjustment_poultry_monday_dekefir").to_i
+            @neg_adjustment_pork_monday_dekefir = -MealStatistic.retrieve("neg_adjustment_pork_monday_dekefir").to_i
+            @neg_adjustment_beef_monday_dekefir = -MealStatistic.retrieve("neg_adjustment_beef_monday_dekefir").to_i
+            @neg_adjustment_poultry_monday_dekefir = -MealStatistic.retrieve("neg_adjustment_poultry_monday_dekefir").to_i
 
-            @neg_adjustment_pork_thursday = -Customer.meal_count("neg_adjustment_pork_thursday").to_i
-            @neg_adjustment_beef_thursday = -Customer.meal_count("neg_adjustment_beef_thursday").to_i
-            @neg_adjustment_poultry_thursday = -Customer.meal_count("neg_adjustment_poultry_thursday").to_i
+            @neg_adjustment_pork_thursday = -MealStatistic.retrieve("neg_adjustment_pork_thursday").to_i
+            @neg_adjustment_beef_thursday = -MealStatistic.retrieve("neg_adjustment_beef_thursday").to_i
+            @neg_adjustment_poultry_thursday = -MealStatistic.retrieve("neg_adjustment_poultry_thursday").to_i
 
-            @neg_adjustment_pork_thursday_wandas = -Customer.meal_count("neg_adjustment_pork_thursday_wandas").to_i
-            @neg_adjustment_beef_thursday_wandas = -Customer.meal_count("neg_adjustment_beef_thursday_wandas").to_i
-            @neg_adjustment_poultry_thursday_wandas = -Customer.meal_count("neg_adjustment_poultry_thursday_wandas").to_i
+            @neg_adjustment_pork_thursday_wandas = -MealStatistic.retrieve("neg_adjustment_pork_thursday_wandas").to_i
+            @neg_adjustment_beef_thursday_wandas = -MealStatistic.retrieve("neg_adjustment_beef_thursday_wandas").to_i
+            @neg_adjustment_poultry_thursday_wandas = -MealStatistic.retrieve("neg_adjustment_poultry_thursday_wandas").to_i
 
-            @neg_adjustment_pork_thursday_coffee_bar = -Customer.meal_count("neg_adjustment_pork_thursday_coffee_bar").to_i
-            @neg_adjustment_beef_thursday_coffee_bar = -Customer.meal_count("neg_adjustment_beef_thursday_coffee_bar").to_i
-            @neg_adjustment_poultry_thursday_coffee_bar = -Customer.meal_count("neg_adjustment_poultry_thursday_coffee_bar").to_i
+            @neg_adjustment_pork_thursday_coffee_bar = -MealStatistic.retrieve("neg_adjustment_pork_thursday_coffee_bar").to_i
+            @neg_adjustment_beef_thursday_coffee_bar = -MealStatistic.retrieve("neg_adjustment_beef_thursday_coffee_bar").to_i
+            @neg_adjustment_poultry_thursday_coffee_bar = -MealStatistic.retrieve("neg_adjustment_poultry_thursday_coffee_bar").to_i
 
-            @neg_adjustment_pork_thursday_dekefir = -Customer.meal_count("neg_adjustment_pork_thursday_dekefir").to_i
-            @neg_adjustment_beef_thursday_dekefir = -Customer.meal_count("neg_adjustment_beef_thursday_dekefir").to_i
-            @neg_adjustment_poultry_thursday_dekefir = -Customer.meal_count("neg_adjustment_poultry_thursday_dekefir").to_i
+            @neg_adjustment_pork_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_pork_thursday_dekefir").to_i
+            @neg_adjustment_beef_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_beef_thursday_dekefir").to_i
+            @neg_adjustment_poultry_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_poultry_thursday_dekefir").to_i
 
 
             active_nonpaused_customers_include_new_signups = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:[current_pick_up_date,StartDate.first.start_date.to_date])

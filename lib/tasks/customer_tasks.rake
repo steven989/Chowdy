@@ -29,6 +29,21 @@ namespace :customers do
         CustomerMailer.failed_invoice_email.deliver
     end
 
+    desc 'update meal count for dashboard display'
+    task :update_meal_count => [:environment] do
+        MealStatistic.all.each do |ms|
+            result = Customer.meal_count(ms.statistic)
+            if ms.statistic_type == "integer"
+                ms.update_attributes(value_integer:result.to_i)
+            elsif ms.statistic_type == "string"
+                ms.update_attributes(value_string:result.to_s)
+            elsif ms.statistic_type == "long_text"
+                ms.update_attributes(value_long_text:result.to_s)
+            end
+        end
+    end
+
+
     desc 'pause/cancel/restart customers'
     task :execute_pause_cancel_restart_queue, [:distance] => [:environment] do |t, args|
         if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
@@ -236,6 +251,7 @@ namespace :app do
     task :run_scheduled_events => [:environment] do |t, args|        
         ScheduledTask.delay.run_all_tasks
     end 
+
 
 
 end
