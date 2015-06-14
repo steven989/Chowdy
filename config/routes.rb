@@ -24,6 +24,7 @@ Chowdy::Application.routes.draw do
   resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
   get 'user/profile' => 'users#profile', as: 'user_profile'
   get 'admin_action/customer_sheet' => 'admin_actions#customer_sheet', as: 'customer_sheet'
+  get 'admin_action/deliveries_csv' => 'admin_actions#delivery_csv', as: 'deliveries_csv'
   get 'admin_action/next_week_breakdown' => 'admin_actions#next_week_breakdown', as: 'next_week_breakdown'
   get 'admin_action/customer/:id/edit' => 'admin_actions#individual_customer_edit', as: 'admin_edit_customer'
   put 'admin_action/customer/:id/update' => 'admin_actions#individual_customer_update', as: 'admin_update_customer'

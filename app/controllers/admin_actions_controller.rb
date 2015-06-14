@@ -40,6 +40,28 @@ class AdminActionsController < ApplicationController
 
     end
 
+    def delivery_csv
+        puts '---------------------------------------------------'
+        @deliveries = Customer.where{(active? >> ["Yes","yes"]) & (paused? >> [nil,"No","no"]) & ((recurring_delivery >> ["Yes","yes"])|((hub =~ "%delivery%") &(monday_pickup_hub == nil)))}
+
+        @data = [] 
+        @deliveries.each do |c|
+            @data.push({customer_id:c.id,email:c.email,name:c.name,address:c.delivery_address,phone_number:c.phone_number, reg_mon:c.regular_meals_on_monday, grn_mon:c.green_meals_on_monday, reg_thu:c.regular_meals_on_thursday, grn_thu:c.green_meals_on_thursday,no_pork:c.no_pork,no_beef:c.no_beef,no_poultry:c.no_poultry,special_delivery_instructions:c.special_delivery_instructions,selected_hub:c.hub,monday_delivery_hub:c.monday_delivery_hub,thursday_delivery_hub:c.thursday_delivery_hub,delivery_time:c.delivery_time})
+        end
+
+        respond_to do |format|
+            format.csv { 
+                disposition = "attachment; filename='deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
+                response.headers['Content-Disposition'] = disposition
+                if @data.blank?
+                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","special_delivery_instructions","selected_hub","monday_delivery_hub","thursday_delivery_hub","delivery_time"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                else 
+                    send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                end
+            }
+        end        
+    end
+
     def next_week_breakdown
         @regular_monday = MealStatistic.retrieve("regular_meals_next_monday")
         @green_monday = MealStatistic.retrieve("green_meals_next_monday")
