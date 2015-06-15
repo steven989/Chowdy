@@ -319,7 +319,10 @@ class Customer < ActiveRecord::Base
                     referral_name_email = referral.titlecase if referral_matched
 
                     unless duplicate_match.length >= 1
-                        CustomerMailer.confirmation_email(customer,hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
+                        #check to see if this customer was started before backend was deployed
+                        unless Customer.where{ (date_signed_up_for_recurring==nil) | (date_signed_up_for_recurring < "2015-06-12")}.map {|c| c.email}.include? customer_email
+                            CustomerMailer.confirmation_email(customer,hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
+                        end
                     end
 
                 #6) Send report with actions required
