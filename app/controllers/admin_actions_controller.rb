@@ -297,34 +297,62 @@ class AdminActionsController < ApplicationController
         elsif params[:todo] == "refund"
             recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
             amount = (params[:refund][:meals_refunded].to_i * 6.99 * 1.13 * 100).round
-            refund_list = []
-            recent_charges.each do |charge_id|
-                charge = Stripe::Charge.retrieve(charge_id)
-                net_amount = charge.amount - charge.amount_refunded
-                if net_amount - amount >= 0
-                    refund_list.push({charge_id.to_sym => amount})
-                    break
+            immediate_refund = params[:refund][:attach_to_next_invoice] == "0" ? true : false
+
+            if immediate_refund
+                begin
+                    refund_list = []
+                    recent_charges.each do |charge_id|
+                        charge = Stripe::Charge.retrieve(charge_id)
+                        net_amount = charge.amount - charge.amount_refunded
+                        if net_amount - amount >= 0
+                            refund_list.push({charge_id.to_sym => amount})
+                            break
+                        else
+                            refund_list.push({charge_id.to_sym => net_amount}) unless net_amount == 0
+                            amount -= net_amount
+                        end
+                    end
+
+                    refund_week = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+                    internal_refund_id = nil
+                    refund_list.each do |refund_li|
+                        charge_id = refund_li.keys[0].to_s
+                        list_refund_amount = refund_li.values[0]
+                        charge = Stripe::Charge.retrieve(charge_id)
+                        if stripe_refund_response = charge.refunds.create(amount:list_refund_amount) 
+                            newly_created_refund = Refund.create(stripe_customer_id: @customer.stripe_customer_id, refund_week:refund_week, charge_week:Time.at(charge.created).to_date,charge_id: charge.id, meals_refunded:params[:refund][:meals_refunded].to_i, amount_refunded: list_refund_amount, refund_reason: params[:refund][:refund_reason], stripe_refund_id: stripe_refund_response.id)
+                            newly_created_refund.internal_refund_id = internal_refund_id.nil? ? newly_created_refund.id : internal_refund_id
+                            if newly_created_refund.save
+                                internal_refund_id ||= newly_created_refund.id
+                            end
+                        end     
+
+                    end
+                rescue => error
+                    flash[:status] = "fail"
+                    flash[:notice_customers] = "Error occurred when refunding: #{error.message}"
                 else
-                    refund_list.push({charge_id.to_sym => net_amount}) unless net_amount == 0
-                    amount -= net_amount
+                    flash[:status] = "success"
+                    flash[:notice_customers] = "Successfully refunded"
+                end
+            else
+                begin
+                    Stripe::InvoiceItem.create(
+                        customer: @customer.stripe_customer_id,
+                        amount: -amount,
+                        currency: 'CAD',
+                        description: params[:refund][:refund_reason]
+                    )
+                rescue => error
+                    flash[:status] = "fail"
+                    flash[:notice_customers] = "Error occurred when creating refund for upcoming invoice: #{error.message}"
+                else 
+                    flash[:status] = "success"
+                    flash[:notice_customers] = "Invoice item successfully created"
                 end
             end
 
-            refund_week = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
-            internal_refund_id = nil
-            refund_list.each do |refund_li|
-                charge_id = refund_li.keys[0].to_s
-                list_refund_amount = refund_li.values[0]
-                charge = Stripe::Charge.retrieve(charge_id)
-                if stripe_refund_response = charge.refunds.create(amount:list_refund_amount) 
-                    newly_created_refund = Refund.create(stripe_customer_id: @customer.stripe_customer_id, refund_week:refund_week, charge_week:Time.at(charge.created).to_date,charge_id: charge.id, meals_refunded:params[:refund][:meals_refunded].to_i, amount_refunded: list_refund_amount, refund_reason: params[:refund][:refund_reason], stripe_refund_id: stripe_refund_response.id)
-                    newly_created_refund.internal_refund_id = internal_refund_id.nil? ? newly_created_refund.id : internal_refund_id
-                    if newly_created_refund.save
-                        internal_refund_id ||= newly_created_refund.id
-                    end
-                end     
-
-            end
         elsif params[:todo] == "attach_coupon"
             check_result = PromotionRedemption.check_eligibility(@customer,params[:coupon_code])
             if check_result[:result]

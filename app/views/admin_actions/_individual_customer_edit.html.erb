@@ -184,6 +184,10 @@
               <%= f.number_field :meals_refunded, class: "form-control" %>
           </div>
           <div class="form-group">
+              <%= f.label :attach_to_next_invoice, "Apply refund to next invoice" %>
+              <%= f.check_box :attach_to_next_invoice, class: "form-control" %>
+          </div>
+          <div class="form-group">
               <%= f.label :refund_reason, "Reason for refund" %>
               <%= f.text_area :refund_reason, class: "form-control" %>
           </div>
