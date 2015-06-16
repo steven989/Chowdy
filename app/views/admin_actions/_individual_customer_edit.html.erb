@@ -188,7 +188,7 @@
               <%= f.check_box :attach_to_next_invoice, class: "form-control" %>
           </div>
           <div class="form-group">
-              <%= f.label :refund_reason, "Reason for refund" %>
+              <%= f.label :refund_reason, "Reason for refund (type it as if the customer will see it on their invoice)" %>
               <%= f.text_area :refund_reason, class: "form-control" %>
           </div>
     <%= f.submit "Refund", class: "btn btn-md btn-warning m-t-sm" %>
@@ -232,6 +232,10 @@
       <div class="form-group">
           <%= label_tag :cancel_reason %>
           <%= select_tag :cancel_reason, options_for_select(@cancel_reasons), class:"form-control" %>
+      </div>
+      <div class="form-group">
+        <%= label_tag 'feedback', "Other cancel notes" %>
+        <%= text_area_tag 'feedback',nil,class: "input-sm input-s form-control", rows: "6", placeholder: "Type any other cancel comments" %>
       </div>
       <div class="form-group">
           <%= label_tag :immediate_effect, "Immediate effect (force change after Thursday deadline but before billing. This does not result in refund. For restarts, it's effective starting the upcoming Monday.)" %>

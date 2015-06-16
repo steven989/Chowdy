@@ -631,7 +631,7 @@ class AdminActionsController < ApplicationController
                         flash[:notice_customers] = "Pause cannot be completed: must choose an end date"    
                     end
                 end
-            elsif params[:stop_type].downcase == "cancel"    
+            elsif params[:stop_type].downcase == "cancel"
                 if params[:immediate_effect] == "1"
                     begin
                         if @customer.stripe_subscription_id.blank?
@@ -645,6 +645,10 @@ class AdminActionsController < ApplicationController
                                 @customer.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)
                                 @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                             end
+                        end
+
+                        unless params[:feedback].blank?
+                            @customer.feedbacks.create(feedback:params[:feedback], occasion:"cancel") 
                         end
 
                         if @customer.errors.any?
@@ -678,6 +682,10 @@ class AdminActionsController < ApplicationController
                         @customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:params[:cancel_reason])
                     else
                         @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                    end
+
+                    unless params[:feedback].blank?
+                        @customer.feedbacks.create(feedback:params[:feedback], occasion:"cancel") 
                     end
 
                     if @customer.errors.any?
