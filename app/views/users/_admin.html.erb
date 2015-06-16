@@ -738,6 +738,15 @@ $(function(){
                     <section class="tab-pane" id="promotions" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder padder-v">
+                              <% if flash[:notice_promotions] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_promotions] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
                               <section class="row padder">
                                 <div class="panel panel-default">
                                   <header class="panel-heading">
@@ -791,6 +800,15 @@ $(function(){
                     <section class="tab-pane" id="system_settings" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder padder-v">
+                              <% if flash[:notice_system_settings] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_system_settings] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
                               <section class="row padder">
                                 <div class="panel panel-default">
                                   <header class="panel-heading">
