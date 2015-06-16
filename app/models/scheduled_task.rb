@@ -18,23 +18,27 @@ class ScheduledTask < ActiveRecord::Base
     def run
         begin
             if self.parameter_1.blank?
+                Rake::Task[self.task_name].reenable
                 Rake::Task[self.task_name].invoke
                 Rake::Task[self.task_name].reenable
             else
                 if self.parameter_2.blank?
                     parameter_1 = self.parameter_1_type == "int" ? self.parameter_1.to_i : self.parameter_1
+                    Rake::Task[self.task_name].reenable
                     Rake::Task[self.task_name].invoke(parameter_1)
                     Rake::Task[self.task_name].reenable
                 else 
                     if self.parameter_3.blank?
                         parameter_1 = self.parameter_1_type == "int" ? self.parameter_1.to_i : self.parameter_1
                         parameter_2 = self.parameter_2_type == "int" ? self.parameter_2.to_i : self.parameter_2
+                        Rake::Task[self.task_name].reenable
                         Rake::Task[self.task_name].invoke(parameter_1,parameter_2)
                         Rake::Task[self.task_name].reenable
                     else 
                         parameter_1 = self.parameter_1_type == "int" ? self.parameter_1.to_i : self.parameter_1
                         parameter_2 = self.parameter_2_type == "int" ? self.parameter_2.to_i : self.parameter_2
                         parameter_3 = self.parameter_3_type == "int" ? self.parameter_3.to_i : self.parameter_3
+                        Rake::Task[self.task_name].reenable
                         Rake::Task[self.task_name].invoke(parameter_1,parameter_2,parameter_3)
                         Rake::Task[self.task_name].reenable
                     end
