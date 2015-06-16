@@ -142,67 +142,83 @@ class AdminActionsController < ApplicationController
         @customer = Customer.where(id:params[:id]).take
         _sponsor = @customer.sponsored? ? "1" : "0"
         if params[:todo] == "info"
-            @customer.update_attributes(individual_attributes_params)
-            if (params[:customer][:email] != @customer.email) && (!params[:customer][:email].blank?)
-                begin
-                    current_stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)   
-                    current_stripe_customer.email = params[:customer][:email].downcase
-                    current_stripe_customer.save
-                rescue => error
-                    puts '---------------------------------------------------'
-                    puts "Email could not be updated"
-                    puts '---------------------------------------------------'
-                    CustomerMailer.delay.rescued_error(@customer,"Email could not be updated: "+error.message)
+            begin
+                # -------------------------------------------------
+                @customer.update_attributes(individual_attributes_params)
+                # -------------------------------------------------
+                if (params[:customer][:email] != @customer.email) && (!params[:customer][:email].blank?)
+                    begin
+                        current_stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)   
+                        current_stripe_customer.email = params[:customer][:email].downcase
+                        current_stripe_customer.save
+                    rescue => error
+                        puts '---------------------------------------------------'
+                        puts "Email could not be updated"
+                        puts '---------------------------------------------------'
+                        CustomerMailer.delay.rescued_error(@customer,"Email could not be updated: "+error.message)
+                    else
+                        if @customer.user
+                            @customer.user.update(email:params[:customer][:email].downcase)
+                        end
+                        @customer.update(email:params[:customer][:email].downcase)
+                    end
+                end
+                # -------------------------------------------------
+                if (params[:customer][:referral_code].gsub(" ","") != @customer.referral_code) && (!params[:customer][:referral_code].blank?)
+                    _old_referral_code = @customer.referral_code
+                    if @customer.update(referral_code:params[:customer][:referral_code].gsub(" ",""))
+                        Customer.where(matched_referrers_code:_old_referral_code).each do |c|
+                            c.update_attributes(matched_referrers_code:params[:customer][:referral_code].gsub(" ",""))
+                        end
+                    end
+                end
+                # -------------------------------------------------
+                if (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "1")
+                    unless @customer.stripe_subscription_id.blank?
+                        stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                        if stripe_subscription.delete
+                            @customer.update_attributes(stripe_subscription_id:nil)
+                        end
+                    end
+                elsif (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "0")
+                    if @customer.stripe_subscription_id.blank?
+                        current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
+                        current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
+                        meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                        
+                        effective_date = StartDate.first.start_date
+
+                        if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:effective_date.to_time.to_i)                
+                            new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
+                            @customer.update(stripe_subscription_id: new_subscription_id) 
+                        end
+                    end
+                end
+                # -------------------------------------------------
+                no_beef = (params[:customer][:no_beef].blank? || params[:customer][:no_beef] == "0") ? false : true
+                no_pork = (params[:customer][:no_pork].blank? || params[:customer][:no_pork] == "0") ? false : true
+                no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
+                send_notification = (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry)
+                @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
+                if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
+                    CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
+                end
+                # -------------------------------------------------
+            rescue => error
+                flash[:status] = "fail"
+                flash[:notice_customers] = "Error occurred when updating customer information: #{error.message}"
+                puts '---------------------------------------------------'
+                puts "Error occurred when updating customer information: #{error.message}"
+                puts '---------------------------------------------------'
+            else
+                if @customer.errors.any?
+                    flash[:status] = "fail"
+                    flash[:notice_customers] = "Customer information cannot be updated: #{@customer.errors.full_messages.join(", ")}"
                 else
-                    if @customer.user
-                        @customer.user.update(email:params[:customer][:email].downcase)
-                    end
-                    @customer.update(email:params[:customer][:email].downcase)
+                    flash[:status] = "success"
+                    flash[:notice_customers] = "Customer information updated"
                 end
             end
-
-            if (params[:customer][:referral_code].gsub(" ","") != @customer.referral_code) && (!params[:customer][:referral_code].blank?)
-                _old_referral_code = @customer.referral_code
-                if @customer.update(referral_code:params[:customer][:referral_code].gsub(" ",""))
-                    Customer.where(matched_referrers_code:_old_referral_code).each do |c|
-                        c.update_attributes(matched_referrers_code:params[:customer][:referral_code].gsub(" ",""))
-                    end
-                end
-            end
-
-            if (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "1")
-                unless @customer.stripe_subscription_id.blank?
-                    stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                    if stripe_subscription.delete
-                        @customer.update_attributes(stripe_subscription_id:nil)
-                    end
-                end
-            elsif (params[:customer][:sponsored] != _sponsor) && (params[:customer][:sponsored] == "0")
-                if @customer.stripe_subscription_id.blank?
-                    current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
-                    current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
-                    meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
-                    
-                    effective_date = StartDate.first.start_date
-
-                    if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:effective_date.to_time.to_i)                
-                        new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
-                        @customer.update(stripe_subscription_id: new_subscription_id) 
-                    end
-                end
-            end
-
-            no_beef = (params[:customer][:no_beef].blank? || params[:customer][:no_beef] == "0") ? false : true
-            no_pork = (params[:customer][:no_pork].blank? || params[:customer][:no_pork] == "0") ? false : true
-            no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
-            send_notification = (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry)
-            @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
-            if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
-                CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
-            end
-
-
-
         elsif params[:todo] == "meal_count"
             monday_regular = params[:customer][:regular_meals_on_monday].to_i
             monday_green = params[:customer][:green_meals_on_monday].to_i
@@ -210,63 +226,74 @@ class AdminActionsController < ApplicationController
             thursday_green = params[:customer][:green_meals_on_thursday].to_i
             total_meals = monday_regular + monday_green + thursday_regular + thursday_green
 
-            plan_match = Subscription.where(weekly_meals:total_meals, interval: params[:interval], interval_count:params[:interval_count].to_i)
+            begin
+                plan_match = Subscription.where(weekly_meals:total_meals, interval: params[:interval], interval_count:params[:interval_count].to_i)
 
-            if plan_match.blank?
-                id = total_meals.to_s+"meals"+(params[:interval_count].to_i > 1 ? params[:interval_count] : "")+params[:interval].gsub(/[aeioun]/i,"")
-                amount = (total_meals*6.99*1.13*100).round
-                statement_descriptor = (params[:interval_count].to_i > 1 ? params[:interval_count] : "") + params[:interval].gsub(/[aeioun]/i,"").upcase + " PLN " + total_meals.to_s
-                if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:params[:interval],interval_count:params[:interval_count].to_i, name:id, statement_descriptor: statement_descriptor)
-                    plan_match = Subscription.create(weekly_meals:total_meals,stripe_plan_id:id,interval:params[:interval],interval_count:params[:interval_count].to_i)
+                if plan_match.blank?
+                    id = total_meals.to_s+"meals"+(params[:interval_count].to_i > 1 ? params[:interval_count] : "")+params[:interval].gsub(/[aeioun]/i,"")
+                    amount = (total_meals*6.99*1.13*100).round
+                    statement_descriptor = (params[:interval_count].to_i > 1 ? params[:interval_count] : "") + params[:interval].gsub(/[aeioun]/i,"").upcase + " PLN " + total_meals.to_s
+                    if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:params[:interval],interval_count:params[:interval_count].to_i, name:id, statement_descriptor: statement_descriptor)
+                        plan_match = Subscription.create(weekly_meals:total_meals,stripe_plan_id:id,interval:params[:interval],interval_count:params[:interval_count].to_i)
 
+                        if (total_meals == @customer.total_meals_per_week) && (params[:interval] == (@customer.interval.blank? ? "week" : @customer.interval)) && (params[:interval_count].to_i == (@customer.interval_count.blank? ? 1 : @customer.interval))
+                            @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green)
+                        else
+                            if @customer.stripe_subscription_id.blank?
+                                @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
+                                update_interval = params[:interval] == "week" ? nil : params[:interval]
+                                update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
+                                @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
+                            else
+                                subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                                _current_period_end = subscription.current_period_end
+                                subscription.plan = plan_match.stripe_plan_id
+                                subscription.trial_end = _current_period_end
+                                subscription.prorate = false  
+                                if subscription.save                      
+                                    @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
+                                    update_interval = params[:interval] == "week" ? nil : params[:interval]
+                                    update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
+                                    @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                         
+                                end
+                            end
+                        end
+                    end
+                else
                     if (total_meals == @customer.total_meals_per_week) && (params[:interval] == (@customer.interval.blank? ? "week" : @customer.interval)) && (params[:interval_count].to_i == (@customer.interval_count.blank? ? 1 : @customer.interval))
-                        @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green)
+                        @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, number_of_green: monday_green + thursday_green)
+                        update_interval = params[:interval] == "week" ? nil : params[:interval]
+                        update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
+                        @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                 
                     else
                         if @customer.stripe_subscription_id.blank?
                             @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
-                            update_interval = params[:interval] == "week" ? nil : params[:interval]
-                            update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
-                            @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
                         else
                             subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
                             _current_period_end = subscription.current_period_end
-                            subscription.plan = plan_match.stripe_plan_id
+                            subscription.plan = plan_match.take.stripe_plan_id
                             subscription.trial_end = _current_period_end
                             subscription.prorate = false  
                             if subscription.save                      
                                 @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
+
                                 update_interval = params[:interval] == "week" ? nil : params[:interval]
                                 update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
-                                @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                         
+                                @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
+                          
                             end
                         end
                     end
                 end
+            rescue => error
+                flash[:status] = "fail"
+                flash[:notice_customers] = "Error occurred when changing meal count: #{error.message}"
+                puts '---------------------------------------------------'
+                puts "Error occurred when changing meal count: #{error.message}"
+                puts '---------------------------------------------------'
             else
-                if (total_meals == @customer.total_meals_per_week) && (params[:interval] == (@customer.interval.blank? ? "week" : @customer.interval)) && (params[:interval_count].to_i == (@customer.interval_count.blank? ? 1 : @customer.interval))
-                    @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, number_of_green: monday_green + thursday_green)
-                    update_interval = params[:interval] == "week" ? nil : params[:interval]
-                    update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
-                    @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                 
-                else
-                    if @customer.stripe_subscription_id.blank?
-                        @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
-                    else
-                        subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                        _current_period_end = subscription.current_period_end
-                        subscription.plan = plan_match.take.stripe_plan_id
-                        subscription.trial_end = _current_period_end
-                        subscription.prorate = false  
-                        if subscription.save                      
-                            @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
-
-                            update_interval = params[:interval] == "week" ? nil : params[:interval]
-                            update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
-                            @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
-                      
-                        end
-                    end
-                end
+                flash[:status] = "success"
+                flash[:notice_customers] = "Meal count updated"
             end
         elsif params[:todo] == "hub"
             monday_pickup_hub = params[:customer][:monday_pickup_hub]
@@ -278,20 +305,43 @@ class AdminActionsController < ApplicationController
             @customer.monday_delivery_hub = monday_delivery_hub unless monday_delivery_hub.blank?
             @customer.thursday_delivery_hub = thursday_delivery_hub unless thursday_delivery_hub.blank?
 
-            @customer.save
-
+            if @customer.save
+                flash[:status] = "success"
+                flash[:notice_customers] = "Hub updated"
+            else 
+                flash[:status] = "fail"
+                flash[:notice_customers] = "Hub could not be updated: #{@customer.errors.full_messages.join(", ")}"
+            end
         elsif params[:todo] == "delivery_info"
-            @customer.update_attributes(delivery_info_params)
-            @customer.update_attribute(:delivery_set_up?,params[:customer][:delivery_set_up])
+            if @customer.update_attributes(delivery_info_params) && @customer.update_attribute(:delivery_set_up?,params[:customer][:delivery_set_up])
+                flash[:status] = "success"
+                flash[:notice_customers] = "Delivery info updated"
+            else
+                flash[:status] = "fail"
+                flash[:notice_customers] = "Delivery info could not be updated: #{@customer.errors.full_messages.join(", ")}"
+            end
         elsif params[:todo] == "delivery_toggle"
             if ["Yes","yes"].include? @customer.recurring_delivery
-                @customer.update_attributes(recurring_delivery: nil)
+                if @customer.update_attributes(recurring_delivery: nil)
+                    flash[:status] = "success"
+                    flash[:notice_customers] = "Delivery turned off"
+                else
+                    flash[:status] = "fail"
+                    flash[:notice_customers] = "Delivery cannot be turned off: #{@customer.errors.full_messages.join(", ")}"
+                end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Stop Delivery")
             else
                 @customer.update_attributes(recurring_delivery: "yes")
                 @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
                 @customer.update_attributes(thursday_delivery_hub: "delivery") if @customer.thursday_delivery_hub.blank?                
                 @customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
+                if @customer.errors.any?
+                    flash[:status] = "fail"
+                    flash[:notice_customers] = "Delivery cannot be turned on: #{@customer.errors.full_messages.join(", ")}"
+                else
+                    flash[:status] = "success"
+                    flash[:notice_customers] = "Delivery turned on"
+                end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Start Delivery")
             end
         elsif params[:todo] == "refund"
@@ -332,6 +382,9 @@ class AdminActionsController < ApplicationController
                 rescue => error
                     flash[:status] = "fail"
                     flash[:notice_customers] = "Error occurred when refunding: #{error.message}"
+                    puts '---------------------------------------------------'
+                    puts "Error occurred when refunding: #{error.message}"
+                    puts '---------------------------------------------------'
                 else
                     flash[:status] = "success"
                     flash[:notice_customers] = "Successfully refunded"
@@ -347,6 +400,9 @@ class AdminActionsController < ApplicationController
                 rescue => error
                     flash[:status] = "fail"
                     flash[:notice_customers] = "Error occurred when creating refund for upcoming invoice: #{error.message}"
+                    puts '---------------------------------------------------'
+                    puts "Error occurred when creating refund for upcoming invoice: #{error.message}"
+                    puts '---------------------------------------------------'
                 else 
                     flash[:status] = "success"
                     flash[:notice_customers] = "Invoice item successfully created"
@@ -364,63 +420,15 @@ class AdminActionsController < ApplicationController
                 flash[:notice_customers] = check_result[:message]            
             end
         elsif params[:todo] == "apply_referral"
-            unless @customer.stripe_subscription_id.blank?
+            if !@customer.stripe_subscription_id.blank?
                 stripe_customer = Stripe::Customer.retrieve(@customer.stripe_customer_id)
                 stripe_subscription = stripe_customer.subscriptions.retrieve(@customer.stripe_subscription_id)
 
                 referral = params[:referral_code]
                 if Customer.where(referral_code: referral.gsub(" ","").downcase).length == 1 #match code
-                    referral_match = Customer.where(referral_code: referral.gsub(" ","").downcase)
-                    
-                    unless referral_match.take.stripe_subscription_id.blank?
-                        #referrer discount
-                        stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
-                        stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
-                        
-                            #check for existing coupons
-                            if stripe_referral_subscription_match.discount.nil?
-                                stripe_referral_subscription_match.coupon = "referral bonus"
-                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
-                                stripe_referral_subscription_match.coupon = "referral bonus x 2"
-                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
-                                stripe_referral_subscription_match.coupon = "referral bonus x 3"
-                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
-                                stripe_referral_subscription_match.coupon = "referral bonus x 4"
-                            elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
-                                stripe_referral_subscription_match.coupon = "referral bonus x 5"
-                            else
-                                do_not_increment_referral = true
-                                CustomerMailer.delay.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)")
-                            end
 
-                        stripe_referral_subscription_match.prorate = false
-                        if stripe_referral_subscription_match.save                
-                            referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10) unless do_not_increment_referral
-                        end
-                    end
-                    #referree discount
-                    if stripe_subscription.discount.nil?
-                        stripe_subscription.coupon = "referral bonus"
-                    elsif stripe_subscription.discount.coupon.id == "referral bonus"
-                        stripe_subscription.coupon = "referral bonus x 2"
-                    elsif stripe_subscription.discount.coupon.id == "referral bonus x 2"
-                        stripe_subscription.coupon = "referral bonus x 3"
-                    elsif stripe_subscription.discount.coupon.id == "referral bonus x 3"
-                        stripe_subscription.coupon = "referral bonus x 4"
-                    elsif stripe_subscription.discount.coupon.id == "referral bonus x 4"
-                        stripe_subscription.coupon = "referral bonus x 5"
-                    else
-                        do_not_increment_referral_referree = true
-                        CustomerMailer.delay.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)")
-                    end
-                    stripe_subscription.prorate = false
-                    if stripe_subscription.save
-                        @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10) unless do_not_increment_referral_referree
-                    end
-                
-                else #match name
-                    referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
-                    if referral_match.length == 1
+                    begin
+                        referral_match = Customer.where(referral_code: referral.gsub(" ","").downcase)
                         
                         unless referral_match.take.stripe_subscription_id.blank?
                             #referrer discount
@@ -447,7 +455,7 @@ class AdminActionsController < ApplicationController
                             if stripe_referral_subscription_match.save                
                                 referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10) unless do_not_increment_referral
                             end
-                        end             
+                        end
                         #referree discount
                         if stripe_subscription.discount.nil?
                             stripe_subscription.coupon = "referral bonus"
@@ -463,63 +471,200 @@ class AdminActionsController < ApplicationController
                             do_not_increment_referral_referree = true
                             CustomerMailer.delay.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)")
                         end
-
                         stripe_subscription.prorate = false
                         if stripe_subscription.save
                             @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10) unless do_not_increment_referral_referree
                         end
+                    rescue => error
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "Error occurred when applying referral credit: #{error.message}"
+                        puts '---------------------------------------------------'
+                        puts "Error occurred when applying referral credit: #{error.message}"
+                        puts '---------------------------------------------------'
+                    else
+                        flash[:status] = "success"
+                        flash[:notice_customers] = "Referral credit applied"
+                    end
+                else #match name
+                    referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
+                    if referral_match.length == 1
+                        begin     
+                            unless referral_match.take.stripe_subscription_id.blank?
+                                #referrer discount
+                                stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
+                                stripe_referral_subscription_match = stripe_referral_match.subscriptions.retrieve(referral_match.take.stripe_subscription_id)
+                                
+                                    #check for existing coupons
+                                    if stripe_referral_subscription_match.discount.nil?
+                                        stripe_referral_subscription_match.coupon = "referral bonus"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 2"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 2"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 3"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 3"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 4"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 5"
+                                    else
+                                        do_not_increment_referral = true
+                                        CustomerMailer.delay.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)")
+                                    end
+
+                                stripe_referral_subscription_match.prorate = false
+                                if stripe_referral_subscription_match.save                
+                                    referral_match.take.update_attributes(referral_bonus_referrer: referral_match.take.referral_bonus_referrer.to_i + 10) unless do_not_increment_referral
+                                end
+                            end             
+                            #referree discount
+                            if stripe_subscription.discount.nil?
+                                stripe_subscription.coupon = "referral bonus"
+                            elsif stripe_subscription.discount.coupon.id == "referral bonus"
+                                stripe_subscription.coupon = "referral bonus x 2"
+                            elsif stripe_subscription.discount.coupon.id == "referral bonus x 2"
+                                stripe_subscription.coupon = "referral bonus x 3"
+                            elsif stripe_subscription.discount.coupon.id == "referral bonus x 3"
+                                stripe_subscription.coupon = "referral bonus x 4"
+                            elsif stripe_subscription.discount.coupon.id == "referral bonus x 4"
+                                stripe_subscription.coupon = "referral bonus x 5"
+                            else
+                                do_not_increment_referral_referree = true
+                                CustomerMailer.delay.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)")
+                            end
+
+                            stripe_subscription.prorate = false
+                            if stripe_subscription.save
+                                @customer.update_attributes(matched_referrers_code:referral_match.take.referral_code,referral:referral.gsub(" ",""),referral_bonus_referree: @customer.referral_bonus_referree.to_i + 10) unless do_not_increment_referral_referree
+                            end
+                        rescue => error
+                            flash[:status] = "fail"
+                            flash[:notice_customers] = "Error occurred when applying referral credit: #{error.message}"
+                            puts '---------------------------------------------------'
+                            puts "Error occurred when applying referral credit: #{error.message}"
+                            puts '---------------------------------------------------'
+                        else
+                            flash[:status] = "success"
+                            flash[:notice_customers] = "Referral credit applied"
+                        end
+                    else 
+                        if (Customer.where(referral_code: referral.gsub(" ","").downcase).length == 0)  && (referral_match.length == 0)
+                            flash[:status] = "fail"
+                            flash[:notice_customers] = "Referral credit not applied: cannot find any customers matching #{referral}"
+                        else
+                            flash[:status] = "fail"
+                            flash[:notice_customers] = "Referral credit not applied: found multiple customers matching #{referral}"
+                        end
                     end
                 end
+            else
+                flash[:status] = "fail"
+                flash[:notice_customers] = "Referral cannot be applied: this customer does not have an active paid subscription"
             end
         elsif params[:todo] == "stop" 
             if params[:stop_type].downcase == "pause" 
                 end_date = params[:pause_end].to_date  
                 if params[:immediate_effect] == "1"
-                    unless end_date.blank?
-                        adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
-                        if @customer.stripe_subscription_id.blank?
-                            @customer.update(paused?:"yes", pause_end_date:adjusted_pause_end_date-1, next_pick_up_date:adjusted_pause_end_date)
-                            @customer.stop_requests.create(request_type:'pause',start_date:Date.today, end_date:adjusted_pause_end_date-1, requested_date: Date.today)
-                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
-                        else
-                            stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                            stripe_subscription.trial_end = adjusted_pause_end_date.to_time.to_i
-                            stripe_subscription.prorate = false
-                            if stripe_subscription.save
+                    if !end_date.blank?
+                        begin
+                            adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                            if @customer.stripe_subscription_id.blank?
                                 @customer.update(paused?:"yes", pause_end_date:adjusted_pause_end_date-1, next_pick_up_date:adjusted_pause_end_date)
                                 @customer.stop_requests.create(request_type:'pause',start_date:Date.today, end_date:adjusted_pause_end_date-1, requested_date: Date.today)
                                 @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            else
+                                stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                                stripe_subscription.trial_end = adjusted_pause_end_date.to_time.to_i
+                                stripe_subscription.prorate = false
+                                if stripe_subscription.save
+                                    @customer.update(paused?:"yes", pause_end_date:adjusted_pause_end_date-1, next_pick_up_date:adjusted_pause_end_date)
+                                    @customer.stop_requests.create(request_type:'pause',start_date:Date.today, end_date:adjusted_pause_end_date-1, requested_date: Date.today)
+                                    @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                                end
                             end
+
+                            if @customer.errors.any?
+                                status = "fail"
+                                message = "Error occurred while attempting to pause: #{@customer.error.full_messages.join(", ")}"
+                            else
+                                status = "success"
+                                message = "Customer paused"
+                            end
+                        rescue => error
+                            flash[:status] = "fail"
+                            flash[:notice_customers] = "An error occurred when attempting to pause: #{error.message}" 
+                            puts '---------------------------------------------------'
+                            puts "An error occurred when attempting to pause: #{error.message}" 
+                            puts '---------------------------------------------------'
+                        else
+                            status ||= "success"
+                            message || = "Customer paused"
+                            flash[:status] = status
+                            flash[:notice_customers] = message
                         end
+                    else
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "Pause cannot be completed: must choose an end date"  
                     end
                 else
                     associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
-                    unless end_date.blank?
+                    if !end_date.blank?
                         adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
                         if [2,3,4].include? Date.today.wday
                             adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                         else
                             adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
                         end
+
                         if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? @customer.active?) && !(["Yes","yes"].include? @customer.paused?)
                             @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                             @customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
                         end
+
+                        if @customer.errors.any?
+                            flash[:status] = "fail"
+                            flash[:notice_customers] = "Pause request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+                        else
+                            flash[:status] = "success"
+                            flash[:notice_customers] = "Pause request submitted"    
+                        end
+                    else 
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "Pause cannot be completed: must choose an end date"    
                     end
                 end
             elsif params[:stop_type].downcase == "cancel"    
                 if params[:immediate_effect] == "1"
-                    if @customer.stripe_subscription_id.blank?
-                        @customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
-                        @customer.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)                      
-                        @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
-                    else
-                        stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                        if stripe_subscription.delete
+                    begin
+                        if @customer.stripe_subscription_id.blank?
                             @customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
-                            @customer.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)
+                            @customer.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)                      
                             @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        else
+                            stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                            if stripe_subscription.delete
+                                @customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                                @customer.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)
+                                @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            end
                         end
+
+                        if @customer.errors.any?
+                            status = "fail"
+                            message = "Error occurred while attempting to cancel: #{@customer.error.full_messages.join(", ")}"
+                        else
+                            status = "success"
+                            message = "Customer cancelled"
+                        end
+                    rescue => error
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "An error occurred when attempting to cancel: #{error.message}" 
+                        puts '---------------------------------------------------'
+                        puts "An error occurred when attempting to cancel: #{error.message}" 
+                        puts '---------------------------------------------------'
+                    else
+                        status ||= "success"
+                        message || = "Customer cancelled"
+                        flash[:status] = status
+                        flash[:notice_customers] = message
                     end
                 else
                     if [2,3,4].include? Date.today.wday
@@ -534,37 +679,66 @@ class AdminActionsController < ApplicationController
                     else
                         @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                     end
+
+                    if @customer.errors.any?
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "Cancel request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+                    else
+                        flash[:status] = "success"
+                        flash[:notice_customers] = "Cancel request submitted"    
+                    end
                 end
             elsif params[:stop_type].downcase == "restart"
                 if params[:immediate_effect] == "1"
-                    if @customer.stripe_subscription_id.blank?
-                        start_date_update = Chowdy::Application.closest_date(1,1)
-                        if @customer.sponsored?
-                            @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
-                            @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)                       
-                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
-                        else
-                            current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
-                            current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
-                            meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
-                            
-                            if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
-                                new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
-                                @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                    begin
+                        if @customer.stripe_subscription_id.blank?
+                            start_date_update = Chowdy::Application.closest_date(1,1)
+                            if @customer.sponsored?
+                                @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
+                                @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)                       
+                                @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            else
+                                current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
+                                current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
+                                meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                                
+                                if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
+                                    new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
+                                    @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                                    @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                                    @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                                end
+                            end
+                        else 
+                            start_date_update = Chowdy::Application.closest_date(1,1)
+                            paused_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                            paused_subscription.trial_end = start_date_update.to_time.to_i
+                            paused_subscription.prorate = false
+                            if paused_subscription.save
+                                @customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
                                 @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
                                 @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                             end
                         end
-                    else 
-                        start_date_update = Chowdy::Application.closest_date(1,1)
-                        paused_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                        paused_subscription.trial_end = start_date_update.to_time.to_i
-                        paused_subscription.prorate = false
-                        if paused_subscription.save
-                            @customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
-                            @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
-                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+
+                        if @customer.errors.any?
+                            status = "fail"
+                            message = "Error occurred while attempting to restart: #{@customer.error.full_messages.join(", ")}"
+                        else
+                            status = "success"
+                            message = "Customer restarted"
                         end
+                    rescue => error
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "An error occurred when attempting to restart: #{error.message}" 
+                        puts '---------------------------------------------------'
+                        puts "An error occurred when attempting to restart: #{error.message}" 
+                        puts '---------------------------------------------------'
+                    else
+                        status ||= "success"
+                        message || = "Customer restarted"
+                        flash[:status] = status
+                        flash[:notice_customers] = message
                     end
                 else
                     if [2,3,4].include? Date.today.wday
@@ -584,8 +758,17 @@ class AdminActionsController < ApplicationController
                             @customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
                             @customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
                     end
+
+                    if @customer.errors.any?
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+                    else
+                        flash[:status] = "success"
+                        flash[:notice_customers] = "Restart request submitted"    
+                    end
                 end
             end
+
         elsif params[:todo] == "destroy" 
             if params[:confirm_delete] == "on"
                 result = @customer.delete_with_stripe
