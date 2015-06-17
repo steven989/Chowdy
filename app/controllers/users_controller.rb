@@ -95,6 +95,7 @@ class UsersController < ApplicationController
             @cancel_curr_timeseries = StopQueue.where(stop_type:"cancel").select('created_at::date AS day, COUNT(*) as cancels').group('day').order('day asc').select{ |r| !r.day.nil?}.map {|r| [r.day.to_time.to_i*1000, r.cancels]}.to_a
             @cancel_curr_timeseries.each {|c| if @cancel_timeseries.select {|e| e[0] == c[0]}.length == 1; @cancel_timeseries.select {|e| e[0] == c[0]}[0][1] = @cancel_timeseries.select {|e| e[0] == c[0]}[0][1].to_i + c[1].to_i else  @cancel_timeseries.push c end} unless @cancel_curr_timeseries.blank?
             @cancel_timeseries = @cancel_timeseries.length >= 14 ? @cancel_timeseries[-14..-1].to_a : @cancel_timeseries[-@cancel_timeseries.length..-1].to_a
+            @cancel_timeseries.sort_by! {|e| e[0]}
 
             @promotions = Promotion.all.order(created_at: :asc)
 
