@@ -17,6 +17,7 @@ class MenusController < ApplicationController
 
         received_data.each do |rd|
             production_day = rd[:production_day].to_date
+            meal_type = rd[:meal_type]
             meal_name = rd[:meal_name]
             protein = rd[:protein]
             carb = rd[:carb]
@@ -25,8 +26,8 @@ class MenusController < ApplicationController
             notes = rd[:notes]
             dish = rd[:dish]
 
-            Menu.where(production_day:production_day).delete_all if Menu.where(production_day:production_day).length > 0
-            menu_item = Menu.new(production_day:production_day,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,dish:dish)
+            Menu.where(production_day:production_day,meal_type:meal_type).delete_all if Menu.where(production_day:production_day,meal_type:meal_type).length > 0
+            menu_item = Menu.new(production_day:production_day,meal_type:meal_type,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,dish:dish)
             
             if menu_item.save
                 results.push([production_day,true,nil])

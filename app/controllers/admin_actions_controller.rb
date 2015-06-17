@@ -2,6 +2,7 @@ class AdminActionsController < ApplicationController
 
     def customer_sheet  
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+
         @current_period = current_pick_up_date.strftime("%b %d")+" - " +(current_pick_up_date+ 5.days).strftime("%b %d")
         @id_iterate = 1
         if params[:hub] == 'wandas'

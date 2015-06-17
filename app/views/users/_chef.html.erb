@@ -23,7 +23,8 @@ $(function(){
         var current_year = new Date().getFullYear();
         var month = $('#month_select').val();
         var month_value = month_array.indexOf(month);
-        var pull_url = '<%= menu_path("placeholder") %>'.replace("placeholder",month_value+1)
+        var pull_url = '<%= menu_path("placeholder") %>'.replace("placeholder",month_value+1);
+        var meal_types = ["Beef", "Pork", "Poultry", "Green 1", "Green 2"]
         
         //pull data from the system
           $.ajax({
@@ -58,21 +59,26 @@ $(function(){
                   };
 
                 production_days_array.forEach(function(element){
-                  var d = new Date (element[0]);
-                  var production_day_dom = d.formatDate();
-                  var matched_result = data.filter(function(d){return d.production_day == production_day_dom})
+                  meal_types.forEach(function(e){
 
-                  var meal_name = matched_result.length == 1 ? matched_result[0].meal_name : "" ;
-                  var protein = matched_result.length == 1 ? matched_result[0].protein : "" ;
-                  var carb = matched_result.length == 1 ? matched_result[0].carb : "" ;
-                  var veggie = matched_result.length == 1 ? matched_result[0].veggie : "" ;
-                  var extra = matched_result.length == 1 ? matched_result[0].extra : "" ;
-                  var notes = matched_result.length == 1 ? matched_result[0].notes : "" ;
-                  var dish = matched_result.length == 1 ? matched_result[0].dish : false ;
-                  var dish_check = dish ? "checked" : "";
+                      var d = new Date (element[0]);
+                      var production_day_dom = d.formatDate();
+                      var matched_result = data.filter(function(d){return (d.production_day == production_day_dom) && (d.meal_type == e)})
 
-                  $('#menu_items tbody').append("<tr><td class='disable_editable c1'>"+production_day_dom+"</td><td class='c2'>"+meal_name+"</td><td class='c3'>"+protein+"</td><td class='c4'>"+carb+"</td><td class='c5'>"+veggie+"</td><td class='c6'>"+extra+"</td><td class='c7'>"+notes+"</td><td class='disable_editable c8'><input type='checkbox' "+dish_check+"></td></tr>")
+                      var meal_name = matched_result.length == 1 ? matched_result[0].meal_name : "" ;
+                      var protein = matched_result.length == 1 ? matched_result[0].protein : "" ;
+                      var carb = matched_result.length == 1 ? matched_result[0].carb : "" ;
+                      var veggie = matched_result.length == 1 ? matched_result[0].veggie : "" ;
+                      var extra = matched_result.length == 1 ? matched_result[0].extra : "" ;
+                      var notes = matched_result.length == 1 ? matched_result[0].notes : "" ;
+                      var dish = matched_result.length == 1 ? matched_result[0].dish : false ;
+                      var dish_check = dish ? "checked" : "";
 
+                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td></tr>")
+                    
+
+                    });
+                    $('#menu_items tbody').append("<tr><td colspan='9' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
                 });
 
                 $('#menu_items').editableTableWidget();
@@ -89,8 +95,8 @@ $(function(){
 
         function submit_menu_table_value() {
           var output_json = [];
-          $('#menu_items tbody').children().each(function(index){
-            output_json.push({production_day:$(this).children().eq(0).html(), meal_name:$(this).children().eq(1).html(), protein:$(this).children().eq(2).html(), carb:$(this).children().eq(3).html(), veggie:$(this).children().eq(4).html(), extra:$(this).children().eq(5).html(), notes:$(this).children().eq(6).html(), dish:$(this).children().eq(7).children().eq(0).is(':checked')})
+          $('#menu_items tbody').children().filter(function(c){return $(this).hasClass("hasData")}).each(function(index){
+            output_json.push({production_day:$(this).children().eq(0).html(), meal_type:$(this).children().eq(1).html(), meal_name:$(this).children().eq(2).html(), protein:$(this).children().eq(3).html(), carb:$(this).children().eq(4).html(), veggie:$(this).children().eq(5).html(), extra:$(this).children().eq(6).html(), notes:$(this).children().eq(7).html(), dish:$(this).children().eq(8).children().eq(0).is(':checked')})
             
           });
 
@@ -187,13 +193,14 @@ $(function(){
                                 <thead>
                                   <tr>
                                     <th class="c1">Production Date</th>
-                                    <th class="c2">Meal Name</th>
-                                    <th class="c3">Protein</th>
-                                    <th class="c4">Carbs</th>
-                                    <th class="c5">Veggies</th>
-                                    <th class="c6">Extra/Garnish</th>
-                                    <th class="c7">Additional Notes</th>
-                                    <th class="c8">Dish?</th>
+                                    <th class="c2">Meal Type</th>
+                                    <th class="c3">Meal Name</th>
+                                    <th class="c4">Protein</th>
+                                    <th class="c5">Carbs</th>
+                                    <th class="c6">Veggies</th>
+                                    <th class="c7">Extra/Garnish</th>
+                                    <th class="c8">Additional Notes</th>
+                                    <th class="c9">Dish?</th>
                                   </tr>
                                 </thead>
                                 <tbody>
