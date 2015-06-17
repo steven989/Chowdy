@@ -608,7 +608,7 @@ class AdminActionsController < ApplicationController
                     associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
                     if !end_date.blank?
                         adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
-                        if [2,3,4].include? Date.today.wday
+                        if [1,2,3,4].include? Date.today.wday
                             adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                         else
                             adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
@@ -671,7 +671,7 @@ class AdminActionsController < ApplicationController
                         flash[:notice_customers] = message
                     end
                 else
-                    if [2,3,4].include? Date.today.wday
+                    if [1,2,3,4].include? Date.today.wday
                         adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                     else
                         adjusted_cancel_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
@@ -749,7 +749,7 @@ class AdminActionsController < ApplicationController
                         flash[:notice_customers] = message
                     end
                 else
-                    if [2,3,4].include? Date.today.wday
+                    if [1,2,3,4].include? Date.today.wday
                         adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                     else
                         adjusted_restart_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now

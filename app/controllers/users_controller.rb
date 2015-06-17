@@ -377,7 +377,7 @@ class UsersController < ApplicationController
             @phone_number = @current_customer.phone_number
             @note = @current_customer.special_delivery_instructions
 
-            if [2,3,4].include? Date.today.wday
+            if [1,2,3,4].include? Date.today.wday
                 @earliest_pause_end_date = Chowdy::Application.closest_date(2,1)
             else
                 @earliest_pause_end_date = Chowdy::Application.closest_date(3,1)

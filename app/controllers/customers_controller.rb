@@ -47,7 +47,7 @@ protect_from_forgery :except => :payment
             associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
             unless end_date.blank?
                 adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
-                if [2,3,4].include? Date.today.wday
+                if [1,2,3,4].include? Date.today.wday
                     adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                 else
                     adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
@@ -61,7 +61,7 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#changePlan"
 
         elsif params[:id].downcase == "cancel"    
-            if [2,3,4].include? Date.today.wday
+            if [1,2,3,4].include? Date.today.wday
                 adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
             else
                 adjusted_cancel_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
@@ -79,7 +79,7 @@ protect_from_forgery :except => :payment
             end
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "restart"
-            if [2,3,4].include? Date.today.wday
+            if [1,2,3,4].include? Date.today.wday
                 adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
             else
                 adjusted_restart_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
@@ -162,7 +162,7 @@ protect_from_forgery :except => :payment
                 redirect_to user_profile_path+"#settings"
             end
         elsif params[:id].downcase == "hub" 
-            if [2,3,4].include? Date.today.wday
+            if [1,2,3,4].include? Date.today.wday
                 adjusted_change_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
             else
                 adjusted_change_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
@@ -215,7 +215,7 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "change_subscription"
             total_updated_meals = params[:monday_reg_hidden].to_i + params[:monday_grn_hidden].to_i + params[:thursday_reg_hidden].to_i + params[:thursday_grn_hidden].to_i
-            if [2,3,4].include? Date.today.wday
+            if [1,2,3,4].include? Date.today.wday
                 adjusted_change_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
             else
                 adjusted_change_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
