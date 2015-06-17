@@ -596,7 +596,7 @@ class AdminActionsController < ApplicationController
                             puts '---------------------------------------------------'
                         else
                             status ||= "success"
-                            message || = "Customer paused"
+                            message ||= "Customer paused"
                             flash[:status] = status
                             flash[:notice_customers] = message
                         end
@@ -666,7 +666,7 @@ class AdminActionsController < ApplicationController
                         puts '---------------------------------------------------'
                     else
                         status ||= "success"
-                        message || = "Customer cancelled"
+                        message ||= "Customer cancelled"
                         flash[:status] = status
                         flash[:notice_customers] = message
                     end
@@ -744,7 +744,7 @@ class AdminActionsController < ApplicationController
                         puts '---------------------------------------------------'
                     else
                         status ||= "success"
-                        message || = "Customer restarted"
+                        message ||= "Customer restarted"
                         flash[:status] = status
                         flash[:notice_customers] = message
                     end
