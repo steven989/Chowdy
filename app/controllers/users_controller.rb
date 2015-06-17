@@ -165,6 +165,8 @@ class UsersController < ApplicationController
 
             @all_customers = Customer.all.order(created_at: :desc)
 
+        elsif @current_user.role == "chef"
+            @menu = Menu.all.order(production_day: :asc)
         else
             @current_customer = current_user.customer
             @display_cancel = true

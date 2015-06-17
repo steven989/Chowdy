@@ -1,0 +1,228 @@
+<script>
+
+$(function(){
+
+    //URL segment
+
+      //retrieve
+      var hash = (window.location.hash == "" || window.location.hash == "#_=_") ? "#menu" : window.location.hash;
+      $('#main-nav li a[href='+hash+']').tab("show");
+      $(".nav-main").find(".highlight").removeClass("highlight");
+      $('#main-nav li a[href='+hash+']').parent().addClass("highlight");
+
+      //navigation amongst the tabs
+      $('#main-nav li a, .link_to_settings, #logo').off("click").on("click",function(){
+        window.location.hash = $(this).attr("href");
+        $(".nav-main").find(".highlight").removeClass("highlight");
+        $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
+      });
+
+      var month_array = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+
+      function generate_menu_table() {
+        var current_year = new Date().getFullYear();
+        var month = $('#month_select').val();
+        var month_value = month_array.indexOf(month);
+        var pull_url = '<%= menu_path("placeholder") %>'.replace("placeholder",month_value+1)
+        
+        //pull data from the system
+          $.ajax({
+            url: pull_url,
+            type: 'GET',
+            dataType: 'JSON'
+          }).done(function(data){
+
+                // get the first and last dates of the month
+                var first_of_month = new Date(current_year,month_value, 1);
+                var last_of_month = new Date(current_year,month_value+1, 0);
+
+                // iterate over the two dates to get an array of dates and weekday
+                var wday_array = []
+                for (var itdate = first_of_month; itdate <= last_of_month; itdate.setDate(itdate.getDate()+1)) {
+                  wday_array.push([new Date(current_year,month_value,itdate.getDate()), itdate.getDay()]);
+                }
+
+                // return only Sundays and Wednesdays
+                var production_days_array 
+                production_days_array = wday_array.filter(function(e){
+                  return (e[1] == 0) || (e[1] == 3);
+                });
+              
+                // generate the menu table
+
+                 Date.prototype.formatDate = function() {
+                   var yyyy = this.getFullYear().toString();
+                   var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+                   var dd  = this.getDate().toString();
+                   return yyyy +"-"+ (mm[1]?mm:"0"+mm[0]) +"-"+ (dd[1]?dd:"0"+dd[0]); // padding
+                  };
+
+                production_days_array.forEach(function(element){
+                  var d = new Date (element[0]);
+                  var production_day_dom = d.formatDate();
+                  var matched_result = data.filter(function(d){return d.production_day == production_day_dom})
+
+                  var meal_name = matched_result.length == 1 ? matched_result[0].meal_name : "" ;
+                  var protein = matched_result.length == 1 ? matched_result[0].protein : "" ;
+                  var carb = matched_result.length == 1 ? matched_result[0].carb : "" ;
+                  var veggie = matched_result.length == 1 ? matched_result[0].veggie : "" ;
+                  var extra = matched_result.length == 1 ? matched_result[0].extra : "" ;
+                  var notes = matched_result.length == 1 ? matched_result[0].notes : "" ;
+                  var dish = matched_result.length == 1 ? matched_result[0].dish : false ;
+                  var dish_check = dish ? "checked" : "";
+
+                  $('#menu_items tbody').append("<tr><td class='disable_editable c1'>"+production_day_dom+"</td><td class='c2'>"+meal_name+"</td><td class='c3'>"+protein+"</td><td class='c4'>"+carb+"</td><td class='c5'>"+veggie+"</td><td class='c6'>"+extra+"</td><td class='c7'>"+notes+"</td><td class='disable_editable c8'><input type='checkbox' "+dish_check+"></td></tr>")
+
+                });
+
+                $('#menu_items').editableTableWidget();
+
+                $('#menu_items td').on('change', function() {$('#update_menu').html("Save changes").removeClass("disabled");});
+
+          });
+
+        }
+
+
+        generate_menu_table();
+
+
+        function submit_menu_table_value() {
+          var output_json = [];
+          $('#menu_items tbody').children().each(function(index){
+            output_json.push({production_day:$(this).children().eq(0).html(), meal_name:$(this).children().eq(1).html(), protein:$(this).children().eq(2).html(), carb:$(this).children().eq(3).html(), veggie:$(this).children().eq(4).html(), extra:$(this).children().eq(5).html(), notes:$(this).children().eq(6).html(), dish:$(this).children().eq(7).children().eq(0).is(':checked')})
+            
+          });
+
+            $.ajax({
+              url: '<%= menu_path("all") %>',
+              type: 'PUT',
+              dataType: 'JSON',
+              contentType: 'application/json',
+              data: JSON.stringify({"data": output_json})
+            }).done(function(data){
+              test = data
+              if (data.result ) {
+                $('#update_menu').html("Changes saved").addClass("disabled");
+              } else {
+                $('#submitErrorModal .modal-body').html(data.errors);
+                $('#submitErrorModal').modal();
+              }
+            });
+
+        }
+
+        $('#update_menu').off('click').on('click',function(){
+          submit_menu_table_value();
+        });
+
+        $('#month_select').off('change').on('change',function(){
+          submit_menu_table_value();
+          $('#menu_items tbody').empty();
+          generate_menu_table();
+        })
+
+});
+
+</script>
+
+<section class="vbox">
+    <header class="bg-black header header-md navbar-fixed-top-xs box-shadow">
+        <div class="navbar-header aside-md">
+            <a class="btn btn-link visible-xs m-t-sm" data-toggle="class:nav-off-screen" data-target="#nav">
+                      <i class="fa fa-bars"></i>
+            </a>
+            <a href="#menu" data-toggle="tab" id="logo">
+              <%= image_tag "logo-light.png", width:"120px", alt: "Chowdy", class: "m-t-sm m-b-sm" %>
+            </a>
+        </div>
+      
+    </header>    
+    <section>
+        <section class="hbox stretch">
+            
+            <aside class="bg-white aside-md hidden-print b-r" id="nav">
+                <nav class="nav-primary hidden-xs padder-v tabbable">
+                    <div class="visible-xs" style="height: 65px;"></div>
+                    <ul class="nav nav-main" data-ride="collapse" id="main-nav">
+                        <li class="highlight">
+                          <a href="#menu" class="auto b-b padder-v" data-toggle="tab">
+                            <i class="i i-statistics icon">
+                            </i>
+                            <span class="font-bold">Menu</span>
+                          </a>
+                        </li>
+                        <li>
+                          <%= link_to logout_path, class:"padder-v" do %>
+                            <i class="fa fa-terminal">
+                            </i>
+                            <span class="font-bold">Log out</span>
+                          <% end %>
+                        </li>
+                    </ul>
+
+                </nav>
+                
+            </aside>
+
+
+            <section id="content container">
+                <section class="hbox stretch bg-light tab-content">
+                    <section class="tab-pane active" id="menu" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder">
+                              <div class="row m-t-md">
+                                <div class="col-sm-5">
+                                  <div class="form-group">
+                                    <%= label_tag :month_select, "Choose Month" %>
+                                    <%= select_tag :month_select, options_for_select(["January","February","March","April","May","June","July","August","September","October","November","December"], Date.today.strftime("%B")), class:"form-control"  %>
+                                  </div>
+                                </div>
+                                <div class="col-sm-5">
+                                  <button class="btn btn-s-md btn-primary btn-rounded m-t-md disabled" id="update_menu">Changes saved</button>
+                                </div>
+                              </div>
+    
+                              <table id="menu_items" class="display table table-striped m-b-none" style="font-size: 12px">
+                                <thead>
+                                  <tr>
+                                    <th class="c1">Production Date</th>
+                                    <th class="c2">Meal Name</th>
+                                    <th class="c3">Protein</th>
+                                    <th class="c4">Carbs</th>
+                                    <th class="c5">Veggies</th>
+                                    <th class="c6">Extra/Garnish</th>
+                                    <th class="c7">Additional Notes</th>
+                                    <th class="c8">Dish?</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                              </table>
+                            </section>
+                        </section>
+                    </section> 
+                </section>
+            </section>
+        
+        </section>
+    </section>
+</section>
+
+
+<!-- Form modal -->
+<div class="modal fade" id="submitErrorModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Error</h4>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>

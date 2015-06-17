@@ -15077,6 +15077,10 @@ Array.prototype.indexOf||(Array.prototype.indexOf=function(t,i){if(void 0===this
 
 
 }).call(this);
+(function() {
+
+
+}).call(this);
 /* =========================================================
  * bootstrap-datepicker.js 
  * http://www.eyecon.ro/bootstrap-datepicker
@@ -17578,6 +17582,142 @@ b.bind("mouseup.slimscroll",function(a){y=!1;p();b.unbind(".slimscroll")});retur
  */
 
 (function(b){b.support.touch="ontouchend" in document;if(!b.support.touch){return;}var c=b.ui.mouse.prototype,e=c._mouseInit,a;function d(g,h){if(g.originalEvent.touches.length>1){return;}g.preventDefault();var i=g.originalEvent.changedTouches[0],f=document.createEvent("MouseEvents");f.initMouseEvent(h,true,true,window,1,i.screenX,i.screenY,i.clientX,i.clientY,false,false,false,false,0,null);g.target.dispatchEvent(f);}c._touchStart=function(g){var f=this;if(a||!f._mouseCapture(g.originalEvent.changedTouches[0])){return;}a=true;f._touchMoved=false;d(g,"mouseover");d(g,"mousemove");d(g,"mousedown");};c._touchMove=function(f){if(!a){return;}this._touchMoved=true;d(f,"mousemove");};c._touchEnd=function(f){if(!a){return;}d(f,"mouseup");d(f,"mouseout");if(!this._touchMoved){d(f,"click");}a=false;};c._mouseInit=function(){var f=this;f.element.bind("touchstart",b.proxy(f,"_touchStart")).bind("touchmove",b.proxy(f,"_touchMove")).bind("touchend",b.proxy(f,"_touchEnd"));e.call(f);};})(jQuery);
+/*global $, window*/
+
+$.fn.editableTableWidget = function (options) {
+	'use strict';
+	return $(this).each(function () {
+		var buildDefaultOptions = function () {
+				var opts = $.extend({}, $.fn.editableTableWidget.defaultOptions);
+				opts.editor = opts.editor.clone();
+				return opts;
+			},
+			activeOptions = $.extend(buildDefaultOptions(), options),
+			ARROW_LEFT = 37, ARROW_UP = 38, ARROW_RIGHT = 39, ARROW_DOWN = 40, ENTER = 13, ESC = 27, TAB = 9,
+			element = $(this),
+			editor = activeOptions.editor.css('position', 'absolute').hide().appendTo(element.parent()),
+			active,
+			showEditor = function (select) {
+
+				active = element.find('td:focus');
+
+				if (active.length && !active.hasClass('disable_editable')) { //the !active.hasClass('disable_editable') is manually added by Steve to disable editing of certain cells
+					editor.val(active.text())
+						.removeClass('error')
+						.show()
+						.offset(active.offset())
+						.css(active.css(activeOptions.cloneProperties))
+						.width(active.width())
+						.height(active.height())
+						.focus();
+					if (select) {
+						editor.select();
+					}
+				}
+
+
+			},
+			setActiveText = function () {
+				var text = editor.val(),
+					evt = $.Event('change'),
+					originalContent;
+				if (active.text() === text || editor.hasClass('error')) {
+					return true;
+				}
+				originalContent = active.html();
+				active.text(text).trigger(evt, text);
+				if (evt.result === false) {
+					active.html(originalContent);
+				}
+			},
+			movement = function (element, keycode) {
+				if (keycode === ARROW_RIGHT) {
+					return element.next('td');
+				} else if (keycode === ARROW_LEFT) {
+					return element.prev('td');
+				} else if (keycode === ARROW_UP) {
+					return element.parent().prev().children().eq(element.index());
+				} else if (keycode === ARROW_DOWN) {
+					return element.parent().next().children().eq(element.index());
+				}
+				return [];
+			};
+		editor.blur(function () {
+			setActiveText();
+			editor.hide();
+		}).keydown(function (e) {
+			if (e.which === ENTER) {
+				setActiveText();
+				editor.hide();
+				active.focus();
+				e.preventDefault();
+				e.stopPropagation();
+			} else if (e.which === ESC) {
+				editor.val(active.text());
+				e.preventDefault();
+				e.stopPropagation();
+				editor.hide();
+				active.focus();
+			} else if (e.which === TAB) {
+				active.focus();
+			} else if (this.selectionEnd - this.selectionStart === this.value.length) {
+				var possibleMove = movement(active, e.which);
+				if (possibleMove.length > 0) {
+					possibleMove.focus();
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			}
+		})
+		.on('input paste', function () {
+			var evt = $.Event('validate');
+			active.trigger(evt, editor.val());
+			if (evt.result === false) {
+				editor.addClass('error');
+			} else {
+				editor.removeClass('error');
+			}
+		});
+		element.on('click keypress dblclick', showEditor)
+		.css('cursor', 'pointer')
+		.keydown(function (e) {
+			var prevent = true,
+				possibleMove = movement($(e.target), e.which);
+			if (possibleMove.length > 0) {
+				possibleMove.focus();
+			} else if (e.which === ENTER) {
+				showEditor(false);
+			} else if (e.which === 17 || e.which === 91 || e.which === 93) {
+				showEditor(true);
+				prevent = false;
+			} else {
+				prevent = false;
+			}
+			if (prevent) {
+				e.stopPropagation();
+				e.preventDefault();
+			}
+		});
+
+		element.find('td').prop('tabindex', 1);
+
+		$(window).on('resize', function () {
+			if (editor.is(':visible')) {
+				editor.offset(active.offset())
+				.width(active.width())
+				.height(active.height());
+			}
+		});
+	});
+
+};
+$.fn.editableTableWidget.defaultOptions = {
+	cloneProperties: ['padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right',
+					  'text-align', 'font', 'font-size', 'font-family', 'font-weight',
+					  'border', 'border-top', 'border-bottom', 'border-left', 'border-right'],
+	editor: $('<input>')
+};
+
 // This is a manifest file that'll be compiled into application.js, which will include all the files
 // listed below.
 //
