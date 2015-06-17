@@ -83,7 +83,11 @@ $(function(){
 
                 $('#menu_items').editableTableWidget();
 
-                $('#menu_items td').on('change', function() {$('#update_menu').html("Save changes").removeClass("disabled");});
+                $('#menu_items td').on('change', function() {
+                  $('#change_notification').removeClass("hidden");
+                  $('#update_menu').html("Save changes").removeClass("disabled");
+
+                });
 
           });
 
@@ -109,6 +113,7 @@ $(function(){
             }).done(function(data){
               test = data
               if (data.result ) {
+                $('#change_notification').addClass("hidden");
                 $('#update_menu').html("Changes saved").addClass("disabled");
               } else {
                 $('#submitErrorModal .modal-body').html(data.errors);
@@ -179,13 +184,23 @@ $(function(){
                             <section class="scrollable padder">
                               <div class="row m-t-md">
                                 <div class="col-sm-5">
+                                  <%= label_tag :month_select, "Choose Month" %>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-sm-5">
                                   <div class="form-group">
-                                    <%= label_tag :month_select, "Choose Month" %>
                                     <%= select_tag :month_select, options_for_select(["January","February","March","April","May","June","July","August","September","October","November","December"], Date.today.strftime("%B")), class:"form-control"  %>
                                   </div>
                                 </div>
-                                <div class="col-sm-5">
-                                  <button class="btn btn-s-md btn-primary btn-rounded m-t-md disabled" id="update_menu">Changes saved</button>
+                                <div class="col-sm-2">
+                                  <button class="btn btn-s-md btn-primary btn-rounded disabled" id="update_menu">Changes saved</button>
+                                </div>
+                                <div class="col-sm-4">
+                                  <div id="change_notification" class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; left:0px; bottom: 0px;">
+                                    
+                                    You have unsaved changes
+                                  </div>
                                 </div>
                               </div>
     

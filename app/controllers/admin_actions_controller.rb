@@ -2,6 +2,19 @@ class AdminActionsController < ApplicationController
 
     def customer_sheet  
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+        production_day_sunday = Chowdy::Application.closest_date(-1,7,current_pick_up_date)
+        production_day_wednesday = Chowdy::Application.closest_date(1,3,current_pick_up_date)
+
+        @beef_monday = Menu.where(production_day:production_day_sunday, meal_type:"Beef").take.meal_name unless Menu.where(production_day:production_day_sunday, meal_type:"Beef").blank?
+        @beef_thursday = Menu.where(production_day:production_day_wednesday, meal_type:"Beef").take.meal_name unless Menu.where(production_day:production_day_wednesday, meal_type:"Beef").blank?
+        @pork_monday = Menu.where(production_day:production_day_sunday, meal_type:"Pork").take.meal_name unless Menu.where(production_day:production_day_sunday, meal_type:"Pork").blank?
+        @pork_thursday = Menu.where(production_day:production_day_wednesday, meal_type:"Pork").take.meal_name unless Menu.where(production_day:production_day_wednesday, meal_type:"Pork").blank?
+        @poultry_monday = Menu.where(production_day:production_day_sunday, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:production_day_sunday, meal_type:"Poultry").blank?
+        @poultry_thursday = Menu.where(production_day:production_day_wednesday, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:production_day_wednesday, meal_type:"Poultry").blank?
+        @green_1_monday = Menu.where(production_day:production_day_sunday, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:production_day_sunday, meal_type:"Green 1").blank?
+        @green_1_thursday = Menu.where(production_day:production_day_wednesday, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:production_day_wednesday, meal_type:"Green 1").blank?
+        @green_2_monday = Menu.where(production_day:production_day_sunday, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:production_day_sunday, meal_type:"Green 2").blank?
+        @green_2_thursday = Menu.where(production_day:production_day_wednesday, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:production_day_wednesday, meal_type:"Green 2").blank?
 
         @current_period = current_pick_up_date.strftime("%b %d")+" - " +(current_pick_up_date+ 5.days).strftime("%b %d")
         @id_iterate = 1
