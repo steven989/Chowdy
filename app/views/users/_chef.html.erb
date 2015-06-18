@@ -58,6 +58,7 @@ $(function(){
                    return yyyy +"-"+ (mm[1]?mm:"0"+mm[0]) +"-"+ (dd[1]?dd:"0"+dd[0]); // padding
                   };
 
+                $('#menu_items tbody').append("<tr style='height:140px;'></tr>")
                 production_days_array.forEach(function(element){
                   meal_types.forEach(function(e){
 
@@ -74,14 +75,14 @@ $(function(){
                       var dish = matched_result.length == 1 ? matched_result[0].dish : false ;
                       var dish_check = dish ? "checked" : "";
 
-                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td></tr>")
+                      $('#menu_items tbody').append("</tr><tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td></tr>")
                     
-
                     });
                     $('#menu_items tbody').append("<tr><td colspan='9' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
                 });
 
                 $('#menu_items').editableTableWidget();
+                $('#menu_items thead').width($('#menu_items').width());
 
                 $('#menu_items td').on('change', function() {
                   $('#change_notification').removeClass("hidden");
@@ -101,7 +102,6 @@ $(function(){
           var output_json = [];
           $('#menu_items tbody').children().filter(function(c){return $(this).hasClass("hasData")}).each(function(index){
             output_json.push({production_day:$(this).children().eq(0).html(), meal_type:$(this).children().eq(1).html(), meal_name:$(this).children().eq(2).html(), protein:$(this).children().eq(3).html(), carb:$(this).children().eq(4).html(), veggie:$(this).children().eq(5).html(), extra:$(this).children().eq(6).html(), notes:$(this).children().eq(7).html(), dish:$(this).children().eq(8).children().eq(0).is(':checked')})
-            
           });
 
             $.ajax({
@@ -132,6 +132,10 @@ $(function(){
           $('#menu_items tbody').empty();
           generate_menu_table();
         })
+
+        $( window ).resize(function() {
+            $('#menu_items thead').width($('#menu_items').width());
+        });
 
 });
 
@@ -182,30 +186,32 @@ $(function(){
                     <section class="tab-pane active" id="menu" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder">
-                              <div class="row m-t-md">
-                                <div class="col-sm-5">
-                                  <%= label_tag :month_select, "Choose Month" %>
-                                </div>
-                              </div>
-                              <div class="row">
-                                <div class="col-sm-5">
-                                  <div class="form-group">
-                                    <%= select_tag :month_select, options_for_select(["January","February","March","April","May","June","July","August","September","October","November","December"], Date.today.strftime("%B")), class:"form-control"  %>
+                              <div style="position:fixed; height: 100px; display: block; width: 80%; background-color: #f2f4f8;">
+                                <div class="row m-t-md">
+                                  <div class="col-sm-5">
+                                    <%= label_tag :month_select, "Choose Month" %>
                                   </div>
                                 </div>
-                                <div class="col-sm-2">
-                                  <button class="btn btn-s-md btn-primary btn-rounded disabled" id="update_menu">Changes saved</button>
-                                </div>
-                                <div class="col-sm-4">
-                                  <div id="change_notification" class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; left:0px; bottom: 0px;">
-                                    
-                                    You have unsaved changes
+                                <div class="row">
+                                  <div class="col-sm-5">
+                                    <div class="form-group">
+                                      <%= select_tag :month_select, options_for_select(["January","February","March","April","May","June","July","August","September","October","November","December"], Date.today.strftime("%B")), class:"form-control"  %>
+                                    </div>
+                                  </div>
+                                  <div class="col-sm-2">
+                                    <button class="btn btn-s-md btn-primary btn-rounded disabled" id="update_menu">Changes saved</button>
+                                  </div>
+                                  <div class="col-sm-4">
+                                    <div id="change_notification" class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; left:0px; bottom: 0px;">
+                                      
+                                      You have unsaved changes
+                                    </div>
                                   </div>
                                 </div>
                               </div>
     
-                              <table id="menu_items" class="display table table-striped m-b-none" style="font-size: 12px">
-                                <thead>
+                              <table id="menu_items" class="display table table-striped m-b-none" style="font-size: 12px;">
+                                <thead style="position:fixed; background-color: #f2f4f8; top:150px;">
                                   <tr>
                                     <th class="c1">Production Date</th>
                                     <th class="c2">Meal Type</th>
