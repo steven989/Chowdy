@@ -9,7 +9,7 @@ class ScheduledTask < ActiveRecord::Base
             sch_tasks.each do |t|
                 report.push(t.run)
             end
-            CustomerMailer.scheduled_task_report(report).deliver
+            CustomerMailer.scheduled_task_report(report).deliver if report.select {|r| r.values[0] == "fail"}.length > 0
         else
             puts "No schedueld job right now"
         end 
