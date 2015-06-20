@@ -98,7 +98,7 @@ $(function(){
                   $("#delivery_request_form input:submit").addClass("disabled");
                 } else {
                 var latlng = results[0].geometry.location;
-                  if (contains_location(latlng)) {
+                  if (contains_location(latlng)=="downtown") {
                     $('#address_match_warning strong').html("Note that the default delivery time is every <span class='text-danger-lt'>Monday and Thursday between 11am and noon</span> unless otherwise requested below.<br><br>If our courier cannot drop off the meals, they will return them to the hub, where you are welcome to pick up the meals yourself");
                     $('#address_match_warning').removeClass("hidden");
                     $("label[for='note']").html("Additional note (we cannot deliver after 5pm)")
@@ -106,20 +106,18 @@ $(function(){
                     if ($("#delivery_request_form #phone_number").val() != "" ){
                       $("#delivery_request_form input:submit").removeClass("disabled");
                     }
-                  } else {
-                    if (true) { //change the if condition to the GTA boundary when it's available
-                      $('#boundary').val("GTA");
-                      $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>11am and 3pm every Monday and Thursday in an insulated bag</span> that can stay cool for up to 8 hours");
-                      $("label[for='note']").html("Additional note")
-                      $('#address_match_warning').removeClass("hidden");
-                      if ($("#delivery_request_form #phone_number").val() != "" ){
-                        $("#delivery_request_form input:submit").removeClass("disabled");
-                      }
-                    } else {
-                      $('#address_match_warning strong').html("Your location is outside of our delivery zone");
-                      $('#address_match_warning').removeClass("hidden");
-                      $("#delivery_request_form input:submit").addClass("disabled");
+                  } else if (contains_location(latlng)=="gta") {
+                    $('#boundary').val("GTA");
+                    $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>11am and 3pm every Monday and Thursday in an insulated bag</span> that can stay cool for up to 8 hours");
+                    $("label[for='note']").html("Additional note")
+                    $('#address_match_warning').removeClass("hidden");
+                    if ($("#delivery_request_form #phone_number").val() != "" ){
+                      $("#delivery_request_form input:submit").removeClass("disabled");
                     }
+                  } else {
+                    $('#address_match_warning strong').html("Your location is outside of our delivery zone");
+                    $('#address_match_warning').removeClass("hidden");
+                    $("#delivery_request_form input:submit").addClass("disabled");                    
                   }
                 }
               }
@@ -135,6 +133,9 @@ $(function(){
 
       var gmaps_boundary_path = []
       var coordinates = <%= raw @delivery_boundary_coordinates %>
+      var gmaps_boundary_path_gta = []
+      var coordinates_gta = <%= raw @delivery_boundary_coordinates_gta %>
+
       coordinates.forEach(function(coordinate){
         gmaps_boundary_path.push(new google.maps.LatLng(coordinate.lat, coordinate.lng))
       });
@@ -142,7 +143,20 @@ $(function(){
         paths: gmaps_boundary_path
       });
 
-      return google.maps.geometry.poly.containsLocation(loc, delivery_boundary_polygon)
+      coordinates_gta.forEach(function(coordinate){
+        gmaps_boundary_path_gta.push(new google.maps.LatLng(coordinate.lat, coordinate.lng))
+      });
+      var delivery_boundary_polygon_gta = new google.maps.Polygon({
+        paths: gmaps_boundary_path_gta
+      });
+
+      if (google.maps.geometry.poly.containsLocation(loc, delivery_boundary_polygon)) {
+        return 'downtown'
+      } else if (google.maps.geometry.poly.containsLocation(loc, delivery_boundary_polygon_gta)) {
+        return 'gta'
+      } else {
+        return false
+      }
     }
 
 
