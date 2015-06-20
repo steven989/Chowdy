@@ -348,6 +348,8 @@ class UsersController < ApplicationController
             @card_brand = card.data[0].brand
             @card_last4 = card.data[0].last4
             
+            @delivery_boundary = @current_customer.delivery_boundary
+
             unless stripe_customer.subscriptions.data[0].blank?
                 current_period_end = stripe_customer.subscriptions.data[0].current_period_end
                 @next_billing_date = Time.at(current_period_end).to_datetime + 2.hours
@@ -379,6 +381,7 @@ class UsersController < ApplicationController
             @delivery_address = @current_customer.delivery_address
             @phone_number = @current_customer.phone_number
             @note = @current_customer.special_delivery_instructions
+            @delivery_boundary = @current_customer.delivery_boundary
 
             if [1,2,3,4].include? Date.today.wday
                 @earliest_pause_end_date = Chowdy::Application.closest_date(2,1)
