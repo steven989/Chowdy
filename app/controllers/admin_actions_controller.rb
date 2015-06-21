@@ -619,7 +619,7 @@ class AdminActionsController < ApplicationController
                         flash[:notice_customers] = "Pause cannot be completed: must choose an end date"  
                     end
                 else
-                    associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
                     if !end_date.blank?
                         adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
                         if [1,2,3,4].include? Date.today.wday
@@ -690,7 +690,7 @@ class AdminActionsController < ApplicationController
                     else
                         adjusted_cancel_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
                     end
-                    associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
                     if ["Yes","yes"].include? @customer.active?
                         @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                         @customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:params[:cancel_reason])
@@ -768,7 +768,7 @@ class AdminActionsController < ApplicationController
                     else
                         adjusted_restart_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
                     end
-                    associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
                     
                     if @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
                         if ((["Yes","yes"].include? @customer.active?) && (["Yes","yes"].include? @customer.paused?)) || (@customer.active?.blank? || (["No","no"].include? @customer.active?))
