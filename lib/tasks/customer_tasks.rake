@@ -11,7 +11,7 @@ namespace :customers do
     desc 'update status information for customers restarting after pause'
     task :restart_status => [:environment] do
         Customer.where(paused?: ["yes","Yes"], pause_end_date: [Chowdy::Application.closest_date(1,7), Chowdy::Application.closest_date(1,1)]).each do |customer|
-            customer.update(paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
+            customer.update(paused?:nil, pause_end_date:nil,pause_cancel_request:nil,next_pick_up_date:Chowdy::Application.closest_date(1,1))
         end
     end
 
