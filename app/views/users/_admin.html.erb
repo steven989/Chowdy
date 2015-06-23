@@ -47,7 +47,8 @@ $(function(){
        });
 
        $('#feedback').DataTable({
-        searching: false
+        searching: false,
+        order: [[1, "desc"]]
        });
 
        $('#overdue_invoice').DataTable({
