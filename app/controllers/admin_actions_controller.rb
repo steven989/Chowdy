@@ -21,21 +21,21 @@ class AdminActionsController < ApplicationController
         if params[:hub] == 'wandas'
             @location = "Wanda's"
             @location_match ='wanda'
-            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & ((monday_pickup_hub =~ '%wanda%') | (monday_delivery_hub =~ '%wanda%') | (thursday_pickup_hub =~ '%wanda%') | (thursday_delivery_hub =~ '%wanda%'))}.order("LOWER(name) asc")            
+            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%wanda%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%wanda%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%wanda%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%wanda%') & (recurring_delivery >> ["Yes","yes"])))}.order("LOWER(name) asc")            
             
         elsif params[:hub] == 'coffee_bar'
             @location = "Coffee Bar"
             @location_match ='coffee'
-            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & ((monday_pickup_hub =~ '%coffee%bar%') | (monday_delivery_hub =~ '%coffee%bar%') | (thursday_pickup_hub =~ '%coffee%bar%') | (thursday_delivery_hub =~ '%coffee%bar%'))}.order("LOWER(name) asc")
+            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%coffee%bar%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%coffee%bar%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%coffee%bar%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%coffee%bar%') & (recurring_delivery >> ["Yes","yes"])))}.order("LOWER(name) asc")
         elsif params[:hub] == 'dekefir'
             @location = "deKEFIR"
             @location_match ='dekefir'
-            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & ((monday_pickup_hub =~ '%dekefir%') | (monday_delivery_hub =~ '%dekefir%') | (thursday_pickup_hub =~ '%dekefir%') | (thursday_delivery_hub =~ '%dekefir%'))}.order("LOWER(name) asc")
+            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%dekefir%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%dekefir%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
         end
 
         @data = [] 
         @customers.each do |c|
-            @data.push({id: @id_iterate,name:c.name.titlecase,email:c.email,reg_mon: if c.monday_pickup_hub.match(/#{@location_match}/i) || c.monday_delivery_hub.match(/#{@location_match}/i); c.regular_meals_on_monday.to_i else 0 end, reg_thu: if c.thursday_pickup_hub.match(/#{@location_match}/i) || c.thursday_delivery_hub.match(/#{@location_match}/i); c.regular_meals_on_thursday.to_i else 0 end,grn_mon: if c.monday_pickup_hub.match(/#{@location_match}/i) || c.monday_delivery_hub.match(/#{@location_match}/i); c.green_meals_on_monday.to_i else 0 end, grn_thu: if c.thursday_pickup_hub.match(/#{@location_match}/i) || c.thursday_delivery_hub.match(/#{@location_match}/i); c.green_meals_on_thursday.to_i else 0 end})
+            @data.push({id: @id_iterate,name:c.name.titlecase,email:c.email,reg_mon: if ((c.monday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.monday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery)) ); c.regular_meals_on_monday.to_i else 0 end, reg_thu: if ((c.thursday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.thursday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery))); c.regular_meals_on_thursday.to_i else 0 end,grn_mon: if ((c.monday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.monday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery))); c.green_meals_on_monday.to_i else 0 end, grn_thu: if ((c.thursday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.thursday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery))); c.green_meals_on_thursday.to_i else 0 end})
             @id_iterate += 1
         end
 
