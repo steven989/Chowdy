@@ -55,12 +55,12 @@ $(function(){
 
       //retrieve
       var hash = (window.location.hash == "" || window.location.hash == "#_=_") ? "#dashboard" : window.location.hash;
-      $('#main-nav li a[href='+hash+']').tab("show");
+      $('#main-nav a[href='+hash+']').tab("show");
       $(".nav-main").find(".highlight").removeClass("highlight");
       $('#main-nav li a[href='+hash+']').parent().addClass("highlight");
 
       //navigation amongst the tabs
-      $('#main-nav li a, .link_to_settings, #logo').off("click").on("click",function(){
+      $('#main-nav a, .link_to_settings, #logo').off("click").on("click",function(){
         window.location.hash = $(this).attr("href");
         $(".nav-main").find(".highlight").removeClass("highlight");
         $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
@@ -73,6 +73,38 @@ $(function(){
       $('#subscription_change_alert').removeClass("hidden");
     };
 
+    // star rating
+
+    $('.star_rating').raty({
+      click: function() {
+        $(this).parent().children('.submit_meal_rating').removeClass('disabled');
+      }
+    });
+
+    // submit rating
+
+    $('.submit_meal_rating').off('click').on('click',function(){
+      var comment = $(this).parent().parent().find('textarea').val();
+      var rating = $(this).parent().parent().find('.star_rating').raty('score');
+      var menu_id = $(this).parent().parent().find('#menu_id').val();
+
+      _this = $(this);
+
+      $.ajax({
+        url: '<%= submit_meal_rating_path %>',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {comment:comment, rating:rating, menu_id:menu_id}
+      }).done(function(data){
+        if (data.result) {
+          _this.addClass("disabled");
+          _this.html("Rating saved");
+        } else {
+          alert("Rating could not be saved; "+data.message)
+        }
+      })
+
+    });
 
     // check delivery 
     $('#delivery_request_form input').off("change").on("change", function(){
@@ -388,6 +420,13 @@ $(function(){
                           <% end %>
                         </li>
                         <div class="text-center m-t-xl">For technical issues please email<br><a href="mailto:help@chowdy.ca" class="text-primary">help@chowdy.ca</a></div>
+                        <a href="#rate_menu"  data-toggle="tab">
+                          <div class="btn btn-s-md btn-info m-t-lg m-l-md" style="width: 82%;">
+                            <i class="fa fa-star">
+                            </i>
+                            Rate the meals
+                          </div>
+                        </a>
                     </ul>
                 </nav>
                 
@@ -990,6 +1029,229 @@ $(function(){
                         </section>
                       </section>                      
                     </section>  
+
+
+                    <section class="tab-pane" id="rate_menu" role="tabpanel">
+                      <section class="vbox">
+                        <section class="scrollable padder"> 
+                          <div class="row">
+                            <div class="col-sm-6">
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12 b-b b-2x">Meals for Monday - Wednesday (<%= (@menu_date_sunday+1.day).strftime("%b %d") %> - <%= (@menu_date_sunday+3.day).strftime("%b %d") %>)</div>
+                              </div>  
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_beef">
+                                    <div class="panel-heading no-border bg-dark">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @beef_monday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @beef_monday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_beef">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_pork">
+                                    <div class="panel-heading no-border bg-black lter">
+                                      <span class="font-bold" style="color: #FFFFFF"><%= @pork_monday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @pork_monday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_pork">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_poultry">
+                                    <div class="panel-heading no-border bg-black lter">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @poultry_monday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @poultry_monday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_poultry">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_green_1">
+                                    <div class="panel-heading no-border bg-success lter">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @green_1_monday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @green_1_monday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_green_1">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_green_2">
+                                    <div class="panel-heading no-border bg-success lter">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @green_2_monday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @green_2_monday_id ||= 0 %>
+
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_green_2">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>
+                            </div>
+                            <div class="col-sm-6">
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12 b-b b-2x">Meals for Thursday - Saturday (<%= (@menu_date_sunday+4.day).strftime("%b %d") %> - <%= (@menu_date_sunday+6.day).strftime("%b %d") %>)</div>
+                              </div>  
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_beef">
+                                    <div class="panel-heading no-border bg-dark">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @beef_thursday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @beef_thursday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_beef">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_pork">
+                                    <div class="panel-heading no-border bg-black lter">
+                                      <span class="font-bold" style="color: #FFFFFF"><%= @pork_thursday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @pork_thursday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_pork">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_poultry">
+                                    <div class="panel-heading no-border bg-black lter">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @poultry_monday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @poultry_monday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_poultry">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_green_1">
+                                    <div class="panel-heading no-border bg-success lter">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @green_1_thursday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @green_1_thursday_id ||= 0 %>
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_green_1">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>
+                              <div class="row m-t-md padder">
+                                <div class="col-sm-12">
+                                  <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_green_2">
+                                    <div class="panel-heading no-border bg-success lter">
+                                      <span class="font-bold" style="color: #FFFFFF "><%= @green_2_thursday %></span>
+                                    </div>
+                                    <div class="panel-body no-border">
+                                      Feedback for this item
+                                      <section class="scrollable bg-light lter">
+                                        <textarea rows="3" class="form-control scrollable"></textarea>
+                                        <%= hidden_field_tag 'menu_id', @green_2_thursday_id ||= 0 %>
+
+                                      </section>
+                                    </div>
+                                    <div class="clearfix panel-footer no-border">
+                                      <div class="star_rating pull-left"></div>
+                                      <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_green_2">Submit rating</div>
+                                    </div>
+                                  </section>
+                                </div>                              
+                              </div>                              
+                            </div>
+                          </div>
+                        </section>
+                      </section>                      
+                    </section>  
+
                 </section>
             </section>
         
