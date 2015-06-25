@@ -77,6 +77,7 @@ $(function(){
 
     $('.star_rating').raty({
       click: function() {
+        $(this).parent().children('.submit_meal_rating').html("Submit rating");
         $(this).parent().children('.submit_meal_rating').removeClass('disabled');
       }
     });

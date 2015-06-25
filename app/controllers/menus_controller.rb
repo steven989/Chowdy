@@ -10,6 +10,16 @@ class MenusController < ApplicationController
         end
     end
 
+    def pull_rating_details
+        menu = Menu.find(params[:id])
+        details = menu.menu_ratings.order(created_at: :desc)
+        respond_to do |format|
+          format.json {
+            render json: details.to_json
+          }
+        end
+    end
+
     def update        
         received_data = params[:data].to_a
 

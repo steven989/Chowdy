@@ -71,7 +71,7 @@
 
 
 #menu .c3 {
-    width: 20%;
+    width: 14%;
 }
 
 #menu .c9 {
@@ -80,6 +80,10 @@
 
 #menu .c8 {
     width: 15%;
+}
+
+#menu .c10, #menu .c11 {
+    width: 3%;
 }
 
 
