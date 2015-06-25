@@ -7,7 +7,7 @@
     <p>This is an ongoing meal service that automatically rebills every week, so please read the instructions bellow to make sure your subscription goes smoothly.</p>
     <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %></b></p>
     <% if @delivery %>
-        <p>You've indicated that you want delivery, please log in to your account using the link below, and put in the delivery address as soon as possible. Note that the default delivery time is every Monday and Thursday between 11am and noon.</p>
+        <p>You've indicated that you want delivery, please log in to your account using the link below, and put in the delivery address as soon as possible. Note that the default delivery time is every Monday and Thursday between 11am and noon. The delivery is $10 per drop.</p>
     <% else %>
         <p>Pick up your meals at <%= @hub %>, the store hours of this hub is <%= @op_hours %>. Just let staff know your name and you can grab your meals. That's it!</p>
     <% end %>
