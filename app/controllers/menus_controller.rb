@@ -10,6 +10,16 @@ class MenusController < ApplicationController
         end
     end
 
+    def pull_rating_details
+        menu = Menu.find(params[:id])
+        details = menu.menu_ratings.order(created_at: :desc)
+        respond_to do |format|
+          format.json {
+            render json: details.to_json
+          }
+        end
+    end
+
     def update        
         received_data = params[:data].to_a
 
@@ -26,13 +36,17 @@ class MenusController < ApplicationController
             notes = rd[:notes]
             dish = rd[:dish]
 
-            Menu.where(production_day:production_day,meal_type:meal_type).delete_all if Menu.where(production_day:production_day,meal_type:meal_type).length > 0
-            menu_item = Menu.new(production_day:production_day,meal_type:meal_type,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,dish:dish)
-            
-            if menu_item.save
-                results.push([production_day,true,nil])
+            if Menu.where(production_day:production_day,meal_type:meal_type).length > 0
+                menu_item = Menu.where(production_day:production_day,meal_type:meal_type).take
+                menu_item.update_attributes(production_day:production_day,meal_type:meal_type,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,dish:dish)
             else
-                results.push([production_day,false,menu_item.errors.full_messages.join(", ")])
+                menu_item = Menu.new(production_day:production_day,meal_type:meal_type,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,dish:dish)
+            
+                if menu_item.save
+                    results.push([production_day,true,nil])
+                else
+                    results.push([production_day,false,menu_item.errors.full_messages.join(", ")])
+                end
             end
         end
 

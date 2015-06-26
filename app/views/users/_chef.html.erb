@@ -1,6 +1,8 @@
 <script>
 
+var test
 $(function(){
+
 
     //URL segment
 
@@ -17,6 +19,23 @@ $(function(){
         $(".nav-main").find('a[href="'+$(this).attr("href")+'"]').parent().addClass("highlight");
       });
 
+      function loadRatingDetails() {
+        $('.load_rating_details').off('click').on('click',function(){
+          event.preventDefault();
+          $.ajax({
+            url: $(this).attr('href'),
+            type: 'GET',
+            dataType: 'JSON'
+          }).done(function(data){
+            data.forEach(function(e){
+              $('#rating_details_table tbody').html('')
+              $('#rating_details_table tbody').append('<tr><td>'+e.created_at+'</td><td>'+e.rating+'</td><td>'+e.comment+'</td></tr>')
+            });
+            $('#ratingDetailsModal').modal();
+          })
+        });
+      }
+
       var month_array = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
       function generate_menu_table() {
@@ -32,7 +51,7 @@ $(function(){
             type: 'GET',
             dataType: 'JSON'
           }).done(function(data){
-
+              test = data;
                 // get the first and last dates of the month
                 var first_of_month = new Date(current_year,month_value, 1);
                 var last_of_month = new Date(current_year,month_value+1, 0);
@@ -66,6 +85,7 @@ $(function(){
                       var production_day_dom = d.formatDate();
                       var matched_result = data.filter(function(d){return (d.production_day == production_day_dom) && (d.meal_type == e)})
 
+                      var id = matched_result.length == 1 ? matched_result[0].id : 0 ;
                       var meal_name = matched_result.length == 1 ? matched_result[0].meal_name : "" ;
                       var protein = matched_result.length == 1 ? matched_result[0].protein : "" ;
                       var carb = matched_result.length == 1 ? matched_result[0].carb : "" ;
@@ -74,11 +94,13 @@ $(function(){
                       var notes = matched_result.length == 1 ? matched_result[0].notes : "" ;
                       var dish = matched_result.length == 1 ? matched_result[0].dish : false ;
                       var dish_check = dish ? "checked" : "";
+                      var average_score = matched_result.length == 1 ? (matched_result[0].average_score == null ? "" : matched_result[0].average_score) : "" ;
+                      var number_of_scores = matched_result.length == 1 ? (matched_result[0].number_of_scores == null ? "" : matched_result[0].number_of_scores) : "" ;
 
-                      $('#menu_items tbody').append("</tr><tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td></tr>")
+                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
                     
                     });
-                    $('#menu_items tbody').append("<tr><td colspan='9' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
+                    $('#menu_items tbody').append("<tr><td colspan='11' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
                 });
 
                 $('#menu_items').editableTableWidget();
@@ -90,12 +112,14 @@ $(function(){
 
                 });
 
+                loadRatingDetails();
           });
 
         }
 
 
         generate_menu_table();
+        
 
 
         function submit_menu_table_value() {
@@ -222,6 +246,8 @@ $(function(){
                                     <th class="c7">Extra/Garnish</th>
                                     <th class="c8">Additional Notes</th>
                                     <th class="c9">Dish?</th>
+                                    <th class="c10">Rating</th>
+                                    <th class="c11"># Rated</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -238,8 +264,8 @@ $(function(){
 </section>
 
 
-<!-- Form modal -->
-<div class="modal fade" id="submitErrorModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
+<!-- Submit error modal -->
+<div class="modal fade" id="submitErrorModal" tabindex="-1" role="dialog" aria-labelledby="submitErrorModal" aria-hidden="true" style="z-index: 10000;">
   <div class="modal-dialog">
       <div class="modal-content">
           <div class="modal-header">
@@ -247,6 +273,34 @@ $(function(){
             <h4 class="modal-title" id="myModalLabel">Error</h4>
           </div>
           <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Rating details modal -->
+<div class="modal fade" id="ratingDetailsModal" tabindex="-1" role="dialog" aria-labelledby="ratingDetailsModal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Rating details</h4>
+          </div>
+          <div class="modal-body">
+            <table id="rating_details_table" class="display table table-striped m-b-none" style="font-size: 12px;">
+              <thead>
+                <tr>
+                  <th >Date</th>
+                  <th >Rating</th>
+                  <th >Comment</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

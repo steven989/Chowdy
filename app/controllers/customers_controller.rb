@@ -22,6 +22,34 @@ protect_from_forgery :except => :payment
 
     end
 
+    def rate_menu_item
+        current_customer = current_user.customer
+        menu_id = params[:menu_id].to_i
+        comment = params[:comment]
+        rating = params[:rating].to_i
+
+
+        respond_to do |format| 
+            format.json {
+                if params[:rating].blank?
+                    render json: {result: false, message: "Rating cannot be blank"}
+                else
+                    menu = Menu.find(menu_id)
+                    menu.menu_ratings.delete_all
+                    rating_obj = menu.menu_ratings.new(comment:comment,rating:rating,stripe_customer_id:current_customer.stripe_customer_id)
+                    if rating_obj.save
+                        number_of_ratings = menu.menu_ratings.length
+                        average_rating = menu.menu_ratings.sum(:rating).to_f/menu.menu_ratings.length.to_f
+                        menu.update_attributes(average_score:average_rating,number_of_scores:number_of_ratings)
+                        render json: {result: true, message: "Rating saved"}
+                    else
+                        render json: {result: false, message: rating_obj.errors.full_messages.join(", ")}
+                    end
+                end
+            }
+        end
+    end
+
     def create_profile
         customer = Customer.where(stripe_customer_id:params[:id]).take
         if customer

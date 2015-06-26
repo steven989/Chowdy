@@ -1,4 +1,11 @@
 GIT
+  remote: git://github.com/bmc/jquery-raty-rails.git
+  revision: f362f17c0ff3ac039ab05b5e48e5db24a27794b3
+  specs:
+    jquery-raty-rails (0.0.1)
+      rails (>= 3.2.3)
+
+GIT
   remote: https://github.com/stripe/stripe-ruby
   revision: 782a596c8f01060d22b44151e9dbd60a8ef138d6
   specs:
@@ -206,6 +213,7 @@ DEPENDENCIES
   hirb
   jbuilder (~> 1.2)
   jquery-rails
+  jquery-raty-rails!
   newrelic_rpm
   pg
   puma

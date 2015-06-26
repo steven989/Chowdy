@@ -15,5 +15,6 @@
 //= require turbolinks
 //= require_tree .
 //= require_tree ../../../vendor/assets/javascripts/.
+//= require jquery.raty
 
 

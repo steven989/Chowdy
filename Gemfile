@@ -76,6 +76,8 @@ gem 'delayed_job_active_record'
 #13) link shortener
 gem 'shortener'
 
+#14) jQuery rating
+gem 'jquery-raty-rails', github: 'bmc/jquery-raty-rails'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
