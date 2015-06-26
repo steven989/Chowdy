@@ -172,18 +172,18 @@ class UsersController < ApplicationController
             @menu_date_sunday = Date.today.wday == 0 ? Chowdy::Application.closest_date(-2,7) : Chowdy::Application.closest_date(-1,7)
             @menu_date_wednesday = Chowdy::Application.closest_date(1,3,@menu_date_sunday)
 
-            @beef_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").take.meal_name+" (beef)" unless Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").blank?
-            @pork_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").take.meal_name+" (pork)" unless Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").blank?
-            @poultry_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Poultry").take.meal_name+" (poultry)" unless Menu.where(production_day:@menu_date_sunday, meal_type:"Poultry").blank?
-            @green_1_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Green 1").take.meal_name+" (green)" unless Menu.where(production_day:@menu_date_sunday, meal_type:"Green 1").blank?
-            @green_2_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").take.meal_name+" (green)" unless Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").blank?
+            @beef_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").blank?
+            @pork_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").blank?
+            @poultry_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Poultry").blank?
+            @green_1_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Green 1").blank?
+            @green_2_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").blank?
 
 
-            @beef_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").take.meal_name+" (beef)" unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").blank?
-            @pork_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").take.meal_name+" (pork)" unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").blank?
-            @poultry_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Poultry").take.meal_name+" (poultry)" unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Poultry").blank?
-            @green_1_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").take.meal_name+" (green)" unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").blank?
-            @green_2_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").take.meal_name+" (green)" unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").blank?
+            @beef_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").blank?
+            @pork_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").blank?
+            @poultry_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Poultry").blank?
+            @green_1_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").blank?
+            @green_2_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").blank?
 
             @beef_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").blank?
             @pork_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").blank?

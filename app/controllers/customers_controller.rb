@@ -35,12 +35,10 @@ protect_from_forgery :except => :payment
                     render json: {result: false, message: "Rating cannot be blank"}
                 else
                     menu = Menu.find(menu_id)
-                    menu.menu_ratings.delete_all
+                    menu.menu_ratings.where(stripe_customer_id: current_customer.stripe_customer_id).delete_all
                     rating_obj = menu.menu_ratings.new(comment:comment,rating:rating,stripe_customer_id:current_customer.stripe_customer_id)
                     if rating_obj.save
-                        number_of_ratings = menu.menu_ratings.length
-                        average_rating = menu.menu_ratings.sum(:rating).to_f/menu.menu_ratings.length.to_f
-                        menu.update_attributes(average_score:average_rating,number_of_scores:number_of_ratings)
+                        menu.delay.refresh_rating
                         render json: {result: true, message: "Rating saved"}
                     else
                         render json: {result: false, message: rating_obj.errors.full_messages.join(", ")}
