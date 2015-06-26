@@ -21,12 +21,17 @@ $(function(){
 
       function loadRatingDetails() {
         $('.load_rating_details').off('click').on('click',function(){
+          event.preventDefault();
           $.ajax({
             url: $(this).attr('href'),
             type: 'GET',
             dataType: 'JSON'
           }).done(function(data){
-            console.log(data);
+            data.forEach(function(e){
+              $('#rating_details_table tbody').html('')
+              $('#rating_details_table tbody').append('<tr><td>'+e.created_at+'</td><td>'+e.rating+'</td><td>'+e.comment+'</td></tr>')
+            });
+            $('#ratingDetailsModal').modal();
           })
         });
       }
@@ -92,7 +97,7 @@ $(function(){
                       var average_score = matched_result.length == 1 ? (matched_result[0].average_score == null ? "" : matched_result[0].average_score) : "" ;
                       var number_of_scores = matched_result.length == 1 ? (matched_result[0].number_of_scores == null ? "" : matched_result[0].number_of_scores) : "" ;
 
-                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c10'><button href='/menu/"+id+"/pull_rating_details' class='load_rating_details'>"+average_score+"</button></td><td class='disable_editable c11'>"+number_of_scores+"</td></tr>")
+                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
                     
                     });
                     $('#menu_items tbody').append("<tr><td colspan='11' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
@@ -285,6 +290,17 @@ $(function(){
             <h4 class="modal-title" id="myModalLabel">Rating details</h4>
           </div>
           <div class="modal-body">
+            <table id="rating_details_table" class="display table table-striped m-b-none" style="font-size: 12px;">
+              <thead>
+                <tr>
+                  <th >Date</th>
+                  <th >Rating</th>
+                  <th >Comment</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
