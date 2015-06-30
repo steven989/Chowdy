@@ -5,7 +5,7 @@ class PromotionRedemptionsController < ApplicationController
         
         check_result = PromotionRedemption.check_eligibility(current_customer,params[:promo_code])
         if check_result[:result]
-            PromotionRedemption.delay.redeem(current_customer,params[:promo_code])
+            PromotionRedemption.redeem(current_customer,params[:promo_code])
             flash[:status] = check_result[:result] ? "success" : "fail"
             flash[:notice_referral] = check_result[:message]
         else

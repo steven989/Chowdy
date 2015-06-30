@@ -223,8 +223,20 @@ class Customer < ActiveRecord::Base
                                     puts '---------------------------------------------------'
                                     CustomerMailer.rescued_error(customer,"Refund cannot be completed: "+error.message).deliver
                                 else
-                                    PromotionRedemption.create(stripe_customer_id:customer.stripe_customer_id,promotion_id:promotion.id)
-                                    newly_created_refund = Refund.new(stripe_customer_id: customer.stripe_customer_id, refund_week:StartDate.first.start_date, charge_week:Date.today,charge_id:charge_id, meals_refunded: nil, amount_refunded: promotion.amount_in_cents, refund_reason: "Promo code: #{promotion.code}", stripe_refund_id: stripe_refund_response.id)
+                                    begin
+                                        PromotionRedemption.create(stripe_customer_id:customer.stripe_customer_id,promotion_id:promotion.id)
+                                        newly_created_refund = Refund.create(stripe_customer_id: customer.stripe_customer_id, refund_week:StartDate.first.start_date, charge_week:Date.today,charge_id:charge_id, meals_refunded: nil, amount_refunded: promotion.amount_in_cents, refund_reason: "Promo code: #{promotion.code}", stripe_refund_id: stripe_refund_response.id)
+                                        newly_created_refund.internal_refund_id = newly_created_refund.id
+                                        newly_created_refund.save
+                                    rescue => error
+                                        puts '---------------------------------------------------'
+                                        puts "Refund cannot be recorded"
+                                        puts error.message
+                                        puts '---------------------------------------------------'
+                                        CustomerMailer.rescued_error(customer,"Refund cannot be recorded: "+error.message).deliver
+                                    else
+                                        puts "no issue"
+                                    end
                                 end
                             else 
                                 stripe_subscription.coupon = promotion.stripe_coupon_id

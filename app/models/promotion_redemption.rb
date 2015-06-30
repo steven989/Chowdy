@@ -51,11 +51,20 @@ class PromotionRedemption < ActiveRecord::Base
                     end
                 end
 
+                refund_week = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+                internal_refund_id = nil
                 refund_list.each do |refund_li|
                     charge_id = refund_li.keys[0].to_s
                     list_refund_amount = refund_li.values[0]
                     charge = Stripe::Charge.retrieve(charge_id)
-                    charge.refunds.create(amount:list_refund_amount) 
+
+                    if stripe_refund_response = charge.refunds.create(amount:list_refund_amount) 
+                        newly_created_refund = Refund.create(stripe_customer_id: customer.stripe_customer_id, refund_week:refund_week, charge_week:Time.at(charge.created).to_date,charge_id: charge.id, meals_refunded:nil, amount_refunded: list_refund_amount, refund_reason: "Promo code: #{promotion.code}", stripe_refund_id: stripe_refund_response.id)
+                        newly_created_refund.internal_refund_id = internal_refund_id.nil? ? newly_created_refund.id : internal_refund_id
+                        if newly_created_refund.save
+                            internal_refund_id ||= newly_created_refund.id
+                        end
+                    end   
                 end
 
                 promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
