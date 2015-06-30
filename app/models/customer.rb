@@ -215,7 +215,7 @@ class Customer < ActiveRecord::Base
                                 begin 
                                     charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
                                     charge = Stripe::Charge.retrieve(charge_id)
-                                    charge.refunds.create(amount: promotion.amount_in_cents)
+                                    stripe_refund_response = charge.refunds.create(amount: promotion.amount_in_cents)
                                 rescue => error
                                     puts '---------------------------------------------------'
                                     puts "Refund cannot be completed"
@@ -224,6 +224,7 @@ class Customer < ActiveRecord::Base
                                     CustomerMailer.rescued_error(customer,"Refund cannot be completed: "+error.message).deliver
                                 else
                                     PromotionRedemption.create(stripe_customer_id:customer.stripe_customer_id,promotion_id:promotion.id)
+                                    newly_created_refund = Refund.new(stripe_customer_id: customer.stripe_customer_id, refund_week:StartDate.first.start_date, charge_week:Date.today,charge_id:charge_id, meals_refunded: nil, amount_refunded: promotion.amount_in_cents, refund_reason: "Promo code: #{promotion.code}", stripe_refund_id: stripe_refund_response.id)
                                 end
                             else 
                                 stripe_subscription.coupon = promotion.stripe_coupon_id

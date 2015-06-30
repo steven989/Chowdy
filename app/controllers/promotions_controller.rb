@@ -117,7 +117,7 @@ class PromotionsController < ApplicationController
   private
 
   def promotion_params
-    params.require(:promotion).permit(:start_date,:end_date,:code,:stripe_coupon_id,:immediate_refund,:amount_in_cents)
+    params.require(:promotion).permit(:start_date,:end_date,:code,:stripe_coupon_id,:immediate_refund,:amount_in_cents,:new_customer_only)
   end
 
 

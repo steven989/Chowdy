@@ -385,7 +385,7 @@ class AdminActionsController < ApplicationController
                         list_refund_amount = refund_li.values[0]
                         charge = Stripe::Charge.retrieve(charge_id)
                         if stripe_refund_response = charge.refunds.create(amount:list_refund_amount) 
-                            newly_created_refund = Refund.create(stripe_customer_id: @customer.stripe_customer_id, refund_week:refund_week, charge_week:Time.at(charge.created).to_date,charge_id: charge.id, meals_refunded:params[:refund][:meals_refunded].to_i, amount_refunded: list_refund_amount, refund_reason: params[:refund][:refund_reason], stripe_refund_id: stripe_refund_response.id)
+                            newly_created_refund = Refund.new(stripe_customer_id: @customer.stripe_customer_id, refund_week:refund_week, charge_week:Time.at(charge.created).to_date,charge_id: charge.id, meals_refunded:params[:refund][:meals_refunded].to_i, amount_refunded: list_refund_amount, refund_reason: params[:refund][:refund_reason], stripe_refund_id: stripe_refund_response.id)
                             newly_created_refund.internal_refund_id = internal_refund_id.nil? ? newly_created_refund.id : internal_refund_id
                             if newly_created_refund.save
                                 internal_refund_id ||= newly_created_refund.id

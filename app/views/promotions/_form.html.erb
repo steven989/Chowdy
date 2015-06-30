@@ -15,10 +15,12 @@
     </div>
     <% end %>
     <div class="form-group">
-
       <%= f.label :immediate_refund %>
       <%= f.check_box :immediate_refund, class: "form-control" %>
-
+    </div>
+    <div class="form-group">
+      <%= f.label :new_customer_only %>
+      <%= f.check_box :new_customer_only, class: "form-control" %>
     </div>
   </div>
   <div class="modal-footer">

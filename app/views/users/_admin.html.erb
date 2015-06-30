@@ -768,6 +768,7 @@ $(function(){
                                           <th>Redeption Code</th>
                                           <th>Stripe Coupon ID</th>
                                           <th>Immediate Refund?</th>
+                                          <th>New Customer Only?</th>
                                           <th>Number of Redeptions</th>
                                           <th>Edit</th>
                                           <th>Start/Stop Promotion</th>
@@ -785,6 +786,7 @@ $(function(){
                                             <td><%= p.code %></td>
                                             <td><%= p.stripe_coupon_id %></td>
                                             <td><%= p.immediate_refund %></td>
+                                            <td><%= p.new_customer_only %></td>
                                             <td><%= p.promotion_redemptions.length %></td>
                                             <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_promotion_path(p) %>" style="min-width: 0px;width: 60px;">Edit</button></td>
                                             <% @coupon_activate_button = p.active ? "Stop" : "Start" %>

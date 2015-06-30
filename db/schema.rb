@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150625223439) do
+ActiveRecord::Schema.define(version: 20150630144054) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -196,8 +196,8 @@ ActiveRecord::Schema.define(version: 20150625223439) do
   create_table "promotions", force: :cascade do |t|
     t.date     "start_date"
     t.date     "end_date"
-    t.string   "code",             limit: 255
-    t.string   "stripe_coupon_id", limit: 255
+    t.string   "code",              limit: 255
+    t.string   "stripe_coupon_id",  limit: 255
     t.boolean  "immediate_refund"
     t.boolean  "active"
     t.integer  "redemptions"
@@ -205,6 +205,7 @@ ActiveRecord::Schema.define(version: 20150625223439) do
     t.datetime "updated_at"
     t.integer  "amount_in_cents"
     t.boolean  "pause"
+    t.boolean  "new_customer_only"
   end
 
   create_table "refunds", force: :cascade do |t|

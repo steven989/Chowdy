@@ -12,6 +12,8 @@ class PromotionRedemption < ActiveRecord::Base
                 promotion = Promotion.where(code:promo_code, active:true).take
                 if customer.promotion_redemptions.map {|pr| pr.promotion_id}.include? promotion.id
                     {result:false, message:'You already applied this promo code'}
+                elsif (promotion.new_customer_only) && ((customer.created_at) < (14.days.ago))
+                    {result:false, message:'This promo is available to new customers only'}
                 else
                     if (["No","no",nil].include? customer.active?) || (customer.stripe_subscription_id.blank?)
                         {result:false, message:'Promo code cannot be applied as you do not current have an active subscription'}
