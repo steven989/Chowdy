@@ -579,7 +579,7 @@ class AdminActionsController < ApplicationController
                 if params[:immediate_effect] == "1"
                     if !end_date.blank?
                         begin
-                            adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                            adjusted_pause_end_date = end_date.wday == 1 ? end_date : Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
                             if @customer.stripe_subscription_id.blank?
                                 @customer.update(paused?:"yes", pause_end_date:adjusted_pause_end_date-1, next_pick_up_date:adjusted_pause_end_date)
                                 @customer.stop_requests.create(request_type:'pause',start_date:Date.today, end_date:adjusted_pause_end_date-1, requested_date: Date.today)
