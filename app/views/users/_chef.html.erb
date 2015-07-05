@@ -1,6 +1,5 @@
 <script>
 
-var test
 $(function(){
 
 
@@ -27,8 +26,8 @@ $(function(){
             type: 'GET',
             dataType: 'JSON'
           }).done(function(data){
+            $('#rating_details_table tbody').html('');
             data.forEach(function(e){
-              $('#rating_details_table tbody').html('')
               $('#rating_details_table tbody').append('<tr><td>'+e.created_at+'</td><td>'+e.rating+'</td><td>'+e.comment+'</td></tr>')
             });
             $('#ratingDetailsModal').modal();
