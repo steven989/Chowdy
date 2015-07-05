@@ -91,7 +91,4 @@ class PromotionRedemption < ActiveRecord::Base
 
     end
 
-
-
-
 end

@@ -96,6 +96,17 @@ class CustomerMailer < ActionMailer::Base
     end    
   end
 
+  def urgent_stop_delivery_notice(customer,type)
+    @customer = customer
+    @type = type
+    mail(
+      to: "steven989@gmail.com",
+      subject: 'Change delivery request received'
+      ) do |format|
+        format.text
+    end    
+  end
+
   def failed_invoice(invoice)
     @customer = invoice.customer
     @name = invoice.customer.name.split(/\s/)[0].capitalize

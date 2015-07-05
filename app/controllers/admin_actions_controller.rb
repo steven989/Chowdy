@@ -216,6 +216,7 @@ class AdminActionsController < ApplicationController
                 @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
                 if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
+                    CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Meal preference has changed")
                 end
                 # -------------------------------------------------
             rescue => error
@@ -344,6 +345,7 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Delivery cannot be turned off: #{@customer.errors.full_messages.join(", ")}"
                 end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Stop Delivery")
+                CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Stop Delivery")
             else
                 @customer.update_attributes(recurring_delivery: "yes")
                 @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
@@ -357,6 +359,7 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Delivery turned on"
                 end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Start Delivery")
+                CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Start Delivery")
             end
         elsif params[:todo] == "refund"
             recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end

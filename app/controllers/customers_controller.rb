@@ -212,6 +212,7 @@ protect_from_forgery :except => :payment
             
             if _current_delivery
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Change delivery info")
+                CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Change delivery info")
             else
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Start Delivery")
             end
@@ -219,6 +220,7 @@ protect_from_forgery :except => :payment
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery:nil)
             CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
+            CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 
             current_customer.update_attributes(name:params[:name])
@@ -271,6 +273,7 @@ protect_from_forgery :except => :payment
             current_customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
             if (["Yes","yes"].include? current_customer.recurring_delivery) && (send_notification)
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal preference has changed")
+                CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal preference has changed")
             end
 
             redirect_to user_profile_path+"#changePlan"
