@@ -153,5 +153,49 @@ class CustomerMailer < ActionMailer::Base
     end 
   end
 
+  def send_customer_list
+        current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+
+        hub_array = ['wandas','coffee_bar','dekefir']
+        hub_array.each do |hub|
+            @id_iterate = 1
+            if hub == 'wandas'
+                @location = "Wanda's"
+                @location_match ='wanda'
+                @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%wanda%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%wanda%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%wanda%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%wanda%') & (recurring_delivery >> ["Yes","yes"])))}.order("LOWER(name) asc")            
+                
+            elsif hub == 'coffee_bar'
+                @location = "Coffee Bar"
+                @location_match ='coffee'
+                @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%coffee%bar%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%coffee%bar%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%coffee%bar%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%coffee%bar%') & (recurring_delivery >> ["Yes","yes"])))}.order("LOWER(name) asc")
+            elsif hub == 'dekefir'
+                @location = "deKEFIR"
+                @location_match ='dekefir'
+                @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%dekefir%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%dekefir%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
+            end
+
+            @data = [] 
+            @customers.each do |c|
+                @data.push({id: @id_iterate,name:c.name.titlecase,email:c.email,reg_mon: if ((c.monday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.monday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery)) ); c.regular_meals_on_monday.to_i else 0 end, reg_thu: if ((c.thursday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.thursday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery))); c.regular_meals_on_thursday.to_i else 0 end,grn_mon: if ((c.monday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.monday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery))); c.green_meals_on_monday.to_i else 0 end, grn_thu: if ((c.thursday_pickup_hub.match(/#{@location_match}/i)) && (!["Yes","yes"].include?(c.recurring_delivery))) || ((c.thursday_delivery_hub.match(/#{@location_match}/i)) && (["Yes","yes"].include?(c.recurring_delivery))); c.green_meals_on_thursday.to_i else 0 end})
+                @id_iterate += 1
+            end
+
+            if @data.blank?
+                attachments["customer_sheet_#{hub}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"] = CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]}
+            else 
+                attachments["customer_sheet_#{hub}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"] = CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}
+            end
+
+        end
+
+        mail(
+          to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value, 
+          subject: 'Customer list for this week'
+          ) do |format|
+            format.text
+        end 
+
+  end
+
 
 end

@@ -257,4 +257,9 @@ namespace :app do
         DailySnapshot.take_snapshot
     end 
 
+    desc 'Email the customer as is to the admin'
+    task :email_customer_list => [:environment] do 
+        CustomerMailer.delay.send_customer_list
+    end     
+
 end
