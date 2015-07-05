@@ -658,7 +658,7 @@ $(function(){
                                       <tbody>
                                         <% @feedback.each do |f| %>
                                           <tr>
-                                            <td><%= f.customer.name %></td>
+                                            <td><%= f.customer.nil? ? f.stripe_customer_id : f.customer.name %></td>
                                             <td><%= f.created_at.strftime("%Y-%m-%d") %></td>
                                             <td><%= f.occasion %></td>
                                             <td><%= f.feedback %></td>
