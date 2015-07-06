@@ -5,7 +5,7 @@ This is just a heads up that your Chowdy charges was declined. Our system will a
 <% if  @customer.created_at < "2015-06-12 04:00:00 EDT".to_datetime %>
 If there's a new credit card you'd like to use, simply use our regular sign up page (http://chowdy.ca/signup) to input your new card, and we will update your account in the backend.
 <% else %>
-If there's a new credit card you'd like to use, simply login to your account (<%= link_to login_url %>) and update the card there.
+If there's a new credit card you'd like to use, simply login to your account (<%= login_url %>) and update the card there.
 <% end %>
 
 Thanks,
