@@ -94,11 +94,13 @@
 
     #customer_sheet {
         page-break-inside:auto;
+        position: relative;
     }
 
     #customer_sheet tr, #customer_sheet td {
         page-break-inside:avoid; 
         page-break-after:auto;
+        position: relative;
     }
 
 }
