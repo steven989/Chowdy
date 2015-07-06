@@ -54,9 +54,9 @@
                     <section class="row">
                       <div class="col-sm-12">
                         <div class="panel panel-default">
-                          <table id="customer_sheet" class="display table m-b-none text-center" style="font-size: 12px">
+                          <table id="customer_sheet" class="display table m-b-none text-center" style="font-size: 12px; page-break-inside:auto;">
                             <thead>
-                              <tr>
+                              <tr style="page-break-inside:avoid; page-break-after:auto;">
                                 <th style="padding-bottom: 0; padding-top: 0;"></th>
                                 <th style="padding-bottom: 0; padding-top: 0;"></th>
                                 <th class="b-r" style="padding-bottom: 0; padding-top: 0;"></th>
@@ -76,7 +76,7 @@
                             <tbody>
 
                               <% @data.each do |d| %>
-                                <tr>
+                                <tr  style="page-break-inside:avoid; page-break-after:auto;" >
                                   <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:id] %></td>
                                   <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:name] %></td>
                                   <td class="b-r" style="padding-bottom: 0; padding-top: 0;"><%= d[:email] %></td>
