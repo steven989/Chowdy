@@ -125,7 +125,7 @@ $(function(){
         function submit_menu_table_value() {
           var output_json = [];
           $('#menu_items tbody').children().filter(function(c){return $(this).hasClass("hasData")}).each(function(index){
-            output_json.push({production_day:$(this).children().eq(0).html(), meal_type:$(this).children().eq(1).html(), meal_name:$(this).children().eq(2).html(), protein:$(this).children().eq(3).html(), carb:$(this).children().eq(4).html(), veggie:$(this).children().eq(5).html(), extra:$(this).children().eq(6).html(), notes:$(this).children().eq(7).html(), dish:$(this).children().eq(8).children().eq(0).is(':checked')})
+            output_json.push({production_day:$(this).children().eq(0).html(), meal_type:$(this).children().eq(1).html(),meal_count:$(this).children().eq(2).html(), meal_name:$(this).children().eq(3).html(), protein:$(this).children().eq(4).html(), carb:$(this).children().eq(5).html(), veggie:$(this).children().eq(6).html(), extra:$(this).children().eq(7).html(), notes:$(this).children().eq(8).html(), dish:$(this).children().eq(9).children().eq(0).is(':checked')})
           });
 
             $.ajax({
