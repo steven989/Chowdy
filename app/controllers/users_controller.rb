@@ -20,6 +20,7 @@ class UsersController < ApplicationController
         @current_user = current_user
 
         if @current_user.role == "admin"
+            current_user.log_activity("admin dashboard")
             current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
             active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
             @current_customers_count = MealStatistic.retrieve("total_customer")
@@ -166,9 +167,10 @@ class UsersController < ApplicationController
             @all_customers = Customer.all.order(created_at: :desc)
 
         elsif @current_user.role == "chef"
+            current_user.log_activity("chef dashboard")
             @menu = Menu.all.order(production_day: :asc)
         else
-
+            current_user.log_activity("user accessing dashboard")
             @menu_date_sunday = Date.today.wday == 0 ? Chowdy::Application.closest_date(-2,7) : Chowdy::Application.closest_date(-1,7)
             @menu_date_wednesday = Chowdy::Application.closest_date(1,3,@menu_date_sunday)
 

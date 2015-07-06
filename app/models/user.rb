@@ -7,12 +7,20 @@ class User < ActiveRecord::Base
 
   validates :email, uniqueness: true
 
+  has_many :user_activities
+
   authenticates_with_sorcery! do |config|
     config.authentications_class = Authentication
   end
 
   has_many :authentications, :dependent => :destroy
   accepts_nested_attributes_for :authentications
+
+
+  def log_activity(type)
+    self.user_activities.create(activity_type:type)
+  end
+
 
   private
   def new_user?
