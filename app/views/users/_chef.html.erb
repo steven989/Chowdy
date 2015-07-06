@@ -85,6 +85,7 @@ $(function(){
                       var matched_result = data.filter(function(d){return (d.production_day == production_day_dom) && (d.meal_type == e)})
 
                       var id = matched_result.length == 1 ? matched_result[0].id : 0 ;
+                      var meal_count = matched_result.length == 1 ? (matched_result[0].meal_count == null ? "" : matched_result[0].meal_count) : "" ;
                       var meal_name = matched_result.length == 1 ? matched_result[0].meal_name : "" ;
                       var protein = matched_result.length == 1 ? matched_result[0].protein : "" ;
                       var carb = matched_result.length == 1 ? matched_result[0].carb : "" ;
@@ -96,10 +97,10 @@ $(function(){
                       var average_score = matched_result.length == 1 ? (matched_result[0].average_score == null ? "" : matched_result[0].average_score) : "" ;
                       var number_of_scores = matched_result.length == 1 ? (matched_result[0].number_of_scores == null ? "" : matched_result[0].number_of_scores) : "" ;
 
-                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c2'>"+e+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
+                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c9'>"+e+"</td><td class='c9'>"+meal_count+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
                     
                     });
-                    $('#menu_items tbody').append("<tr><td colspan='11' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
+                    $('#menu_items tbody').append("<tr><td colspan='12' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
                 });
 
                 $('#menu_items').editableTableWidget();
@@ -236,17 +237,18 @@ $(function(){
                               <table id="menu_items" class="display table table-striped m-b-none" style="font-size: 12px;">
                                 <thead style="position:fixed; background-color: #f2f4f8; top:150px;">
                                   <tr>
-                                    <th class="c1">Production Date</th>
-                                    <th class="c2">Meal Type</th>
-                                    <th class="c3">Meal Name</th>
-                                    <th class="c4">Protein</th>
-                                    <th class="c5">Carbs</th>
-                                    <th class="c6">Veggies</th>
-                                    <th class="c7">Extra/Garnish</th>
-                                    <th class="c8">Additional Notes</th>
-                                    <th class="c9">Dish?</th>
-                                    <th class="c10">Rating</th>
-                                    <th class="c11"># Rated</th>
+                                    <th class="c1 text-center">Production Date</th>
+                                    <th class="c9 text-center">Meal Type</th>
+                                    <th class="c9 text-center">#</th>
+                                    <th class="c3 text-center">Meal Name</th>
+                                    <th class="c4 text-center">Protein</th>
+                                    <th class="c5 text-center">Carbs</th>
+                                    <th class="c6 text-center">Veggies</th>
+                                    <th class="c7 text-center">Extra/Garnish</th>
+                                    <th class="c8 text-center">Additional Notes</th>
+                                    <th class="c9 text-center">Dish?</th>
+                                    <th class="c10 text-center">Rating</th>
+                                    <th class="c11 text-center"># Rated</th>
                                   </tr>
                                 </thead>
                                 <tbody>
