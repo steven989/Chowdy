@@ -192,9 +192,9 @@ class CustomerMailer < ActionMailer::Base
             end
 
             if @data.blank?
-                attachments["customer_sheet_#{hub}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"] = CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]}
+                attachments["customer_sheet_#{hub}_#{current_pick_up_date.strftime("%Y_%m_%d")}.csv"] = CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]}
             else 
-                attachments["customer_sheet_#{hub}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"] = CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}
+                attachments["customer_sheet_#{hub}_#{current_pick_up_date.strftime("%Y_%m_%d")}.csv"] = CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}
             end
 
         end

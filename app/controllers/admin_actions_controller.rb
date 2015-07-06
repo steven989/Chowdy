@@ -42,12 +42,12 @@ class AdminActionsController < ApplicationController
         respond_to do |format|
             format.html
             format.csv { 
-                disposition = "attachment; filename='customer_sheet_#{params[:hub]}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
+                disposition = "attachment; filename='customer_sheet_#{params[:hub]}_#{current_pick_up_date.strftime("%Y_%m_%d")}.csv'"
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "customer_sheet_#{params[:hub]}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << ["id","name","email","reg_mon","reg_thu","grn_mon","grn_thu"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "customer_sheet_#{params[:hub]}_#{current_pick_up_date.strftime("%Y_%m_%d")}.csv"
                 else 
-                    send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "customer_sheet_#{params[:hub]}_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "customer_sheet_#{params[:hub]}_#{current_pick_up_date.strftime("%Y_%m_%d")}.csv"
                 end
             }
         end
