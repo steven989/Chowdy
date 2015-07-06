@@ -88,11 +88,19 @@
 }
 
 @media print {
-
-
     #customer_sheet .green_background {
         background-color: #D4DDCB !important;
     }
+
+    #customer_sheet {
+        page-break-inside:auto;
+    }
+
+    #customer_sheet tr, #customer_sheet td {
+        page-break-inside:avoid; 
+        page-break-after:auto;
+    }
+
 }
 
 
