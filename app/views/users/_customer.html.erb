@@ -106,8 +106,15 @@ $(function(){
         data: {comment:comment, rating:rating, menu_id:menu_id}
       }).done(function(data){
         if (data.result) {
-          _this.addClass("disabled");
-          _this.html("Rating saved");
+          var elm = _this.closest('.menu_card');
+          if (elm.hasClass('fade_left')) {
+            elm.addClass('fadeOutLeft');  
+          } else if (elm.hasClass('fade_right')) {
+            elm.addClass('fadeOutRight');  
+          }
+          elm.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function(){
+            $(this).remove();
+        });
         } else {
           alert("Rating could not be saved; "+data.message)
         }
@@ -1048,7 +1055,7 @@ $(function(){
                               <div class="row m-t-md padder">
                                 <div class="col-sm-12 b-b b-3x"><b>Meals for Monday - Wednesday (<%= (@menu_date_sunday+1.day).strftime("%b %d") %> - <%= (@menu_date_sunday+3.day).strftime("%b %d") %>)</b></div>
                               </div>  
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @beef_monday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @beef_monday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_beef">
                                     <div class="panel-heading no-border bg-dark">
@@ -1068,7 +1075,7 @@ $(function(){
                                   </section>
                                 </div>
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @pork_monday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @pork_monday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_pork">
                                     <div class="panel-heading no-border bg-black lter">
@@ -1088,7 +1095,7 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @poultry_monday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @poultry_monday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_poultry">
                                     <div class="panel-heading no-border bg-black lter">
@@ -1108,7 +1115,7 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @green_1_monday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @green_1_monday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_green_1">
                                     <div class="panel-heading no-border bg-success lter">
@@ -1128,7 +1135,7 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @green_2_monday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @green_2_monday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_green_2">
                                     <div class="panel-heading no-border bg-success lter">
@@ -1154,7 +1161,7 @@ $(function(){
                               <div class="row m-t-md padder">
                                 <div class="col-sm-12 b-b b-3x"><b>Meals for Thursday - Saturday (<%= (@menu_date_sunday+4.day).strftime("%b %d") %> - <%= (@menu_date_sunday+6.day).strftime("%b %d") %>)</b></div>
                               </div>  
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @beef_thursday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @beef_thursday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_beef">
                                     <div class="panel-heading no-border bg-dark">
@@ -1174,7 +1181,7 @@ $(function(){
                                   </section>
                                 </div>
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @pork_thursday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @pork_thursday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_pork">
                                     <div class="panel-heading no-border bg-black lter">
@@ -1194,7 +1201,7 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @poultry_monday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @poultry_monday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_poultry">
                                     <div class="panel-heading no-border bg-black lter">
@@ -1214,7 +1221,7 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @green_1_thursday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @green_1_thursday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_green_1">
                                     <div class="panel-heading no-border bg-success lter">
@@ -1234,7 +1241,7 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
-                              <div class="row m-t-md padder menu_card" data-menu-id="<%= @green_2_thursday_id ||= 0 %>">
+                              <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @green_2_thursday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_green_2">
                                     <div class="panel-heading no-border bg-success lter">
