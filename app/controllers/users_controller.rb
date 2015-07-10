@@ -199,12 +199,13 @@ class UsersController < ApplicationController
             @green_1_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").blank?
             @green_2_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").blank?
 
-
             @current_customer = current_user.customer
             @display_cancel = true
             @display_pause = true
             @display_restart = true
             @disable_sub_update = false
+
+            @rated_menu_items = @current_customer.menu_ratings.where("menu_id is not null").order(created_at: :desc).limit(20).map{|mr| mr.menu_id }
 
             @current_pick_up_window_caption = (Date.today < @current_customer.first_pick_up_date) ? "Pick-up Window Next Week" : "Pick-up Window This Week"
 
