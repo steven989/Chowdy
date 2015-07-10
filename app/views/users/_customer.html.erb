@@ -7,7 +7,7 @@ $(function(){
           var rated_items = <%= @rated_menu_items %>;
           $('.menu_card').filter(function(){
             return rated_items.indexOf($(this).data('menu-id')) > -1
-          }).empty();
+          }).remove();
         })();
 
     // create hub map
