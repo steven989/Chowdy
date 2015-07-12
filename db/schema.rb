@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150706224426) do
+ActiveRecord::Schema.define(version: 20150712140536) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -141,6 +141,7 @@ ActiveRecord::Schema.define(version: 20150706224426) do
     t.integer  "invoice_amount"
     t.boolean  "paid",                            default: false
     t.date     "date_paid"
+    t.boolean  "closed"
   end
 
   create_table "feedbacks", force: :cascade do |t|

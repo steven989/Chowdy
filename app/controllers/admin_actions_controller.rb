@@ -146,7 +146,7 @@ class AdminActionsController < ApplicationController
                 puts '---------------------------------------------------'
                 CustomerMailer.delay.rescued_error(invoice.customer,'Something went wrong trying to close an invoice: '+error.message.inspect)
             else
-                invoice.update_attributes(paid:true, next_attempt:nil, date_paid: Date.today)
+                invoice.update_attributes(closed:true, next_attempt:nil)
             end
         end
         redirect_to user_profile_path+"#dashboard"

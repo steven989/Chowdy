@@ -129,19 +129,31 @@ protect_from_forgery :except => :payment
                 current_stripe_customer.source = params[:stripeToken]
                 current_stripe_customer.save
                 #attempt to pay back overdue invoices
+                decline_count = 0
                 if current_customer.failed_invoices.where(paid:false).length > 0 
                     current_customer.failed_invoices.where(paid:false).each do |failed_invoice| 
                         begin 
-                            Stripe::Invoice.retrieve(failed_invoice.invoice_number).pay
+                            stripe_invoice = Stripe::Invoice.retrieve(failed_invoice.invoice_number)
+                            if stripe_invoice.closed
+                                stripe_invoice.closed = false
+                                stripe_invoice.save
+                            end
+                            stripe_invoice.pay
                         rescue
                             puts "Card declined"
+                            decline_count += 1
                         else
-                            failed_invoice.update_attributes(paid:true,date_paid:Date.today)
+                            failed_invoice.update_attributes(paid:true,closed:false,date_paid:Date.today)
                         end
                     end
                 end
-                notice_status = "success"
-                notice_message = "Credit card updated"
+                if decline_count > 0
+                    notice_status = "fail"
+                    notice_message = "Card declined for one or more of your invoices"
+                else
+                    notice_status = "success"
+                    notice_message = "Credit card updated"
+                end
             rescue => error
                 puts '---------------------------------------------------'
                 puts "some error occured when customer tried to update credit card"
