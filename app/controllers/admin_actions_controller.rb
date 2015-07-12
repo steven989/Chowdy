@@ -139,15 +139,24 @@ class AdminActionsController < ApplicationController
                     puts '---------------------------------------------------'
                     CustomerMailer.delay.rescued_error(invoice.customer,'Something went wrong trying to close an invoice: '+error.message.inspect)
                 end
+                flash[:status] = "fail"
+                flash[:notice_dashboard] = 'Something went wrong trying to close invoice: '+error.message.inspect
             rescue => error
                 puts '---------------------------------------------------'
                 puts 'Something went wrong trying to close an invoice'
                 puts error.message
                 puts '---------------------------------------------------'
                 CustomerMailer.delay.rescued_error(invoice.customer,'Something went wrong trying to close an invoice: '+error.message.inspect)
+                flash[:status] = "fail"
+                flash[:notice_dashboard] = 'Something went wrong trying to close invoice: '+error.message.inspect
             else
                 invoice.update_attributes(closed:true, next_attempt:nil)
+                flash[:status] = "success"
+                flash[:notice_dashboard] = 'Invoice closed'
             end
+        else
+            flash[:status] = "fail"
+            flash[:notice_dashboard] = 'Could not find invoice in the database'
         end
         redirect_to user_profile_path+"#dashboard"
     end

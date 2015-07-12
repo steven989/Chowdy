@@ -235,6 +235,15 @@ $(function(){
                     <section class="tab-pane active" id="dashboard" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder">
+                              <% if flash[:notice_dashboard] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_dashboard] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
                               <section class="row">
                                 <div class="col-sm-12">
                                     <div class="panel panel-default b-a m-t-md">
