@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150712140536) do
+ActiveRecord::Schema.define(version: 20150713224702) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -261,6 +261,24 @@ ActiveRecord::Schema.define(version: 20150712140536) do
     t.datetime "start_date"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "stop_queue_records", force: :cascade do |t|
+    t.date     "associated_cutoff"
+    t.string   "stop_type",          limit: 255
+    t.string   "stripe_customer_id", limit: 255
+    t.date     "end_date"
+    t.date     "start_date"
+    t.integer  "updated_meals"
+    t.integer  "updated_reg_mon"
+    t.integer  "updated_reg_thu"
+    t.integer  "updated_grn_mon"
+    t.integer  "updated_grn_thu"
+    t.string   "cancel_reason",      limit: 255
+    t.datetime "queue_created_at"
+    t.datetime "queue_updated_at"
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
   end
 
   create_table "stop_queues", force: :cascade do |t|
