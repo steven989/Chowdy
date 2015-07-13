@@ -119,7 +119,7 @@ namespace :customers do
                         queue_item.destroy
                     else
                         stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                        stripe_subscription.trial_end = queue_item.end_date.to_time.to_i
+                        stripe_subscription.trial_end = (queue_item.end_date + 23.9.hours).to_time.to_i
                         stripe_subscription.prorate = false
                         if stripe_subscription.save
                             current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
@@ -153,7 +153,7 @@ namespace :customers do
                             current_customer_interval_count = current_customer.interval_count.blank? ? 1 : current_customer.interval_count
                             meals_per_week = Subscription.where(weekly_meals:current_customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
                             
-                            if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
+                            if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:(start_date_update + 23.9.hours).to_time.to_i)
                                 new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
                                 current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
                                 current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1) unless current_customer.stop_requests.order(created_at: :desc).limit(1).take.blank?
@@ -163,7 +163,7 @@ namespace :customers do
                     else 
                         start_date_update = queue_item.start_date
                         paused_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                        paused_subscription.trial_end = start_date_update.to_time.to_i
+                        paused_subscription.trial_end = (start_date_update + 23.9.hours).to_time.to_i
                         paused_subscription.prorate = false
                         if paused_subscription.save
                             current_customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)

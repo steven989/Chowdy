@@ -598,7 +598,7 @@ class AdminActionsController < ApplicationController
                                 @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                             else
                                 stripe_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                                stripe_subscription.trial_end = adjusted_pause_end_date.to_time.to_i
+                                stripe_subscription.trial_end = (adjusted_pause_end_date + 23.9.hours).to_time.to_i
                                 stripe_subscription.prorate = false
                                 if stripe_subscription.save
                                     @customer.update(paused?:"yes", pause_end_date:adjusted_pause_end_date-1, next_pick_up_date:adjusted_pause_end_date)
@@ -726,7 +726,7 @@ class AdminActionsController < ApplicationController
                 if params[:immediate_effect] == "1"
                     begin
                         if @customer.stripe_subscription_id.blank?
-                            start_date_update = Chowdy::Application.closest_date(1,1)
+                            start_date_update = [5,6,0].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,1) : Date.today
                             if @customer.sponsored?
                                 @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
                                 @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)                       
@@ -736,7 +736,7 @@ class AdminActionsController < ApplicationController
                                 current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
                                 meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
                                 
-                                if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:start_date_update.to_time.to_i)
+                                if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:(start_date_update + 23.9.hours).to_time.to_i)
                                     new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
                                     @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
                                     @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
@@ -746,7 +746,7 @@ class AdminActionsController < ApplicationController
                         else 
                             start_date_update = Chowdy::Application.closest_date(1,1)
                             paused_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                            paused_subscription.trial_end = start_date_update.to_time.to_i
+                            paused_subscription.trial_end = (start_date_update + 23.9.hours).to_time.to_i
                             paused_subscription.prorate = false
                             if paused_subscription.save
                                 @customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
