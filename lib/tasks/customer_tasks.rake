@@ -51,6 +51,48 @@ namespace :customers do
                 current_customer = queue_item.customer
                 if current_customer.stripe_subscription_id != nil
                     begin
+
+                        if Date.today < current_customer.first_pick_up_date
+                            raw_difference = queue_item.updated_meals - current_customer.total_meals_per_week
+                            if raw_difference > 0
+                                difference = raw_difference
+
+                                Stripe::InvoiceItem.create(
+                                    customer: current_customer.stripe_customer_id,
+                                    amount: (difference * 6.99 * 1.13 * 100).round,
+                                    currency: 'CAD',
+                                    description: "First-week adjustment for #{difference} extra meals requested after sign up"
+                                )
+
+                                Stripe::Invoice.create(
+                                    customer: current_customer.stripe_customer_id
+                                )
+
+                            elsif raw_difference < 0
+                                
+                                difference = raw_difference * -1
+                                
+                                charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
+                                charge = Stripe::Charge.retrieve(charge_id)
+                                stripe_refund_response = charge.refunds.create(amount: (difference * 6.99 * 1.13 * 100).round)
+
+                                newly_created_refund = Refund.create(
+                                        stripe_customer_id: current_customer.stripe_customer_id, 
+                                        refund_week:StartDate.first.start_date, 
+                                        charge_week:Date.today,
+                                        charge_id:charge_id, 
+                                        meals_refunded: difference, 
+                                        amount_refunded: (difference * 6.99 * 1.13 * 100).round, 
+                                        refund_reason: "Subscription adjustment before first week", 
+                                        stripe_refund_id: stripe_refund_response.id
+                                )
+                                newly_created_refund.internal_refund_id = newly_created_refund.id
+                                newly_created_refund.save
+                            end
+
+                        end
+
+
                         case queue_item.updated_meals
                             when 6
                                 meals_per_week = "6mealswk" 
@@ -83,8 +125,8 @@ namespace :customers do
                             green_meals_on_monday: queue_item.updated_grn_mon,
                             regular_meals_on_thursday: queue_item.updated_reg_thu,
                             green_meals_on_thursday: queue_item.updated_grn_thu
-                            )
-                            queue_item.destroy
+                        )
+                        queue_item.destroy
                     end
                 else
                     current_customer.update(
@@ -94,8 +136,7 @@ namespace :customers do
                         green_meals_on_monday: queue_item.updated_grn_mon,
                         regular_meals_on_thursday: queue_item.updated_reg_thu,
                         green_meals_on_thursday: queue_item.updated_grn_thu
-                        )
-                        queue_item.destroy                    
+                    )
                 end
             end
         end
