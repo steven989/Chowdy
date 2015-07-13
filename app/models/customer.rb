@@ -452,7 +452,7 @@ class Customer < ActiveRecord::Base
 
     def self.handle_payments(invoice_number)
         failed_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
-        failed_invoice.update_attributes(paid:true,date_paid:Date.today) unless failed_invoice.blank?
+        failed_invoice.update_attributes(paid:true,date_paid:Date.today,closed:nil) unless failed_invoice.blank?
     end
 
 
