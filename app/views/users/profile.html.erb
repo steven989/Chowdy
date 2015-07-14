@@ -1,3 +1,4 @@
+<div id="fakeLoader"></div>
 <% if @current_user.role == "admin" %>
   <%= render partial: 'admin' %>
 <% elsif @current_user.role == "chef" %>

@@ -1,7 +1,12 @@
 <script>
-
+$("#fakeLoader").fakeLoader({
+    timeToHide:30000, //Time in milliseconds for fakeLoader disappear
+    zIndex:"999",//Default zIndex
+    spinner:"spinner6",//Options: 'spinner1', 'spinner2', 'spinner3', 'spinner4', 'spinner5', 'spinner6', 'spinner7'
+    bgColor:"#f2f4f8", //Hex, RGB or RGBA colors  
+});
 $(function(){
-
+    $("#fakeLoader").fadeOut();
 
     //URL segment
 
