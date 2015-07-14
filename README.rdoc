@@ -1,28 +1,8 @@
 == README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is a customer app that powers the members.chowdy.ca. It provides a dashboard for customers to modify their weekly meal subscription, a section for chefs to update the menu, and admin dashboard for Chowdy admins to manage the customers.
 
-Things you may want to cover:
+There are scheduled weekly tasks that produces a series of reports and other critical info updates (total customer and meal numbers, customers that require delivery)
 
-* Ruby version
+The app is currently deployed on Heroku, with Ruby 2.1.0, Rails 4.2, ad Postgres for database. The Heroku uses 1 web dyno to handle HTTP request, and 1 worker dyno to handle all scheduled jobs, receive Stripe webhooks, and send emails.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
