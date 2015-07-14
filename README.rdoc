@@ -1,6 +1,6 @@
 == README
 
-This is a customer app that powers the members.chowdy.ca. It provides a dashboard for customers to modify their weekly meal subscription, a section for chefs to update the menu, and admin dashboard for Chowdy admins to manage the customers.
+This is a custom app that powers the members.chowdy.ca. It provides a dashboard for customers to modify their weekly meal subscription, a section for chefs to update the menu, and admin dashboard for Chowdy admins to manage the customers.
 
 There are scheduled weekly tasks that produces a series of reports and other critical info updates (total customer and meal numbers, customers that require delivery)
 
