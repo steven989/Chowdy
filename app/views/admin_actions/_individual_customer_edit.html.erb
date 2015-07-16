@@ -244,9 +244,28 @@
       </div>
     <%= f.submit "Request", class: "btn btn-md btn-danger m-t-sm" %>
     <% end %>
+    <% if @customer.user %>
+      <div class="line line-dashed b-b line-lg pull-in"></div>
+      <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=reset_account", method: :put do |f| %>
+      <%= label_tag 'reset_check_box', "Check this box to confirm you want to delete the customer's online account (customer itself will not be deleted, just the online account)" %>
+      <%= check_box_tag :confirm_reset,nil,false,class: "form-control"%>
+      <%= f.submit "Reset account", class: "btn btn-md btn-danger m-t-sm disabled" %>
+      <% end %>    
+      <script>
+        $('#confirm_reset').off("click").on("click",function(){
+          if ($(this).is(':checked')) {
+            var form = $(this).closest("form");
+            form.find('input[type=submit]').removeClass("disabled");
+          } else {
+            var form = $(this).closest("form");
+            form.find('input[type=submit]').addClass("disabled");
+          }
+        });
+      </script>
+    <% end %>
     <div class="line line-dashed b-b line-lg pull-in"></div>
     <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=destroy", method: :put do |f| %>
-    <%= label_tag 'delete_check_box', "Check this box to confirm you want to delete this customer" %>
+    <%= label_tag 'delete_check_box', "Check this box to confirm you want to delete this customer (all trace of the customer will be completely purged)" %>
     <%= check_box_tag :confirm_delete,nil,false,class: "form-control"%>
     <%= f.submit "Delete customer permanently", class: "btn btn-md btn-danger m-t-sm disabled" %>
     <% end %>

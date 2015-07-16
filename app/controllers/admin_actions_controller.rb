@@ -812,6 +812,24 @@ class AdminActionsController < ApplicationController
                 flash[:status] = "fail"
                 flash[:notice_customers] = "Delete confirmation box must be checked to delete a customer"
             end
+        elsif params[:todo] == "reset_account" 
+            if params[:confirm_reset] == "on"
+                if @customer.user
+                    if @customer.user.delete
+                        flash[:status] = "success"
+                        flash[:notice_customers] = "Customer account deleted"
+                    else
+                        flash[:status] = "fail"
+                        flash[:notice_customers] = "Customer account could not be deleted"
+                    end
+                else
+                    flash[:status] = "fail"
+                    flash[:notice_customers] = "Nothing was deleted. Customer did not register an online account"
+                end
+            else
+                flash[:status] = "fail"
+                flash[:notice_customers] = "Reset confirmation box must be checked to reset a customer account"
+            end
         end
         redirect_to user_profile_path+"#customers"
     end
