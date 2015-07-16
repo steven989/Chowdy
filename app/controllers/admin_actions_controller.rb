@@ -817,14 +817,14 @@ class AdminActionsController < ApplicationController
                 if @customer.user
                     if @customer.user.delete
                         flash[:status] = "success"
-                        flash[:notice_customers] = "Customer account deleted"
+                        flash[:notice_customers] = "Customer account reset"
                     else
                         flash[:status] = "fail"
-                        flash[:notice_customers] = "Customer account could not be deleted"
+                        flash[:notice_customers] = "Customer account could not be reset"
                     end
                 else
                     flash[:status] = "fail"
-                    flash[:notice_customers] = "Nothing was deleted. Customer did not register an online account"
+                    flash[:notice_customers] = "Nothing was reset. Customer did not register an online account"
                 end
             else
                 flash[:status] = "fail"
