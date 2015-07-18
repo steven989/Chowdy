@@ -79,6 +79,9 @@ gem 'shortener'
 #14) jQuery rating
 gem 'jquery-raty-rails', github: 'bmc/jquery-raty-rails'
 
+#15) Impersonation
+gem 'pretender'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

@@ -30,6 +30,7 @@ Chowdy::Application.routes.draw do
   get 'admin_action/customer/:id/edit' => 'admin_actions#individual_customer_edit', as: 'admin_edit_customer'
   put 'admin_action/customer/:id/update' => 'admin_actions#individual_customer_update', as: 'admin_update_customer'
   get 'admin_action/failed_invoice/:id/mark_as_paid' => 'admin_actions#mark_failed_invoice_as_paid', as: 'mark_failed_invoice_as_paid'
+  get 'admin_action/impersonate_user/:id' => 'admin_actions#impersonate', as: 'impersonate_user'
 
   resources :password_resets
   resources :system_settings

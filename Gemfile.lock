@@ -117,6 +117,7 @@ GEM
     pg (0.17.1)
     polyamorous (1.1.0)
       activerecord (>= 3.0)
+    pretender (0.1.0)
     puma (2.11.3)
       rack (>= 1.1, < 2.0)
     rack (1.6.1)
@@ -216,6 +217,7 @@ DEPENDENCIES
   jquery-raty-rails!
   newrelic_rpm
   pg
+  pretender
   puma
   rack-timeout
   rails (= 4.2)

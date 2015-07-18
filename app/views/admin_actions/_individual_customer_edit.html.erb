@@ -245,6 +245,10 @@
     <%= f.submit "Request", class: "btn btn-md btn-danger m-t-sm" %>
     <% end %>
     <% if @customer.user %>
+    <div class="line line-dashed b-b line-lg pull-in"></div>
+    <%= link_to 'Click to view this user''s dashboard', impersonate_user_path(@customer.user.id), target:"_blank" %>
+    <% end %>
+    <% if @customer.user %>
       <div class="line line-dashed b-b line-lg pull-in"></div>
       <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=reset_account", method: :put do |f| %>
       <%= label_tag 'reset_check_box', "Check this box to confirm you want to delete the customer's online account (customer itself will not be deleted, just the online account)" %>

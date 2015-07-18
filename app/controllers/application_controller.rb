@@ -1,7 +1,8 @@
 class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
-  
+  impersonates :user
+
   def default_url_options
     if Rails.env.production?
       {host: "http://members.chowdy.ca"}

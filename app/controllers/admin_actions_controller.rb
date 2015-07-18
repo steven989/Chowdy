@@ -1,5 +1,11 @@
 class AdminActionsController < ApplicationController
 
+    def impersonate
+        user = User.find(params[:id])
+        impersonate_user(user)
+        redirect_to user_profile_path
+    end
+
     def customer_sheet  
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
         production_day_sunday = Chowdy::Application.closest_date(-1,7,current_pick_up_date)
