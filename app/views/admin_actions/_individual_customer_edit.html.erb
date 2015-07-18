@@ -246,7 +246,7 @@
     <% end %>
     <% if @customer.user %>
     <div class="line line-dashed b-b line-lg pull-in"></div>
-    <%= link_to 'Click to view this user''s dashboard', impersonate_user_path(@customer.user.id), target:"_blank" %>
+    <%= link_to 'Click to view this user''s dashboard', impersonate_user_path(@customer.user.id) %>
     <% end %>
     <% if @customer.user %>
       <div class="line line-dashed b-b line-lg pull-in"></div>
