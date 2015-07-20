@@ -8,9 +8,22 @@ class Customer < ActiveRecord::Base
     has_many :failed_invoices, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id, dependent: :destroy 
     has_many :refunds, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :promotion_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :stop_queue_records, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
     validates :email, uniqueness: true
     validates :referral_code, uniqueness: true, allow_nil: :true, allow_blank: :true
+
+    def referral
+        if referral_code = self.matched_referrers_code
+            if referrer = Customer.where(referral_code:referral_code).take
+                referrer
+            else
+                nil
+            end
+        else
+            nil
+        end
+    end
 
     def self.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
         if customer_name.blank?

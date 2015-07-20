@@ -21,7 +21,7 @@ class CustomerMailer < ActionMailer::Base
                     when !@hub.match(/dekefir/i).nil?
                         "Monday - Friday, 7:00am to 6:00pm (closed on weekends and holidays)"
                     when !@hub.match(/coffee/i).nil? 
-                        "Monday - Saturday, 7:00am to 8:00pm (open 9am on Saturday)"
+                        "Monday - Saturday, 7:00am to 7:00pm (open 9am on Saturday)"
                 end
     @proper_hub_name = case 
                     when !@hub.match(/wanda/i).nil?
@@ -45,7 +45,7 @@ class CustomerMailer < ActionMailer::Base
 
     mail(
       to: customer_email, 
-      subject: 'Your Chowdy subscription is confirmed'
+      subject: "Your Chowdy subscription is confirmed and begins on #{@start_date.strftime('%B %d')}"
       ) do |format|
         format.html
     end
