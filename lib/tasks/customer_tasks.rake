@@ -162,8 +162,9 @@ namespace :customers do
                         queue_item.add_to_record
                         queue_item.destroy
                     else
+                        stripe_trial_end_date = Date.today < current_customer.first_pick_up_date ? queue_item.end_date + 7.days + 23.9.hours : queue_item.end_date + 23.9.hours
                         stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                        stripe_subscription.trial_end = (queue_item.end_date + 23.9.hours).to_time.to_i
+                        stripe_subscription.trial_end = (stripe_trial_end_date).to_time.to_i
                         stripe_subscription.prorate = false
                         if stripe_subscription.save
                             current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
@@ -180,6 +181,27 @@ namespace :customers do
                         queue_item.add_to_record
                         queue_item.destroy                        
                     else
+                        if Date.today < current_customer.first_pick_up_date
+                            charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
+                            charge = Stripe::Charge.retrieve(charge_id)
+                            internal_refund_id = nil
+                            if stripe_refund_response = charge.refunds.create
+                                newly_created_refund = Refund.create(
+                                        stripe_customer_id: current_customer.stripe_customer_id, 
+                                        refund_week:StartDate.first.start_date, 
+                                        charge_week:Date.today,
+                                        charge_id:charge_id, 
+                                        meals_refunded: current_customer.total_meals_per_week, 
+                                        amount_refunded: (current_customer.total_meals_per_week * 6.99 * 1.13 * 100).round, 
+                                        refund_reason: "Customer cancelled before starting", 
+                                        stripe_refund_id: stripe_refund_response.id
+                                )
+                                newly_created_refund.internal_refund_id = internal_refund_id.nil? ? newly_created_refund.id : internal_refund_id
+                                if newly_created_refund.save
+                                    internal_refund_id ||= newly_created_refund.id
+                                end
+                            end
+                        end
                         stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
                         if stripe_subscription.delete
                             current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
