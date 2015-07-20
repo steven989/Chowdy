@@ -55,7 +55,6 @@ $(function(){
             type: 'GET',
             dataType: 'JSON'
           }).done(function(data){
-              test = data;
                 // get the first and last dates of the month
                 var first_of_month = new Date(current_year,month_value, 1);
                 var last_of_month = new Date(current_year,month_value+1, 0);

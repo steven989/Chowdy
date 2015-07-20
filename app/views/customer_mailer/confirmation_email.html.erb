@@ -12,7 +12,7 @@
         <p>Pick up your meals at <%= @hub %>, the store hours of this hub is <%= @op_hours %>. Just let staff know your name and you can grab your meals. That's it!</p>
     <% end %>
     <p><b><u>Please create an account</u> to pause or make changes to your subscription (and rate the meals!) at: <%= short_url(create_customer_profile_url(@stripe_customer_id)) %></b></p>
-    <p>If you need to pause/cancel your subscription, please do so online by the Thursday of the week as that's when we order your fresh ingredients. Once the chefs have already cooked your food, we cannot refund you or give you credits. Let's minimize food waste together! Announcements are made through your online account, so be sure to check it periodically.</p>
+    <p>If you need to pause/cancel your subscription, please do so online by the Thursday of the week as that's when we order your fresh ingredients. Once the chefs have already cooked your food, we cannot refund you or give you credits. Let's minimize food waste together! Announcements are made through your online account, so be sure to check it weekly.</p>
     <p>Refer a friend using <b><%= @current_customer.referral_code %></b> and you both get $10 off your meals!</p>
     <p>That's it, welcome to the Chowdy community.</p>
     <p>- the Chowdy team</p>
