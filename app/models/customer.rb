@@ -521,20 +521,20 @@ class Customer < ActiveRecord::Base
         self.stop_queues.each do |sq|
             if sq.stop_type == "change_sub"
                 if sq.updated_meals.to_i  < sq.customer.total_meals_per_week
-                    output_array.push("#{iterator}: decrease to #{sq.updated_meals.to_i} meals")
+                    output_array.push("#{iterator} (#{sq.created_at.strftime('%b %d')}): decrease to #{sq.updated_meals.to_i} meals")
                 else
-                    output_array.push("#{iterator}: increase to #{sq.updated_meals.to_i} meals")
+                    output_array.push("#{iterator} (#{sq.created_at.strftime('%b %d')}): increase to #{sq.updated_meals.to_i} meals")
                 end
             elsif sq.stop_type == "cancel"
-                output_array.push("#{iterator}: cancel")
+                output_array.push("#{iterator} (#{sq.created_at.strftime('%b %d')}): cancel")
             elsif sq.stop_type == "pause"
-                output_array.push("#{iterator}: pause until #{sq.end_date}")
+                output_array.push("#{iterator} (#{sq.created_at.strftime('%b %d')}): pause until #{sq.end_date}")
             elsif sq.stop_type == "change_hub"
-                output_array.push("#{iterator}: change hub to #{sq.cancel_reason}")
+                output_array.push("#{iterator} (#{sq.created_at.strftime('%b %d')}): change hub to #{sq.cancel_reason}")
             elsif sq.stop_type == "restart"
-                output_array.push("#{iterator}: restart")
+                output_array.push("#{iterator} (#{sq.created_at.strftime('%b %d')}): restart")
             else
-                output_array.push("#{iterator}: "+sq.stop_type.capitalize)
+                output_array.push("#{iterator} (#{sq.created_at.strftime('%b %d')}): "+sq.stop_type.capitalize)
             end
             iterator += 1
         end
