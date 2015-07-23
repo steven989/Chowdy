@@ -639,7 +639,7 @@ class AdminActionsController < ApplicationController
                 else
                     associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
                     if !end_date.blank?
-                        adjusted_pause_end_date = Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                        adjusted_pause_end_date = end_date.to_date.wday == 1 ? end_date.to_date : Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
                         if [1,2,3,4].include? Date.today.wday
                             adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                         else
