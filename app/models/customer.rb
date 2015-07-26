@@ -53,7 +53,7 @@ class Customer < ActiveRecord::Base
                     stripe_customer_id:customer_id, 
                     raw_green_input:green_number, 
                     email:customer_email, 
-                    name:customer_name,
+                    name:customer_name.gsub(/\s$/,""),
                     hub:hub,
                     referral:referral,
                     total_meals_per_week: meal_per_week,
