@@ -13,7 +13,7 @@ class Customer < ActiveRecord::Base
     validates :email, uniqueness: true
     validates :referral_code, uniqueness: true, allow_nil: :true, allow_blank: :true
 
-    def referral
+    def referral_info
         if referral_code = self.matched_referrers_code
             if referrer = Customer.where(referral_code:referral_code).take
                 referrer
