@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150713224702) do
+ActiveRecord::Schema.define(version: 20150730221943) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -74,7 +74,7 @@ ActiveRecord::Schema.define(version: 20150713224702) do
     t.string   "delivery_address",                     limit: 255
     t.string   "delivery_time",                        limit: 255
     t.string   "delivery_set_up?",                     limit: 255
-    t.string   "special_delivery_instructions",        limit: 255
+    t.text     "special_delivery_instructions"
     t.integer  "delivery_charge_accrued"
     t.integer  "delivery_charge_paid"
     t.string   "stripe_customer_id",                   limit: 255
