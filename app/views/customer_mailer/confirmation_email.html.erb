@@ -5,7 +5,7 @@
 <body>
     <p>Hi <%= @name %>, thanks for signing up for Chowdy!</p>
     <p>This is an ongoing meal service that automatically rebills every week, so please read the instructions bellow to make sure your subscription goes smoothly.</p>
-    <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %></b></p>
+    <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %>. You can pick up your first batch (half or your weekly subscription) every Monday-Wednesday, and the second batch (the other half of your weekly subscription) every Thursday-Saturday.</b></p>
     <% if @delivery %>
         <p>You've indicated that you want delivery, please log in to your account using the link below, and put in the delivery address as soon as possible. The delivery is $10 per drop.</p>
     <% else %>
