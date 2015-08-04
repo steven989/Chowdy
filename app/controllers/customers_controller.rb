@@ -78,7 +78,7 @@ protect_from_forgery :except => :payment
                 else
                     adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
                 end
-                if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? current_customer.active?) && !(["Yes","yes"].include? current_customer.paused?)
+                if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? current_customer.active?)
                     current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                     current_customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
                 end
