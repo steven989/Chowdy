@@ -323,7 +323,7 @@ class UsersController < ApplicationController
                             @current_status_color = "text-success-lt"
                         elsif @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'cancel'
                             @current_status = "Active"
-                            @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}."
+                            @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. You can restart subscription whenever you wish by clicking <b>Resume Subscription</b> button in the <b>Manage Subscription</b> tab."
                             @current_status_color = "text-success-lt"
                             @display_cancel = false
                         end
@@ -346,7 +346,7 @@ class UsersController < ApplicationController
                             @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.end_date.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. "if @change_effective_date}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
                         elsif @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'cancel'
                             @current_status = "Paused"
-                            @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}."
+                            @sub_status = "Your subscription will be cancelled starting #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. You can easily restart your subscription from the Manage Subscription tab whenever you want."
                             @current_status_color = "text-warning-lt"
                             @display_cancel = false
                         end
@@ -371,7 +371,7 @@ class UsersController < ApplicationController
                 else
                     @current_status = "Inactive"
                     @current_status_color = "text-danger-lt"
-                    @sub_status = "Hub change effective when you resume." if @requested_hub_to_change_to
+                    @sub_status = "You can restart your subscription by clicking the <b>Resume Subscription</b> button in the <a href='#changePlan' data-toggle='tab' class='url_seg'>Manage Subscription</a> tab #{'. Hub change effective when you resume.' if @requested_hub_to_change_to}"
                     @display_cancel = false
                     @display_pause = false
                     @disable_sub_update = true
