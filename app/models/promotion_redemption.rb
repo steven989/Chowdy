@@ -3,13 +3,13 @@ class PromotionRedemption < ActiveRecord::Base
     belongs_to :promotion
 
     def self.check_eligibility(customer,promo_code)
-        if Promotion.where(code:promo_code).length > 0
-            if Promotion.where(code:promo_code, active:true).length == 0 
+        if Promotion.where("code ilike ?", promo_code.gsub(" ","")).length > 0
+            if Promotion.where("code ilike ? and active = true", promo_code.gsub(" ","")).length == 0 
                 {result:false, message:'Promotion is not active'}
-            elsif Promotion.where(code:promo_code, active:true).length > 1
+            elsif Promotion.where("code ilike ? and active = true", promo_code.gsub(" ","")).length > 1
                 {result:false, message:'Multiple active promotions'}
             else
-                promotion = Promotion.where(code:promo_code, active:true).take
+                promotion = Promotion.where("code ilike ? and active = true", promo_code.gsub(" ","")).take
                 if customer.promotion_redemptions.map {|pr| pr.promotion_id}.include? promotion.id
                     {result:false, message:'You already applied this promo code'}
                 elsif (promotion.new_customer_only) && ((customer.created_at) < (14.days.ago))
@@ -34,7 +34,7 @@ class PromotionRedemption < ActiveRecord::Base
 
     def self.redeem(customer,promo_code)
         begin
-            promotion = Promotion.where(code:promo_code, active:true).take
+            promotion = Promotion.where("code ilike ? and active = true", promo_code.gsub(" ","")).take
             if promotion.immediate_refund
                 recent_charges = Stripe::Charge.all(customer:customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
                 amount = promotion.amount_in_cents
