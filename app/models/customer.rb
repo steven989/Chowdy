@@ -222,7 +222,7 @@ class Customer < ActiveRecord::Base
                         end
                         referral_matched = true
                     
-                    elsif Promotion.where(code: referral.gsub(" ",""),active:true).length == 1 #match promo code
+                    elsif Promotion.where("code ilike ? and active = true", referral.gsub(" ","")).length == 1 #match promo code
                         promotion = Promotion.where(code: referral.gsub(" ","")).take
                             if promotion.immediate_refund
                                 begin 
