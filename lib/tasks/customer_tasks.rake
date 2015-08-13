@@ -15,6 +15,20 @@ namespace :customers do
         end
     end
 
+    desc 'look for anomalies in the customer data'
+    task :scan_customer_data_anomalies => [:environment] do
+        anomaly_array = []
+        active_customers = Customer.where(active?: ["yes","Yes"])
+
+        #negative meal counts
+        negative_meal_count_customers = Customer.where{(active? >> ["yes","Yes"]) & ((regular_meals_on_monday < 0) | (green_meals_on_monday < 0 )| (regular_meals_on_thursday < 0) | (green_meals_on_thursday < 0))}
+        negative_meal_count_customers.each {|c| anomaly_array.push([c,"negative meal count"]) }
+
+        if anomaly_array.length > 0 
+            CustomerMailer.delay.anomaly_report(anomaly_array)
+        end
+    end
+
     desc 'update everyone\'s start date'
     task :update_individual_start_date, [:number_of_weeks] => [:environment] do |t, args|        
         Customer.where("next_pick_up_date = ?", Chowdy::Application.closest_date(-1,1)).each do |customer|

@@ -1,0 +1,8 @@
+<% if @anomalies.length > 0 %>
+These customers have anomalies:
+    <% @anomalies.each do |anomaly| %>
+    | Customer email: <%= anomaly[0].email %> | Anomaly Type: <%= anomaly[1] %> |
+    <% end %>
+<% else %>
+    No anomalies
+<% end %>

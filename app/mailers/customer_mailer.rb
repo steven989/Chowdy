@@ -107,6 +107,12 @@ class CustomerMailer < ActionMailer::Base
     end    
   end
 
+  def anomaly_report(anomalies)
+    @anomalies = anomalies
+    mail(:to => SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value,
+         :subject => "Look into these customers with anomalies")
+  end
+
   def failed_invoice(invoice)
     @customer = invoice.customer
     @name = invoice.customer.name.split(/\s/)[0].capitalize
