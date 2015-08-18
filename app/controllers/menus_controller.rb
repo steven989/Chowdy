@@ -22,7 +22,12 @@ class MenusController < ApplicationController
 
     def pull_suggestion
         category = params[:category]
-        suggestions = Menu.where("meal_type ilike ? and meal_name !=''", "%#{category}%").order(average_score: :desc).limit(20).map{|mi| {meal_type:category.capitalize,data:[{id:mi.id,name:mi.meal_name,veg:mi.veggie,carb:mi.carb,rating:mi.average_score,last_made:mi.production_day}]}}
+        suggestions_no_null = Menu.where("meal_type ilike ? and meal_name !='' and average_score is not null", "%#{category}%").order(average_score: :desc).limit(20)
+        set_limit = [20 - suggestions_no_null.length, 0].max
+        suggestions_null = Menu.where("meal_type ilike ? and meal_name !='' and average_score is null", "%#{category}%").order(average_score: :desc).limit(set_limit)
+        suggestions_combined = suggestions_no_null + suggestions_null
+        suggestions = suggestions_combined.map{|mi| {meal_type:category.capitalize,data:[{id:mi.id,name:mi.meal_name,veg:mi.veggie,carb:mi.carb,rating:mi.average_score,last_made:mi.production_day}]}}
+
         respond_to do |format|
           format.json {
             render json: suggestions.to_json
