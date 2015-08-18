@@ -115,7 +115,7 @@ class AdminActionsController < ApplicationController
         @customer = Customer.where(id:params[:id]).take
         @interval = @customer.interval.blank? ? "week" : @customer.interval
         @interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
-        @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3"]).map {|hub| hub.setting_value} 
+        @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3","hub_4"]).map {|hub| hub.setting_value} 
         @meals_refunded_this_week = Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).group(:internal_refund_id).maximum(:meals_refunded).values.sum {|e| e}
         @amount_refunded_this_week = (Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).sum(:amount_refunded).to_f)/100.00
         @active_coupons = Promotion.where(active:true).map {|p| p.code }
