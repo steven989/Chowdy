@@ -5,6 +5,15 @@ $("#fakeLoader").fakeLoader({
     spinner:"spinner6",//Options: 'spinner1', 'spinner2', 'spinner3', 'spinner4', 'spinner5', 'spinner6', 'spinner7'
     bgColor:"#f2f4f8", //Hex, RGB or RGBA colors  
 });
+
+  
+  var activeInputMealType = null;
+  var activeInputMealID = null;
+  var suggestionPath = '<%= pull_suggestion_path %>';
+  var individualMealPullPath = '<%= pull_individual_detail_path %>';
+  var autoSuggest; 
+  var test;
+
 $(function(){
     $("#fakeLoader").fadeOut();
 
@@ -101,13 +110,14 @@ $(function(){
                       var average_score = matched_result.length == 1 ? (matched_result[0].average_score == null ? "" : matched_result[0].average_score) : "" ;
                       var number_of_scores = matched_result.length == 1 ? (matched_result[0].number_of_scores == null ? "" : matched_result[0].number_of_scores) : "" ;
 
-                      $('#menu_items tbody').append("<tr class='hasData'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c9'>"+e+"</td><td class='c9'>"+meal_count+"</td><td class='c3'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
+                      $('#menu_items tbody').append("<tr class='hasData' data-id='"+id+"' data-type='"+e+"'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c9'>"+e+"</td><td class='c9'>"+meal_count+"</td><td class='c3 meal_name'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
                     
                     });
                     $('#menu_items tbody').append("<tr><td colspan='12' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
                 });
 
                 $('#menu_items').editableTableWidget();
+
                 $('#menu_items thead').width($('#menu_items').width());
 
                 $('#menu_items td').on('change', function() {
@@ -120,7 +130,6 @@ $(function(){
           });
 
         }
-
 
         generate_menu_table();
         
@@ -137,7 +146,6 @@ $(function(){
               contentType: 'application/json',
               data: JSON.stringify({"data": output_json})
             }).done(function(data){
-              test = data
               if (data.result ) {
                 $('#change_notification').addClass("hidden");
                 $('#update_menu').html("Changes saved").addClass("disabled");
@@ -283,6 +291,12 @@ $(function(){
       </div>
   </div>
 </div>
+
+<!-- Meal suggestion box -->
+<div id="meal_suggestion" class="hidden" style="position:absolute; width:500px; background-color:white; max-height: 300px; overflow-y: scroll; -webkit-box-shadow: -5px 9px 24px -2px rgba(0,0,0,0.41); -moz-box-shadow: -5px 9px 24px -2px rgba(0,0,0,0.41); box-shadow: -5px 9px 24px -2px rgba(0,0,0,0.41);">
+
+</div>
+
 
 <!-- Rating details modal -->
 <div class="modal fade" id="ratingDetailsModal" tabindex="-1" role="dialog" aria-labelledby="ratingDetailsModal" aria-hidden="true" style="z-index: 10000;">

@@ -36,7 +36,8 @@ Chowdy::Application.routes.draw do
   resources :system_settings
   resources :scheduled_tasks
   resources :menus, only: [:update, :show]
-  get 'menu/:id/pull_rating_details' => 'menus#pull_rating_details', as: 'pull_rating_details'
+  get 'menu/pull_suggestion' => 'menus#pull_suggestion', as: 'pull_suggestion'
+  get 'menu/pull_individual_detail' => 'menus#pull_individual_detail', as: 'pull_individual_detail'
   get 'scheduled_task/:id/run' => 'scheduled_tasks#run', as: 'run_task'
 
   get 'announcement/new' => 'system_settings#new_announcement', as: 'new_announcement'

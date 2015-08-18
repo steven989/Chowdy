@@ -20,6 +20,25 @@ class MenusController < ApplicationController
         end
     end
 
+    def pull_suggestion
+        category = params[:category]
+        suggestions = Menu.where("meal_type ilike ? and meal_name !=''", "%#{category}%").order(average_score: :desc).limit(20).map{|mi| {meal_type:category.capitalize,data:[{id:mi.id,name:mi.meal_name,veg:mi.veggie,carb:mi.carb,rating:mi.average_score,last_made:mi.production_day}]}}
+        respond_to do |format|
+          format.json {
+            render json: suggestions.to_json
+          }
+        end        
+    end
+
+    def pull_individual_detail
+        menu_item = Menu.find(params[:meal_id])
+        respond_to do |format|
+          format.json {
+            render json: menu_item.to_json
+          }
+        end
+    end
+
     def update        
         received_data = params[:data].to_a
 
