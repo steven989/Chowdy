@@ -36,7 +36,7 @@ class PromotionRedemption < ActiveRecord::Base
         begin
             promotion = Promotion.where("code ilike ? and active = true", promo_code.gsub(" ","")).take
             if promotion.immediate_refund
-                recent_charges = Stripe::Charge.all(customer:customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
+                recent_charges = Stripe::Charge.all(customer:customer.stripe_customer_id, limit:20).data.select {|c| c.paid == true}.inject([]) do |array, data| array.push(data.id) end
                 amount = promotion.amount_in_cents
                 refund_list = []
                 recent_charges.each do |charge_id|

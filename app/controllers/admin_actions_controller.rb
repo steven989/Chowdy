@@ -377,7 +377,7 @@ class AdminActionsController < ApplicationController
                 CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Start Delivery")
             end
         elsif params[:todo] == "refund"
-            recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.inject([]) do |array, data| array.push(data.id) end
+            recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.select {|c| c.paid == true}.inject([]) do |array, data| array.push(data.id) end
             amount = (params[:refund][:meals_refunded].to_i * 6.99 * 1.13 * 100).round
             immediate_refund = params[:refund][:attach_to_next_invoice] == "0" ? true : false
 
