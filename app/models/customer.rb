@@ -562,19 +562,22 @@ class Customer < ActiveRecord::Base
             monday_regular_wandas = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:regular_meals_on_monday).to_i
             monday_regular_coffee_bar = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:regular_meals_on_monday).to_i
             monday_regular_dekefir = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:regular_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:regular_meals_on_monday).to_i
+            monday_regular_gta_delivery = active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%gta%").sum(:regular_meals_on_monday).to_i
         monday_green = active_nonpaused_customers.sum(:green_meals_on_monday).to_i
             monday_green_wandas = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:green_meals_on_monday).to_i
             monday_green_coffee_bar = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:green_meals_on_monday).to_i
             monday_green_dekefir = active_nonpaused_customers.where("monday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:green_meals_on_monday).to_i + active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:green_meals_on_monday).to_i
+            monday_green_gta_delivery = active_nonpaused_customers.where("monday_delivery_hub ilike ? and recurring_delivery is not null", "%gta%").sum(:green_meals_on_monday).to_i
         thursday_regular = active_nonpaused_customers.sum(:regular_meals_on_thursday).to_i
             thursday_regular_wandas = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:regular_meals_on_thursday).to_i
             thursday_regular_coffee_bar = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:regular_meals_on_thursday).to_i
             thursday_regular_dekefir = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:regular_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:regular_meals_on_thursday).to_i
+            thursday_regular_gta_delivery = active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%gta%").sum(:regular_meals_on_thursday).to_i
         thursday_green = active_nonpaused_customers.sum(:green_meals_on_thursday).to_i
             thursday_green_wandas = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%wanda%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%wanda%").sum(:green_meals_on_thursday).to_i
             thursday_green_coffee_bar = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%coffee%bar%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%coffee%bar%").sum(:green_meals_on_thursday).to_i
             thursday_green_dekefir = active_nonpaused_customers.where("thursday_pickup_hub ilike ? and recurring_delivery is null", "%dekefir%").sum(:green_meals_on_thursday).to_i + active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%dekefir%").sum(:green_meals_on_thursday).to_i
-
+            thursday_green_gta_delivery = active_nonpaused_customers.where("thursday_delivery_hub ilike ? and recurring_delivery is not null", "%gta%").sum(:green_meals_on_thursday).to_i
         total_meals = monday_regular + monday_green + thursday_regular + thursday_green
 
         # Pauses taking place next week
@@ -607,6 +610,8 @@ class Customer < ActiveRecord::Base
             monday_regular_coffee_bar
         elsif count_type == "monday_regular_dekefir"
             monday_regular_dekefir
+        elsif count_type == "monday_regular_gta_delivery"
+            monday_regular_gta_delivery
         elsif count_type == "monday_green"
             monday_green
         elsif count_type == "monday_green_wandas"
@@ -615,6 +620,8 @@ class Customer < ActiveRecord::Base
             monday_green_coffee_bar
         elsif count_type == "monday_green_dekefir"
             monday_green_dekefir
+        elsif count_type == "monday_green_gta_delivery"
+            monday_green_gta_delivery
         elsif count_type == "thursday_regular"
             thursday_regular
         elsif count_type == "thursday_regular_wandas"
@@ -623,6 +630,8 @@ class Customer < ActiveRecord::Base
             thursday_regular_coffee_bar
         elsif count_type == "thursday_regular_dekefir"
             thursday_regular_dekefir
+        elsif count_type == "thursday_regular_gta_delivery"
+            thursday_regular_gta_delivery
         elsif count_type == "thursday_green"
             thursday_green
         elsif count_type == "thursday_green_wandas"
@@ -631,6 +640,8 @@ class Customer < ActiveRecord::Base
             thursday_green_coffee_bar
         elsif count_type == "thursday_green_dekefir"
             thursday_green_dekefir
+        elsif count_type == "thursday_green_gta_delivery"
+            thursday_green_gta_delivery
         elsif count_type == "total_meals"
             total_meals
         elsif count_type == "total_meals_next"

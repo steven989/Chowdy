@@ -29,18 +29,22 @@ class UsersController < ApplicationController
                 @monday_regular_wandas = MealStatistic.retrieve("monday_regular_wandas")
                 @monday_regular_coffee_bar = MealStatistic.retrieve("monday_regular_coffee_bar")
                 @monday_regular_dekefir = MealStatistic.retrieve("monday_regular_dekefir")
+                @monday_regular_gta_delivery = MealStatistic.retrieve("monday_regular_gta_delivery")
             @monday_green = MealStatistic.retrieve("monday_green")
                 @monday_green_wandas = MealStatistic.retrieve("monday_green_wandas")
                 @monday_green_coffee_bar = MealStatistic.retrieve("monday_green_coffee_bar")
                 @monday_green_dekefir = MealStatistic.retrieve("monday_green_dekefir")
+                @monday_green_gta_delivery = MealStatistic.retrieve("monday_green_gta_delivery")
             @thursday_regular = MealStatistic.retrieve("thursday_regular")
                 @thursday_regular_wandas = MealStatistic.retrieve("thursday_regular_wandas")
                 @thursday_regular_coffee_bar = MealStatistic.retrieve("thursday_regular_coffee_bar")
                 @thursday_regular_dekefir = MealStatistic.retrieve("thursday_regular_dekefir")
+                @thursday_regular_gta_delivery = MealStatistic.retrieve("thursday_regular_gta_delivery")
             @thursday_green = MealStatistic.retrieve("thursday_green")
                 @thursday_green_wandas = MealStatistic.retrieve("thursday_green_wandas")
                 @thursday_green_coffee_bar = MealStatistic.retrieve("thursday_green_coffee_bar")
                 @thursday_green_dekefir = MealStatistic.retrieve("thursday_green_dekefir")
+                @thursday_green_gta_delivery = MealStatistic.retrieve("thursday_green_gta_delivery")
             @total_meals = MealStatistic.retrieve("total_meals")
             @total_meals_next = MealStatistic.retrieve("total_meals_next")
 
@@ -60,6 +64,10 @@ class UsersController < ApplicationController
             @neg_adjustment_beef_monday_dekefir = -MealStatistic.retrieve("neg_adjustment_beef_monday_dekefir").to_i
             @neg_adjustment_poultry_monday_dekefir = -MealStatistic.retrieve("neg_adjustment_poultry_monday_dekefir").to_i
 
+            @neg_adjustment_pork_monday_gta_delivery = ""
+            @neg_adjustment_beef_monday_gta_delivery = ""
+            @neg_adjustment_poultry_monday_gta_delivery = ""
+
             @neg_adjustment_pork_thursday = -MealStatistic.retrieve("neg_adjustment_pork_thursday").to_i
             @neg_adjustment_beef_thursday = -MealStatistic.retrieve("neg_adjustment_beef_thursday").to_i
             @neg_adjustment_poultry_thursday = -MealStatistic.retrieve("neg_adjustment_poultry_thursday").to_i
@@ -76,6 +84,9 @@ class UsersController < ApplicationController
             @neg_adjustment_beef_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_beef_thursday_dekefir").to_i
             @neg_adjustment_poultry_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_poultry_thursday_dekefir").to_i
 
+            @neg_adjustment_pork_thursday_gta_delivery = ""
+            @neg_adjustment_beef_thursday_gta_delivery = ""
+            @neg_adjustment_poultry_thursday_gta_delivery = ""
 
             active_nonpaused_customers_include_new_signups = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:[current_pick_up_date,StartDate.first.start_date.to_date])
             @customers_with_missing_info = active_nonpaused_customers_include_new_signups.where("((monday_pickup_hub is null or monday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((thursday_pickup_hub is null or thursday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((monday_delivery_hub is null or monday_delivery_hub ilike '%delivery%') and recurring_delivery is not null) or ((thursday_delivery_hub is null or thursday_delivery_hub ilike '%delivery%') and recurring_delivery is not null)")
