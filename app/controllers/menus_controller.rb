@@ -12,7 +12,7 @@ class MenusController < ApplicationController
 
     def pull_rating_details
         menu = Menu.find(params[:id])
-        details = menu.menu_ratings.order(created_at: :desc)
+        details = menu.menu_ratings.order(created_at: :desc).map {|mr| {menu_id:mr.menu_id, id:mr.id, customer_name: "#{mr.customer.name if mr.customer} (#{mr.customer.email if mr.customer})",rating:mr.rating,comment:mr.comment }}
         respond_to do |format|
           format.json {
             render json: details.to_json

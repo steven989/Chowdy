@@ -42,7 +42,7 @@ $(function(){
           }).done(function(data){
             $('#rating_details_table tbody').html('');
             data.forEach(function(e){
-              $('#rating_details_table tbody').append('<tr><td>'+e.created_at+'</td><td>'+e.rating+'</td><td>'+e.comment+'</td></tr>')
+              $('#rating_details_table tbody').append('<tr><td>'+e.customer_name+'</td><td>'+e.rating+'</td><td>'+e.comment+'</td></tr>')
             });
             $('#ratingDetailsModal').modal();
           })
@@ -310,7 +310,7 @@ $(function(){
             <table id="rating_details_table" class="display table table-striped m-b-none" style="font-size: 12px;">
               <thead>
                 <tr>
-                  <th >Date</th>
+                  <th >Customer</th>
                   <th >Rating</th>
                   <th >Comment</th>
                 </tr>
