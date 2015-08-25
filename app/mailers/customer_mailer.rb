@@ -173,7 +173,7 @@ class CustomerMailer < ActionMailer::Base
   def send_customer_list
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
 
-        hub_array = ['wandas','coffee_bar','dekefir']
+        hub_array = ['wandas','coffee_bar','dekefir','gta_courier']
         hub_array.each do |hub|
             @id_iterate = 1
             if hub == 'wandas'
@@ -189,6 +189,10 @@ class CustomerMailer < ActionMailer::Base
                 @location = "deKEFIR"
                 @location_match ='dekefir'
                 @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%dekefir%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%dekefir%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
+            elsif hub == 'gta_courier'
+                @location = "GTA Courier"
+                @location_match ='gta'
+                @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_delivery_hub =~ '%gta%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_delivery_hub =~ '%gta%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
             end
 
             @data = [] 
