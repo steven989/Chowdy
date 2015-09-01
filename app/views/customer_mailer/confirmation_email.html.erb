@@ -5,10 +5,13 @@
 <body>
     <p>Hi <%= @name %>, thanks for signing up for Chowdy!</p>
     <p>This is an ongoing meal service that automatically rebills every week, so please read the instructions bellow to make sure your subscription goes smoothly.</p>
-    <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %>. You can pick up <%= @total_monday %> meals Monday-Wednesday, and the other <%= @total_thursday %> meals Thursday-Saturday anytime during your hub's opening hours.</b></p>
     <% if @delivery %>
+        <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %>. You will receive <%= @total_monday %> meals on Monday, and the other <%= @total_thursday %> meals on Thursday.</b></p>
+
         <p>You've indicated that you want delivery, please log in to your account using the link below, and put in the delivery address as soon as possible. If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (in case you are not home). The delivery is $10 per drop.</p>
     <% else %>
+        <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %>. You can pick up <%= @total_monday %> meals Monday-Wednesday, and the other <%= @total_thursday %> meals Thursday-Saturday anytime during your hub's opening hours.</b></p>
+
         <p>Pick up your meals at <%= @hub %>, the store hours of this hub is <%= @op_hours %>. Just let staff know your name and you can grab your meals. That's it! (Please double check your meals when picking up to make sure you're happy with your selections.)</p>
     <% end %>
     <p><b><u>Please create an account</u> to pause or make changes to your subscription (and rate the meals!) at: <%= short_url(create_customer_profile_url(@stripe_customer_id)) %></b></p>
