@@ -66,7 +66,7 @@ class AdminActionsController < ApplicationController
 
         @data = [] 
         @deliveries.each do |c|
-            @data.push({customer_id:c.id,email:c.email,name:c.name,address:c.delivery_address,phone_number:c.phone_number, reg_mon:"#{[nil,'',0].include?(c.regular_meals_on_monday) ? '' : c.regular_meals_on_monday.to_s()+ ' Reg'}" , grn_mon:"#{[nil,'',0].include?(c.green_meals_on_monday) ? '' : c.green_meals_on_monday.to_s() + ' Grn'}", reg_thu:"#{[nil,'',0].include?(c.regular_meals_on_thursday) ? '' : c.regular_meals_on_thursday.to_s() + ' Reg'}", grn_thu:"#{[nil,'',0].include?(c.green_meals_on_thursday) ? '' : c.green_meals_on_thursday.to_s() + ' Grn'}",no_pork:"#{c.no_pork ? 'No Pork' : ''}",no_beef:"#{c.no_beef ? 'No Beef' : ''}",no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",special_delivery_instructions:c.special_delivery_instructions,selected_hub:c.hub,monday_delivery_hub:c.monday_delivery_hub,thursday_delivery_hub:c.thursday_delivery_hub,delivery_time:c.delivery_time,delivery_boundary:c.delivery_boundary})
+            @data.push({customer_id:c.id,email:c.email,name:c.name,address:c.delivery_address,phone_number:c.phone_number, reg_mon:"#{[nil,'',0].include?(c.regular_meals_on_monday) ? '' : c.regular_meals_on_monday.to_s()+ ' Reg'}" , grn_mon:"#{[nil,'',0].include?(c.green_meals_on_monday) ? '' : c.green_meals_on_monday.to_s() + ' Grn'}", reg_thu:"#{[nil,'',0].include?(c.regular_meals_on_thursday) ? '' : c.regular_meals_on_thursday.to_s() + ' Reg'}", grn_thu:"#{[nil,'',0].include?(c.green_meals_on_thursday) ? '' : c.green_meals_on_thursday.to_s() + ' Grn'}",no_pork:"#{c.no_pork ? 'No Pork' : ''}",no_beef:"#{c.no_beef ? 'No Beef' : ''}",no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",special_delivery_instructions:c.special_delivery_instructions,selected_hub:c.hub,monday_delivery_hub:c.monday_delivery_hub,thursday_delivery_hub:c.thursday_delivery_hub,delivery_time:c.delivery_time,delivery_boundary:c.delivery_boundary})
         end
 
         respond_to do |format|
@@ -74,7 +74,7 @@ class AdminActionsController < ApplicationController
                 disposition = "attachment; filename='deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","special_delivery_instructions","selected_hub","monday_delivery_hub","thursday_delivery_hub","delivery_time", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","special_delivery_instructions","selected_hub","monday_delivery_hub","thursday_delivery_hub","delivery_time", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 else 
                     send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 end
@@ -227,8 +227,9 @@ class AdminActionsController < ApplicationController
                 no_beef = (params[:customer][:no_beef].blank? || params[:customer][:no_beef] == "0") ? false : true
                 no_pork = (params[:customer][:no_pork].blank? || params[:customer][:no_pork] == "0") ? false : true
                 no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
-                send_notification = (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry)
-                @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
+                extra_ice = (params[:customer][:extra_ice].blank? || params[:customer][:extra_ice] == "0") ? false : true
+                send_notification = (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (extra_ice != @customer.extra_ice)
+                @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice)
                 if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
                     CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Meal preference has changed")

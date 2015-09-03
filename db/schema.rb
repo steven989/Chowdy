@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150730221943) do
+ActiveRecord::Schema.define(version: 20150903185121) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -94,6 +94,7 @@ ActiveRecord::Schema.define(version: 20150730221943) do
     t.boolean  "no_pork"
     t.boolean  "no_poultry"
     t.string   "delivery_boundary"
+    t.boolean  "extra_ice"
   end
 
   create_table "daily_snapshots", force: :cascade do |t|
