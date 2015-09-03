@@ -223,7 +223,7 @@ class Customer < ActiveRecord::Base
                         referral_matched = true
                     
                     elsif Promotion.where("code ilike ? and active = true", referral.gsub(" ","")).length == 1 #match promo code
-                        promotion = Promotion.where(code: referral.gsub(" ","")).take
+                        promotion = Promotion.where("code ilike ? and active = true", referral.gsub(" ","")).take
                             if promotion.immediate_refund
                                 begin 
                                     charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
