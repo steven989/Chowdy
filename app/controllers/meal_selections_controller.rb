@@ -6,7 +6,7 @@ class MealSelectionsController < ApplicationController
 
         current_customer = current_user.customer
         
-        if current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
+        if current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank? || ((Date.today < current_customer.first_pick_up_date && current_customer.created_at > Chowdy::Application.closest_date(-1,3,current_customer.first_pick_up_date) ) ? true : false)
             total_meals = current_customer.total_meals_per_week.to_i
             total_green = current_customer.number_of_green.to_i
             monday_regular = current_customer.regular_meals_on_monday.to_i

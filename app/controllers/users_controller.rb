@@ -347,14 +347,15 @@ class UsersController < ApplicationController
             @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{monday_pickup_hub_match_string||= "xxx"}%")|(setting_attribute =~ "%#{thursday_pickup_hub_match_string ||= "xxx"}%") | (setting_attribute =~ "%#{next_week_hub_match_string ||= "xxx"}%"))}
 
             
-            if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank?
+            if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank? || @selection_timing_exception_for_new_customers
+                @change_effective_date = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank? ? nil : @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.start_date.strftime("%A %b %e")
                 @total_meals = @current_customer.total_meals_per_week.to_i
                 @total_green = @current_customer.number_of_green.to_i
                 @monday_regular = @current_customer.regular_meals_on_monday.to_i
                 @monday_green = @current_customer.green_meals_on_monday.to_i
                 @thursday_regular = @current_customer.regular_meals_on_thursday.to_i
                 @thursday_green = @current_customer.green_meals_on_thursday.to_i
-                @no_selection_issue =  @current_customer.total_meals_per_week.to_i - (@current_customer.meal_selections.where(production_day:@display_production_day_1).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum + @current_customer.meal_selections.where(production_day:@display_production_day_2).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum)
+                @no_selection_issue =  @current_customer.meal_selections.where(production_day:@display_production_day_1).blank? ? 0 : (@current_customer.total_meals_per_week.to_i - (@current_customer.meal_selections.where(production_day:@display_production_day_1).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum + @current_customer.meal_selections.where(production_day:@display_production_day_2).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum))
             else
                 @change_effective_date = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.start_date.strftime("%A %b %e")
                 @total_meals = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_meals.to_i
@@ -363,7 +364,7 @@ class UsersController < ApplicationController
                 @thursday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_thu.to_i
                 @thursday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_thu.to_i
                 @total_green = @monday_green + @thursday_green
-                @no_selection_issue = (@current_customer.meal_selections.where(production_day:@display_production_day_1).blank? || @current_customer.stop_queues.where(stop_type:'change_sub',start_date:Chowdy::Application.closest_date(1,1,@display_production_day_1)).blank?) ? 0 : (@current_customer.stop_queues.where(stop_type:'change_sub',start_date:Chowdy::Application.closest_date(1,1,@display_production_day_1)).take.updated_meals.to_i - @current_customer.meal_selections.where(production_day:@display_production_day_1).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum - @current_customer.meal_selections.where(production_day:@display_production_day_2).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum)
+                @no_selection_issue = @current_customer.meal_selections.where(production_day:@display_production_day_1).blank? ? 0 : ((@current_customer.meal_selections.where(production_day:@display_production_day_1).blank? || @current_customer.stop_queues.where(stop_type:'change_sub',start_date:Chowdy::Application.closest_date(1,1,@display_production_day_1)).blank?) ? 0 : (@current_customer.stop_queues.where(stop_type:'change_sub',start_date:Chowdy::Application.closest_date(1,1,@display_production_day_1)).take.updated_meals.to_i - @current_customer.meal_selections.where(production_day:@display_production_day_1).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum - @current_customer.meal_selections.where(production_day:@display_production_day_2).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum))
 
 
             end
