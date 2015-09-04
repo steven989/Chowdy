@@ -28,6 +28,11 @@ module Chowdy
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
   
+    def wday(date=Date.today)
+        date_given = date.to_date
+        date_given.wday == 0 ? 7 : date_given.wday
+    end
+
     def closest_date(distance=0,day_of_week=0, reference_date=Date.today)
         #distance specifies how many weeks away the desired day is from today. 1 indicates the upcoming, -1 indicates the last
         #day_of_week is from 1 to 7, where 1 is Monday and 7 is Sunday

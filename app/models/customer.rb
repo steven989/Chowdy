@@ -9,6 +9,7 @@ class Customer < ActiveRecord::Base
     has_many :refunds, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :promotion_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :stop_queue_records, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :meal_selections, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
     validates :email, uniqueness: true
     validates :referral_code, uniqueness: true, allow_nil: :true, allow_blank: :true

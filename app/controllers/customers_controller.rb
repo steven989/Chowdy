@@ -233,6 +233,8 @@ protect_from_forgery :except => :payment
             current_customer.update(recurring_delivery:nil)
             CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
             CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")
+            flash[:status] = "warning"
+            flash[:notice_delivery] = "Your delivery has been stopped effective your next batch. If you have not selected a pick-up hub, please do so under <a href='#changePlan' data-toggle='tab' class='url_seg'>Manage Subscription</a> tab"
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 
             current_customer.update_attributes(name:params[:name])

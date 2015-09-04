@@ -181,6 +181,47 @@ class UsersController < ApplicationController
             current_user.log_activity("chef dashboard")
             @menu = Menu.all.order(production_day: :asc)
         else
+
+            @current_customer = current_user.customer
+            @display_cancel = true
+            @display_pause = true
+            @display_restart = true
+            @disable_sub_update = false
+
+            cut_off_wday = SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i
+            @cut_off_date = Chowdy::Application.wday(Date.today) == cut_off_wday ? Date.today : Chowdy::Application.closest_date(1,cut_off_wday)
+            @display_production_day_1 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.wday(Date.today) : Chowdy::Application.closest_date(1,7)) : (Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.closest_date(1,7) : Chowdy::Application.closest_date(2,7))
+            @display_production_day_2 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) < 3 ? Chowdy::Application.closest_date(2,3) : Chowdy::Application.closest_date(1,3)) : (Chowdy::Application.wday(Date.today) < 3  ? Chowdy::Application.closest_date(3,3) : Chowdy::Application.closest_date(2,3))
+
+            @monday_beef_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Beef").blank?
+            @monday_pork_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Pork").blank?
+            @monday_poultry_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Poultry").blank?
+            @monday_green_1_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Green 1").blank?
+            @monday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Green 2").blank?
+
+            meal_selection_customer_monday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_1)
+
+            @monday_beef_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.beef
+            @monday_pork_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.pork
+            @monday_poultry_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.poultry
+            @monday_green_1_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.green_1
+            @monday_green_2_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.green_2
+
+            @thursday_beef_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Beef").blank?
+            @thursday_pork_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Pork").blank?
+            @thursday_poultry_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Poultry").blank?
+            @thursday_green_1_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").blank?
+            @thursday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").blank?
+
+            meal_selection_customer_thursday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_2)
+
+            @thursday_beef_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.beef
+            @thursday_pork_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.pork
+            @thursday_poultry_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.poultry
+            @thursday_green_1_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.green_1
+            @thursday_green_2_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.green_2
+
+
             current_user.log_activity("user accessing dashboard")
             @menu_date_sunday = Date.today.wday == 0 ? Chowdy::Application.closest_date(-2,7) : Chowdy::Application.closest_date(-1,7)
             @menu_date_wednesday = Chowdy::Application.closest_date(1,3,@menu_date_sunday)
@@ -210,11 +251,6 @@ class UsersController < ApplicationController
             @green_1_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 1").blank?
             @green_2_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").blank?
 
-            @current_customer = current_user.customer
-            @display_cancel = true
-            @display_pause = true
-            @display_restart = true
-            @disable_sub_update = false
 
             @rated_menu_items = @current_customer.menu_ratings.where("menu_id is not null").order(created_at: :desc).limit(20).map{|mr| mr.menu_id }
 

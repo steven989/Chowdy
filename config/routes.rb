@@ -32,6 +32,9 @@ Chowdy::Application.routes.draw do
   get 'admin_action/failed_invoice/:id/mark_as_paid' => 'admin_actions#mark_failed_invoice_as_paid', as: 'mark_failed_invoice_as_paid'
   get 'admin_action/impersonate_user/:id' => 'admin_actions#impersonate', as: 'impersonate_user'
 
+  get 'meal_selection/edit' => 'meal_selections#edit', as:'choose_meals'
+  post 'meal_selection/update' => 'meal_selections#update', as:'update_meal_choice'
+
   resources :password_resets
   resources :system_settings
   resources :scheduled_tasks
