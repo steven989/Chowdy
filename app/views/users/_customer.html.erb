@@ -89,6 +89,46 @@ $(function(){
       }
     });
 
+    // submit menu selection
+
+    $('#submit_meal_selection').off('click').on('click',function(){
+
+      data = [
+        {
+          production_day:"<%= @display_production_day_1 %>",
+          beef:$('#monday_beef_1_spinner').val(),
+          pork:$('#monday_pork_1_spinner').val(),
+          poultry:$('#monday_poultry_1_spinner').val(),
+          green_1:$('#monday_green_1_1_spinner').val(),
+          green_2:$('#monday_green_2_1_spinner').val()},
+        {
+          production_day:"<%= @display_production_day_2 %>",
+          beef:$('#thursday_beef_1_spinner').val(),
+          pork:$('#thursday_pork_1_spinner').val(),
+          poultry:$('#thursday_poultry_1_spinner').val(),
+          green_1:$('#thursday_green_1_1_spinner').val(),
+          green_2:$('#thursday_green_2_1_spinner').val()}
+        ];
+
+        console.log(data);
+
+      $.ajax({
+        url: '<%= update_meal_choice_path %>',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {meal_selection: JSON.stringify(data)}
+      }).done(function(data){
+        if(data.status == "success") {
+          $('#submit_meal_selection').html("Selection Saved");
+          $('#submit_meal_selection').addClass('disabled');
+          $('#unsaved_warning_meal_selection').addClass('hidden');
+        } else {
+          $('#errorModal .modal-body').html("Meal selection could not be saved - " + data.message);
+          $('#errorModal').modal({show:true});
+        }
+      })      
+    });
+
     // submit rating
 
     $('.submit_meal_rating').off('click').on('click',function(){
@@ -264,67 +304,114 @@ $(function(){
     var updated_thursday_regular_limit = <%= @thursday_regular.to_i - @thursday_beef_selection_1_number.to_i - @thursday_pork_selection_1_number.to_i - @thursday_poultry_selection_1_number.to_i %>;
     var updated_thursday_green_limit = <%= @thursday_green.to_i - @thursday_green_1_selection_1_number.to_i - @thursday_green_2_selection_1_number.to_i%>;
 
+    function update_display_guide() {
+
+      if (updated_monday_regular_limit == 0) {
+        $('#monday_regular_remaining_display').addClass('hidden');
+      } else {
+        $('#monday_regular_remaining_display').removeClass('hidden');
+        $('#monday_regular_remaining').html(updated_monday_regular_limit);
+      }
+
+      if (updated_monday_green_limit == 0) {
+        $('#monday_green_remaining_display').addClass('hidden');
+      } else {
+        $('#monday_green_remaining_display').removeClass('hidden');
+        $('#monday_green_remaining').html(updated_monday_green_limit);
+      }
+
+      if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0) {
+        $('#monday_selection_full').removeClass('hidden');
+      } else {
+        $('#monday_selection_full').addClass('hidden');
+      }
+
+
+      if (updated_thursday_regular_limit == 0) {
+        $('#thursday_regular_remaining_display').addClass('hidden');
+      } else {
+        $('#thursday_regular_remaining_display').removeClass('hidden');
+        $('#thursday_regular_remaining').html(updated_thursday_regular_limit);
+      }
+
+      if (updated_thursday_green_limit == 0) {
+        $('#thursday_green_remaining_display').addClass('hidden');
+      } else {
+        $('#thursday_green_remaining_display').removeClass('hidden');
+        $('#thursday_green_remaining').html(updated_thursday_green_limit);
+      }     
+
+      if (updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
+        $('#thursday_selection_full').removeClass('hidden');
+      } else {
+        $('#thursday_selection_full').addClass('hidden');
+      } 
+    };
+
+    update_display_guide();
+
     $('#monday_beef_1_spinner').TouchSpin({
       min: 0,
-      max: updated_monday_regular_limit,
+      max: $('#monday_beef_1_spinner').val()*1 + updated_monday_regular_limit,
       step: 1
     });
 
     $('#monday_pork_1_spinner').TouchSpin({
       min: 0,
-      max: updated_monday_regular_limit,
+      max: $('#monday_pork_1_spinner').val()*1 + updated_monday_regular_limit,
       step: 1
     });
 
     $('#monday_poultry_1_spinner').TouchSpin({
       min: 0,
-      max: updated_monday_regular_limit,
+      max: $('#monday_poultry_1_spinner').val()*1 + updated_monday_regular_limit,
       step: 1
     });
 
     $('#monday_green_1_1_spinner').TouchSpin({
       min: 0,
-      max: updated_monday_green_limit,
+      max: $('#monday_green_1_1_spinner').val()*1 + updated_monday_green_limit,
       step: 1
     });
 
     $('#monday_green_2_1_spinner').TouchSpin({
       min: 0,
-      max: updated_monday_green_limit,
+      max: $('#monday_green_2_1_spinner').val()*1 + updated_monday_green_limit,
       step: 1
     });
 
     $('#thursday_beef_1_spinner').TouchSpin({
       min: 0,
-      max: updated_thursday_regular_limit,
+      max: $('#thursday_beef_1_spinner').val()*1 + updated_thursday_regular_limit,
       step: 1
     });
 
     $('#thursday_pork_1_spinner').TouchSpin({
       min: 0,
-      max: updated_thursday_regular_limit,
+      max: $('#thursday_pork_1_spinner').val()*1 + updated_thursday_regular_limit,
       step: 1
     });
 
     $('#thursday_poultry_1_spinner').TouchSpin({
       min: 0,
-      max: updated_thursday_regular_limit,
+      max: $('#thursday_poultry_1_spinner').val()*1 + updated_thursday_regular_limit,
       step: 1
     });
 
     $('#thursday_green_1_1_spinner').TouchSpin({
       min: 0,
-      max: updated_thursday_green_limit,
+      max: $('#thursday_green_1_1_spinner').val()*1 + updated_thursday_green_limit,
       step: 1
     });
 
     $('#thursday_green_2_1_spinner').TouchSpin({
       min: 0,
-      max: updated_thursday_green_limit,
+      max: $('#thursday_green_2_1_spinner').val()*1 + updated_thursday_green_limit,
       step: 1
     });
 
     $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner, #thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').off("change").on("change", function(){
+
       $(this).closest('.display_number_container').find('.selection_display').html($(this).val());
       updated_monday_regular_limit = monday_regular_limit -  $('#monday_beef_1_spinner').val() -  $('#monday_pork_1_spinner').val() -  $('#monday_poultry_1_spinner').val();
       console.log(updated_monday_regular_limit);
@@ -336,6 +423,18 @@ $(function(){
       $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_monday_regular_limit + $(this).val()*1})});
       $('#monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_monday_green_limit + $(this).val()*1})});
 
+      $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_thursday_regular_limit + $(this).val()*1})});
+      $('#thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_thursday_green_limit + $(this).val()*1})});
+
+      if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0 && updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
+        $('#submit_meal_selection').removeClass('disabled');  
+      } else {
+        $('#submit_meal_selection').addClass('disabled');  
+      }
+      
+      $('#unsaved_warning_meal_selection').removeClass('hidden');
+
+      update_display_guide();
 
     })
 
@@ -420,14 +519,6 @@ $(function(){
             $('#monday_grn_hidden').val(updated_mon_grn);
             $('#thursday_grn_hidden').val(updated_thu_grn);
             updated_green = updated_value;
-            post_green_total_reg_meals = updated_total_meal_number - updated_value;
-            if (post_green_total_reg_meals % 2 == 0) {
-              $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
-              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
-            } else {
-              $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
-              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
-            };
 
           } else {
             daily_difference_low = (updated_value - total_green)/2 - 0.5;
@@ -437,15 +528,11 @@ $(function(){
             $('#monday_grn_hidden').val(updated_mon_grn);
             $('#thursday_grn_hidden').val(updated_thu_grn);
             updated_green = updated_value;
-            post_green_total_reg_meals = updated_total_meal_number - updated_value;
-            if (post_green_total_reg_meals % 2 == 0) {
-              $('#monday_reg_hidden').val(post_green_total_reg_meals/2);
-              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2);
-            } else {
-              $('#monday_reg_hidden').val(post_green_total_reg_meals/2-0.5);
-              $('#thursday_reg_hidden').val(post_green_total_reg_meals/2+0.5);
-            };
           };
+
+          $('#monday_reg_hidden').val(updated_total_meal_number/2 - updated_mon_grn);
+          $('#thursday_reg_hidden').val(updated_total_meal_number/2 - updated_thu_grn)
+
           updateVisibleNumbers();
         });
       
@@ -489,9 +576,9 @@ $(function(){
                         <% unless @current_customer.recurring_delivery.blank? %>
                         <li class="highlight">
                           <a href="#meal_selection" class="auto b-b padder-v" data-toggle="tab">
-                            <i class="i i-statistics icon">
+                            <i class="i i-book icon">
                             </i>
-                            <span class="font-bold">Meal selection</span>
+                            <span class="font-bold">Choose Meals</span>
                           </a>
                         </li>
                         <% end %>
@@ -684,7 +771,7 @@ $(function(){
                                           <% end %>
                                         </h3>
                                         <% unless @current_customer.recurring_delivery.blank? %>
-                                          <p class="m-b-xs text-muted text-center"><a href="<%= choose_meals_path %>" id="choose_meals">Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b><br> (Cut-off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at midnight. If no selection is made default selection will be sent)</p>
+                                          <p class="m-b-xs text-muted text-center"><a href="#meal_selection" class="url_seg" >Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b><br> (Cut-off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at midnight. If no selection is made default selection will be sent)</p>
                                         <% end %>
                                     </div>
                                 </section>
@@ -1556,17 +1643,17 @@ $(function(){
                         <section class="scrollable padder"> 
                           <div class="row m-t-lg">
                             <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
-                              <button class="btn btn-s-md btn-success disabled">Submit Selection</button>                            
+                              <button class="btn btn-s-md btn-success disabled" id="submit_meal_selection">Submit Selection</button>                            
                             </div>
-                            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-8" id="subscription_change_warning">
-                              <div class="alert alert-warning alert-block text-center" style="height:34px; padding-top:8px;">
+                            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-8">
+                              <div class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; margin: 0;" id="unsaved_warning_meal_selection">
                                 
                                 You have unsaved changes
                               </div>
                             </div>  
                           </div>
                           <div class="row m-t-sm padder">
-                            Meal selection for <%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %>
+                            Meal selection for <b><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none</span><span id="monday_regular_remaining_display"><span id="monday_regular_remaining"></span> regular </span><span id="monday_green_remaining_display"> <span id="monday_green_remaining"></span> green</span>)
                           </div>
                           <div class="row m-t-none">
                             <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
@@ -1619,7 +1706,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_poultry_1_spinner" value="@monday_poultry_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="monday_poultry_1_spinner" value="<%= @monday_poultry_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1638,7 +1725,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_green_1_1_spinner" value="@monday_green_1_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="monday_green_1_1_spinner" value="<%= @monday_green_1_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1657,7 +1744,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_green_2_1_spinner" value="@monday_green_2_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="monday_green_2_1_spinner" value="<%= @monday_green_2_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1666,7 +1753,7 @@ $(function(){
                             </div>
                           </div>
                           <div class="row m-t-lg padder">
-                            Meal selection for <%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %>
+                            Meal selection for <b><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none</span><span id="thursday_regular_remaining_display"><span id="thursday_regular_remaining"></span> regular </span><span id="thursday_green_remaining_display"><span id="thursday_green_remaining"></span> green</span>)
                           </div>
                           <div class="row m-t-none">
                             <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
@@ -1681,7 +1768,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_beef_1_spinner" value="@thursday_beef_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="thursday_beef_1_spinner" value="<%= @thursday_beef_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1700,7 +1787,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_pork_1_spinner" value="@thursday_pork_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="thursday_pork_1_spinner" value="<%= @thursday_pork_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1719,7 +1806,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_poultry_1_spinner" value="@thursday_poultry_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="thursday_poultry_1_spinner" value="<%= @thursday_poultry_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1738,7 +1825,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_green_1_1_spinner" value="@thursday_green_1_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="thursday_green_1_1_spinner" value="<%= @thursday_green_1_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1757,7 +1844,7 @@ $(function(){
                                     </div>
                                     <div class="row row-centered">
                                       <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_green_2_1_spinner" value="@thursday_green_2_selection_1_number" style="opacity: 0;">
+                                        <input type="text" id="thursday_green_2_1_spinner" value="<%= @thursday_green_2_selection_1_number %>" style="opacity: 0;">
                                       </div>
                                     </div>
                                   </div>                                    
@@ -1856,6 +1943,25 @@ $(function(){
             <%= submit_tag 'Submit feedback',class:"btn btn-primary" %>
           </div>
         <% end %>
+      </div>
+  </div>
+</div>
+
+
+<!-- Error modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Error</h4>
+          </div>
+          <div class="modal-body">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
       </div>
   </div>
 </div>

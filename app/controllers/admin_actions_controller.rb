@@ -64,9 +64,43 @@ class AdminActionsController < ApplicationController
         puts '---------------------------------------------------'
         @deliveries = Customer.where{(active? >> ["Yes","yes"]) & (paused? >> [nil,"No","no"]) & ((recurring_delivery >> ["Yes","yes"])|((hub =~ "%delivery%") &(monday_pickup_hub == nil)))}
 
+        current_pick_up_date = SystemSetting.where(setting:"system_date",setting_attribute:"pick_up_date").take.setting_value.to_date
+        production_day_1 = Chowdy::Application.closest_date(-1,7,current_pick_up_date)
+        production_day_2 = Chowdy::Application.closest_date(1,3,current_pick_up_date)
+
         @data = [] 
         @deliveries.each do |c|
-            @data.push({customer_id:c.id,email:c.email,name:c.name,address:c.delivery_address,phone_number:c.phone_number, reg_mon:"#{[nil,'',0].include?(c.regular_meals_on_monday) ? '' : c.regular_meals_on_monday.to_s()+ ' Reg'}" , grn_mon:"#{[nil,'',0].include?(c.green_meals_on_monday) ? '' : c.green_meals_on_monday.to_s() + ' Grn'}", reg_thu:"#{[nil,'',0].include?(c.regular_meals_on_thursday) ? '' : c.regular_meals_on_thursday.to_s() + ' Reg'}", grn_thu:"#{[nil,'',0].include?(c.green_meals_on_thursday) ? '' : c.green_meals_on_thursday.to_s() + ' Grn'}",no_pork:"#{c.no_pork ? 'No Pork' : ''}",no_beef:"#{c.no_beef ? 'No Beef' : ''}",no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",special_delivery_instructions:c.special_delivery_instructions,selected_hub:c.hub,monday_delivery_hub:c.monday_delivery_hub,thursday_delivery_hub:c.thursday_delivery_hub,delivery_time:c.delivery_time,delivery_boundary:c.delivery_boundary})
+            @data.push({
+                customer_id:c.id,
+                email:c.email,
+                name:c.name,
+                address:c.delivery_address,
+                phone_number:c.phone_number, 
+                reg_mon:"#{[nil,'',0].include?(c.regular_meals_on_monday) ? '' : c.regular_meals_on_monday.to_s()+ ' Reg'}" , 
+                grn_mon:"#{[nil,'',0].include?(c.green_meals_on_monday) ? '' : c.green_meals_on_monday.to_s() + ' Grn'}", 
+                reg_thu:"#{[nil,'',0].include?(c.regular_meals_on_thursday) ? '' : c.regular_meals_on_thursday.to_s() + ' Reg'}", 
+                grn_thu:"#{[nil,'',0].include?(c.green_meals_on_thursday) ? '' : c.green_meals_on_thursday.to_s() + ' Grn'}",
+                no_pork:"#{c.no_pork ? 'No Pork' : ''}",
+                no_beef:"#{c.no_beef ? 'No Beef' : ''}",
+                no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",
+                extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",
+                beef_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.beef == 0 || c.meal_selections.where(production_day:production_day_1).take.beef.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.beef} Beef"),
+                pork_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.pork == 0 || c.meal_selections.where(production_day:production_day_1).take.pork.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.pork} Pork"),
+                poultry_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.poultry == 0 || c.meal_selections.where(production_day:production_day_1).take.poultry.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.poultry} Poultry"),
+                green_1_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.green_1 == 0 || c.meal_selections.where(production_day:production_day_1).take.green_1.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.green_1} Green 1"),
+                green_2_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.green_2 == 0 || c.meal_selections.where(production_day:production_day_1).take.green_2.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.green_2} Green 2"),
+                beef_thursday:c.meal_selections.where(production_day:production_day_2).blank? ? "" : ((c.meal_selections.where(production_day:production_day_2).take.beef == 0 || c.meal_selections.where(production_day:production_day_2).take.beef.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_2).take.beef} Beef"),
+                pork_thursday:c.meal_selections.where(production_day:production_day_2).blank? ? "" : ((c.meal_selections.where(production_day:production_day_2).take.pork == 0 || c.meal_selections.where(production_day:production_day_2).take.pork.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_2).take.pork} Pork"),
+                poultry_thursday:c.meal_selections.where(production_day:production_day_2).blank? ? "" : ((c.meal_selections.where(production_day:production_day_2).take.poultry == 0 || c.meal_selections.where(production_day:production_day_2).take.poultry.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_2).take.poultry} Poultry"),
+                green_1_thursday:c.meal_selections.where(production_day:production_day_2).blank? ? "" : ((c.meal_selections.where(production_day:production_day_2).take.green_1 == 0 || c.meal_selections.where(production_day:production_day_2).take.green_1.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_2).take.green_1} Green 1"),
+                green_2_thursday:c.meal_selections.where(production_day:production_day_2).blank? ? "" : ((c.meal_selections.where(production_day:production_day_2).take.green_2 == 0 || c.meal_selections.where(production_day:production_day_2).take.green_2.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_2).take.green_2} Green 2"),
+                special_delivery_instructions:c.special_delivery_instructions,
+                selected_hub:c.hub,
+                monday_delivery_hub:c.monday_delivery_hub,
+                thursday_delivery_hub:c.thursday_delivery_hub,
+                delivery_time:c.delivery_time,
+                delivery_boundary:c.delivery_boundary
+                })
         end
 
         respond_to do |format|
