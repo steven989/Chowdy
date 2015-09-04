@@ -188,7 +188,8 @@ class UsersController < ApplicationController
             @display_restart = true
             @disable_sub_update = false
 
-            cut_off_wday = SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i
+            @selection_timing_exception_for_new_customers = (Date.today < @current_customer.first_pick_up_date && @current_customer.created_at > Chowdy::Application.closest_date(-1,3,@current_customer.first_pick_up_date) ) ? true : false  #cut off date is system setting, unless the customer signed up after Wednesday and it's before his first pick up
+            cut_off_wday = @selection_timing_exception_for_new_customers ? ((Date.today.wday == 0 && DateTime.now.hour >= 14) ? SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i : 7 ) : SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i
             @cut_off_date = Chowdy::Application.wday(Date.today) == cut_off_wday ? Date.today : Chowdy::Application.closest_date(1,cut_off_wday)
             @display_production_day_1 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.wday(Date.today) : Chowdy::Application.closest_date(1,7)) : (Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.closest_date(1,7) : Chowdy::Application.closest_date(2,7))
             @display_production_day_2 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) < 3 ? Chowdy::Application.closest_date(2,3) : Chowdy::Application.closest_date(1,3)) : (Chowdy::Application.wday(Date.today) < 3  ? Chowdy::Application.closest_date(3,3) : Chowdy::Application.closest_date(2,3))

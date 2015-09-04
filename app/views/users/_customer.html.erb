@@ -771,7 +771,11 @@ $(function(){
                                           <% end %>
                                         </h3>
                                         <% unless @current_customer.recurring_delivery.blank? %>
-                                          <p class="m-b-xs text-muted text-center"><a href="#meal_selection" class="url_seg" >Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b><br> (Cut-off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at midnight. If no selection is made default selection will be sent)</p>
+                                          <div class="row">
+                                            <div class="col-md-12 text-center" style="padding: 0 10% 0 10%;">
+                                              <p class="m-b-xs text-muted"><a href="#meal_selection" class="url_seg" >Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b>. Cut off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %><% if @selection_timing_exception_for_new_customers %> (normally it's every Thursday at midnight, but we've extended it for you this week!)<% end %>. If no selection is made before the cut off then default selection will be sent.</p>
+                                            </div>
+                                          </div>
                                         <% end %>
                                     </div>
                                 </section>
