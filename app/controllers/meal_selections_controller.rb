@@ -25,6 +25,7 @@ class MealSelectionsController < ApplicationController
         meal_selection = JSON.parse(params[:meal_selection])
 
         message = []
+        meal_selections = []
 
         if meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i < monday_regular
             status = "fail"
@@ -53,7 +54,7 @@ class MealSelectionsController < ApplicationController
         else
             meal_selection.each do |ms|
                 MealSelection.where(stripe_customer_id:current_customer.stripe_customer_id,production_day:ms['production_day'].to_date).delete_all
-                MealSelection.create(
+                result = MealSelection.create(
                     stripe_customer_id:current_user.customer.stripe_customer_id,
                     production_day:ms['production_day'].to_date,
                     beef:ms['beef'].to_i,
@@ -62,6 +63,8 @@ class MealSelectionsController < ApplicationController
                     green_1:ms['green_1'].to_i,
                     green_2:ms['green_2'].to_i
                 )
+
+                meal_selections.push(result)
             end
         end
 
@@ -69,6 +72,10 @@ class MealSelectionsController < ApplicationController
             status = "fail"
             message.push(error.message)
         else
+            CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
+            if Date.today.wday == 0 && Date.today < current_customer.first_pick_up_date
+                CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
+            end
             status ||= "success"
         end
 

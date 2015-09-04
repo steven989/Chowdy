@@ -187,6 +187,8 @@ class UsersController < ApplicationController
             @display_pause = true
             @display_restart = true
             @disable_sub_update = false
+            @display_meal_selection = @current_customer.recurring_delivery.blank? ? false : true
+            
 
             @selection_timing_exception_for_new_customers = (Date.today < @current_customer.first_pick_up_date && @current_customer.created_at > Chowdy::Application.closest_date(-1,3,@current_customer.first_pick_up_date) ) ? true : false  #cut off date is system setting, unless the customer signed up after Wednesday and it's before his first pick up
             cut_off_wday = @selection_timing_exception_for_new_customers ? ((Date.today.wday == 0 && DateTime.now.hour >= 14) ? SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i : 7 ) : SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i
@@ -352,6 +354,7 @@ class UsersController < ApplicationController
                 @monday_green = @current_customer.green_meals_on_monday.to_i
                 @thursday_regular = @current_customer.regular_meals_on_thursday.to_i
                 @thursday_green = @current_customer.green_meals_on_thursday.to_i
+                @no_selection_issue =  @current_customer.total_meals_per_week.to_i - (@current_customer.meal_selections.where(production_day:@display_production_day_1).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum + @current_customer.meal_selections.where(production_day:@display_production_day_2).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum)
             else
                 @change_effective_date = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.start_date.strftime("%A %b %e")
                 @total_meals = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_meals.to_i
@@ -360,6 +363,9 @@ class UsersController < ApplicationController
                 @thursday_regular = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_reg_thu.to_i
                 @thursday_green = @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.updated_grn_thu.to_i
                 @total_green = @monday_green + @thursday_green
+                @no_selection_issue = (@current_customer.meal_selections.where(production_day:@display_production_day_1).blank? || @current_customer.stop_queues.where(stop_type:'change_sub',start_date:Chowdy::Application.closest_date(1,1,@display_production_day_1)).blank?) ? 0 : (@current_customer.stop_queues.where(stop_type:'change_sub',start_date:Chowdy::Application.closest_date(1,1,@display_production_day_1)).take.updated_meals.to_i - @current_customer.meal_selections.where(production_day:@display_production_day_1).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum - @current_customer.meal_selections.where(production_day:@display_production_day_2).select{(pork + beef + poultry + green_1 + green_2).as(sum)}.first.sum)
+
+
             end
 
             if @current_customer.active?.downcase == "yes" 
@@ -378,7 +384,7 @@ class UsersController < ApplicationController
                     else
                         @current_status = "Active"
                         @current_status_color = "text-success-lt"
-                        @sub_status = (@change_effective_date ? "Meal count change effective #{@change_effective_date}. " : "") + (@requested_hub_to_change_to ? "Hub change effective "+@hub_change_effective_date+"." : "")
+                        @sub_status = (@change_effective_date ? "Meal count change effective #{@change_effective_date}. " : "") +"#{@no_selection_issue < 0 ? 'You have chosen more meals for delivery than you have subscribed for. Please increase your subscription in the <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab. If you do not do so, our system will automatically adjust for the difference upon delivery.' : (@no_selection_issue > 0 ? 'You have not yet selected all your meals for delivery next week. Please go to <a href="#meal_selection" class="url_seg">Choose Meals</a> tab to choose your remaining meals' : '')}" + (@requested_hub_to_change_to ? "Hub change effective "+@hub_change_effective_date+"." : "")
                         @display_restart = false
                     end
                 else
@@ -386,7 +392,7 @@ class UsersController < ApplicationController
                         if @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'restart'
                             @current_status = "Paused"
                             @current_status_color = "text-warning-lt"
-                            @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. "if @change_effective_date}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
+                            @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. "if @change_effective_date}#{@no_selection_issue < 0 ? 'You have chosen more meals for delivery than you have subscribed for. Please increase your subscription in the <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab. If you do not do so, our system will automatically adjust for the difference upon delivery.' : (@no_selection_issue > 0 ? 'You have not yet selected all your meals for delivery next week. Please go to <a href="#meal_selection" class="url_seg">Choose Meals</a> tab to choose your remaining meals' : '')}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
                             @display_restart = false
                         elsif @current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.stop_type == 'pause'
                             @current_status = "Paused"
@@ -402,7 +408,7 @@ class UsersController < ApplicationController
                         @pause_end = @current_customer.next_pick_up_date.to_date
                         @current_status = "Paused"
                         @current_status_color = "text-warning-lt"
-                        @sub_status = "Your subscription will resume on #{@pause_end.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. " if @change_effective_date}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
+                        @sub_status = "Your subscription will resume on #{@pause_end.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. " if @change_effective_date}#{@no_selection_issue < 0 ? 'You have chosen more meals for delivery than you have subscribed for. Please increase your subscription in the <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab. If you do not do so, our system will automatically adjust for the difference upon delivery.' : (@no_selection_issue > 0 ? 'You have not yet selected all your meals for delivery next week. Please go to <a href="#meal_selection" class="url_seg">Choose Meals</a> tab to choose your remaining meals' : '')}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
                     end   
                     
                     
@@ -413,7 +419,7 @@ class UsersController < ApplicationController
                         @current_status = "Inactive"
                         @current_status_color = "text-danger-lt"
                         @display_pause = false
-                        @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. " if @change_effective_date}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
+                        @sub_status = "Your subscription will resume on #{@current_customer.stop_queues.where(stop_type: ["cancel","pause","restart"]).order(created_at: :desc).limit(1).take.start_date.strftime("%A %B %d, %Y")}. #{"Meal count change effective when you resume. " if @change_effective_date}#{@no_selection_issue < 0 ? 'You have chosen more meals for delivery than you have subscribed for. Please increase your subscription in the <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab. If you do not do so, our system will automatically adjust for the difference upon delivery.' : (@no_selection_issue > 0 ? 'You have not yet selected all your meals for delivery next week. Please go to <a href="#meal_selection" class="url_seg">Choose Meals</a> tab to choose your remaining meals' : '')}#{"Hub change effective when you resume." if @requested_hub_to_change_to}"
                         @display_restart = false
                     end
                 else

@@ -227,6 +227,8 @@ protect_from_forgery :except => :payment
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Change delivery info")
             else
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Start Delivery")
+                flash[:status] = "warning"
+                flash[:notice_delivery] = "Please select your meals in the <a href='#meal_selection' data-toggle='tab' class='url_seg'>Choose Meals</a> tab"
             end
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 

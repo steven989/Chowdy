@@ -571,7 +571,7 @@ $(function(){
                             <span class="font-bold">Dashboard</span>
                           </a>
                         </li>
-                        <% unless @current_customer.recurring_delivery.blank? %>
+                        <% if @display_meal_selection %>
                         <li class="highlight">
                           <a href="#meal_selection" class="auto b-b padder-v" data-toggle="tab">
                             <i class="i i-book icon">
@@ -768,10 +768,10 @@ $(function(){
                                             Delivery to <%= @current_customer.delivery_address %>
                                           <% end %>
                                         </h3>
-                                        <% unless @current_customer.recurring_delivery.blank? %>
+                                        <% if @display_meal_selection %>
                                           <div class="row">
                                             <div class="col-md-12 text-center" style="padding: 0 10% 0 10%;">
-                                              <p class="m-b-xs text-muted"><a href="#meal_selection" class="url_seg" >Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b>. Cut off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %><% if @selection_timing_exception_for_new_customers %> (normally it's every Thursday at midnight, but we've extended it for you this week!)<% end %>. If no selection is made before the cut off then default selection will be sent.</p>
+                                              <p class="m-b-xs text-muted"><a href="#meal_selection" data-toggle="tab" class="url_seg" >Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b>. Cut off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %><% if @selection_timing_exception_for_new_customers %> (normally it's every Thursday at midnight, but we've extended it for you this week!)<% end %>. If no selection is made before the cut off then default selection will be sent.</p>
                                             </div>
                                           </div>
                                         <% end %>
@@ -1639,224 +1639,232 @@ $(function(){
                         </section>
                       </section>                      
                     </section>  
-
-                    <section class="tab-pane" id="meal_selection" role="tabpanel">
-                      <section class="vbox">
-                        <section class="scrollable padder"> 
-                          <div class="row m-t-lg">
-                            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
-                              <button class="btn btn-s-md btn-success disabled" id="submit_meal_selection">Submit Selection</button>                            
-                            </div>
-                            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-8">
-                              <div class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; margin: 0;" id="unsaved_warning_meal_selection">
-                                
-                                You have unsaved changes
+      
+                    <% if @display_meal_selection %>
+                      <section class="tab-pane" id="meal_selection" role="tabpanel">
+                        <section class="vbox">
+                          <section class="scrollable padder"> 
+                            <div class="row m-t-lg">
+                              <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                                <button class="btn btn-s-md btn-success disabled" id="submit_meal_selection">Submit Selection</button>                            
                               </div>
-                            </div>  
-                          </div>
-                          <div class="row m-t-sm padder">
-                            Meal selection for <b><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none</span><span id="monday_regular_remaining_display"><span id="monday_regular_remaining"></span> regular </span><span id="monday_green_remaining_display"> <span id="monday_green_remaining"></span> green</span>)
-                          </div>
-                          <div class="row m-t-none">
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @monday_beef_selection_1_name %></h5>
+                              <div class="col-lg-5 col-md-5 col-sm-5 col-xs-8">
+                                <div class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; margin: 0;" id="unsaved_warning_meal_selection">
+                                  
+                                  You have unsaved changes
                                 </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="monday_beef_1" style="font-size:30px;"><%= @monday_beef_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_beef_1_spinner" value="<%= @monday_beef_selection_1_number %>" style="opacity: 0;">
+                              </div>  
+                            </div>
+                            <div class="row m-t-sm padder">
+                              Meal selection for <b><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none</span><b><span id="monday_regular_remaining_display" style="color:#f0ad4e"><span id="monday_regular_remaining"></span> regular </span><span id="monday_green_remaining_display" style="color:#f0ad4e"> <span id="monday_green_remaining"></span> green</span></b>)
+                            </div>
+                            <div class="row padder">
+                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>
+                            </div>
+                            <div class="row m-t-none">
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @monday_beef_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="monday_beef_1" style="font-size:30px;"><%= @monday_beef_selection_1_number %></span>
                                       </div>
-                                    </div>
-                                  </div>                                    
-                                </div>
-                              </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card pork">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @monday_pork_selection_1_name %></h5>
-                                </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="monday_pork_1" style="font-size:30px;"><%= @monday_pork_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_pork_1_spinner" value="<%= @monday_pork_selection_1_number %>" style="opacity: 0;">
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="monday_beef_1_spinner" value="<%= @monday_beef_selection_1_number %>" style="opacity: 0;">
+                                        </div>
                                       </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                
-                              </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card poultry">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @monday_poultry_selection_1_name %></h5>
+                                    </div>                                    
+                                  </div>
                                 </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="monday_poultry_1" style="font-size:30px;"><%= @monday_poultry_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_poultry_1_spinner" value="<%= @monday_poultry_selection_1_number %>" style="opacity: 0;">
+                              </div>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card pork">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @monday_pork_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="monday_pork_1" style="font-size:30px;"><%= @monday_pork_selection_1_number %></span>
                                       </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                 
-                              </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @monday_green_1_selection_1_name %></h5>
-                                </div>
-                                <div class="row  display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="monday_green_1_1" style="font-size:30px;"><%= @monday_green_1_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_green_1_1_spinner" value="<%= @monday_green_1_selection_1_number %>" style="opacity: 0;">
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="monday_pork_1_spinner" value="<%= @monday_pork_selection_1_number %>" style="opacity: 0;">
+                                        </div>
                                       </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                 
-                              </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @monday_green_2_selection_1_name %></h5>
+                                    </div>                                    
+                                  </div>                                
                                 </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="monday_green_2_1" style="font-size:30px;"><%= @monday_green_2_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="monday_green_2_1_spinner" value="<%= @monday_green_2_selection_1_number %>" style="opacity: 0;">
+                              </div>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card poultry">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @monday_poultry_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="monday_poultry_1" style="font-size:30px;"><%= @monday_poultry_selection_1_number %></span>
                                       </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                 
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row m-t-lg padder">
-                            Meal selection for <b><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none</span><span id="thursday_regular_remaining_display"><span id="thursday_regular_remaining"></span> regular </span><span id="thursday_green_remaining_display"><span id="thursday_green_remaining"></span> green</span>)
-                          </div>
-                          <div class="row m-t-none">
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @thursday_beef_selection_1_name %></h5>
-                                </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="thursday_beef_1" style="font-size:30px;"><%= @thursday_beef_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_beef_1_spinner" value="<%= @thursday_beef_selection_1_number %>" style="opacity: 0;">
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="monday_poultry_1_spinner" value="<%= @monday_poultry_selection_1_number %>" style="opacity: 0;">
+                                        </div>
                                       </div>
-                                    </div>
-                                  </div>                                    
+                                    </div>                                    
+                                  </div>                                 
                                 </div>
                               </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card pork">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @thursday_pork_selection_1_name %></h5>
-                                </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="thursday_pork_1" style="font-size:30px;"><%= @thursday_pork_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_pork_1_spinner" value="<%= @thursday_pork_selection_1_number %>" style="opacity: 0;">
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @monday_green_1_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row  display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="monday_green_1_1" style="font-size:30px;"><%= @monday_green_1_selection_1_number %></span>
                                       </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                
-                              </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card poultry">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @thursday_poultry_selection_1_name %></h5>
-                                </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="thursday_poultry_1" style="font-size:30px;"><%= @thursday_poultry_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_poultry_1_spinner" value="<%= @thursday_poultry_selection_1_number %>" style="opacity: 0;">
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="monday_green_1_1_spinner" value="<%= @monday_green_1_selection_1_number %>" style="opacity: 0;">
+                                        </div>
                                       </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                 
-                              </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @thursday_green_1_selection_1_name %></h5>
+                                    </div>                                    
+                                  </div>                                 
                                 </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="thursday_green_1_1" style="font-size:30px;"><%= @thursday_green_1_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_green_1_1_spinner" value="<%= @thursday_green_1_selection_1_number %>" style="opacity: 0;">
-                                      </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                 
                               </div>
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
-                              <div class="inner">
-                                <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                  <h5 style="color:#555;"><%= @thursday_green_2_selection_1_name %></h5>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @monday_green_2_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="monday_green_2_1" style="font-size:30px;"><%= @monday_green_2_selection_1_number %></span>
+                                      </div>
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="monday_green_2_1_spinner" value="<%= @monday_green_2_selection_1_number %>" style="opacity: 0;">
+                                        </div>
+                                      </div>
+                                    </div>                                    
+                                  </div>                                 
                                 </div>
-                                <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                  <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                    <div class="row">
-                                        <span class="h1 block selection_display" id="thursday_green_2_1" style="font-size:30px;"><%= @thursday_green_2_selection_1_number %></span>
-                                    </div>
-                                    <div class="row row-centered">
-                                      <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                        <input type="text" id="thursday_green_2_1_spinner" value="<%= @thursday_green_2_selection_1_number %>" style="opacity: 0;">
-                                      </div>
-                                    </div>
-                                  </div>                                    
-                                </div>                                 
                               </div>
                             </div>
-                          </div>
-                        </section>
-                      </section>                      
-                    </section>  
+                            <div class="row m-t-lg padder">
+                              Meal selection for <b><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none</span><b><span id="thursday_regular_remaining_display" style="color:#f0ad4e"><span id="thursday_regular_remaining"></span> regular </span><span id="thursday_green_remaining_display" style="color:#f0ad4e"><span id="thursday_green_remaining"></span> green</span></b>)
+                            </div>
+                            <div class="row padder">
+                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>
+                            </div>
+                            <div class="row m-t-none">
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @thursday_beef_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="thursday_beef_1" style="font-size:30px;"><%= @thursday_beef_selection_1_number %></span>
+                                      </div>
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="thursday_beef_1_spinner" value="<%= @thursday_beef_selection_1_number %>" style="opacity: 0;">
+                                        </div>
+                                      </div>
+                                    </div>                                    
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card pork">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @thursday_pork_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="thursday_pork_1" style="font-size:30px;"><%= @thursday_pork_selection_1_number %></span>
+                                      </div>
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="thursday_pork_1_spinner" value="<%= @thursday_pork_selection_1_number %>" style="opacity: 0;">
+                                        </div>
+                                      </div>
+                                    </div>                                    
+                                  </div>                                
+                                </div>
+                              </div>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card poultry">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @thursday_poultry_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="thursday_poultry_1" style="font-size:30px;"><%= @thursday_poultry_selection_1_number %></span>
+                                      </div>
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="thursday_poultry_1_spinner" value="<%= @thursday_poultry_selection_1_number %>" style="opacity: 0;">
+                                        </div>
+                                      </div>
+                                    </div>                                    
+                                  </div>                                 
+                                </div>
+                              </div>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @thursday_green_1_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="thursday_green_1_1" style="font-size:30px;"><%= @thursday_green_1_selection_1_number %></span>
+                                      </div>
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="thursday_green_1_1_spinner" value="<%= @thursday_green_1_selection_1_number %>" style="opacity: 0;">
+                                        </div>
+                                      </div>
+                                    </div>                                    
+                                  </div>                                 
+                                </div>
+                              </div>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
+                                <div class="inner">
+                                  <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                    <h5 style="color:#555;"><%= @thursday_green_2_selection_1_name %></h5>
+                                  </div>
+                                  <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                    <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                      <div class="row">
+                                          <span class="h1 block selection_display" id="thursday_green_2_1" style="font-size:30px;"><%= @thursday_green_2_selection_1_number %></span>
+                                      </div>
+                                      <div class="row row-centered">
+                                        <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                          <input type="text" id="thursday_green_2_1_spinner" value="<%= @thursday_green_2_selection_1_number %>" style="opacity: 0;">
+                                        </div>
+                                      </div>
+                                    </div>                                    
+                                  </div>                                 
+                                </div>
+                              </div>
+                            </div>
+                          </section>
+                        </section>                      
+                      </section> 
+                    <% end %> 
 
                 </section>
             </section>

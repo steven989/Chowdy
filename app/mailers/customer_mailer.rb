@@ -85,7 +85,8 @@ class CustomerMailer < ActionMailer::Base
     end    
   end
 
-  def stop_delivery_notice(customer,type)
+  def stop_delivery_notice(customer,type,additional_object=nil)
+    @additional_object = additional_object
     @customer = customer
     @type = type
     mail(
@@ -96,7 +97,8 @@ class CustomerMailer < ActionMailer::Base
     end    
   end
 
-  def urgent_stop_delivery_notice(customer,type)
+  def urgent_stop_delivery_notice(customer,type,additional_object=nil)
+    @additional_object = additional_object
     @customer = customer
     @type = type
     mail(
