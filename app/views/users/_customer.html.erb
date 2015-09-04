@@ -110,7 +110,7 @@ $(function(){
           green_2:$('#thursday_green_2_1_spinner').val()}
         ];
 
-        console.log(data);
+  
 
       $.ajax({
         url: '<%= update_meal_choice_path %>',
@@ -352,61 +352,61 @@ $(function(){
 
     $('#monday_beef_1_spinner').TouchSpin({
       min: 0,
-      max: $('#monday_beef_1_spinner').val()*1 + updated_monday_regular_limit,
+      max: Math.max($('#monday_beef_1_spinner').val()*1 + updated_monday_regular_limit,$('#monday_beef_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_pork_1_spinner').TouchSpin({
       min: 0,
-      max: $('#monday_pork_1_spinner').val()*1 + updated_monday_regular_limit,
+      max: Math.max($('#monday_pork_1_spinner').val()*1 + updated_monday_regular_limit,$('#monday_pork_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_poultry_1_spinner').TouchSpin({
       min: 0,
-      max: $('#monday_poultry_1_spinner').val()*1 + updated_monday_regular_limit,
+      max: Math.max($('#monday_poultry_1_spinner').val()*1 + updated_monday_regular_limit,$('#monday_poultry_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_green_1_1_spinner').TouchSpin({
       min: 0,
-      max: $('#monday_green_1_1_spinner').val()*1 + updated_monday_green_limit,
+      max: Math.max($('#monday_green_1_1_spinner').val()*1 + updated_monday_green_limit,$('#monday_green_1_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_green_2_1_spinner').TouchSpin({
       min: 0,
-      max: $('#monday_green_2_1_spinner').val()*1 + updated_monday_green_limit,
+      max: Math.max($('#monday_green_2_1_spinner').val()*1 + updated_monday_green_limit,$('#monday_green_2_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_beef_1_spinner').TouchSpin({
       min: 0,
-      max: $('#thursday_beef_1_spinner').val()*1 + updated_thursday_regular_limit,
+      max: Math.max($('#thursday_beef_1_spinner').val()*1 + updated_thursday_regular_limit,$('#thursday_beef_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_pork_1_spinner').TouchSpin({
       min: 0,
-      max: $('#thursday_pork_1_spinner').val()*1 + updated_thursday_regular_limit,
+      max: Math.max($('#thursday_pork_1_spinner').val()*1 + updated_thursday_regular_limit,$('#thursday_pork_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_poultry_1_spinner').TouchSpin({
       min: 0,
-      max: $('#thursday_poultry_1_spinner').val()*1 + updated_thursday_regular_limit,
+      max: Math.max($('#thursday_poultry_1_spinner').val()*1 + updated_thursday_regular_limit,$('#thursday_poultry_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_green_1_1_spinner').TouchSpin({
       min: 0,
-      max: $('#thursday_green_1_1_spinner').val()*1 + updated_thursday_green_limit,
+      max: Math.max($('#thursday_green_1_1_spinner').val()*1 + updated_thursday_green_limit,$('#thursday_green_1_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_green_2_1_spinner').TouchSpin({
       min: 0,
-      max: $('#thursday_green_2_1_spinner').val()*1 + updated_thursday_green_limit,
+      max: Math.max($('#thursday_green_2_1_spinner').val()*1 + updated_thursday_green_limit,$('#thursday_green_2_1_spinner').val()*1),
       step: 1
     });
 
@@ -414,17 +414,17 @@ $(function(){
 
       $(this).closest('.display_number_container').find('.selection_display').html($(this).val());
       updated_monday_regular_limit = monday_regular_limit -  $('#monday_beef_1_spinner').val() -  $('#monday_pork_1_spinner').val() -  $('#monday_poultry_1_spinner').val();
-      console.log(updated_monday_regular_limit);
+
 
       updated_monday_green_limit = monday_green_limit -  $('#monday_green_1_1_spinner').val() -  $('#monday_green_2_1_spinner').val();
       updated_thursday_regular_limit = thursday_regular_limit -  $('#thursday_beef_1_spinner').val() -  $('#thursday_pork_1_spinner').val() -  $('#thursday_poultry_1_spinner').val();
       updated_thursday_green_limit = thursday_green_limit -  $('#thursday_green_1_1_spinner').val() -  $('#thursday_green_2_1_spinner').val();
 
-      $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_monday_regular_limit + $(this).val()*1})});
-      $('#monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_monday_green_limit + $(this).val()*1})});
+      $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_regular_limit + $(this).val()*1)})});
+      $('#monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_green_limit + $(this).val()*1)})});
 
-      $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_thursday_regular_limit + $(this).val()*1})});
-      $('#thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: updated_thursday_green_limit + $(this).val()*1})});
+      $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_regular_limit + $(this).val()*1)})});
+      $('#thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_green_limit + $(this).val()*1)})});
 
       if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0 && updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
         $('#submit_meal_selection').removeClass('disabled');  
@@ -484,18 +484,15 @@ $(function(){
             $('#green_meals_spinner').val(updated_green);
             $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
          } else {
-            var regular_meals = updated_value - updated_green
-            if (regular_meals % 2 == 0) {
-              $('#monday_reg_hidden').val(regular_meals/2);
-              $('#thursday_reg_hidden').val(regular_meals/2);            
-            } else {
-              $('#monday_reg_hidden').val(regular_meals/2 - 0.5);
-              $('#thursday_reg_hidden').val(regular_meals/2 + 0.5); 
-            };
+            $('#monday_reg_hidden').val(updated_value/2 - $('#monday_grn_hidden').val()*1)
+            $('#thursday_reg_hidden').val(updated_value/2 - $('#thursday_grn_hidden').val()*1)
+
             updated_total_meal_number = updated_value;
             $('#green_meals_spinner').val(updated_green);
             $('#green_meals_spinner').trigger("touchspin.updatesettings", {max: updated_total_meal_number});
+         
          }
+
          updateVisibleNumbers();
       });
                 
@@ -532,6 +529,7 @@ $(function(){
 
           $('#monday_reg_hidden').val(updated_total_meal_number/2 - updated_mon_grn);
           $('#thursday_reg_hidden').val(updated_total_meal_number/2 - updated_thu_grn)
+
 
           updateVisibleNumbers();
         });
