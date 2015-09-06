@@ -68,6 +68,9 @@ class PromotionRedemption < ActiveRecord::Base
                 end
 
                 promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                if customer.user
+                    customer.user.log_activity("Coupon applied")
+                end
             else 
                 stripe_subscription = Stripe::Customer.retrieve(customer.stripe_customer_id).subscriptions.retrieve(customer.stripe_subscription_id)
 
@@ -75,6 +78,9 @@ class PromotionRedemption < ActiveRecord::Base
                 stripe_subscription.prorate = false
                 if stripe_subscription.save
                     promotion.update_attribute(:redemptions, promotion.redemptions.to_i + 1)
+                    if customer.user
+                        customer.user.log_activity("Coupon applied")
+                    end
                 end
             end
         rescue => error

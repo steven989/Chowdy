@@ -286,6 +286,9 @@ class AdminActionsController < ApplicationController
                 else
                     flash[:status] = "success"
                     flash[:notice_customers] = "Customer information updated"
+                    if @customer.user
+                        @customer.user.log_activity("Admin: customer information updated")
+                    end
                 end
             end
         elsif params[:todo] == "meal_count"
@@ -363,6 +366,9 @@ class AdminActionsController < ApplicationController
             else
                 flash[:status] = "success"
                 flash[:notice_customers] = "Meal count updated"
+                if @customer.user
+                    @customer.user.log_activity("Admin: updated customer's meal count")
+                end
             end
         elsif params[:todo] == "hub"
             monday_pickup_hub = params[:customer][:monday_pickup_hub]
@@ -377,6 +383,9 @@ class AdminActionsController < ApplicationController
             if @customer.save
                 flash[:status] = "success"
                 flash[:notice_customers] = "Hub updated"
+                if @customer.user
+                    @customer.user.log_activity("Admin: updated customer's hub")
+                end
             else 
                 flash[:status] = "fail"
                 flash[:notice_customers] = "Hub could not be updated: #{@customer.errors.full_messages.join(", ")}"
@@ -385,6 +394,9 @@ class AdminActionsController < ApplicationController
             if @customer.update_attributes(delivery_info_params) && @customer.update_attribute(:delivery_set_up?,params[:customer][:delivery_set_up])
                 flash[:status] = "success"
                 flash[:notice_customers] = "Delivery info updated"
+                if @customer.user
+                    @customer.user.log_activity("Admin: updated customer's delivery info")
+                end
             else
                 flash[:status] = "fail"
                 flash[:notice_customers] = "Delivery info could not be updated: #{@customer.errors.full_messages.join(", ")}"
@@ -394,6 +406,9 @@ class AdminActionsController < ApplicationController
                 if @customer.update_attributes(recurring_delivery: nil)
                     flash[:status] = "success"
                     flash[:notice_customers] = "Delivery turned off"
+                    if @customer.user
+                        @customer.user.log_activity("Admin: stopped customer's delivery")
+                    end
                 else
                     flash[:status] = "fail"
                     flash[:notice_customers] = "Delivery cannot be turned off: #{@customer.errors.full_messages.join(", ")}"
@@ -411,6 +426,9 @@ class AdminActionsController < ApplicationController
                 else
                     flash[:status] = "success"
                     flash[:notice_customers] = "Delivery turned on"
+                    if @customer.user
+                        @customer.user.log_activity("Admin: started customer's delivery")
+                    end
                 end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Start Delivery")
                 CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Start Delivery")
@@ -459,6 +477,9 @@ class AdminActionsController < ApplicationController
                 else
                     flash[:status] = "success"
                     flash[:notice_customers] = "Successfully refunded"
+                    if @customer.user
+                        @customer.user.log_activity("Admin: refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
+                    end
                 end
             else
                 begin
@@ -477,6 +498,9 @@ class AdminActionsController < ApplicationController
                 else 
                     flash[:status] = "success"
                     flash[:notice_customers] = "Invoice item successfully created"
+                    if @customer.user
+                        @customer.user.log_activity("Admin: refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
+                    end
                 end
             end
 
@@ -555,6 +579,9 @@ class AdminActionsController < ApplicationController
                     else
                         flash[:status] = "success"
                         flash[:notice_customers] = "Referral credit applied"
+                        if @customer.user
+                            @customer.user.log_activity("Admin: applied referral credit")
+                        end
                     end
                 else #match name
                     referral_match = Customer.where("name ilike ?", referral.gsub(/\s$/,"").downcase)
@@ -615,6 +642,9 @@ class AdminActionsController < ApplicationController
                         else
                             flash[:status] = "success"
                             flash[:notice_customers] = "Referral credit applied"
+                            if @customer.user
+                                @customer.user.log_activity("Admin: applied referral credit")
+                            end
                         end
                     else 
                         if (Customer.where(referral_code: referral.gsub(" ","").downcase).length == 0)  && (referral_match.length == 0)
@@ -666,10 +696,14 @@ class AdminActionsController < ApplicationController
                             puts "An error occurred when attempting to pause: #{error.message}" 
                             puts '---------------------------------------------------'
                         else
+                            if @customer.user
+                                @customer.user.log_activity("Admin: paused customer effective immediately until #{end_date}")
+                            end
                             status ||= "success"
                             message ||= "Customer paused"
                             flash[:status] = status
                             flash[:notice_customers] = message
+
                         end
                     else
                         flash[:status] = "fail"
@@ -694,6 +728,9 @@ class AdminActionsController < ApplicationController
                             flash[:status] = "fail"
                             flash[:notice_customers] = "Pause request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                         else
+                            if @customer.user
+                                @customer.user.log_activity("Admin: requested pause for customer until #{end_date}")
+                            end
                             flash[:status] = "success"
                             flash[:notice_customers] = "Pause request submitted"    
                         end
@@ -736,6 +773,9 @@ class AdminActionsController < ApplicationController
                         puts "An error occurred when attempting to cancel: #{error.message}" 
                         puts '---------------------------------------------------'
                     else
+                        if @customer.user
+                            @customer.user.log_activity("Admin: cancelled customer's subscription")
+                        end
                         status ||= "success"
                         message ||= "Customer cancelled"
                         flash[:status] = status
@@ -763,6 +803,9 @@ class AdminActionsController < ApplicationController
                         flash[:status] = "fail"
                         flash[:notice_customers] = "Cancel request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                     else
+                        if @customer.user
+                            @customer.user.log_activity("Admin: requested cancellation")
+                        end
                         flash[:status] = "success"
                         flash[:notice_customers] = "Cancel request submitted"    
                     end
@@ -814,6 +857,9 @@ class AdminActionsController < ApplicationController
                         puts "An error occurred when attempting to restart: #{error.message}" 
                         puts '---------------------------------------------------'
                     else
+                        if @customer.user
+                            @customer.user.log_activity("Admin: restarted subscription")
+                        end
                         status ||= "success"
                         message ||= "Customer restarted"
                         flash[:status] = status
@@ -842,6 +888,9 @@ class AdminActionsController < ApplicationController
                         flash[:status] = "fail"
                         flash[:notice_customers] = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                     else
+                        if @customer.user
+                            @customer.user.log_activity("Admin: requested restart")
+                        end
                         flash[:status] = "success"
                         flash[:notice_customers] = "Restart request submitted"    
                     end

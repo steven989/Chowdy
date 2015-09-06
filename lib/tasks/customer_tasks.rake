@@ -303,6 +303,9 @@ namespace :customers do
                             regular_meals_on_thursday: queue_item.updated_reg_thu,
                             green_meals_on_thursday: queue_item.updated_grn_thu
                         )
+                        if current_customer.user
+                            current_customer.user.log_activity("System: subscription meal count updated")
+                        end
                         queue_item.add_to_record
                         queue_item.destroy
                     end
@@ -315,6 +318,9 @@ namespace :customers do
                         regular_meals_on_thursday: queue_item.updated_reg_thu,
                         green_meals_on_thursday: queue_item.updated_grn_thu
                     )
+                    if current_customer.user
+                        current_customer.user.log_activity("System: subscription meal count updated")
+                    end
                 end
             end
         end
@@ -322,6 +328,9 @@ namespace :customers do
         if StopQueue.where(stop_type: ["change_hub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
             StopQueue.where(stop_type: ["change_hub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 if queue_item.customer.update_attributes(hub:queue_item.cancel_reason,monday_pickup_hub:queue_item.cancel_reason,thursday_pickup_hub:queue_item.cancel_reason)
+                    if queue_item.customer.user
+                        queue_item.customer.user.log_activity("System: hub changed")
+                    end
                     queue_item.add_to_record
                     queue_item.destroy
                 end
@@ -336,6 +345,9 @@ namespace :customers do
                     if current_customer.stripe_subscription_id.blank?
                         current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
                         current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1, requested_date: queue_item.created_at)
+                        if current_customer.user
+                            current_customer.user.log_activity("System: subscription paused until #{queue_item.end_date-1}")
+                        end
                         queue_item.add_to_record
                         queue_item.destroy
                     else
@@ -346,6 +358,9 @@ namespace :customers do
                         if stripe_subscription.save
                             current_customer.update(paused?:"yes", pause_end_date:queue_item.end_date-1, next_pick_up_date:queue_item.end_date)
                             current_customer.stop_requests.create(request_type:'pause',start_date:queue_item.start_date, end_date:queue_item.end_date-1, requested_date: queue_item.created_at)
+                            if current_customer.user
+                                current_customer.user.log_activity("System: subscription paused until #{queue_item.end_date-1}")
+                            end
                             queue_item.add_to_record
                             queue_item.destroy
                         end
@@ -355,6 +370,9 @@ namespace :customers do
                     if current_customer.stripe_subscription_id.blank?
                         current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
                         current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date,cancel_reason:queue_item.cancel_reason, requested_date: queue_item.created_at)
+                        if current_customer.user
+                            current_customer.user.log_activity("System: subscription cancelled")
+                        end
                         queue_item.add_to_record
                         queue_item.destroy                        
                     else
@@ -383,6 +401,9 @@ namespace :customers do
                         if stripe_subscription.delete
                             current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
                             current_customer.stop_requests.create(request_type:'cancel',start_date:queue_item.start_date,cancel_reason:queue_item.cancel_reason, requested_date: queue_item.created_at)
+                            if current_customer.user
+                                current_customer.user.log_activity("System: subscription cancelled")
+                            end
                             queue_item.add_to_record
                             queue_item.destroy
                         end
@@ -393,6 +414,9 @@ namespace :customers do
                         if current_customer.sponsored?
                             current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
                             current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1) unless current_customer.stop_requests.order(created_at: :desc).limit(1).take.blank?
+                            if current_customer.user
+                                current_customer.user.log_activity("System: subscription restarted")
+                            end
                             queue_item.add_to_record
                             queue_item.destroy                            
                         else
@@ -404,6 +428,9 @@ namespace :customers do
                                 new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
                                 current_customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
                                 current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1) unless current_customer.stop_requests.order(created_at: :desc).limit(1).take.blank?
+                                if current_customer.user
+                                    current_customer.user.log_activity("System: subscription restarted")
+                                end
                                 queue_item.add_to_record
                                 queue_item.destroy
                             end
@@ -416,6 +443,9 @@ namespace :customers do
                         if paused_subscription.save
                             current_customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
                             current_customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1) unless current_customer.stop_requests.order(created_at: :desc).limit(1).take.blank?
+                            if current_customer.user
+                                current_customer.user.log_activity("System: subscription restarted")
+                            end
                             queue_item.add_to_record
                             queue_item.destroy
                         end
@@ -473,6 +503,9 @@ namespace :customers do
                         regular_meals_on_thursday: queue_item.updated_reg_thu,
                         green_meals_on_thursday: queue_item.updated_grn_thu
                         )                    
+                end
+                if current_customer.user
+                    current_customer.user.log_activity("System: subscription meal count updated")
                 end
                 queue_item.add_to_record
                 queue_item.destroy

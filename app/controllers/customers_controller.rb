@@ -81,6 +81,7 @@ protect_from_forgery :except => :payment
                 if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? current_customer.active?)
                     current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                     current_customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
+                    current_user.log_activity("Requested pause until #{end_date}")
                 end
             end
 
@@ -96,6 +97,7 @@ protect_from_forgery :except => :payment
             if ["Yes","yes"].include? current_customer.active?
                 current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                 current_customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:params[:cancel_reason])
+                current_user.log_activity("Requested cancel")
             else
                 current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
             end
@@ -118,9 +120,11 @@ protect_from_forgery :except => :payment
                 end
             elsif ["pause","cancel"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
                 current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
+                current_user.log_activity("Restart requested")
             elsif ["restart"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
                     current_customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
                     current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+                    current_user.log_activity("Requested restart")
             end
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "change_card"
@@ -153,6 +157,7 @@ protect_from_forgery :except => :payment
                 else
                     notice_status = "success"
                     notice_message = "Credit card updated"
+                    current_user.log_activity("Credit card updated")
                 end
             rescue => error
                 puts '---------------------------------------------------'
@@ -183,7 +188,8 @@ protect_from_forgery :except => :payment
                             notice_status = "fail"    
                         else 
                             notice_message = "Email updated"
-                            notice_status = "success"                            
+                            notice_status = "success"  
+                            current_user.log_activity("Email updated")
                         end
                     end
                 rescue => error
@@ -214,6 +220,7 @@ protect_from_forgery :except => :payment
                 start_date:adjusted_change_date,
                 cancel_reason: params[:hub] #just using this field to capture any text value
             )
+            current_user.log_activity("Hub change requested")
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "delivery" 
             _current_delivery = (["Yes","yes"].include? current_customer.recurring_delivery) ? true : false
@@ -225,10 +232,12 @@ protect_from_forgery :except => :payment
             if _current_delivery
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Change delivery info")
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Change delivery info")
+                current_user.log_activity("Updated delivery information")
             else
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Start Delivery")
                 flash[:status] = "warning"
                 flash[:notice_delivery] = "Please select your meals in the <a href='#meal_selection' data-toggle='tab' class='url_seg'>Choose Meals</a> tab"
+                current_user.log_activity("Start delivery requested")
             end
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
@@ -237,6 +246,7 @@ protect_from_forgery :except => :payment
             CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")
             flash[:status] = "warning"
             flash[:notice_delivery] = "Your delivery has been stopped effective your next batch. If you have not selected a pick-up hub, please do so under <a href='#changePlan' data-toggle='tab' class='url_seg'>Manage Subscription</a> tab"
+            current_user.log_activity("Stop delivery requested")
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "name" 
             current_customer.update_attributes(name:params[:name])
@@ -247,6 +257,7 @@ protect_from_forgery :except => :payment
             else
                 notice_status = "success"
                 notice_message = "Name updated"
+                current_user.log_activity("Name updated")
             end
 
             flash[:status] = notice_status
@@ -291,7 +302,7 @@ protect_from_forgery :except => :payment
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal preference has changed")
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal preference has changed")
             end
-
+            current_user.log_activity("Requested subscription change")
             redirect_to user_profile_path+"#changePlan"
         end
 
