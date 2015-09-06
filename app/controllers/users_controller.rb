@@ -194,6 +194,9 @@ class UsersController < ApplicationController
             cut_off_wday = @selection_timing_exception_for_new_customers ? ((Date.today.wday == 0 && DateTime.now.hour >= 14) ? SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i : 7 ) : SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i
             @cut_off_date = Chowdy::Application.wday(Date.today) == cut_off_wday ? Date.today : Chowdy::Application.closest_date(1,cut_off_wday)
             @display_production_day_1 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.wday(Date.today) : Chowdy::Application.closest_date(1,7)) : (Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.closest_date(1,7) : Chowdy::Application.closest_date(2,7))
+            puts '---------------------------------------------------'
+            puts @display_production_day_1.inspect
+            puts '---------------------------------------------------'
             @display_production_day_2 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) < 3 ? Chowdy::Application.closest_date(2,3) : Chowdy::Application.closest_date(1,3)) : (Chowdy::Application.wday(Date.today) < 3  ? Chowdy::Application.closest_date(3,3) : Chowdy::Application.closest_date(2,3))
 
             @monday_beef_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Beef").blank?
