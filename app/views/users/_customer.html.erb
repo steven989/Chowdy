@@ -1691,7 +1691,7 @@ $(function(){
                               </div>  
                             </div>
                             <div class="row m-t-sm padder">
-                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
+                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none. You have selected all your meals!</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
                             </div>
                             <div class="row padder">
                               Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>
@@ -1794,7 +1794,7 @@ $(function(){
                               </div>
                             </div>
                             <div class="row m-t-lg padder">
-                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none</span><b><span id="thursday_total_remaining_display" style="color:#f0ad4e"><span id="thursday_total_remaining"></span> meals</span></b>)
+                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none. You have selected all your meals!</span><b><span id="thursday_total_remaining_display" style="color:#f0ad4e"><span id="thursday_total_remaining"></span> meals</span></b>)
                             </div>
                             <div class="row padder">
                               Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>
