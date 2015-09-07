@@ -295,118 +295,140 @@ $(function(){
 
     // meal selections pinner
 
-    var monday_regular_limit = <%= @monday_regular %>;
-    var monday_green_limit = <%= @monday_green %>;
-    var thursday_regular_limit = <%= @thursday_regular %>;
-    var thursday_green_limit = <%= @thursday_green %>;
+    var monday_regular_limit = <%= @monday_regular.to_i %>;
+    var monday_green_limit = <%= @monday_green.to_i %>;
+    var thursday_regular_limit = <%= @thursday_regular.to_i %>;
+    var thursday_green_limit = <%= @thursday_green.to_i %>;
+    var monday_total_limit = monday_regular_limit + monday_green_limit;
+    var thursday_total_limit = thursday_regular_limit + thursday_green_limit
     var updated_monday_regular_limit = <%= @monday_regular.to_i - @monday_beef_selection_1_number.to_i - @monday_pork_selection_1_number.to_i - @monday_poultry_selection_1_number.to_i %>;
     var updated_monday_green_limit = <%= @monday_green.to_i - @monday_green_1_selection_1_number.to_i - @monday_green_2_selection_1_number.to_i%>;
+    var updated_monday_total_limit = updated_monday_regular_limit + updated_monday_green_limit;
     var updated_thursday_regular_limit = <%= @thursday_regular.to_i - @thursday_beef_selection_1_number.to_i - @thursday_pork_selection_1_number.to_i - @thursday_poultry_selection_1_number.to_i %>;
     var updated_thursday_green_limit = <%= @thursday_green.to_i - @thursday_green_1_selection_1_number.to_i - @thursday_green_2_selection_1_number.to_i%>;
+    var updated_thursday_total_limit = updated_thursday_regular_limit + updated_thursday_green_limit;
 
     function update_display_guide() {
 
-      if (updated_monday_regular_limit == 0) {
-        $('#monday_regular_remaining_display').addClass('hidden');
-      } else {
-        $('#monday_regular_remaining_display').removeClass('hidden');
-        $('#monday_regular_remaining').html(updated_monday_regular_limit);
-      }
-
-      if (updated_monday_green_limit == 0) {
-        $('#monday_green_remaining_display').addClass('hidden');
-      } else {
-        $('#monday_green_remaining_display').removeClass('hidden');
-        $('#monday_green_remaining').html(updated_monday_green_limit);
-      }
-
-      if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0) {
+      if (updated_monday_total_limit == 0) {
+        $('#monday_total_remaining_display').addClass('hidden');
         $('#monday_selection_full').removeClass('hidden');
       } else {
+        $('#monday_total_remaining_display').removeClass('hidden');
+        $('#monday_total_remaining').html(updated_monday_total_limit);
         $('#monday_selection_full').addClass('hidden');
       }
 
+      // if (updated_monday_regular_limit == 0) {
+      //   $('#monday_regular_remaining_display').addClass('hidden');
+      // } else {
+      //   $('#monday_regular_remaining_display').removeClass('hidden');
+      //   $('#monday_regular_remaining').html(updated_monday_regular_limit);
+      // }
 
-      if (updated_thursday_regular_limit == 0) {
-        $('#thursday_regular_remaining_display').addClass('hidden');
-      } else {
-        $('#thursday_regular_remaining_display').removeClass('hidden');
-        $('#thursday_regular_remaining').html(updated_thursday_regular_limit);
-      }
+      // if (updated_monday_green_limit == 0) {
+      //   $('#monday_green_remaining_display').addClass('hidden');
+      // } else {
+      //   $('#monday_green_remaining_display').removeClass('hidden');
+      //   $('#monday_green_remaining').html(updated_monday_green_limit);
+      // }
 
-      if (updated_thursday_green_limit == 0) {
-        $('#thursday_green_remaining_display').addClass('hidden');
-      } else {
-        $('#thursday_green_remaining_display').removeClass('hidden');
-        $('#thursday_green_remaining').html(updated_thursday_green_limit);
-      }     
+      // if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0) {
+      //   $('#monday_selection_full').removeClass('hidden');
+      // } else {
+      //   $('#monday_selection_full').addClass('hidden');
+      // }
 
-      if (updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
+
+      if (updated_thursday_total_limit == 0) {
+        $('#thursday_total_remaining_display').addClass('hidden');
         $('#thursday_selection_full').removeClass('hidden');
       } else {
+        $('#thursday_total_remaining_display').removeClass('hidden');
+        $('#thursday_total_remaining').html(updated_thursday_total_limit);
         $('#thursday_selection_full').addClass('hidden');
-      } 
+      }
+
+      // if (updated_thursday_regular_limit == 0) {
+      //   $('#thursday_regular_remaining_display').addClass('hidden');
+      // } else {
+      //   $('#thursday_regular_remaining_display').removeClass('hidden');
+      //   $('#thursday_regular_remaining').html(updated_thursday_regular_limit);
+      // }
+
+      // if (updated_thursday_green_limit == 0) {
+      //   $('#thursday_green_remaining_display').addClass('hidden');
+      // } else {
+      //   $('#thursday_green_remaining_display').removeClass('hidden');
+      //   $('#thursday_green_remaining').html(updated_thursday_green_limit);
+      // }     
+
+      // if (updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
+      //   $('#thursday_selection_full').removeClass('hidden');
+      // } else {
+      //   $('#thursday_selection_full').addClass('hidden');
+      // } 
     };
 
     update_display_guide();
 
     $('#monday_beef_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#monday_beef_1_spinner').val()*1 + updated_monday_regular_limit,$('#monday_beef_1_spinner').val()*1),
+      max: Math.max($('#monday_beef_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_beef_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_pork_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#monday_pork_1_spinner').val()*1 + updated_monday_regular_limit,$('#monday_pork_1_spinner').val()*1),
+      max: Math.max($('#monday_pork_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_pork_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_poultry_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#monday_poultry_1_spinner').val()*1 + updated_monday_regular_limit,$('#monday_poultry_1_spinner').val()*1),
+      max: Math.max($('#monday_poultry_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_poultry_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_green_1_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#monday_green_1_1_spinner').val()*1 + updated_monday_green_limit,$('#monday_green_1_1_spinner').val()*1),
+      max: Math.max($('#monday_green_1_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_green_1_1_spinner').val()*1),
       step: 1
     });
 
     $('#monday_green_2_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#monday_green_2_1_spinner').val()*1 + updated_monday_green_limit,$('#monday_green_2_1_spinner').val()*1),
+      max: Math.max($('#monday_green_2_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_green_2_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_beef_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#thursday_beef_1_spinner').val()*1 + updated_thursday_regular_limit,$('#thursday_beef_1_spinner').val()*1),
+      max: Math.max($('#thursday_beef_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_beef_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_pork_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#thursday_pork_1_spinner').val()*1 + updated_thursday_regular_limit,$('#thursday_pork_1_spinner').val()*1),
+      max: Math.max($('#thursday_pork_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_pork_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_poultry_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#thursday_poultry_1_spinner').val()*1 + updated_thursday_regular_limit,$('#thursday_poultry_1_spinner').val()*1),
+      max: Math.max($('#thursday_poultry_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_poultry_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_green_1_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#thursday_green_1_1_spinner').val()*1 + updated_thursday_green_limit,$('#thursday_green_1_1_spinner').val()*1),
+      max: Math.max($('#thursday_green_1_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_green_1_1_spinner').val()*1),
       step: 1
     });
 
     $('#thursday_green_2_1_spinner').TouchSpin({
       min: 0,
-      max: Math.max($('#thursday_green_2_1_spinner').val()*1 + updated_thursday_green_limit,$('#thursday_green_2_1_spinner').val()*1),
+      max: Math.max($('#thursday_green_2_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_green_2_1_spinner').val()*1),
       step: 1
     });
 
@@ -417,16 +439,29 @@ $(function(){
 
 
       updated_monday_green_limit = monday_green_limit -  $('#monday_green_1_1_spinner').val() -  $('#monday_green_2_1_spinner').val();
+      updated_monday_total_limit = updated_monday_regular_limit + updated_monday_green_limit;
       updated_thursday_regular_limit = thursday_regular_limit -  $('#thursday_beef_1_spinner').val() -  $('#thursday_pork_1_spinner').val() -  $('#thursday_poultry_1_spinner').val();
       updated_thursday_green_limit = thursday_green_limit -  $('#thursday_green_1_1_spinner').val() -  $('#thursday_green_2_1_spinner').val();
+      updated_thursday_total_limit = updated_thursday_regular_limit + updated_thursday_green_limit;
 
-      $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_regular_limit + $(this).val()*1)})});
-      $('#monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_green_limit + $(this).val()*1)})});
+      // $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_regular_limit + $(this).val()*1)})});
 
-      $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_regular_limit + $(this).val()*1)})});
-      $('#thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_green_limit + $(this).val()*1)})});
+      // $('#monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_green_limit + $(this).val()*1)})});
 
-      if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0 && updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
+      $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_total_limit + $(this).val()*1)})});
+
+      // $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_regular_limit + $(this).val()*1)})});
+      // $('#thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_green_limit + $(this).val()*1)})});
+
+      $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_total_limit + $(this).val()*1)})});
+
+      // if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0 && updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
+      //   $('#submit_meal_selection').removeClass('disabled');  
+      // } else {
+      //   $('#submit_meal_selection').addClass('disabled');  
+      // }
+
+      if (updated_monday_total_limit == 0 && updated_thursday_total_limit == 0) {
         $('#submit_meal_selection').removeClass('disabled');  
       } else {
         $('#submit_meal_selection').addClass('disabled');  
@@ -1656,7 +1691,7 @@ $(function(){
                               </div>  
                             </div>
                             <div class="row m-t-sm padder">
-                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none</span><b><span id="monday_regular_remaining_display" style="color:#f0ad4e"><span id="monday_regular_remaining"></span> regular </span><span id="monday_green_remaining_display" style="color:#f0ad4e"> <span id="monday_green_remaining"></span> green</span></b>)
+                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
                             </div>
                             <div class="row padder">
                               Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>
@@ -1759,7 +1794,7 @@ $(function(){
                               </div>
                             </div>
                             <div class="row m-t-lg padder">
-                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none</span><b><span id="thursday_regular_remaining_display" style="color:#f0ad4e"><span id="thursday_regular_remaining"></span> regular </span><span id="thursday_green_remaining_display" style="color:#f0ad4e"><span id="thursday_green_remaining"></span> green</span></b>)
+                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none</span><b><span id="thursday_total_remaining_display" style="color:#f0ad4e"><span id="thursday_total_remaining"></span> meals</span></b>)
                             </div>
                             <div class="row padder">
                               Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>

@@ -27,30 +27,42 @@ class MealSelectionsController < ApplicationController
         message = []
         meal_selections = []
 
-        if meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i < monday_regular
+        if meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i + meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i < monday_regular.to_i + monday_green.to_i
             status = "fail"
-            message.push("Not enough regular meals selected for Monday")
-        elsif meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i > monday_regular
+            message.push("Not enough meals selected for Monday")
+        elsif meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i + meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i > monday_regular.to_i + monday_green.to_i
             status = "fail"
-            message.push("Regular meals selected for Monday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")
-        elsif meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i < monday_green
+            message.push("Meals selected for Monday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")            
+        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i + meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i < thursday_regular.to_i + thursday_green.to_i 
             status = "fail"
-            message.push("Not enough green meals selected for Monday")
-        elsif meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i > monday_green
+            message.push("Not enough meals selected for Thursday")
+        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i + meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i > thursday_regular.to_i + thursday_green.to_i 
             status = "fail"
-            message.push("Green meals selected for Monday is more than the subscribed amount. Please change your green meal count in 'Manage Subscriptions' tab")
-        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i < thursday_regular
-            status = "fail"
-            message.push("Not enough regular meals selected for Thursday")
-        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i > thursday_regular
-            status = "fail"
-            message.push("Regular meals selected for Thursday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")        
-        elsif meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i < thursday_green
-            status = "fail"
-            message.push("Not enough green meals selected for Thursday")
-        elsif meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i > thursday_green
-            status = "fail"
-            message.push("Green meals selected for Thursday is more than the subscribed amount. Please change your green meal count in 'Manage Subscriptions' tab")
+            message.push("Meals selected for Thursday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")            
+        # elsif meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i < monday_regular
+        #     status = "fail"
+        #     message.push("Not enough regular meals selected for Monday")
+        # elsif meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i > monday_regular
+        #     status = "fail"
+        #     message.push("Regular meals selected for Monday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")
+        # elsif meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i < monday_green
+        #     status = "fail"
+        #     message.push("Not enough green meals selected for Monday")
+        # elsif meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i > monday_green
+        #     status = "fail"
+        #     message.push("Green meals selected for Monday is more than the subscribed amount. Please change your green meal count in 'Manage Subscriptions' tab")
+        # elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i < thursday_regular
+        #     status = "fail"
+        #     message.push("Not enough regular meals selected for Thursday")
+        # elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i > thursday_regular
+        #     status = "fail"
+        #     message.push("Regular meals selected for Thursday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")        
+        # elsif meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i < thursday_green
+        #     status = "fail"
+        #     message.push("Not enough green meals selected for Thursday")
+        # elsif meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i > thursday_green
+        #     status = "fail"
+        #     message.push("Green meals selected for Thursday is more than the subscribed amount. Please change your green meal count in 'Manage Subscriptions' tab")
         else
             meal_selection.each do |ms|
                 MealSelection.where(stripe_customer_id:current_customer.stripe_customer_id,production_day:ms['production_day'].to_date).delete_all
@@ -72,11 +84,14 @@ class MealSelectionsController < ApplicationController
             status = "fail"
             message.push(error.message)
         else
-            CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
-            if Date.today.wday == 0 && Date.today < current_customer.first_pick_up_date
-                CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
+            unless status == "fail"
+                CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
+                if Date.today.wday == 0 && Date.today < current_customer.first_pick_up_date
+                    CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
+                end
+                status = "success"
+                current_user.log_activity("Meal selection for week of #{meal_selection[0]['production_day'].to_date}")
             end
-            status ||= "success"
         end
 
         respond_to do |format|
