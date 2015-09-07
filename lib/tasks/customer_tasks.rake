@@ -69,65 +69,172 @@ namespace :customers do
         mismatched_rows.each do |mmr|
             mmr_reg = mmr.pork.to_i + mmr.beef.to_i + mmr.poultry.to_i
             mmr_grn = mmr.green_1.to_i + mmr.green_2.to_i
+            mmr_total = mmr_reg + mmr_grn
             cust_reg = mmr.production_day.wday == 0 ? mmr.customer.regular_meals_on_monday.to_i : mmr.customer.regular_meals_on_thursday.to_i
             cust_grn = mmr.production_day.wday == 0 ? mmr.customer.green_meals_on_monday.to_i : mmr.customer.green_meals_on_thursday.to_i
-            
-            change_reg = cust_reg.to_i - mmr_reg.to_i
-            change_grn = cust_grn.to_i - mmr_grn.to_i
+            cust_total = cust_reg + cust_grn
 
-            if change_reg > 0
+            # change_reg = cust_reg.to_i - mmr_reg.to_i
+            change_grn = cust_grn.to_i - mmr_grn.to_i
+            change_total = cust_total.to_i - mmr_total.to_i
+
+
+
+            if change_total > 0
                 array_of_eligible_meals = []
                 array_of_eligible_meals.push("pork") unless mmr.customer.no_pork?
                 array_of_eligible_meals.push("beef") unless mmr.customer.no_beef?
                 array_of_eligible_meals.push("poultry") unless mmr.customer.no_poultry?
-                array_of_eligible_meals.shuffle!
 
-                unless array_of_eligible_meals.blank?
-                    while change_reg > 0 do
-                        el = array_of_eligible_meals.slice!(0)
-                        if el == "pork"
-                            mmr.update_attributes(pork:mmr.pork.to_i+1)
-                        elsif el == "beef"
-                            mmr.update_attributes(beef:mmr.beef.to_i+1)
-                        elsif el == "poultry"
-                            mmr.update_attributes(poultry:mmr.poultry.to_i+1)
+                array_of_eligible_green = []
+                array_of_eligible_green.push("green_1")
+                array_of_eligible_green.push("green_2")
+
+                while change_grn > 0
+                    array_of_eligible_green.sort_by! {|type| mmr.send(type.to_sym).to_i}
+                    do_not_increment = false
+                    el = array_of_eligible_green.slice!(0)
+                    if el == "green_1"
+                        if change_grn > 0
+                            mmr.update_attributes(green_1:mmr.green_1.to_i+1)
+                            change_grn -= 1
+                        else 
+                            do_not_increment = true
                         end
-                        array_of_eligible_meals.push(el)
-                        change_reg -= 1
+                    elsif el == "green_2"
+                        if change_grn > 0
+                            mmr.update_attributes(green_2:mmr.green_2.to_i+1)
+                            change_grn -= 1
+                        else
+                            do_not_increment = true
+                        end
                     end
+                    array_of_eligible_green.push(el)
+                    unless do_not_increment
+                        change_total -= 1
+                    end
+                    do_not_increment = false
                 end
-            elsif change_reg < 0
-                array_of_non_eligible_meals = []
-                array_of_non_eligible_meals.push("pork") if mmr.customer.no_pork?
-                array_of_non_eligible_meals.push("beef") if mmr.customer.no_beef?
-                array_of_non_eligible_meals.push("poultry") if mmr.customer.no_poultry?
-                array_of_non_eligible_meals.shuffle!
 
-                unless array_of_non_eligible_meals.blank?
-                    total_non_eligible_meals = array_of_non_eligible_meals.inject {|sum,anem| 
-                        if anem == "pork"
-                            sum + mmr.pork.to_i
-                        elsif anem == "beef"
-                            sum + mmr.beef.to_i
-                        elsif anem == "poultry"
-                            sum + mmr.poultry.to_i
+                while change_total > 0 do
+                    array_of_eligible_meals.sort_by! {|type| mmr.send(type.to_sym).to_i}
+                    do_not_increment = false
+                    el = array_of_eligible_meals.slice!(0)
+                    if el == "pork"
+                        mmr.update_attributes(pork:mmr.pork.to_i+1)
+                    elsif el == "beef"
+                        mmr.update_attributes(beef:mmr.beef.to_i+1)
+                    elsif el == "poultry"
+                        mmr.update_attributes(poultry:mmr.poultry.to_i+1)
+                    end
+                    array_of_eligible_meals.push(el)
+                    unless do_not_increment
+                        change_total -= 1
+                    end
+                    do_not_increment = false
+                end
+            elsif change_total < 0
+
+                array_of_eligible_green = []
+                array_of_eligible_green.push("green_1")
+                array_of_eligible_green.push("green_2")
+
+                while change_grn < 0
+                    array_of_eligible_green.sort_by! {|type| mmr.send(type.to_sym).to_i}.reverse!
+                    do_not_increment = false
+                    el = array_of_eligible_green.slice!(0)
+                    if el == "green_1"
+                        if mmr.green_1.to_i > 0
+                            mmr.update_attributes(green_1:mmr.green_1.to_i-1)
+                            change_grn += 1
+                        else 
+                            do_not_increment = true
                         end
-                    }.to_i
-                
-                    if change_reg.abs >= total_non_eligible_meals
-                        array_of_non_eligible_meals.each { |anem|
+                    elsif el == "green_2"
+                        if mmr.green_2.to_i > 0
+                            mmr.update_attributes(green_2:mmr.green_2.to_i-1)
+                            change_grn += 1
+                        else
+                            do_not_increment = true
+                        end
+                    end
+                    array_of_eligible_green.push(el)
+                    unless do_not_increment
+                        change_total += 1
+                    end
+                    do_not_increment = false
+                end
+
+
+                if change_total < 0
+
+                    array_of_non_eligible_meals = []
+                    array_of_non_eligible_meals.push("pork") if mmr.customer.no_pork?
+                    array_of_non_eligible_meals.push("beef") if mmr.customer.no_beef?
+                    array_of_non_eligible_meals.push("poultry") if mmr.customer.no_poultry?
+
+                    unless array_of_non_eligible_meals.blank?
+                        total_non_eligible_meals = array_of_non_eligible_meals.inject(0) {|sum,anem| 
                             if anem == "pork"
-                                mmr.update_attributes(pork:0)
+                                sum + mmr.pork.to_i
                             elsif anem == "beef"
-                                mmr.update_attributes(beef:0)
+                                sum + mmr.beef.to_i
                             elsif anem == "poultry"
-                                mmr.update_attributes(poultry:0)
-                            end                            
-                        }
-                        change_reg += total_non_eligible_meals
-                    else
-                        while change_reg < 0 do
-                            el = array_of_non_eligible_meals.slice!(0)
+                                sum + mmr.poultry.to_i
+                            end
+                        }.to_i
+
+
+                        if change_total.abs >= total_non_eligible_meals
+                            array_of_non_eligible_meals.each { |anem|
+                                if anem == "pork"
+                                    mmr.update_attributes(pork:0)
+                                elsif anem == "beef"
+                                    mmr.update_attributes(beef:0)
+                                elsif anem == "poultry"
+                                    mmr.update_attributes(poultry:0)
+                                end                            
+                            }
+                            change_total += total_non_eligible_meals
+                        else
+                            while change_total < 0 do
+                                array_of_non_eligible_meals.sort_by! {|type| mmr.send(type.to_sym).to_i}.reverse!
+                                el = array_of_non_eligible_meals.slice!(0)
+                                do_not_increment = false
+                                if el == "pork"
+                                    if mmr.pork.to_i > 0
+                                        mmr.update_attributes(pork:mmr.pork.to_i-1)
+                                    else
+                                        do_not_increment = true
+                                    end
+                                elsif el == "beef"
+                                    if mmr.beef.to_i > 0
+                                        mmr.update_attributes(beef:mmr.beef.to_i-1) 
+                                    else
+                                        do_not_increment = true 
+                                    end
+                                elsif el == "poultry"
+                                    if mmr.poultry.to_i > 0
+                                        mmr.update_attributes(poultry:mmr.poultry.to_i-1)
+                                    else 
+                                        do_not_increment = true
+                                    end
+                                end
+                                array_of_non_eligible_meals.push(el)
+                                change_reg += 1 unless do_not_increment
+                            end                        
+                        end
+                    end
+
+                    array_of_eligible_meals = []
+                    array_of_eligible_meals.push("pork") 
+                    array_of_eligible_meals.push("beef") 
+                    array_of_eligible_meals.push("poultry")
+
+                    unless array_of_eligible_meals.blank?
+                        while change_total < 0 do
+                            array_of_eligible_meals.sort_by! {|type| mmr.send(type.to_sym).to_i}.reverse!
+                            el = array_of_eligible_meals.slice!(0)
                             do_not_increment = false
                             if el == "pork"
                                 if mmr.pork.to_i > 0
@@ -137,83 +244,166 @@ namespace :customers do
                                 end
                             elsif el == "beef"
                                 if mmr.beef.to_i > 0
-                                    mmr.update_attributes(beef:mmr.beef.to_i-1) 
+                                    mmr.update_attributes(beef:mmr.beef.to_i-1)
                                 else
-                                    do_not_increment = true 
+                                    do_not_increment = true
                                 end
                             elsif el == "poultry"
                                 if mmr.poultry.to_i > 0
                                     mmr.update_attributes(poultry:mmr.poultry.to_i-1)
-                                else 
+                                else
                                     do_not_increment = true
                                 end
                             end
-                            array_of_non_eligible_meals.push(el)
-                            change_reg += 1 unless do_not_increment
-                        end                        
-                    end
-                end
-
-                array_of_eligible_meals = []
-                array_of_eligible_meals.push("pork") unless mmr.customer.no_pork?
-                array_of_eligible_meals.push("beef") unless mmr.customer.no_beef?
-                array_of_eligible_meals.push("poultry") unless mmr.customer.no_poultry?
-                array_of_eligible_meals.shuffle!
-
-                unless array_of_eligible_meals.blank?
-                    while change_reg < 0 do
-                        el = array_of_eligible_meals.slice!(0)
-                        do_not_increment = false
-                        if el == "pork"
-                            if mmr.pork.to_i > 0
-                                mmr.update_attributes(pork:mmr.pork.to_i-1)
-                            else
-                                do_not_increment = true
+                            array_of_eligible_meals.push(el)
+                            unless do_not_increment
+                                change_total += 1 
                             end
-                        elsif el == "beef"
-                            if mmr.beef.to_i > 0
-                                mmr.update_attributes(beef:mmr.beef.to_i-1)
-                            else
-                                do_not_increment = true
-                            end
-                        elsif el == "poultry"
-                            if mmr.poultry.to_i > 0
-                                mmr.update_attributes(poultry:mmr.poultry.to_i-1)
-                            else
-                                do_not_increment = true
-                            end
+                            do_not_increment = false
                         end
-                        array_of_eligible_meals.push(el)
-                        change_reg += 1 unless do_not_increment
                     end
                 end
             end
 
-            if change_grn != 0
-                array_of_eligible_meals = ["green_1","green_2"].shuffle!
-                increment = (change_grn/(change_grn.abs)).to_i
-                while change_grn != 0 do
-                    difference = 0
-                    el = array_of_eligible_meals.slice!(0)
-                    if el == "green_1"
-                        mmr.update_attributes(green_1:mmr.green_1.to_i+increment)
-                        if mmr.green_1.to_i < 0
-                            difference = 0 - mmr.green_1.to_i
-                            mmr.update_attributes(green_1:0)
-                        end
-                    elsif el == "green_2"
-                        mmr.update_attributes(green_2:mmr.green_2.to_i+increment)
-                        if mmr.green_2.to_i < 0
-                            difference = 0 - mmr.green_2.to_i
-                            mmr.update_attributes(green_2:0)
-                        end
-                    end
-                    array_of_eligible_meals.push(el)
-                    change_grn -= increment
-                    change_grn -= difference
-                    difference = 0
-                end
-            end
+            # if change_reg > 0
+            #     array_of_eligible_meals = []
+            #     array_of_eligible_meals.push("pork") unless mmr.customer.no_pork?
+            #     array_of_eligible_meals.push("beef") unless mmr.customer.no_beef?
+            #     array_of_eligible_meals.push("poultry") unless mmr.customer.no_poultry?
+            #     array_of_eligible_meals.shuffle!
+
+            #     unless array_of_eligible_meals.blank?
+            #         while change_reg > 0 do
+            #             el = array_of_eligible_meals.slice!(0)
+            #             if el == "pork"
+            #                 mmr.update_attributes(pork:mmr.pork.to_i+1)
+            #             elsif el == "beef"
+            #                 mmr.update_attributes(beef:mmr.beef.to_i+1)
+            #             elsif el == "poultry"
+            #                 mmr.update_attributes(poultry:mmr.poultry.to_i+1)
+            #             end
+            #             array_of_eligible_meals.push(el)
+            #             change_reg -= 1
+            #         end
+            #     end
+            # elsif change_reg < 0
+            #     array_of_non_eligible_meals = []
+            #     array_of_non_eligible_meals.push("pork") if mmr.customer.no_pork?
+            #     array_of_non_eligible_meals.push("beef") if mmr.customer.no_beef?
+            #     array_of_non_eligible_meals.push("poultry") if mmr.customer.no_poultry?
+            #     array_of_non_eligible_meals.shuffle!
+
+            #     unless array_of_non_eligible_meals.blank?
+            #         total_non_eligible_meals = array_of_non_eligible_meals.inject {|sum,anem| 
+            #             if anem == "pork"
+            #                 sum + mmr.pork.to_i
+            #             elsif anem == "beef"
+            #                 sum + mmr.beef.to_i
+            #             elsif anem == "poultry"
+            #                 sum + mmr.poultry.to_i
+            #             end
+            #         }.to_i
+                
+            #         if change_reg.abs >= total_non_eligible_meals
+            #             array_of_non_eligible_meals.each { |anem|
+            #                 if anem == "pork"
+            #                     mmr.update_attributes(pork:0)
+            #                 elsif anem == "beef"
+            #                     mmr.update_attributes(beef:0)
+            #                 elsif anem == "poultry"
+            #                     mmr.update_attributes(poultry:0)
+            #                 end                            
+            #             }
+            #             change_reg += total_non_eligible_meals
+            #         else
+            #             while change_reg < 0 do
+            #                 el = array_of_non_eligible_meals.slice!(0)
+            #                 do_not_increment = false
+            #                 if el == "pork"
+            #                     if mmr.pork.to_i > 0
+            #                         mmr.update_attributes(pork:mmr.pork.to_i-1)
+            #                     else
+            #                         do_not_increment = true
+            #                     end
+            #                 elsif el == "beef"
+            #                     if mmr.beef.to_i > 0
+            #                         mmr.update_attributes(beef:mmr.beef.to_i-1) 
+            #                     else
+            #                         do_not_increment = true 
+            #                     end
+            #                 elsif el == "poultry"
+            #                     if mmr.poultry.to_i > 0
+            #                         mmr.update_attributes(poultry:mmr.poultry.to_i-1)
+            #                     else 
+            #                         do_not_increment = true
+            #                     end
+            #                 end
+            #                 array_of_non_eligible_meals.push(el)
+            #                 change_reg += 1 unless do_not_increment
+            #             end                        
+            #         end
+            #     end
+
+            #     array_of_eligible_meals = []
+            #     array_of_eligible_meals.push("pork") unless mmr.customer.no_pork?
+            #     array_of_eligible_meals.push("beef") unless mmr.customer.no_beef?
+            #     array_of_eligible_meals.push("poultry") unless mmr.customer.no_poultry?
+            #     array_of_eligible_meals.shuffle!
+
+            #     unless array_of_eligible_meals.blank?
+            #         while change_reg < 0 do
+            #             el = array_of_eligible_meals.slice!(0)
+            #             do_not_increment = false
+            #             if el == "pork"
+            #                 if mmr.pork.to_i > 0
+            #                     mmr.update_attributes(pork:mmr.pork.to_i-1)
+            #                 else
+            #                     do_not_increment = true
+            #                 end
+            #             elsif el == "beef"
+            #                 if mmr.beef.to_i > 0
+            #                     mmr.update_attributes(beef:mmr.beef.to_i-1)
+            #                 else
+            #                     do_not_increment = true
+            #                 end
+            #             elsif el == "poultry"
+            #                 if mmr.poultry.to_i > 0
+            #                     mmr.update_attributes(poultry:mmr.poultry.to_i-1)
+            #                 else
+            #                     do_not_increment = true
+            #                 end
+            #             end
+            #             array_of_eligible_meals.push(el)
+            #             change_reg += 1 unless do_not_increment
+            #         end
+            #     end
+            # end
+
+            # if change_grn != 0
+            #     array_of_eligible_meals = ["green_1","green_2"].shuffle!
+            #     increment = (change_grn/(change_grn.abs)).to_i
+            #     while change_grn != 0 do
+            #         difference = 0
+            #         el = array_of_eligible_meals.slice!(0)
+            #         if el == "green_1"
+            #             mmr.update_attributes(green_1:mmr.green_1.to_i+increment)
+            #             if mmr.green_1.to_i < 0
+            #                 difference = 0 - mmr.green_1.to_i
+            #                 mmr.update_attributes(green_1:0)
+            #             end
+            #         elsif el == "green_2"
+            #             mmr.update_attributes(green_2:mmr.green_2.to_i+increment)
+            #             if mmr.green_2.to_i < 0
+            #                 difference = 0 - mmr.green_2.to_i
+            #                 mmr.update_attributes(green_2:0)
+            #             end
+            #         end
+            #         array_of_eligible_meals.push(el)
+            #         change_grn -= increment
+            #         change_grn -= difference
+            #         difference = 0
+            #     end
+            # end
 
         end
     end
