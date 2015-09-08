@@ -85,8 +85,8 @@ class MealSelectionsController < ApplicationController
             message.push(error.message)
         else
             unless status == "fail"
-                CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
-                if Date.today.wday == 0 && Date.today < current_customer.first_pick_up_date
+                if Date.today.wday == 0 && DateTime.now.hour < 14 && Date.today < current_customer.first_pick_up_date
+                    CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
                     CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal selection has changed",meal_selections)
                 end
                 status = "success"

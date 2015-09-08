@@ -1694,7 +1694,7 @@ $(function(){
                               Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none. You have selected all your meals!</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
                             </div>
                             <div class="row padder">
-                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>
+                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>. If no selection is made before the cut off then default selection will be sent
                             </div>
                             <div class="row m-t-none">
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
@@ -1797,7 +1797,7 @@ $(function(){
                               Meal selection for <b style="font-size:15px;"><%= (@display_production_day_2 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="thursday_selection_full">none. You have selected all your meals!</span><b><span id="thursday_total_remaining_display" style="color:#f0ad4e"><span id="thursday_total_remaining"></span> meals</span></b>)
                             </div>
                             <div class="row padder">
-                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>
+                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>. If no selection is made before the cut off then default selection will be sent.
                             </div>
                             <div class="row m-t-none">
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
