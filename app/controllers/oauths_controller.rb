@@ -32,6 +32,16 @@ class OauthsController < ApplicationController
               email = Customer.where(stripe_customer_id:stripe_customer_id).take.email 
               @user = create_from(provider)
               @user.update_attributes(stripe_customer_id: params[:state], email: email)
+
+              begin
+                @user.log_activity("Online profile created")
+              rescue => error
+                puts error.message
+              else
+                puts '---------------------------------------------------'
+              end
+
+
               # NOTE: this is the place to add '@user.activate!' if you are using user_activation submodule
 
               reset_session # protect from session fixation attack

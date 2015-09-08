@@ -6,6 +6,13 @@ class UsersController < ApplicationController
         @user = User.new(user_params)
         if @user.save
             @user.update_attributes(email:@user.email.downcase)
+            begin
+                @user.log_activity("Online profile created")
+            rescue => error
+                puts error.message
+            else
+                puts '---------------------------------------------------'
+            end
             auto_login(@user)
             redirect_to user_profile_path
         else

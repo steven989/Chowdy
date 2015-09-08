@@ -928,6 +928,16 @@ class AdminActionsController < ApplicationController
         redirect_to user_profile_path+"#customers"
     end
 
+    def get_user_activity
+        @user = User.find(params[:id].to_i)
+        @activites = @user.user_activities.order(created_at: :desc)
+        respond_to do |format|
+          format.html {
+            render partial: 'get_user_activity'
+          }      
+        end 
+    end
+
     private 
 
     def individual_attributes_params

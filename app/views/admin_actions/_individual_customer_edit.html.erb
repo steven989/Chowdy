@@ -253,6 +253,8 @@
     <% if @customer.user %>
     <div class="line line-dashed b-b line-lg pull-in"></div>
     <%= link_to 'Click to view this user''s dashboard', impersonate_user_path(@customer.user.id) %>
+    <div class="line line-dashed b-b line-lg pull-in"></div>
+    <%= link_to 'View user activities', get_user_activity_path(@customer.user), class:"nestedForm" %>
     <% end %>
     <% if @customer.user %>
       <div class="line line-dashed b-b line-lg pull-in"></div>

@@ -26,16 +26,22 @@ $(function(){
       // ajax
 
       function formRetrievalAjax() {
-              $('.pull_system_setting_form, .pull_next_week_total').off("click").on("click",function(){
-                $.ajax({
-                  url: $(this).attr('href'),
-                  type: 'GET',
-                  dataType: 'html'
-                }).done(function(data){
-                  $('#formModal .modal-content').html(data);
-                  $('#formModal').modal('toggle')
-                });
-              });
+          $('.pull_system_setting_form, .pull_next_week_total, .nestedForm').off("click").on("click",function(){
+            event.preventDefault();
+            $.ajax({
+              url: $(this).attr('href'),
+              type: 'GET',
+              dataType: 'html'
+            }).done(function(data){
+              $('#formModal .modal-content').html(data);
+              $('#formModal').modal({show:true});
+              $("#formModal").animate({
+                  scrollTop: 0
+              }, 500);
+
+              formRetrievalAjax();
+            });
+          });
       };
 
       // data tables
