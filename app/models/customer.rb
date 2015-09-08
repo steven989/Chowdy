@@ -354,9 +354,9 @@ class Customer < ActiveRecord::Base
                     end
 
                 #6) Send report with actions required
-                    if !hub.match(/delivery/i).nil?
-                        manual_checks.push("Delivery required")
-                    end
+                    # if !hub.match(/delivery/i).nil?
+                    #     manual_checks.push("Delivery required")
+                    # end
                     #unmatched referrals (added)
                     #green meal count can't be parsed (added) 
                     #Delivery required --> auto send delivery information request email (added)
