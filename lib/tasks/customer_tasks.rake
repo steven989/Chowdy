@@ -416,102 +416,121 @@ namespace :customers do
         if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
             StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
-                if current_customer.stripe_subscription_id != nil
-                    begin
 
-                        if Date.today < current_customer.first_pick_up_date
-                            raw_difference = queue_item.updated_meals - current_customer.total_meals_per_week
-                            if raw_difference > 0
-                                difference = raw_difference
+                begin
 
-                                Stripe::InvoiceItem.create(
-                                    customer: current_customer.stripe_customer_id,
-                                    amount: (difference * 6.99 * 1.13 * 100).round,
-                                    currency: 'CAD',
-                                    description: "First-week adjustment for #{difference} extra meals requested after sign up"
-                                )
+                    if Date.today < current_customer.first_pick_up_date
+                        raw_difference = queue_item.updated_meals - current_customer.total_meals_per_week
+                        if raw_difference > 0
+                            difference = raw_difference
 
-                                Stripe::Invoice.create(
-                                    customer: current_customer.stripe_customer_id
-                                )
+                            Stripe::InvoiceItem.create(
+                                customer: current_customer.stripe_customer_id,
+                                amount: (difference * 6.99 * 1.13 * 100).round,
+                                currency: 'CAD',
+                                description: "First-week adjustment for #{difference} extra meals requested after sign up"
+                            )
 
-                            elsif raw_difference < 0
-                                
-                                difference = raw_difference * -1
-                                
-                                charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
-                                charge = Stripe::Charge.retrieve(charge_id)
-                                stripe_refund_response = charge.refunds.create(amount: (difference * 6.99 * 1.13 * 100).round)
+                            Stripe::Invoice.create(
+                                customer: current_customer.stripe_customer_id
+                            )
 
-                                newly_created_refund = Refund.create(
-                                        stripe_customer_id: current_customer.stripe_customer_id, 
-                                        refund_week:StartDate.first.start_date, 
-                                        charge_week:Date.today,
-                                        charge_id:charge_id, 
-                                        meals_refunded: difference, 
-                                        amount_refunded: (difference * 6.99 * 1.13 * 100).round, 
-                                        refund_reason: "Subscription adjustment before first week", 
-                                        stripe_refund_id: stripe_refund_response.id
-                                )
-                                newly_created_refund.internal_refund_id = newly_created_refund.id
-                                newly_created_refund.save
-                            end
+                        elsif raw_difference < 0
+                            
+                            difference = raw_difference * -1
+                            
+                            charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
+                            charge = Stripe::Charge.retrieve(charge_id)
+                            stripe_refund_response = charge.refunds.create(amount: (difference * 6.99 * 1.13 * 100).round)
 
+                            newly_created_refund = Refund.create(
+                                    stripe_customer_id: current_customer.stripe_customer_id, 
+                                    refund_week:StartDate.first.start_date, 
+                                    charge_week:Date.today,
+                                    charge_id:charge_id, 
+                                    meals_refunded: difference, 
+                                    amount_refunded: (difference * 6.99 * 1.13 * 100).round, 
+                                    refund_reason: "Subscription adjustment before first week", 
+                                    stripe_refund_id: stripe_refund_response.id
+                            )
+                            newly_created_refund.internal_refund_id = newly_created_refund.id
+                            newly_created_refund.save
                         end
 
+                    end
 
-                        case queue_item.updated_meals
-                            when 6
-                                meals_per_week = "6mealswk" 
-                            when 8
-                                meals_per_week = "8mealswk"
-                            when 10
-                                meals_per_week = "10mealswk"
-                            when 12
-                                meals_per_week = "12mealsweek"
-                            when 14
-                                meals_per_week = "14mealsweek"
-                        end                    
-                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                        _current_period_end = stripe_subscription.current_period_end
-                        stripe_subscription.plan = meals_per_week
-                        stripe_subscription.trial_end = _current_period_end
-                        stripe_subscription.prorate = false
-                        stripe_subscription.save
-                    rescue => error
-                        puts '---------------------------------------------------'
-                        puts "something went wrong trying to change subscription during weekly task"
-                        puts error.message
-                        puts '---------------------------------------------------' 
-                        CustomerMailer.rescued_error(current_customer,error.message).deliver
+                    plan_match = Subscription.where(weekly_meals:queue_item.updated_meals, interval: "week",interval_count:1)
+
+                    if plan_match.blank?
+                        id = queue_item.updated_meals.to_s+"mealswk"
+                        amount = ((queue_item.updated_meals)*6.99*1.13*100).round
+                        statement_descriptor = "WK PLN " + queue_item.updated_meals.to_s
+                        if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:"week",interval_count:1, name:id, statement_descriptor: statement_descriptor)
+                            plan_match = Subscription.create(weekly_meals:queue_item.updated_meals,stripe_plan_id:id,interval:"week",interval_count:1)
+
+                            if (queue_item.updated_meals == current_customer.total_meals_per_week) && ((current_customer.interval.blank? ? "week" : current_customer.interval) == "week") && ((current_customer.interval_count.blank? ? 1 : current_customer.interval) == 1)
+                                current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu)
+                            else
+                                if current_customer.stripe_subscription_id.blank?
+                                    current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                                    update_interval = nil
+                                    update_interval_count = nil
+                                    current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
+                                else
+                                    subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                                    _current_period_end = subscription.current_period_end
+                                    subscription.plan = plan_match.stripe_plan_id
+                                    subscription.trial_end = _current_period_end
+                                    subscription.prorate = false  
+                                    if subscription.save                      
+                                        current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                                        update_interval = nil
+                                        update_interval_count = nil
+                                        current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                         
+                                    end
+                                end
+                            end
+                        end
                     else
-                        current_customer.update(
-                            total_meals_per_week: queue_item.updated_meals, 
-                            number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
-                            regular_meals_on_monday: queue_item.updated_reg_mon, 
-                            green_meals_on_monday: queue_item.updated_grn_mon,
-                            regular_meals_on_thursday: queue_item.updated_reg_thu,
-                            green_meals_on_thursday: queue_item.updated_grn_thu
-                        )
+                        if (queue_item.updated_meals == current_customer.total_meals_per_week) && ((current_customer.interval.blank? ? "week" : current_customer.interval) == "week") && ((current_customer.interval_count.blank? ? 1 : current_customer.interval) == 1)
+                            current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                            update_interval = nil
+                            update_interval_count = nil
+                            current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                 
+                        else
+                            if current_customer.stripe_subscription_id.blank?
+                                current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                            else
+                                subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                                _current_period_end = subscription.current_period_end
+                                subscription.plan = plan_match.take.stripe_plan_id
+                                subscription.trial_end = _current_period_end
+                                subscription.prorate = false  
+                                if subscription.save                      
+                                    current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                                    update_interval = nil
+                                    update_interval_count = nil
+                                    current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
+                                end
+                            end
+                        end
+                    end
+                rescue => error
+                    puts '---------------------------------------------------'
+                    puts "something went wrong trying to change subscription during weekly task"
+                    puts error.message
+                    puts '---------------------------------------------------' 
+                    CustomerMailer.rescued_error(current_customer,error.message).deliver
+                else
+                    unless current_customer.stripe_subscription_id.blank? #if there is no subscription we need to run this whole block again (because there's a chance that the customer is resuming from cancel and if so there will be subscription ID once the resume block code below is run)
                         if current_customer.user
-                            current_customer.user.log_activity("System: subscription meal count updated")
+                            current_customer.user.log_activity("System: subscription meal count updated to #{queue_item.updated_reg_mon} meals per week")
                         end
                         queue_item.add_to_record
                         queue_item.destroy
                     end
-                else
-                    current_customer.update(
-                        total_meals_per_week: queue_item.updated_meals, 
-                        number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
-                        regular_meals_on_monday: queue_item.updated_reg_mon, 
-                        green_meals_on_monday: queue_item.updated_grn_mon,
-                        regular_meals_on_thursday: queue_item.updated_reg_thu,
-                        green_meals_on_thursday: queue_item.updated_grn_thu
-                    )
-                    if current_customer.user
-                        current_customer.user.log_activity("System: subscription meal count updated")
-                    end
                 end
+
             end
         end
 
@@ -643,62 +662,82 @@ namespace :customers do
                 end
             end
         end
-        #run this the second time
+        #run the change subscription code the second time
         if StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
             StopQueue.where(stop_type: ["change_sub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
                 current_customer = queue_item.customer
-                if current_customer.stripe_subscription_id != nil
-                    begin
-                        case queue_item.updated_meals
-                            when 6
-                                meals_per_week = "6mealswk" 
-                            when 8
-                                meals_per_week = "8mealswk"
-                            when 10
-                                meals_per_week = "10mealswk"
-                            when 12
-                                meals_per_week = "12mealsweek"
-                            when 14
-                                meals_per_week = "14mealsweek"
-                        end                    
-                        stripe_subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
-                        _current_period_end = stripe_subscription.current_period_end
-                        stripe_subscription.plan = meals_per_week
-                        stripe_subscription.trial_end = _current_period_end
-                        stripe_subscription.prorate = false
-                        stripe_subscription.save
-                    rescue => error
-                        puts '---------------------------------------------------'
-                        puts "something went wrong trying to change subscription during weekly task"
-                        puts error.message
-                        puts '---------------------------------------------------' 
-                        CustomerMailer.rescued_error(current_customer,error.message).deliver
-                    else
-                        current_customer.update(
-                            total_meals_per_week: queue_item.updated_meals, 
-                            number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
-                            regular_meals_on_monday: queue_item.updated_reg_mon, 
-                            green_meals_on_monday: queue_item.updated_grn_mon,
-                            regular_meals_on_thursday: queue_item.updated_reg_thu,
-                            green_meals_on_thursday: queue_item.updated_grn_thu
-                            )      
-                    end
 
+
+                begin
+                    plan_match = Subscription.where(weekly_meals:queue_item.updated_meals, interval: "week",interval_count:1)
+
+                    if plan_match.blank?
+                        id = queue_item.updated_meals.to_s+"mealswk"
+                        amount = ((queue_item.updated_meals)*6.99*1.13*100).round
+                        statement_descriptor = "WK PLN " + queue_item.updated_meals.to_s
+                        if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:"week",interval_count:1, name:id, statement_descriptor: statement_descriptor)
+                            plan_match = Subscription.create(weekly_meals:queue_item.updated_meals,stripe_plan_id:id,interval:"week",interval_count:1)
+
+                            if (queue_item.updated_meals == current_customer.total_meals_per_week) && ((current_customer.interval.blank? ? "week" : current_customer.interval) == "week") && ((current_customer.interval_count.blank? ? 1 : current_customer.interval) == 1)
+                                current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu)
+                            else
+                                if current_customer.stripe_subscription_id.blank?
+                                    current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                                    update_interval = nil
+                                    update_interval_count = nil
+                                    current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
+                                else
+                                    subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                                    _current_period_end = subscription.current_period_end
+                                    subscription.plan = plan_match.stripe_plan_id
+                                    subscription.trial_end = _current_period_end
+                                    subscription.prorate = false  
+                                    if subscription.save                      
+                                        current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                                        update_interval = nil
+                                        update_interval_count = nil
+                                        current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                         
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        if (queue_item.updated_meals == current_customer.total_meals_per_week) && ((current_customer.interval.blank? ? "week" : current_customer.interval) == "week") && ((current_customer.interval_count.blank? ? 1 : current_customer.interval) == 1)
+                            current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                            update_interval = nil
+                            update_interval_count = nil
+                            current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                 
+                        else
+                            if current_customer.stripe_subscription_id.blank?
+                                current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                            else
+                                subscription = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.retrieve(current_customer.stripe_subscription_id)
+                                _current_period_end = subscription.current_period_end
+                                subscription.plan = plan_match.take.stripe_plan_id
+                                subscription.trial_end = _current_period_end
+                                subscription.prorate = false  
+                                if subscription.save                      
+                                    current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu, total_meals_per_week:queue_item.updated_meals, number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu)
+                                    update_interval = nil
+                                    update_interval_count = nil
+                                    current_customer.update_attributes(interval:update_interval, interval_count:update_interval_count)
+                                end
+                            end
+                        end
+                    end
+                rescue => error
+                    puts '---------------------------------------------------'
+                    puts "something went wrong trying to change subscription during weekly task"
+                    puts error.message
+                    puts '---------------------------------------------------' 
+                    CustomerMailer.rescued_error(current_customer,error.message).deliver
                 else
-                    current_customer.update(
-                        total_meals_per_week: queue_item.updated_meals, 
-                        number_of_green: queue_item.updated_grn_mon + queue_item.updated_grn_thu,
-                        regular_meals_on_monday: queue_item.updated_reg_mon, 
-                        green_meals_on_monday: queue_item.updated_grn_mon,
-                        regular_meals_on_thursday: queue_item.updated_reg_thu,
-                        green_meals_on_thursday: queue_item.updated_grn_thu
-                        )                    
+                    if current_customer.user
+                        current_customer.user.log_activity("System: subscription meal count updated to #{queue_item.updated_meals} meals per week")
+                    end
+                    queue_item.add_to_record
+                    queue_item.destroy
                 end
-                if current_customer.user
-                    current_customer.user.log_activity("System: subscription meal count updated")
-                end
-                queue_item.add_to_record
-                queue_item.destroy
             end
         end
     end

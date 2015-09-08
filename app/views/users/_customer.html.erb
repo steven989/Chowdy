@@ -319,27 +319,6 @@ $(function(){
         $('#monday_selection_full').addClass('hidden');
       }
 
-      // if (updated_monday_regular_limit == 0) {
-      //   $('#monday_regular_remaining_display').addClass('hidden');
-      // } else {
-      //   $('#monday_regular_remaining_display').removeClass('hidden');
-      //   $('#monday_regular_remaining').html(updated_monday_regular_limit);
-      // }
-
-      // if (updated_monday_green_limit == 0) {
-      //   $('#monday_green_remaining_display').addClass('hidden');
-      // } else {
-      //   $('#monday_green_remaining_display').removeClass('hidden');
-      //   $('#monday_green_remaining').html(updated_monday_green_limit);
-      // }
-
-      // if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0) {
-      //   $('#monday_selection_full').removeClass('hidden');
-      // } else {
-      //   $('#monday_selection_full').addClass('hidden');
-      // }
-
-
       if (updated_thursday_total_limit == 0) {
         $('#thursday_total_remaining_display').addClass('hidden');
         $('#thursday_selection_full').removeClass('hidden');
@@ -349,25 +328,6 @@ $(function(){
         $('#thursday_selection_full').addClass('hidden');
       }
 
-      // if (updated_thursday_regular_limit == 0) {
-      //   $('#thursday_regular_remaining_display').addClass('hidden');
-      // } else {
-      //   $('#thursday_regular_remaining_display').removeClass('hidden');
-      //   $('#thursday_regular_remaining').html(updated_thursday_regular_limit);
-      // }
-
-      // if (updated_thursday_green_limit == 0) {
-      //   $('#thursday_green_remaining_display').addClass('hidden');
-      // } else {
-      //   $('#thursday_green_remaining_display').removeClass('hidden');
-      //   $('#thursday_green_remaining').html(updated_thursday_green_limit);
-      // }     
-
-      // if (updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
-      //   $('#thursday_selection_full').removeClass('hidden');
-      // } else {
-      //   $('#thursday_selection_full').addClass('hidden');
-      // } 
     };
 
     update_display_guide();
@@ -444,22 +404,12 @@ $(function(){
       updated_thursday_green_limit = thursday_green_limit -  $('#thursday_green_1_1_spinner').val() -  $('#thursday_green_2_1_spinner').val();
       updated_thursday_total_limit = updated_thursday_regular_limit + updated_thursday_green_limit;
 
-      // $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_regular_limit + $(this).val()*1)})});
-
-      // $('#monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_green_limit + $(this).val()*1)})});
 
       $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_total_limit + $(this).val()*1)})});
 
-      // $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_regular_limit + $(this).val()*1)})});
-      // $('#thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_green_limit + $(this).val()*1)})});
 
       $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_total_limit + $(this).val()*1)})});
 
-      // if (updated_monday_regular_limit == 0 && updated_monday_green_limit == 0 && updated_thursday_regular_limit == 0 && updated_thursday_green_limit == 0) {
-      //   $('#submit_meal_selection').removeClass('disabled');  
-      // } else {
-      //   $('#submit_meal_selection').addClass('disabled');  
-      // }
 
       if (updated_monday_total_limit == 0 && updated_thursday_total_limit == 0) {
         $('#submit_meal_selection').removeClass('disabled');  
@@ -483,7 +433,7 @@ $(function(){
                                                     
     $('#total_meals_spinner').TouchSpin({
       min: 6,
-      max: 14,
+      max: 34,
       step: 2
     });
 

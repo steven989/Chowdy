@@ -333,7 +333,7 @@ class AdminActionsController < ApplicationController
                     end
                 else
                     if (total_meals == @customer.total_meals_per_week) && (params[:interval] == (@customer.interval.blank? ? "week" : @customer.interval)) && (params[:interval_count].to_i == (@customer.interval_count.blank? ? 1 : @customer.interval))
-                        @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, number_of_green: monday_green + thursday_green)
+                        @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green, total_meals_per_week:total_meals, number_of_green: monday_green + thursday_green)
                         update_interval = params[:interval] == "week" ? nil : params[:interval]
                         update_interval_count = params[:interval_count].to_i == 1 ? nil : params[:interval_count].to_i
                         @customer.update_attributes(interval:update_interval, interval_count:update_interval_count)                 

@@ -277,7 +277,7 @@ protect_from_forgery :except => :payment
             end
             associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
 
-            if ([6,8,10,12,14].include?(total_updated_meals)) && (params[:thursday_grn_hidden].to_i + params[:monday_grn_hidden].to_i <= total_updated_meals)
+            if (total_updated_meals.to_i >= 6) && (params[:thursday_grn_hidden].to_i + params[:monday_grn_hidden].to_i <= total_updated_meals)
                 current_customer.stop_queues.where("stop_type ilike ?", "change_sub").destroy_all
                 current_customer.stop_queues.create(
                     stop_type:'change_sub',
