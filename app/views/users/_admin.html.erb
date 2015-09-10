@@ -282,13 +282,25 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_regular_wandas %></span>
-                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                            <small class="text-muted text-u-c">Wanda's (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @wandas_selected_regular_monday %></span>
+                                                            <small class="text-muted text-u-c">Wanda's (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_regular_coffee_bar %></span>
-                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                            <small class="text-muted text-u-c">Coffee Bar (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @coffee_bar_selected_regular_monday %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
@@ -300,7 +312,13 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_regular_gta_delivery %></span>
-                                                            <small class="text-muted text-u-c">GTA Delivery</small>
+                                                            <small class="text-muted text-u-c">GTA Delivery (Not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @gta_selected_regular_monday %></span>
+                                                            <small class="text-muted text-u-c">GTA Delivery (selected)</small>
                                                       </div>  
                                                   </section>
                                                 </div>
@@ -321,10 +339,10 @@ $(function(){
                                                 <div class="meals_details hidden">
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_monday_wandas %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_monday_wandas %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_monday_wandas %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_monday_wandas %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_monday_wandas %></span>
@@ -332,10 +350,21 @@ $(function(){
                                                   </section>
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_monday_coffee_bar %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @wandas_selected_pork_monday %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_monday_coffee_bar %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @wandas_selected_beef_monday %></span>
+                                                    </div>  
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 14px;">C: <%= @wandas_selected_poultry_monday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_monday_coffee_bar %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_monday_coffee_bar %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_monday_coffee_bar %></span>
@@ -343,10 +372,21 @@ $(function(){
                                                   </section>
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_monday_dekefir %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @coffee_bar_selected_pork_monday %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_monday_dekefir %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @coffee_bar_selected_beef_monday %></span>
+                                                    </div>  
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 14px;">C: <%= @coffee_bar_selected_poultry_monday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_monday_dekefir %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_monday_dekefir %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_monday_dekefir %></span>
@@ -354,19 +394,30 @@ $(function(){
                                                   </section>
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_monday_gta_delivery %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_monday_gta_delivery %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_monday_gta_delivery %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_monday_gta_delivery %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_monday_gta_delivery %></span>
                                                     </div>  
                                                   </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @gta_selected_pork_monday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @gta_selected_beef_monday %></span>
+                                                    </div>  
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 14px;">C: <%= @gta_selected_poultry_monday %></span>
+                                                    </div>  
+                                                  </section>
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
                                                     <div class="text-center text-primary">
                                                           <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green %></span>
@@ -377,13 +428,25 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green_wandas %></span>
-                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                            <small class="text-muted text-u-c">Wanda's (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @wandas_selected_green_monday %></span>
+                                                            <small class="text-muted text-u-c">Wanda's (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green_coffee_bar %></span>
-                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                            <small class="text-muted text-u-c">Coffee Bar (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @coffee_bar_selected_green_monday %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
@@ -395,11 +458,87 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @monday_green_gta_delivery %></span>
-                                                            <small class="text-muted text-u-c">GTA Delivery</small>
+                                                            <small class="text-muted text-u-c">GTA Delivery (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @gta_selected_green_monday %></span>
+                                                            <small class="text-muted text-u-c">GTA delivery (selected)</small>
                                                       </div>  
                                                   </section>
                                                 </div>
                                             </div>
+
+                                            <div class="col-md-1">
+                                                <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 25px;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 25px;">G2: </span>
+                                                    </div>     
+                                                </section>
+                                                <div class="meals_details hidden">
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: </span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: <%= @wandas_selected_green_1_monday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: <%= @wandas_selected_green_2_monday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: </span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: <%= @coffee_bar_selected_green_1_monday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: <%= @coffee_bar_selected_green_2_monday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1:</span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2:</span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: </span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: <%= @gta_selected_green_1_monday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: <%= @gta_selected_green_2_monday %></span>
+                                                    </div>  
+                                                  </section>
+                                                </div>
+                                            </div>
+
                                             <div class="col-md-2">
                                                 <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
                                                     <div class="text-center text-primary">
@@ -411,13 +550,25 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_regular_wandas %></span>
-                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                            <small class="text-muted text-u-c">Wanda's (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @wandas_selected_regular_thursday %></span>
+                                                            <small class="text-muted text-u-c">Wanda's (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_regular_coffee_bar %></span>
-                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                            <small class="text-muted text-u-c">Coffee Bar (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @coffee_bar_selected_regular_thursday %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
@@ -429,7 +580,13 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_regular_gta_delivery %></span>
-                                                            <small class="text-muted text-u-c">GTA Delivery</small>
+                                                            <small class="text-muted text-u-c">GTA Delivery (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @gta_selected_regular_thursday %></span>
+                                                            <small class="text-muted text-u-c">GTA delivery (selected)</small>
                                                       </div>  
                                                   </section>
                                                 </div>
@@ -450,10 +607,10 @@ $(function(){
                                                 <div class="meals_details hidden">
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_thursday_wandas %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_thursday_wandas %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_thursday_wandas %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_thursday_wandas %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_thursday_wandas %></span>
@@ -461,10 +618,21 @@ $(function(){
                                                   </section>
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_thursday_coffee_bar %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @wandas_selected_pork_thursday %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_thursday_coffee_bar %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @wandas_selected_beef_thursday %></span>
+                                                    </div>  
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 14px;">C: <%= @wandas_selected_poultry_thursday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_thursday_coffee_bar %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_thursday_coffee_bar %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_thursday_coffee_bar %></span>
@@ -472,10 +640,21 @@ $(function(){
                                                   </section>
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_thursday_dekefir %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @coffee_bar_selected_pork_thursday %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_thursday_dekefir %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @coffee_bar_selected_beef_thursday %></span>
+                                                    </div>  
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 14px;">C: <%= @coffee_bar_selected_poultry_thursday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_thursday_dekefir %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_thursday_dekefir %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_thursday_dekefir %></span>
@@ -483,19 +662,30 @@ $(function(){
                                                   </section>
                                                   <section class="row m-b-md">
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">P: <%= @neg_adjustment_pork_thursday_gta_delivery %></span>
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @neg_adjustment_pork_thursday_gta_delivery %></span>
                                                     </div>
                                                     <div class="text-center text-muted">
-                                                          <span class="h5 block" style="height: 13px;">B: <%= @neg_adjustment_beef_thursday_gta_delivery %></span>
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @neg_adjustment_beef_thursday_gta_delivery %></span>
                                                     </div>  
                                                     <div class="text-center text-muted">
                                                           <span class="h5 block" style="height: 14px;">C: <%= @neg_adjustment_poultry_thursday_gta_delivery %></span>
                                                     </div>  
                                                   </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">P: <%= @gta_selected_pork_thursday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 16px;">B: <%= @gta_selected_beef_thursday %></span>
+                                                    </div>  
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 14px;">C: <%= @gta_selected_poultry_thursday %></span>
+                                                    </div>  
+                                                  </section>
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-3">
+                                            <div class="col-md-2">
                                                 <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
                                                     <div class="text-center text-primary">
                                                           <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green %></span>
@@ -506,13 +696,25 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green_wandas %></span>
-                                                            <small class="text-muted text-u-c">Wanda's</small>
+                                                            <small class="text-muted text-u-c">Wanda's (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @wandas_selected_green_thursday %></span>
+                                                            <small class="text-muted text-u-c">Wanda's (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green_coffee_bar %></span>
-                                                            <small class="text-muted text-u-c">Coffee Bar</small>
+                                                            <small class="text-muted text-u-c">Coffee Bar (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @coffee_bar_selected_green_thursday %></span>
+                                                            <small class="text-muted text-u-c">Coffee Bar (selected)</small>
                                                       </div>  
                                                   </section>
                                                   <section class="row m-b-md">
@@ -524,11 +726,87 @@ $(function(){
                                                   <section class="row m-b-md">
                                                       <div class="text-center text-muted">
                                                             <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @thursday_green_gta_delivery %></span>
-                                                            <small class="text-muted text-u-c">GTA Delivery</small>
+                                                            <small class="text-muted text-u-c">GTA Delivery (not selected)</small>
+                                                      </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                      <div class="text-center text-muted">
+                                                            <span class="h2 block" style="height: 33px; margin-top: 20px; margin-bottom: 10px;"><%= @gta_selected_green_thursday %></span>
+                                                            <small class="text-muted text-u-c">GTA delivery (selected)</small>
                                                       </div>  
                                                   </section>
                                                 </div>
                                             </div>
+
+                                            <div class="col-md-1">
+                                                <section class="row b-b padder-v meal_details_collapse_control" style="cursor:pointer">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 25px;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 25px;">G2: </span>
+                                                    </div>     
+                                                </section>
+                                                <div class="meals_details hidden">
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: </span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: <%= @wandas_selected_green_1_thursday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: <%= @wandas_selected_green_2_thursday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: </span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: <%= @coffee_bar_selected_green_1_thursday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: <%= @coffee_bar_selected_green_2_thursday %></span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1:</span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2:</span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: </span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: </span>
+                                                    </div>  
+                                                  </section>
+                                                  <section class="row m-b-md">
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G1: <%= @gta_selected_green_1_thursday %></span>
+                                                    </div>
+                                                    <div class="text-center text-muted">
+                                                          <span class="h5 block" style="height: 29;">G2: <%= @gta_selected_green_2_thursday %></span>
+                                                    </div>  
+                                                  </section>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>

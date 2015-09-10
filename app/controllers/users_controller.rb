@@ -37,21 +37,80 @@ class UsersController < ApplicationController
                 @monday_regular_coffee_bar = MealStatistic.retrieve("monday_regular_coffee_bar")
                 @monday_regular_dekefir = MealStatistic.retrieve("monday_regular_dekefir")
                 @monday_regular_gta_delivery = MealStatistic.retrieve("monday_regular_gta_delivery")
+                
+                @wandas_selected_beef_monday = MealStatistic.retrieve("wandas_selected_beef_monday")
+                @wandas_selected_pork_monday = MealStatistic.retrieve("wandas_selected_pork_monday")
+                @wandas_selected_poultry_monday = MealStatistic.retrieve("wandas_selected_poultry_monday")
+                @wandas_selected_regular_monday = @wandas_selected_beef_monday.to_i + @wandas_selected_pork_monday.to_i + @wandas_selected_poultry_monday.to_i
+
+                @coffee_bar_selected_beef_monday = MealStatistic.retrieve("coffee_bar_selected_beef_monday")
+                @coffee_bar_selected_pork_monday = MealStatistic.retrieve("coffee_bar_selected_pork_monday")
+                @coffee_bar_selected_poultry_monday = MealStatistic.retrieve("coffee_bar_selected_poultry_monday")
+                @coffee_bar_selected_regular_monday = @coffee_bar_selected_beef_monday.to_i + @coffee_bar_selected_pork_monday.to_i + @coffee_bar_selected_poultry_monday.to_i
+
+                @gta_selected_beef_monday = MealStatistic.retrieve("gta_selected_beef_monday")
+                @gta_selected_pork_monday = MealStatistic.retrieve("gta_selected_pork_monday")
+                @gta_selected_poultry_monday = MealStatistic.retrieve("gta_selected_poultry_monday")
+                @gta_selected_regular_monday = @gta_selected_beef_monday.to_i + @gta_selected_pork_monday.to_i + @gta_selected_poultry_monday.to_i
+            
             @monday_green = MealStatistic.retrieve("monday_green")
                 @monday_green_wandas = MealStatistic.retrieve("monday_green_wandas")
                 @monday_green_coffee_bar = MealStatistic.retrieve("monday_green_coffee_bar")
                 @monday_green_dekefir = MealStatistic.retrieve("monday_green_dekefir")
                 @monday_green_gta_delivery = MealStatistic.retrieve("monday_green_gta_delivery")
+
+                @wandas_selected_green_1_monday = MealStatistic.retrieve("wandas_selected_green_1_monday")
+                @wandas_selected_green_2_monday = MealStatistic.retrieve("wandas_selected_green_2_monday")
+                @wandas_selected_green_monday = @wandas_selected_green_1_monday.to_i + @wandas_selected_green_2_monday.to_i
+
+                @coffee_bar_selected_green_1_monday = MealStatistic.retrieve("coffee_bar_selected_green_1_monday")
+                @coffee_bar_selected_green_2_monday = MealStatistic.retrieve("coffee_bar_selected_green_2_monday")
+                @coffee_bar_selected_green_monday = @coffee_bar_selected_green_1_monday.to_i + @coffee_bar_selected_green_2_monday.to_i
+
+                @gta_selected_green_1_monday = MealStatistic.retrieve("gta_selected_green_1_monday")
+                @gta_selected_green_2_monday = MealStatistic.retrieve("gta_selected_green_2_monday")
+                @gta_selected_green_monday = @gta_selected_green_1_monday.to_i + @gta_selected_green_2_monday.to_i
+
             @thursday_regular = MealStatistic.retrieve("thursday_regular")
                 @thursday_regular_wandas = MealStatistic.retrieve("thursday_regular_wandas")
                 @thursday_regular_coffee_bar = MealStatistic.retrieve("thursday_regular_coffee_bar")
                 @thursday_regular_dekefir = MealStatistic.retrieve("thursday_regular_dekefir")
                 @thursday_regular_gta_delivery = MealStatistic.retrieve("thursday_regular_gta_delivery")
+
+                @wandas_selected_beef_thursday = MealStatistic.retrieve("wandas_selected_beef_thursday")
+                @wandas_selected_pork_thursday = MealStatistic.retrieve("wandas_selected_pork_thursday")
+                @wandas_selected_poultry_thursday = MealStatistic.retrieve("wandas_selected_poultry_thursday")
+                @wandas_selected_regular_thursday = @wandas_selected_beef_thursday.to_i + @wandas_selected_pork_thursday.to_i + @wandas_selected_poultry_thursday.to_i
+
+                @coffee_bar_selected_beef_thursday = MealStatistic.retrieve("coffee_bar_selected_beef_thursday")
+                @coffee_bar_selected_pork_thursday = MealStatistic.retrieve("coffee_bar_selected_pork_thursday")
+                @coffee_bar_selected_poultry_thursday = MealStatistic.retrieve("coffee_bar_selected_poultry_thursday")
+                @coffee_bar_selected_regular_thursday = @coffee_bar_selected_beef_thursday.to_i + @coffee_bar_selected_pork_thursday.to_i + @coffee_bar_selected_poultry_thursday.to_i
+
+                @gta_selected_beef_thursday = MealStatistic.retrieve("gta_selected_beef_thursday")
+                @gta_selected_pork_thursday = MealStatistic.retrieve("gta_selected_pork_thursday")
+                @gta_selected_poultry_thursday = MealStatistic.retrieve("gta_selected_poultry_thursday")
+                @gta_selected_regular_thursday = @gta_selected_beef_thursday.to_i + @gta_selected_pork_thursday.to_i + @gta_selected_poultry_thursday.to_i
+
+
             @thursday_green = MealStatistic.retrieve("thursday_green")
                 @thursday_green_wandas = MealStatistic.retrieve("thursday_green_wandas")
                 @thursday_green_coffee_bar = MealStatistic.retrieve("thursday_green_coffee_bar")
                 @thursday_green_dekefir = MealStatistic.retrieve("thursday_green_dekefir")
                 @thursday_green_gta_delivery = MealStatistic.retrieve("thursday_green_gta_delivery")
+
+                @wandas_selected_green_1_thursday = MealStatistic.retrieve("wandas_selected_green_1_thursday")
+                @wandas_selected_green_2_thursday = MealStatistic.retrieve("wandas_selected_green_2_thursday")
+                @wandas_selected_green_thursday = @wandas_selected_green_1_thursday.to_i + @wandas_selected_green_2_thursday.to_i
+
+                @coffee_bar_selected_green_1_thursday = MealStatistic.retrieve("coffee_bar_selected_green_1_thursday")
+                @coffee_bar_selected_green_2_thursday = MealStatistic.retrieve("coffee_bar_selected_green_2_thursday")
+                @coffee_bar_selected_green_thursday = @coffee_bar_selected_green_1_thursday.to_i + @coffee_bar_selected_green_2_thursday.to_i
+
+                @gta_selected_green_1_thursday = MealStatistic.retrieve("gta_selected_green_1_thursday")
+                @gta_selected_green_2_thursday = MealStatistic.retrieve("gta_selected_green_2_thursday")
+                @gta_selected_green_thursday = @gta_selected_green_1_thursday.to_i + @gta_selected_green_2_thursday.to_i
+
             @total_meals = MealStatistic.retrieve("total_meals")
             @total_meals_next = MealStatistic.retrieve("total_meals_next")
 
