@@ -228,11 +228,25 @@ class UsersController < ApplicationController
             @display_production_day_1 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) == 7 ? Date.today : Chowdy::Application.closest_date(1,7)) : (Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.closest_date(1,7) : Chowdy::Application.closest_date(2,7))
             @display_production_day_2 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) < 3 ? Chowdy::Application.closest_date(2,3) : Chowdy::Application.closest_date(1,3)) : (Chowdy::Application.wday(Date.today) < 3  ? Chowdy::Application.closest_date(3,3) : Chowdy::Application.closest_date(2,3))
 
-            @monday_beef_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Beef").blank?
-            @monday_pork_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Pork").blank?
-            @monday_poultry_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Poultry").blank?
-            @monday_green_1_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Green 1").blank?
-            @monday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_1, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_1, meal_type:"Green 2").blank?
+            monday_beef_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Beef")
+            @monday_beef_selection_1_name = monday_beef_selection_1.blank? ? "Menu to be announced" : monday_beef_selection_1.take.meal_name
+            @monday_beef_selection_1_sub_name = monday_beef_selection_1.blank? ? "" : ((monday_beef_selection_1.take.carb.blank? && monday_beef_selection_1.take.veggie.blank?) ? "" : "with ") + monday_beef_selection_1.take.carb.to_s.titlecase + ((monday_beef_selection_1.take.carb.blank? || monday_beef_selection_1.take.veggie.blank?) ? "" : ", ") + monday_beef_selection_1.take.veggie.to_s.titlecase
+
+            monday_pork_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Pork")
+            @monday_pork_selection_1_name = monday_pork_selection_1.blank? ? "Menu to be announced" : monday_pork_selection_1.take.meal_name
+            @monday_pork_selection_1_sub_name = monday_pork_selection_1.blank? ? "" : ((monday_pork_selection_1.take.carb.blank? && monday_pork_selection_1.take.veggie.blank?) ? "" : "with ") + monday_pork_selection_1.take.carb.to_s.titlecase + ((monday_pork_selection_1.take.carb.blank? || monday_pork_selection_1.take.veggie.blank?) ? "" : ", ") + monday_pork_selection_1.take.veggie.to_s.titlecase
+
+            monday_poultry_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Poultry")
+            @monday_poultry_selection_1_name = monday_poultry_selection_1.blank? ? "Menu to be announced" : monday_poultry_selection_1.take.meal_name
+            @monday_poultry_selection_1_sub_name = monday_poultry_selection_1.blank? ? "" : ((monday_poultry_selection_1.take.carb.blank? && monday_poultry_selection_1.take.veggie.blank?) ? "" : "with ") + monday_poultry_selection_1.take.carb.to_s.titlecase + ((monday_poultry_selection_1.take.carb.blank? || monday_poultry_selection_1.take.veggie.blank?) ? "" : ", ") + monday_poultry_selection_1.take.veggie.to_s.titlecase
+
+            monday_green_1_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Green 1")
+            @monday_green_1_selection_1_name = monday_green_1_selection_1.blank? ? "Menu to be announced" : monday_green_1_selection_1.take.meal_name
+            @monday_green_1_selection_1_sub_name = monday_green_1_selection_1.blank? ? "" : ((monday_green_1_selection_1.take.carb.blank? && monday_green_1_selection_1.take.veggie.blank?) ? "" : "with ") + monday_green_1_selection_1.take.carb.to_s.titlecase + ((monday_green_1_selection_1.take.carb.blank? || monday_green_1_selection_1.take.veggie.blank?) ? "" : ", ") + monday_green_1_selection_1.take.veggie.to_s.titlecase
+
+            monday_green_2_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Green 2")
+            @monday_green_2_selection_1_name = monday_green_2_selection_1.blank? ? "Menu to be announced" : monday_green_2_selection_1.take.meal_name
+            @monday_green_2_selection_1_sub_name = monday_green_2_selection_1.blank? ? "" : ((monday_green_2_selection_1.take.carb.blank? && monday_green_2_selection_1.take.veggie.blank?) ? "" : "with ") + monday_green_2_selection_1.take.carb.to_s.titlecase + ((monday_green_2_selection_1.take.carb.blank? || monday_green_2_selection_1.take.veggie.blank?) ? "" : ", ") + monday_green_2_selection_1.take.veggie.to_s.titlecase
 
             meal_selection_customer_monday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_1)
 
@@ -242,11 +256,37 @@ class UsersController < ApplicationController
             @monday_green_1_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.green_1
             @monday_green_2_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.green_2
 
-            @thursday_beef_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Beef").blank?
-            @thursday_pork_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Pork").blank?
-            @thursday_poultry_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Poultry").blank?
-            @thursday_green_1_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").blank?
-            @thursday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").blank?
+            # @thursday_beef_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Beef").blank?
+            # @thursday_pork_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Pork").blank?
+            # @thursday_poultry_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Poultry").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Poultry").blank?
+            # @thursday_green_1_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").blank?
+            # @thursday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").blank?
+
+
+            thursday_beef_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Beef")
+            @thursday_beef_selection_1_name = thursday_beef_selection_1.blank? ? "Menu to be announced" : thursday_beef_selection_1.take.meal_name
+            @thursday_beef_selection_1_sub_name = thursday_beef_selection_1.blank? ? "" : ((thursday_beef_selection_1.take.carb.blank? && thursday_beef_selection_1.take.veggie.blank?) ? "" : "with ") + thursday_beef_selection_1.take.carb.to_s.titlecase + ((thursday_beef_selection_1.take.carb.blank? || thursday_beef_selection_1.take.veggie.blank?) ? "" : ", ") + thursday_beef_selection_1.take.veggie.to_s.titlecase
+
+            thursday_pork_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Pork")
+            @thursday_pork_selection_1_name = thursday_pork_selection_1.blank? ? "Menu to be announced" : thursday_pork_selection_1.take.meal_name
+            @thursday_pork_selection_1_sub_name = thursday_pork_selection_1.blank? ? "" : ((thursday_pork_selection_1.take.carb.blank? && thursday_pork_selection_1.take.veggie.blank?) ? "" : "with ") + thursday_pork_selection_1.take.carb.to_s.titlecase + ((thursday_pork_selection_1.take.carb.blank? || thursday_pork_selection_1.take.veggie.blank?) ? "" : ", ") + thursday_pork_selection_1.take.veggie.to_s.titlecase
+
+            thursday_poultry_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Poultry")
+            @thursday_poultry_selection_1_name = thursday_poultry_selection_1.blank? ? "Menu to be announced" : thursday_poultry_selection_1.take.meal_name
+            @thursday_poultry_selection_1_sub_name = thursday_poultry_selection_1.blank? ? "" : ((thursday_poultry_selection_1.take.carb.blank? && thursday_poultry_selection_1.take.veggie.blank?) ? "" : "with ") + thursday_poultry_selection_1.take.carb.to_s.titlecase + ((thursday_poultry_selection_1.take.carb.blank? || thursday_poultry_selection_1.take.veggie.blank?) ? "" : ", ") + thursday_poultry_selection_1.take.veggie.to_s.titlecase
+
+            thursday_green_1_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Green 1")
+            @thursday_green_1_selection_1_name = thursday_green_1_selection_1.blank? ? "Menu to be announced" : thursday_green_1_selection_1.take.meal_name
+            @thursday_green_1_selection_1_sub_name = thursday_green_1_selection_1.blank? ? "" : ((thursday_green_1_selection_1.take.carb.blank? && thursday_green_1_selection_1.take.veggie.blank?) ? "" : "with ") + thursday_green_1_selection_1.take.carb.to_s.titlecase + ((thursday_green_1_selection_1.take.carb.blank? || thursday_green_1_selection_1.take.veggie.blank?) ? "" : ", ") + thursday_green_1_selection_1.take.veggie.to_s.titlecase
+
+            thursday_green_2_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2")
+            @thursday_green_2_selection_1_name = thursday_green_2_selection_1.blank? ? "Menu to be announced" : thursday_green_2_selection_1.take.meal_name
+            @thursday_green_2_selection_1_sub_name = thursday_green_2_selection_1.blank? ? "" : ((thursday_green_2_selection_1.take.carb.blank? && thursday_green_2_selection_1.take.veggie.blank?) ? "" : "with ") + thursday_green_2_selection_1.take.carb.to_s.titlecase + ((thursday_green_2_selection_1.take.carb.blank? || thursday_green_2_selection_1.take.veggie.blank?) ? "" : ", ") + thursday_green_2_selection_1.take.veggie.to_s.titlecase
+
+
+
+
+
 
             meal_selection_customer_thursday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_2)
 
