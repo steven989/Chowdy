@@ -84,6 +84,7 @@ class AdminActionsController < ApplicationController
                 no_beef:"#{c.no_beef ? 'No Beef' : ''}",
                 no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",
                 extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",
+                multiple_delivery_address:"#{c.different_delivery_address ? 'Multiple Delivery Address' : ''}",
                 beef_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.beef == 0 || c.meal_selections.where(production_day:production_day_1).take.beef.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.beef} Beef"),
                 pork_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.pork == 0 || c.meal_selections.where(production_day:production_day_1).take.pork.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.pork} Pork"),
                 poultry_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.poultry == 0 || c.meal_selections.where(production_day:production_day_1).take.poultry.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.poultry} Poultry"),
@@ -99,10 +100,8 @@ class AdminActionsController < ApplicationController
                 reg_thu_check: c.meal_selections.where(production_day:production_day_2).blank? ? 0 : c.regular_meals_on_thursday.to_i - (c.meal_selections.where(production_day:production_day_2).take.beef.to_i + c.meal_selections.where(production_day:production_day_2).take.pork.to_i + c.meal_selections.where(production_day:production_day_2).take.poultry.to_i),
                 grn_thu_check: c.meal_selections.where(production_day:production_day_2).blank? ? 0 : c.green_meals_on_thursday.to_i - (c.meal_selections.where(production_day:production_day_2).take.green_1.to_i + c.meal_selections.where(production_day:production_day_2).take.green_2.to_i),
                 special_delivery_instructions:c.special_delivery_instructions,
-                selected_hub:c.hub,
                 monday_delivery_hub:c.monday_delivery_hub,
                 thursday_delivery_hub:c.thursday_delivery_hub,
-                delivery_time:c.delivery_time,
                 delivery_boundary:c.delivery_boundary
                 })
         end
@@ -112,7 +111,7 @@ class AdminActionsController < ApplicationController
                 disposition = "attachment; filename='deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","special_delivery_instructions","selected_hub","monday_delivery_hub","thursday_delivery_hub","delivery_time", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","different_delivery_address","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 else 
                     send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 end
@@ -284,8 +283,9 @@ class AdminActionsController < ApplicationController
                 no_pork = (params[:customer][:no_pork].blank? || params[:customer][:no_pork] == "0") ? false : true
                 no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
                 extra_ice = (params[:customer][:extra_ice].blank? || params[:customer][:extra_ice] == "0") ? false : true
+                different_delivery_address = (params[:customer][:different_delivery_address].blank? || params[:customer][:different_delivery_address] == "0") ? false : true
                 send_notification = ((no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
-                @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice)
+                @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice,different_delivery_address:different_delivery_address)
                 if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
                     CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Meal preference has changed")
