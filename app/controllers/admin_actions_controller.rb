@@ -284,7 +284,7 @@ class AdminActionsController < ApplicationController
                 no_pork = (params[:customer][:no_pork].blank? || params[:customer][:no_pork] == "0") ? false : true
                 no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
                 extra_ice = (params[:customer][:extra_ice].blank? || params[:customer][:extra_ice] == "0") ? false : true
-                send_notification = (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (extra_ice != @customer.extra_ice)
+                send_notification = ((no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
                 @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice)
                 if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
@@ -432,7 +432,9 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Delivery cannot be turned off: #{@customer.errors.full_messages.join(", ")}"
                 end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Stop Delivery")
-                CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Stop Delivery")
+                if (Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                    CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Stop Delivery")
+                end
             else
                 @customer.update_attributes(recurring_delivery: "yes")
                 @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
@@ -449,7 +451,9 @@ class AdminActionsController < ApplicationController
                     end
                 end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Start Delivery")
-                CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Start Delivery")
+                if (Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                    CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Start Delivery")
+                end
             end
         elsif params[:todo] == "refund"
             recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.select {|c| c.paid == true}.inject([]) do |array, data| array.push(data.id) end
