@@ -231,10 +231,15 @@ protect_from_forgery :except => :payment
             
             if _current_delivery
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Change delivery info")
-                CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Change delivery info")
+                if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                    CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Change delivery info")
+                end
                 current_user.log_activity("Updated delivery information")
             else
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Start Delivery")
+                if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                    CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Start Delivery")
+                end
                 flash[:status] = "warning"
                 flash[:notice_delivery] = "Please select your meals in the <a href='#meal_selection' data-toggle='tab' class='url_seg'>Choose Meals</a> tab"
                 current_user.log_activity("Start delivery requested")
@@ -243,7 +248,9 @@ protect_from_forgery :except => :payment
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery:nil)
             CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
-            CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")
+            if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")
+            end
             flash[:status] = "warning"
             flash[:notice_delivery] = "Your delivery has been stopped effective your next batch. If you have not selected a pick-up hub, please do so under <a href='#changePlan' data-toggle='tab' class='url_seg'>Manage Subscription</a> tab"
             current_user.log_activity("Stop delivery requested")
