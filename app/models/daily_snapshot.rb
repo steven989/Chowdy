@@ -11,7 +11,8 @@ class DailySnapshot < ActiveRecord::Base
             existing_date.update_attributes(
                 active_customers_including_pause: active_customers.length,
                 active_customers_excluding_pause: active_nonpaused_customers.length,
-                total_meals: MealStatistic.retrieve("total_meals") 
+                total_meals: MealStatistic.retrieve("total_meals"),
+                next_week_total: MealStatistic.retrieve("total_meals_next")
             )
         else
             date_info = DailySnapshot.new(date:Date.today)
@@ -19,7 +20,8 @@ class DailySnapshot < ActiveRecord::Base
                 date_info.update_attributes(
                     active_customers_including_pause: active_customers.length,
                     active_customers_excluding_pause: active_nonpaused_customers.length,
-                    total_meals: MealStatistic.retrieve("total_meals") 
+                    total_meals: MealStatistic.retrieve("total_meals") ,
+                    next_week_total: MealStatistic.retrieve("total_meals_next")
                 )
             end
         end
