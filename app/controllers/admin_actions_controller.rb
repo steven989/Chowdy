@@ -413,6 +413,10 @@ class AdminActionsController < ApplicationController
                 if @customer.user
                     @customer.user.log_activity("Admin: updated customer's delivery info")
                 end
+                if (Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                    CustomerMailer.delay.stop_delivery_notice(@customer, "Change delivery info")
+                    CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Change delivery info")
+                end
             else
                 flash[:status] = "fail"
                 flash[:notice_customers] = "Delivery info could not be updated: #{@customer.errors.full_messages.join(", ")}"
