@@ -236,8 +236,8 @@ protect_from_forgery :except => :payment
                 end
                 current_user.log_activity("Updated delivery information")
             else
-                CustomerMailer.delay.stop_delivery_notice(current_customer, "Start Delivery")
                 if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                    CustomerMailer.delay.stop_delivery_notice(current_customer, "Start Delivery")
                     CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Start Delivery")
                 end
                 flash[:status] = "warning"
