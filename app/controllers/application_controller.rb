@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   def default_url_options
     if Rails.env.production?
-      {host: "http://members.chowdy.ca"}
+      {host: "https://members.chowdy.ca"}
     else  
       {host: "localhost:3000"}
     end

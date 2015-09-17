@@ -36,7 +36,7 @@ Chowdy::Application.configure do
   config.assets.version = '1.1'
 
   # Default host for Action Mailer
-  config.action_mailer.default_url_options = {host: 'http://members.chowdy.ca'}
+  config.action_mailer.default_url_options = {host: 'https://members.chowdy.ca'}
 
 
   # Specifies the header that your server uses for sending files.
@@ -44,7 +44,7 @@ Chowdy::Application.configure do
   # config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect' # for nginx
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  config.force_ssl = true
 
   # Set to :debug to see everything in the log.
   config.log_level = :info
