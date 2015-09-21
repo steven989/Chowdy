@@ -524,7 +524,7 @@ namespace :customers do
                 else
                     unless current_customer.stripe_subscription_id.blank? #if there is no subscription we need to run this whole block again (because there's a chance that the customer is resuming from cancel and if so there will be subscription ID once the resume block code below is run)
                         if current_customer.user
-                            current_customer.user.log_activity("System: subscription meal count updated to #{queue_item.updated_reg_mon} meals per week")
+                            current_customer.user.log_activity("System: subscription meal count updated to #{queue_item.updated_meals} meals per week")
                         end
                         queue_item.add_to_record
                         queue_item.destroy
