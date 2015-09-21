@@ -455,6 +455,8 @@ namespace :customers do
                             )
                             newly_created_refund.internal_refund_id = newly_created_refund.id
                             newly_created_refund.save
+                            # take this bit out after testing
+                            CustomerMailer.delay.rescued_error(current_customer,'No error. Just an automatic refund was created for this customer so look into it')
                         end
 
                     end
