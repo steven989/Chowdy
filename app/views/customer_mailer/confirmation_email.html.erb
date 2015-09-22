@@ -8,7 +8,7 @@
     <% if @delivery %>
         <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %>. You will receive <%= @total_monday %> meals on Monday, and the other <%= @total_thursday %> meals on Thursday.</b></p>
 
-        <p>You've indicated that you want delivery, please log in to your account using the link below, and put in the delivery address as soon as possible. If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (in case you are not home). The delivery is $10 per drop.</p>
+        <p>You've indicated that you want delivery, please log in to your account using the link below, and put in the delivery address as soon as possible. If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that for our downtown delivery, the meals come in regular bags, not thermal insulated bags. So if you cannot receive your meals during our default downtown delivery time, please log in to your account and let us know a better time for delivery). The delivery is $10 per drop.</p>
     <% else %>
         <p><b>Your subscription begins on <%= @start_date.to_time.strftime("%A %B %d") %>. You can pick up <%= @total_monday %> meals Monday-Wednesday, and the other <%= @total_thursday %> meals Thursday-Saturday anytime during your hub's opening hours. Please let us know ahead of time if you would like a different mix of meal numbers for Monday and Thursday.</b></p>
 
