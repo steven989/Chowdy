@@ -101,68 +101,68 @@ $(function(){
       });
 
       // Plot sign ups and cancels
-      var sign_ups = {
-        label: "Sign up",
-        data: <%= @signup_timeseries %>
+      // var sign_ups = {
+      //   label: "Sign up",
+      //   data: <%= @signup_timeseries %>
 
-      }
-      var cancels = {
-        label: "Cancel",
-        data: <%= @cancel_timeseries %>
-      }
+      // }
+      // var cancels = {
+      //   label: "Cancel",
+      //   data: <%= @cancel_timeseries %>
+      // }
 
-      var options = {
-          series: {
-              lines: {
-                  show: true,
-                  lineWidth: 1,
-                  fill: true,
-                  fillColor: {
-                      colors: [{
-                          opacity: 0.3
-                      }, {
-                          opacity: 0.3
-                      }]
-                  }
-              },
-              points: {
-                  show: true
-              },
-              shadowSize: 2
-          },
-          grid: {
-              hoverable: true,
-              clickable: true,
-              tickColor: "#f0f0f0",
-              borderWidth: 0
-          },
-          colors: ["#1bb399","#177bbb"],
-          xaxis: {
-            mode: "time",
-            timeformat: "%Y-%m-%d"
-          },
-          yaxis: {
-              ticks: 10,
-              tickDecimals: 0
-          },
-          tooltip: true,
-          tooltipOpts: {
-            content: "'%s' of %x.1 is %y.4",
-            defaultTheme: false,
-            shifts: {
-              x: 0,
-              y: 20
-            }
-          }
-      };
+      // var options = {
+      //     series: {
+      //         lines: {
+      //             show: true,
+      //             lineWidth: 1,
+      //             fill: true,
+      //             fillColor: {
+      //                 colors: [{
+      //                     opacity: 0.3
+      //                 }, {
+      //                     opacity: 0.3
+      //                 }]
+      //             }
+      //         },
+      //         points: {
+      //             show: true
+      //         },
+      //         shadowSize: 2
+      //     },
+      //     grid: {
+      //         hoverable: true,
+      //         clickable: true,
+      //         tickColor: "#f0f0f0",
+      //         borderWidth: 0
+      //     },
+      //     colors: ["#1bb399","#177bbb"],
+      //     xaxis: {
+      //       mode: "time",
+      //       timeformat: "%Y-%m-%d"
+      //     },
+      //     yaxis: {
+      //         ticks: 10,
+      //         tickDecimals: 0
+      //     },
+      //     tooltip: true,
+      //     tooltipOpts: {
+      //       content: "'%s' of %x.1 is %y.4",
+      //       defaultTheme: false,
+      //       shifts: {
+      //         x: 0,
+      //         y: 20
+      //       }
+      //     }
+      // };
 
       
-      function plotCharge() {
-        if (window.location.hash == "#dashboard" || window.location.hash == "") {
-        var sign_up_cancel_plot = $.plot($("#sign_up_cancel_chart"), [sign_ups,cancels],options);
-        }
-      }
-      plotCharge();
+      // function plotCharge() {
+      //   if (window.location.hash == "#dashboard" || window.location.hash == "") {
+      //   var sign_up_cancel_plot = $.plot($("#sign_up_cancel_chart"), [sign_ups,cancels],options);
+      //   }
+      // }
+      // plotCharge();
 
       formRetrievalAjax();
 
@@ -1015,7 +1015,7 @@ $(function(){
                                   </div>
                                 </div> 
                               </section>
-
+<!-- 
                               <section class="row padder">
                                 <div class="panel panel-default">
                                   <header class="panel-heading">
@@ -1025,7 +1025,7 @@ $(function(){
                                     
                                   </div>
                                 </div> 
-                              </section>
+                              </section> -->
 
                             </section>
                         </section>
