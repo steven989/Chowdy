@@ -230,9 +230,9 @@ protect_from_forgery :except => :payment
             current_customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
             
             if _current_delivery
-                CustomerMailer.delay.stop_delivery_notice(current_customer, "Change delivery info")
                 if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
                     CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Change delivery info")
+                    CustomerMailer.delay.stop_delivery_notice(current_customer, "Change delivery info")
                 end
                 current_user.log_activity("Updated delivery information")
             else
