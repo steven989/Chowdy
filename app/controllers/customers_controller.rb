@@ -247,8 +247,8 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery:nil)
-            CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
             if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
+                CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")
             end
             flash[:status] = "warning"
@@ -305,7 +305,7 @@ protect_from_forgery :except => :payment
             no_poultry = params[:no_poultry].blank? ? false : true
             send_notification = (no_beef != current_customer.no_beef) || (no_pork != current_customer.no_pork) || (no_poultry != current_customer.no_poultry)
             current_customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry)
-            if (["Yes","yes"].include? current_customer.recurring_delivery) && (send_notification)
+            if (["Yes","yes"].include? current_customer.recurring_delivery) && (send_notification) && ((Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal preference has changed")
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal preference has changed")
             end
