@@ -20,7 +20,7 @@ class CustomerMailer < ActionMailer::Base
                     when !@hub.match(/wanda/i).nil?
                         "Monday - Saturday, 10:30am to Midnight"
                     when !@hub.match(/dekefir/i).nil?
-                        "Monday - Friday, 7:00am to 6:00pm (closed on weekends and holidays)"
+                        "Monday - Friday, 7:00am to 5:00pm (closed on weekends and holidays)"
                     when !@hub.match(/coffee/i).nil? 
                         "Monday - Saturday, 7:00am to 7:00pm (open 9am on Saturday)"
                 end
