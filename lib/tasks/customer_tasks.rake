@@ -538,7 +538,7 @@ namespace :customers do
 
         if StopQueue.where(stop_type: ["change_hub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).length > 0
             StopQueue.where(stop_type: ["change_hub"], associated_cutoff: Chowdy::Application.closest_date(args[:distance],4)).each do |queue_item|
-                if queue_item.customer.update_attributes(hub:queue_item.cancel_reason,monday_pickup_hub:queue_item.cancel_reason,thursday_pickup_hub:queue_item.cancel_reason)
+                if queue_item.customer.update_attributes(hub:queue_item.cancel_reason,monday_pickup_hub:queue_item.cancel_reason,thursday_pickup_hub:queue_item.cancel_reason,recurring_delivery:nil)
                     if queue_item.customer.user
                         queue_item.customer.user.log_activity("System: hub changed")
                     end
