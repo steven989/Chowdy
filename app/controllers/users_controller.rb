@@ -335,7 +335,7 @@ class UsersController < ApplicationController
             @referral_dollars_earned = @number_of_referrals * 10
 
             @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value} 
-            @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_3"]).map {|hub| hub.setting_value} 
+            @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3"]).map {|hub| hub.setting_value} 
             
             unless @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take.blank?
                 @requested_hub_to_change_to = @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take
