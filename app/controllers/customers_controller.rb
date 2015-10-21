@@ -6,17 +6,24 @@ protect_from_forgery :except => :payment
 
     def create #create customer account through Stripe webhook
 
-        customer_id = params[:data][:object][:id]
-        green_number = params[:data][:object][:metadata][:green_meals_number] 
-        customer_email = params[:data][:object][:email].downcase
-        customer_name = params[:data][:object][:metadata][:name]
-        hub = params[:data][:object][:metadata][:hub].gsub(/\\/,"")
-        referral = params[:data][:object][:metadata][:referral]
-        
-        subscription_id = params[:data][:object][:subscriptions][:data][0][:id]
-        plan = params[:data][:object][:subscriptions][:data][0][:plan][:id]
 
-        Customer.delay.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
+        customer_id = params[:data][:object][:id]
+        customer_email = params[:data][:object][:email].downcase
+
+        if params[:data][:object][:subscriptions][:data]
+            green_number = params[:data][:object][:metadata][:green_meals_number] 
+            customer_name = params[:data][:object][:metadata][:name]
+            hub = params[:data][:object][:metadata][:hub].gsub(/\\/,"")
+            referral = params[:data][:object][:metadata][:referral]
+            subscription_id = params[:data][:object][:subscriptions][:data][0][:id]
+            plan = params[:data][:object][:subscriptions][:data][0][:plan][:id]
+
+            Customer.delay.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
+
+        else
+            Gift.create_from_sign_up(customer_id,customer_email)
+
+        end
 
         render nothing:true, status:200, content_type:'text/html'
 

@@ -1,0 +1,21 @@
+<html>
+<head>
+    
+</head>
+<body>
+    <p>Hi <%= @sender_name %>,</p>
+    <p>This is a confirmation that we received your gift purchase for <%= @recipient_name %>, and we've sent an email to <%= @recipient_email %> with the gift code <b><%= @gift_code %></b>.
+    </p>
+    
+    <p><%= @recipient_name %> will need to simply put in the gift code during sign up at <a href="http://chowdy.ca/signup">http://chowdy.ca/signup</a>, and will receive a discount up to the amount of your gift!</p>
+
+    <% if @pay_delivery %>
+        <p>Note that you've indicated that you will pay for delivery. If <%= @recipient_name %> chooses our delivery option, you will be billed $10 for every delivery for duration of the gift (our default delivery frequency is every Monday and Thursday).</p>
+    <% else%>
+        <p>Note that you have not indicated that you will pay for delivery. <%= @recipient_name %> will be billed the courier charge if the delivery option is selected.</p>
+    <% end %>
+
+    <p>- the Chowdy team</p>
+</body>
+
+</html>

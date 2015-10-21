@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150928194206) do
+ActiveRecord::Schema.define(version: 20151021140003) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -154,6 +154,21 @@ ActiveRecord::Schema.define(version: 20150928194206) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "occasion",           limit: 255
+  end
+
+  create_table "gifts", force: :cascade do |t|
+    t.string   "sender_stripe_customer_id"
+    t.string   "sender_name"
+    t.string   "sender_email"
+    t.string   "recipient_name"
+    t.string   "recipient_email"
+    t.string   "charge_id"
+    t.integer  "original_gift_amount"
+    t.integer  "remaining_gift_amount"
+    t.boolean  "pay_delivery"
+    t.string   "gift_code"
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
   end
 
   create_table "meal_selections", force: :cascade do |t|
