@@ -10,6 +10,9 @@ class Customer < ActiveRecord::Base
     has_many :promotion_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :stop_queue_records, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :meal_selections, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :gift_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :gift_remains, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+
 
     validates :email, uniqueness: true
     validates :referral_code, uniqueness: true, allow_nil: :true, allow_blank: :true
@@ -260,6 +263,10 @@ class Customer < ActiveRecord::Base
                                 end
                             end
 
+                    elsif Gift.check_gift_code(referral.gsub(" ",""))[:result]
+                        charge_id = Stripe::Charge.all(customer:customer_id,limit:1).data[0].id
+                        charge = Stripe::Charge.retrieve(charge_id)
+                        Gift.redeem_gift_code(referral.gsub(" ",""),charge,customer,true)
                     else #match name
                         referral_match = Customer.where("name ilike ? and id <> ?", referral.gsub(/\s$/,"").downcase, customer.id)
                         if referral_match.length == 0
@@ -464,9 +471,21 @@ class Customer < ActiveRecord::Base
         end        
     end
 
-    def self.handle_payments(invoice_number)
+    def self.handle_payments(invoice_number,stripe_customer_id)
         failed_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
         failed_invoice.update_attributes(paid:true,date_paid:Date.today,closed:nil) unless failed_invoice.blank?
+        
+        remaining_gift = GiftRemain.where(stripe_customer_id:stripe_customer_id).take
+        unless remaining_gift.blank?
+            if remaining_gift.remaining_gift_amount > 0
+                Gift.redeem_gift_code(remaining_gift.gift.gift_code,nil,Customer.where(stripe_customer_id:stripe_customer_id).take,false)
+            else
+                associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
+                customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"#{gift_code} ran out")
+            end
+            remaining_gift.destroy
+        end
     end
 
 

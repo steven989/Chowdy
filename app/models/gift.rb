@@ -1,5 +1,8 @@
 class Gift < ActiveRecord::Base
 
+    has_many :gift_redemptions
+    has_many :gift_remains
+
     def self.create_from_sign_up(customer_id,customer_email)
 
         begin
@@ -56,5 +59,115 @@ class Gift < ActiveRecord::Base
         end
         self.update_attribute(:gift_code, code_candidate)
     end
+
+    def self.check_gift_code(gift_code)
+        gift = Gift.where("gift_code ilike ?",gift_code).take
+        if gift.nil?
+            {result:false, message:'Gift code does not exist'}
+        else
+            if gift.remaining_gift_amount == 0
+                {result:false, message:'Gift code has already been redeemed'}
+            else
+                {result:true, message:'Gift code applied'}
+            end
+        end
+    end
+
+    def self.redeem_gift_code(gift_code,charge=nil,customer,immediate_refund=false)
+        if Gift.check_gift_code(gift_code)[:result]
+            gift = Gift.where("gift_code ilike ?",gift_code).take
+            gift_amount = gift.remaining_gift_amount
+
+            if immediate_refund
+                stripe_charge = charge
+                charge_amount = stripe_charge.amount
+                discount_amount = [charge_amount,gift_amount].min
+
+                begin
+                    refund = Stripe::Refund.create(
+                        charge:charge,
+                        amount:discount_amount,
+                        metadata:{refund_reason:"Gift code #{gift_code}"}
+                    )
+                rescue => error
+                    puts '---------------------------------------------------'
+                    puts "something went wrong trying to refund customer using gift code"
+                    puts error.message
+                    puts '---------------------------------------------------' 
+                    CustomerMailer.rescued_error(customer,"something went wrong trying to refund customer using gift code: "+error.message.inspect).deliver                    
+                else
+                    Refund.create(
+                        stripe_customer_id: customer.stripe_customer_id, 
+                        refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date, 
+                        charge_week:Time.at(stripe_charge.created).to_date,
+                        charge_id: stripe_charge.id, 
+                        meals_refunded:, 
+                        amount_refunded: discount_amount, 
+                        refund_reason:gift_code, 
+                        stripe_refund_id: refund.id
+                    )
+
+                    remaining_gift_amount = gift_amount - discount_amount
+
+                    gift.gift_redemptions.create(
+                        stripe_customer_id:customer.stripe_customer_id,
+                        amount_redeemed:discount_amount,
+                        amount_remaining:remaining_gift_amount
+                    )
+
+                    gift.update_attributes(remaining_gift_amount:remaining_gift_amount)
+
+                    if gift_remaining_amount > 0
+                        Gift.redeem_gift_code(gift_code,nil,customer,false) #attach a negative invoice item 
+                    else #if gift card is completely used up upon first redemption, then submit a cancel request dated the Thursday after the first pick up date
+                        associated_cutoff = Chowdy::Application.closest_date(1,4,StartDate.first.start_date) #Thursday after customer starts
+                        adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
+                        customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"Gift card #{gift_code} ran out")
+                    end
+                end
+            else
+
+                upcoming_charge_amount = Stripe::Customer.retrieve(customer.stripe_customer_id).subscriptions.retrieve(customer.stripe_subscription_id).plan.amount
+                discount_amount = [upcoming_charge_amount,gift_amount].min
+
+                begin
+
+                    Stripe::InvoiceItem.create(
+                        customer: customer.stripe_customer_id,
+                        amount: -discount_amount,
+                        currency: 'CAD',
+                        description: "Remaining amount of gift #{gift_code}"
+                    )
+
+                rescue => error
+                    puts '---------------------------------------------------'
+                    puts "something went wrong trying to create a negative invoice using gift code"
+                    puts error.message
+                    puts '---------------------------------------------------' 
+                    CustomerMailer.rescued_error(customer,"something went wrong trying to create a negative invoice using gift code: "+error.message.inspect).deliver                    
+                else
+                    remaining_gift_amount = gift_amount - discount_amount
+
+                    gift.gift_redemptions.create(
+                        stripe_customer_id:customer.stripe_customer_id,
+                        amount_redeemed:discount_amount,
+                        amount_remaining:remaining_gift_amount
+                    )
+
+                    gift.update_attributes(remaining_gift_amount:remaining_gift_amount)
+
+                
+                    gift.gift_remains.create(
+                        amount_remaining:remaining_gift_amount,
+                        stripe_customer_id:customer.stripe_customer_id
+                    )
+
+                end
+            end
+        end
+    end
+
+
+
 
 end

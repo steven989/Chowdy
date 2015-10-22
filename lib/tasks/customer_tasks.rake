@@ -517,6 +517,31 @@ namespace :customers do
                             end
                         end
                     end
+
+                    # if there's currently negative invoices associated with gift, we need to adjust the negative invoice amount to reflect the updated. This block doesn't need to be run twice 
+
+                    gift_remain = current_customer.gift_remains
+                    unless gift_remain.blank?
+                        gift_remain.each do |gr|
+                            begin
+                                ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data[0]
+                                ii_amount = ii.amount
+                                ii.delete
+                                gr.gift.update_attributes(remaining_gift_amount:gr.gift.remaining_gift_amount+ii_amount)
+                            rescue => error
+                                puts '---------------------------------------------------'
+                                puts "something went wrong trying to delete Invoice Item before attaching another one during change_sub operation"
+                                puts error.message
+                                puts '---------------------------------------------------' 
+                                CustomerMailer.rescued_error(current_customer,"something went wrong trying to delete Invoice Item before attaching another one during change_sub operation: "+error.message.inspect).deliver                    
+                            else
+                                gr.gift.gift_redemptions.order(id: :desc).limit(1).take.destroy
+                                Gift.redeem_gift_code(gr.gift.gift_code,nil,current_customer,false)
+                                gr.destroy
+                            end
+                        end
+                    end
+
                 rescue => error
                     puts '---------------------------------------------------'
                     puts "something went wrong trying to change subscription during weekly task"
@@ -575,6 +600,14 @@ namespace :customers do
                             queue_item.add_to_record
                             queue_item.destroy
                         end
+                    end
+
+                    #if there's a gift-related cancel auto-cancel, push the cut off date to the Thursday after resume
+                    gift_auto_cancel = current_customer.stop_queues.where("stop_type ilike ? and cancel_reason ilike ?", "cancel","%gift%").take
+                    unless gift_auto_cancel.blank?
+                        associated_cutoff = Chowdy::Application.closest_date(1,4,queue_item.end_date)
+                        adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
+                        gift_auto_cancel.update_attributes(associated_cutoff:associated_cutoff,adjusted_cancel_start_date:adjusted_cancel_start_date)
                     end
 
                 elsif queue_item.stop_type == 'cancel'

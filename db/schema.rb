@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151021140003) do
+ActiveRecord::Schema.define(version: 20151021170502) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -154,6 +154,24 @@ ActiveRecord::Schema.define(version: 20151021140003) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "occasion",           limit: 255
+  end
+
+  create_table "gift_redemptions", force: :cascade do |t|
+    t.integer  "gift_id"
+    t.string   "stripe_customer_id"
+    t.integer  "amount_redeemed"
+    t.integer  "amount_remaining"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
+
+  create_table "gift_remains", force: :cascade do |t|
+    t.integer  "gift_id"
+    t.integer  "amount_remaining"
+    t.date     "date_to_process"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+    t.string   "stripe_customer_id"
   end
 
   create_table "gifts", force: :cascade do |t|
