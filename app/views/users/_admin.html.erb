@@ -77,11 +77,6 @@ $(function(){
         }
        });
 
-       $('#deliveries').DataTable({
-        scrollX: true,
-        searching: false
-       });
-
        $('#scheduled_tasks').DataTable({
         searching: false,
         scrollX: true,
@@ -928,60 +923,6 @@ $(function(){
                                     Customers with delivery request
                                     <%= link_to "Download CSV", deliveries_csv_path(format: :csv), class:"btn btn-s-md btn-default btn-rounded" %>
                                   </header>
-                                  <div class="table-responsive">
-                                    <table id="deliveries" class="display table table-striped m-b-none" style="font-size: 12px">
-                                      <thead>
-                                        <tr>
-                                          <th>Hub change requested?</th>
-                                          <th>Customerm ID</th>
-                                          <th>Customer Email</th>
-                                          <th>Customer Name</th>
-                                          <th>Address</th>
-                                          <th>Phone Number</th>
-                                          <th>Regular - Monday</th>
-                                          <th>Green - Monday</th>
-                                          <th>Regular - Thursday</th>
-                                          <th>Green - Thursday</th>
-                                          <th>No pork</th>
-                                          <th>No beef</th>
-                                          <th>No poultry</th>
-                                          <th>Extra ice</th>
-                                          <th>Delivery notes</th>
-                                          <th>Selected Hub</th>
-                                          <th>Monday Hub</th>
-                                          <th>Thursday Hub</th>
-                                          <th>Delivery time</th>
-                                          <th>Delivery boundary</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <% @deliveries.each do |c| %>
-                                          <tr>
-                                            <td><%= (@customer_requesting_to_switch_to_pickup.include? c.stripe_customer_id) ? "Yes" : "No" %></td>
-                                            <td><%= c.id %></td>
-                                            <td><%= c.email %></td>
-                                            <td><%= c.name %></td>
-                                            <td><%= c.delivery_address %></td>
-                                            <td><%= c.phone_number %></td>
-                                            <td><%= c.regular_meals_on_monday %></td>
-                                            <td><%= c.green_meals_on_monday %></td>
-                                            <td><%= c.regular_meals_on_thursday %></td>
-                                            <td><%= c.green_meals_on_thursday %></td>
-                                            <td><%= c.no_pork %></td>
-                                            <td><%= c.no_beef %></td>
-                                            <td><%= c.no_poultry %></td>
-                                            <td><%= c.extra_ice %></td>
-                                            <td><%= c.special_delivery_instructions %></td>
-                                            <td><%= c.hub %></td>
-                                            <td><%= c.monday_delivery_hub %></td>
-                                            <td><%= c.thursday_delivery_hub %></td>
-                                            <td><%= c.delivery_time %></td>
-                                            <td><%= c.delivery_boundary %></td>
-                                          </tr>
-                                        <% end %>
-                                      </tbody>
-                                    </table>
-                                  </div>
                                 </div> 
                               </section>
 

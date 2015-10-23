@@ -73,7 +73,8 @@ class Gift < ActiveRecord::Base
         end
     end
 
-    def self.redeem_gift_code(gift_code,charge=nil,customer,immediate_refund=false)
+    def self.redeem_gift_code(gift_code=nil,charge=nil,customer=nil,immediate_refund=false)
+
         if Gift.check_gift_code(gift_code)[:result]
             gift = Gift.where("gift_code ilike ?",gift_code).take
             gift_amount = gift.remaining_gift_amount
@@ -84,11 +85,10 @@ class Gift < ActiveRecord::Base
                 discount_amount = [charge_amount,gift_amount].min
 
                 begin
-                    refund = Stripe::Refund.create(
-                        charge:charge,
+                    refund = charge.refunds.create(
                         amount:discount_amount,
                         metadata:{refund_reason:"Gift code #{gift_code}"}
-                    )
+                        )
                 rescue => error
                     puts '---------------------------------------------------'
                     puts "something went wrong trying to refund customer using gift code"
@@ -101,7 +101,7 @@ class Gift < ActiveRecord::Base
                         refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date, 
                         charge_week:Time.at(stripe_charge.created).to_date,
                         charge_id: stripe_charge.id, 
-                        meals_refunded:, 
+                        meals_refunded:nil, 
                         amount_refunded: discount_amount, 
                         refund_reason:gift_code, 
                         stripe_refund_id: refund.id
@@ -117,7 +117,7 @@ class Gift < ActiveRecord::Base
 
                     gift.update_attributes(remaining_gift_amount:remaining_gift_amount)
 
-                    if gift_remaining_amount > 0
+                    if remaining_gift_amount > 0
                         Gift.redeem_gift_code(gift_code,nil,customer,false) #attach a negative invoice item 
                     else #if gift card is completely used up upon first redemption, then submit a cancel request dated the Thursday after the first pick up date
                         associated_cutoff = Chowdy::Application.closest_date(1,4,StartDate.first.start_date) #Thursday after customer starts

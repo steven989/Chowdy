@@ -84,7 +84,9 @@ class AdminActionsController < ApplicationController
                 no_beef:"#{c.no_beef ? 'No Beef' : ''}",
                 no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",
                 extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",
+                gifter_pays_delivery:  unless c.gifts.where("remaining_gift_amount > 0").blank?; (c.gifts.where("remaining_gift_amount > 0").order(id: :desc).limit(1).take.pay_delivery? ? c.gifts.where("remaining_gift_amount > 0").order(id: :desc).limit(1).take.sender_email : nil) end,
                 multiple_delivery_address:"#{c.different_delivery_address ? 'Multiple Delivery Address' : ''}",
+                split_delivery_with:c.split_delivery_with, 
                 beef_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.beef == 0 || c.meal_selections.where(production_day:production_day_1).take.beef.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.beef} Beef"),
                 pork_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.pork == 0 || c.meal_selections.where(production_day:production_day_1).take.pork.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.pork} Pork"),
                 poultry_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.poultry == 0 || c.meal_selections.where(production_day:production_day_1).take.poultry.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.poultry} Poultry"),
@@ -109,7 +111,7 @@ class AdminActionsController < ApplicationController
                 disposition = "attachment; filename='deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","multiple_delivery_address","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","gifter_pays_delivery","multiple_delivery_address","split_delivery_with","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 else 
                     send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 end
@@ -282,8 +284,9 @@ class AdminActionsController < ApplicationController
                 no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
                 extra_ice = (params[:customer][:extra_ice].blank? || params[:customer][:extra_ice] == "0") ? false : true
                 different_delivery_address = (params[:customer][:different_delivery_address].blank? || params[:customer][:different_delivery_address] == "0") ? false : true
-                send_notification = ((no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
-                @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice,different_delivery_address:different_delivery_address)
+                split_delivery_with = params[:customer][:split_delivery_with]
+                send_notification = ((no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (split_delivery_with != @customer.split_delivery_with) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
+                @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice,split_delivery_with:split_delivery_with,different_delivery_address:different_delivery_address)
                 if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
                     CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Meal preference has changed")
@@ -706,6 +709,15 @@ class AdminActionsController < ApplicationController
                                 end
                             end
 
+                            #if there's a gift-related cancel auto-cancel, push the cut off date to the Thursday after resume
+                            gift_auto_cancel = @customer.stop_queues.where("stop_type ilike ? and cancel_reason ilike ?", "cancel","%gift%").take
+                            
+                            unless gift_auto_cancel.blank?
+                                associated_cutoff = Chowdy::Application.closest_date(1,4,end_date)
+                                adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
+                                gift_auto_cancel.update_attributes(associated_cutoff:associated_cutoff,adjusted_cancel_start_date:adjusted_cancel_start_date)
+                            end
+
                             if @customer.errors.any?
                                 status = "fail"
                                 message = "Error occurred while attempting to pause: #{@customer.error.full_messages.join(", ")}"
@@ -744,7 +756,7 @@ class AdminActionsController < ApplicationController
                         end
 
                         if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? @customer.active?) && !(["Yes","yes"].include? @customer.paused?)
-                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            @customer.stop_queues.where("stop_type ilike ? or (stop_type ilike ? and cancel_reason not ilike ?) or stop_type ilike ?", "pause", "cancel","%gift%","restart").destroy_all
                             @customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
                         end
 

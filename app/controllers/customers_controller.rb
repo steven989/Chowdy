@@ -18,7 +18,7 @@ protect_from_forgery :except => :payment
             subscription_id = params[:data][:object][:subscriptions][:data][0][:id]
             plan = params[:data][:object][:subscriptions][:data][0][:plan][:id]
 
-            Customer.delay.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan)
+            Customer.create_from_sign_up(customer_id,green_number,customer_email,customer_name,hub,referral,subscription_id,plan) 
 
         else
             Gift.create_from_sign_up(customer_id,customer_email)
@@ -332,7 +332,7 @@ protect_from_forgery :except => :payment
     end
 
     def payment
-        Customer.delay.handle_payments(params[:data][:object][:id],params[:data][:object][:customer])
+        Customer.handle_payments(params[:data][:object][:id],params[:data][:object][:customer])
 
         render nothing:true, status:200, content_type:'text/html'
     end

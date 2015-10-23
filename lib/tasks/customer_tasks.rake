@@ -421,44 +421,83 @@ namespace :customers do
 
                     if Date.today < current_customer.first_pick_up_date
                         raw_difference = queue_item.updated_meals - current_customer.total_meals_per_week
-                        if raw_difference > 0
-                            difference = raw_difference
+                        applicable_gift = current_customer.gifts.take
+                        if applicable_gift.blank?
+                            if raw_difference > 0
+                                difference = raw_difference
 
-                            Stripe::InvoiceItem.create(
-                                customer: current_customer.stripe_customer_id,
-                                amount: (difference * 6.99 * 1.13 * 100).round,
-                                currency: 'CAD',
-                                description: "First-week adjustment for #{difference} extra meals requested after sign up"
-                            )
+                                Stripe::InvoiceItem.create(
+                                    customer: current_customer.stripe_customer_id,
+                                    amount: (difference * 6.99 * 1.13 * 100).round,
+                                    currency: 'CAD',
+                                    description: "First-week adjustment for #{difference} extra meals requested after sign up"
+                                )
 
-                            Stripe::Invoice.create(
-                                customer: current_customer.stripe_customer_id
-                            )
+                                Stripe::Invoice.create(
+                                    customer: current_customer.stripe_customer_id
+                                )
 
-                        elsif raw_difference < 0
-                            
-                            difference = raw_difference * -1
-                            
-                            charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
-                            charge = Stripe::Charge.retrieve(charge_id)
-                            stripe_refund_response = charge.refunds.create(amount: (difference * 6.99 * 1.13 * 100).round)
+                            elsif raw_difference < 0
+                                
+                                difference = raw_difference * -1
+                                
+                                charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
+                                charge = Stripe::Charge.retrieve(charge_id)
+                                stripe_refund_response = charge.refunds.create(amount: (difference * 6.99 * 1.13 * 100).round)
 
-                            newly_created_refund = Refund.create(
-                                    stripe_customer_id: current_customer.stripe_customer_id, 
-                                    refund_week:StartDate.first.start_date, 
-                                    charge_week:Date.today,
-                                    charge_id:charge_id, 
-                                    meals_refunded: difference, 
-                                    amount_refunded: (difference * 6.99 * 1.13 * 100).round, 
-                                    refund_reason: "Subscription adjustment before first week", 
-                                    stripe_refund_id: stripe_refund_response.id
-                            )
-                            newly_created_refund.internal_refund_id = newly_created_refund.id
-                            newly_created_refund.save
-                            # take this bit out after testing
-                            CustomerMailer.delay.rescued_error(current_customer,'No error. Just an automatic refund was created for this customer so look into it')
+                                newly_created_refund = Refund.create(
+                                        stripe_customer_id: current_customer.stripe_customer_id, 
+                                        refund_week:StartDate.first.start_date, 
+                                        charge_week:Date.today,
+                                        charge_id:charge_id, 
+                                        meals_refunded: difference, 
+                                        amount_refunded: (difference * 6.99 * 1.13 * 100).round, 
+                                        refund_reason: "Subscription adjustment before first week", 
+                                        stripe_refund_id: stripe_refund_response.id
+                                )
+                                newly_created_refund.internal_refund_id = newly_created_refund.id
+                                newly_created_refund.save
+                                # take this bit out after testing
+                                CustomerMailer.delay.rescued_error(current_customer,'No error. Just an automatic refund was created for this customer so look into it')
+                            end
+                        else
+                            if raw_difference > 0
+                                difference = raw_difference 
+                                remain_0 = current_customer.gifts.take.remaining_gift_amount
+                                    ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 }
+                                ii_amount =  ii.blank? ? 0 : ii[0].amount.abs
+
+                                chargeable_difference = [(difference * 6.99 * 1.13 * 100).round - remain_0 - ii_amount, 0].max
+
+                                if chargeable_difference > 0
+                                    Stripe::InvoiceItem.create(
+                                        customer: current_customer.stripe_customer_id,
+                                        amount: chargeable_difference,
+                                        currency: 'CAD',
+                                        description: "First-week adjustment for #{difference} extra meals requested after sign up above gift card amount"
+                                    )
+                                    Stripe::Invoice.create(
+                                        customer: current_customer.stripe_customer_id
+                                    )
+                                end
+
+                                remain_1 = [remain_0 + ii_amount - (difference * 6.99 * 1.13 * 100).round,0].max
+                                applicable_gift.update_attributes(remaining_gift_amount:remain_1)
+                                applicable_gift.gift_remains.delete_all
+                                ii[0].delete unless ii.blank?
+                                
+                            elsif raw_difference < 0
+                                difference = -raw_difference
+                                remain_0 = current_customer.gifts.take.remaining_gift_amount
+                                    ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 }
+                                ii_amount =  ii.blank? ? 0 : ii[0].amount.abs
+                                remain_1 = remain_0 + ii_amount + (difference * 6.99 * 1.13 * 100).round
+                                applicable_gift.update_attributes(remaining_gift_amount:remain_1)
+                                applicable_gift.gift_remains.delete_all
+                                ii[0].delete unless ii.blank?
+                            end
+
                         end
-
                     end
 
                     plan_match = Subscription.where(weekly_meals:queue_item.updated_meals, interval: "week",interval_count:1)
@@ -518,14 +557,18 @@ namespace :customers do
                         end
                     end
 
-                    # if there's currently negative invoices associated with gift, we need to adjust the negative invoice amount to reflect the updated. This block doesn't need to be run twice 
+                    if Date.today < current_customer.first_pick_up_date
+                        Gift.redeem_gift_code(applicable_gift.gift_code,nil,current_customer,false) unless applicable_gift.blank? #attach a negative invoice item  
+                    end
 
+                    # if there's currently negative invoices associated with gift, we need to adjust the negative invoice amount to reflect the updated. This block doesn't need to be run twice 
                     gift_remain = current_customer.gift_remains
-                    unless gift_remain.blank?
+                    
+                    unless gift_remain.blank? || Date.today < current_customer.first_pick_up_date
                         gift_remain.each do |gr|
                             begin
                                 ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data[0]
-                                ii_amount = ii.amount
+                                ii_amount = ii.amount.abs
                                 ii.delete
                                 gr.gift.update_attributes(remaining_gift_amount:gr.gift.remaining_gift_amount+ii_amount)
                             rescue => error

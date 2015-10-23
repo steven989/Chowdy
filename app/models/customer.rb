@@ -10,6 +10,7 @@ class Customer < ActiveRecord::Base
     has_many :promotion_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :stop_queue_records, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :meal_selections, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :gifts, through: :gift_redemptions
     has_many :gift_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :gift_remains, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
@@ -475,14 +476,15 @@ class Customer < ActiveRecord::Base
         failed_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
         failed_invoice.update_attributes(paid:true,date_paid:Date.today,closed:nil) unless failed_invoice.blank?
         
-        remaining_gift = GiftRemain.where(stripe_customer_id:stripe_customer_id).take
+        remaining_gift = GiftRemain.where("stripe_customer_id ilike ? and created_at < ?",stripe_customer_id,Date.today.to_datetime).take #ignore any remain gift created today because Stripe sends a payment_succeeeded webhook immediately after customer_create webhook
         unless remaining_gift.blank?
-            if remaining_gift.remaining_gift_amount > 0
+            if remaining_gift.amount_remaining > 0
                 Gift.redeem_gift_code(remaining_gift.gift.gift_code,nil,Customer.where(stripe_customer_id:stripe_customer_id).take,false)
             else
+                customer = Customer.where(stripe_customer_id:stripe_customer_id).take
                 associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
                 adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
-                customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"#{gift_code} ran out")
+                customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"#{remaining_gift.gift.gift_code} ran out")
             end
             remaining_gift.destroy
         end
