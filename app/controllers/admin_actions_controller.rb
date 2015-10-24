@@ -84,7 +84,7 @@ class AdminActionsController < ApplicationController
                 no_beef:"#{c.no_beef ? 'No Beef' : ''}",
                 no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",
                 extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",
-                gifter_pays_delivery:  unless c.gifts.where("remaining_gift_amount > 0").blank?; (c.gifts.where("remaining_gift_amount > 0").order(id: :desc).limit(1).take.pay_delivery? ? c.gifts.where("remaining_gift_amount > 0").order(id: :desc).limit(1).take.sender_email : nil) end,
+                gifter_pays_delivery: c.gift_remains.blank? ? '' : (c.gift_remains.order(id: :desc).limit(1).take.gift.pay_delivery? ? c.gift_remains.order(id: :desc).limit(1).take.gift.sender_email : ''),
                 multiple_delivery_address:"#{c.different_delivery_address ? 'Multiple Delivery Address' : ''}",
                 split_delivery_with:c.split_delivery_with, 
                 beef_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.beef == 0 || c.meal_selections.where(production_day:production_day_1).take.beef.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.beef} Beef"),
@@ -709,15 +709,6 @@ class AdminActionsController < ApplicationController
                                 end
                             end
 
-                            #if there's a gift-related cancel auto-cancel, push the cut off date to the Thursday after resume
-                            gift_auto_cancel = @customer.stop_queues.where("stop_type ilike ? and cancel_reason ilike ?", "cancel","%gift%").take
-                            
-                            unless gift_auto_cancel.blank?
-                                associated_cutoff = Chowdy::Application.closest_date(1,4,end_date)
-                                adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
-                                gift_auto_cancel.update_attributes(associated_cutoff:associated_cutoff,adjusted_cancel_start_date:adjusted_cancel_start_date)
-                            end
-
                             if @customer.errors.any?
                                 status = "fail"
                                 message = "Error occurred while attempting to pause: #{@customer.error.full_messages.join(", ")}"
@@ -756,7 +747,7 @@ class AdminActionsController < ApplicationController
                         end
 
                         if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? @customer.active?) && !(["Yes","yes"].include? @customer.paused?)
-                            @customer.stop_queues.where("stop_type ilike ? or (stop_type ilike ? and cancel_reason not ilike ?) or stop_type ilike ?", "pause", "cancel","%gift%","restart").destroy_all
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel","restart").destroy_all
                             @customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
                         end
 
@@ -850,10 +841,10 @@ class AdminActionsController < ApplicationController
                 if params[:immediate_effect] == "1"
                     begin
                         if @customer.stripe_subscription_id.blank?
-                            start_date_update = [5,6,0].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,1) : Date.today
+                            start_date_update = [2,3,4,5,6,0].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,1) : Date.today
                             if @customer.sponsored?
                                 @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
-                                @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)                       
+                                @customer.stop_requests.where("request_type ilike ?","%cancel%").order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)                       
                                 @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                             else
                                 current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
@@ -863,12 +854,12 @@ class AdminActionsController < ApplicationController
                                 if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:(start_date_update + 23.9.hours).to_time.to_i)
                                     new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
                                     @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
-                                    @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                                    @customer.stop_requests.where("request_type ilike ?","%cancel%").order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
                                     @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                                 end
                             end
                         else 
-                            start_date_update = Chowdy::Application.closest_date(1,1)
+                            start_date_update = [2,3,4,5,6,0].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,1) : Date.today
                             paused_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
                             paused_subscription.trial_end = (start_date_update + 23.9.hours).to_time.to_i
                             paused_subscription.prorate = false

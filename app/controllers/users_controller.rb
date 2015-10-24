@@ -221,10 +221,16 @@ class UsersController < ApplicationController
             @disable_sub_update = false
             @display_meal_selection = @current_customer.recurring_delivery.blank? ? false : true
             @active_gift = @current_customer.gifts.order(id: :desc).limit(1).take
-                @redemptions = @active_gift.gift_redemptions
-                @last_redemption = @redemptions.order(id: :desc).limit(1).take
-            
-            @remaining_gift_amount_to_show = @redemptions.length > 1 ? @active_gift.remaining_gift_amount + @last_redemption.amount_redeemed : @active_gift.remaining_gift_amount
+
+            if @active_gift.blank?
+                @remaining_gift_amount_to_show = 0
+            else
+                if @active_gift.gift_remains.blank?
+                    @remaining_gift_amount_to_show = 0
+                else
+                    @remaining_gift_amount_to_show = @active_gift.gift_remains.limit(1).take.amount_remaining.to_i + @active_gift.gift_redemptions.order(id: :desc).limit(1).take.amount_redeemed
+                end
+            end
 
             @selection_timing_exception_for_new_customers = (Date.today < @current_customer.first_pick_up_date && @current_customer.created_at > Chowdy::Application.closest_date(-1,3,@current_customer.first_pick_up_date) ) ? true : false  #cut off date is system setting, unless the customer signed up after Wednesday and it's before his first pick up
             cut_off_wday = @selection_timing_exception_for_new_customers ? ((Date.today.wday == 0 && DateTime.now.hour >= 14) ? SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i : 7 ) : SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i

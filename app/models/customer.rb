@@ -484,7 +484,7 @@ class Customer < ActiveRecord::Base
                 customer = Customer.where(stripe_customer_id:stripe_customer_id).take
                 associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
                 adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
-                customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"#{remaining_gift.gift.gift_code} ran out")
+                customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"Gift card #{remaining_gift.gift.gift_code} ran out")
             end
             remaining_gift.destroy
         end

@@ -72,6 +72,7 @@ class CustomerMailer < ActionMailer::Base
   def gift_recipient_notification(gift)
     @pay_delivery = gift.pay_delivery
     @sender_name = gift.sender_name.titlecase
+    @sender_name_short = gift.sender_name.split(" ")[0].titlecase
     @sender_email = gift.sender_email
     @recipient_name = gift.recipient_name.split(" ")[0].titlecase
     @recipient_email = gift.recipient_email
@@ -86,6 +87,18 @@ class CustomerMailer < ActionMailer::Base
       ) do |format|
         format.html
     end    
+  end
+
+  def gift_sender_refund_notification(sender_email,sender_name,recipient_name)
+    @sender_name = sender_name.titlecase
+    @recipient_name = recipient_name.titlecase
+    
+    mail(
+      to: sender_email, 
+      subject: "Chowdy gift purchase could not be completed"
+      ) do |format|
+        format.html
+    end
   end
 
   def duplicate_signup_email(first_name_email,customer_email)

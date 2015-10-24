@@ -19,19 +19,22 @@ class Gift < ActiveRecord::Base
             recipient_email = charge_data[:metadata][:recipient_email].downcase
             pay_delivery = charge_data[:metadata][:pay_delivery].downcase == "yes" ? true : false
 
-            gift = Gift.create(
-                sender_stripe_customer_id:customer_id,
-                sender_name:sender_name,
-                sender_email:customer_email,
-                recipient_name:recipient_name,
-                recipient_email:recipient_email,
-                charge_id:charge_id,
-                original_gift_amount:original_amount,
-                remaining_gift_amount:original_amount,
-                pay_delivery:pay_delivery
-                )
-
-            gift.create_gift_code
+            if customer_email == recipient_email
+                charge_data.refunds.create
+            else
+                gift = Gift.create(
+                    sender_stripe_customer_id:customer_id,
+                    sender_name:sender_name,
+                    sender_email:customer_email,
+                    recipient_name:recipient_name,
+                    recipient_email:recipient_email,
+                    charge_id:charge_id,
+                    original_gift_amount:original_amount,
+                    remaining_gift_amount:original_amount,
+                    pay_delivery:pay_delivery
+                    )
+                gift.create_gift_code
+            end
 
         rescue => error
                 puts '---------------------------------------------------'
@@ -40,11 +43,24 @@ class Gift < ActiveRecord::Base
                 puts '---------------------------------------------------' 
                 CustomerMailer.rescued_error(customer,"something went wrong creating gift: "+error.message.inspect).deliver
         else
-            CustomerMailer.gift_sender_confirmation(gift).deliver #delay this
-            CustomerMailer.gift_recipient_notification(gift).deliver #delay this
+            if customer_email == recipient_email
+                CustomerMailer.gift_sender_refund_notification(customer_email,sender_name,recipient_name).deliver #delay this
+            else
+                CustomerMailer.gift_sender_confirmation(gift).deliver #delay this
+                CustomerMailer.gift_recipient_notification(gift).deliver #delay this
+            end
+
         end
+    end
 
+    def reset_gift_amount(destroy_children=false)
+        original_gift_amount = self.original_gift_amount
+        self.update_attributes(remaining_gift_amount:original_gift_amount)
 
+        if destroy_children
+            self.gift_redemptions.destroy_all
+            self.gift_remains.destroy_all
+        end
     end
 
     def create_gift_code
@@ -130,38 +146,38 @@ class Gift < ActiveRecord::Base
                 upcoming_charge_amount = Stripe::Customer.retrieve(customer.stripe_customer_id).subscriptions.retrieve(customer.stripe_subscription_id).plan.amount
                 discount_amount = [upcoming_charge_amount,gift_amount].min
 
-                begin
+                if discount_amount > 0
+                    begin
+                        
+                            Stripe::InvoiceItem.create(
+                                customer: customer.stripe_customer_id,
+                                amount: -discount_amount,
+                                currency: 'CAD',
+                                description: "Remaining amount of gift #{gift_code}"
+                            )
+                    rescue => error
+                        puts '---------------------------------------------------'
+                        puts "something went wrong trying to create a negative invoice using gift code"
+                        puts error.message
+                        puts '---------------------------------------------------' 
+                        CustomerMailer.rescued_error(customer,"something went wrong trying to create a negative invoice using gift code: "+error.message.inspect).deliver                    
+                    else
+                        remaining_gift_amount = gift_amount - discount_amount
 
-                    Stripe::InvoiceItem.create(
-                        customer: customer.stripe_customer_id,
-                        amount: -discount_amount,
-                        currency: 'CAD',
-                        description: "Remaining amount of gift #{gift_code}"
-                    )
+                        gift.gift_redemptions.create(
+                            stripe_customer_id:customer.stripe_customer_id,
+                            amount_redeemed:discount_amount,
+                            amount_remaining:remaining_gift_amount
+                        )
 
-                rescue => error
-                    puts '---------------------------------------------------'
-                    puts "something went wrong trying to create a negative invoice using gift code"
-                    puts error.message
-                    puts '---------------------------------------------------' 
-                    CustomerMailer.rescued_error(customer,"something went wrong trying to create a negative invoice using gift code: "+error.message.inspect).deliver                    
-                else
-                    remaining_gift_amount = gift_amount - discount_amount
+                        gift.update_attributes(remaining_gift_amount:remaining_gift_amount)
 
-                    gift.gift_redemptions.create(
-                        stripe_customer_id:customer.stripe_customer_id,
-                        amount_redeemed:discount_amount,
-                        amount_remaining:remaining_gift_amount
-                    )
+                        gift.gift_remains.create(
+                            amount_remaining:remaining_gift_amount,
+                            stripe_customer_id:customer.stripe_customer_id
+                        )
 
-                    gift.update_attributes(remaining_gift_amount:remaining_gift_amount)
-
-                
-                    gift.gift_remains.create(
-                        amount_remaining:remaining_gift_amount,
-                        stripe_customer_id:customer.stripe_customer_id
-                    )
-
+                    end
                 end
             end
         end

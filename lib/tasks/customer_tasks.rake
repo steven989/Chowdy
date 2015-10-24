@@ -24,9 +24,14 @@ namespace :customers do
         negative_meal_count_customers = Customer.where{(active? >> ["yes","Yes"]) & ((regular_meals_on_monday < 0) | (green_meals_on_monday < 0 )| (regular_meals_on_thursday < 0) | (green_meals_on_thursday < 0))}
         negative_meal_count_customers.each {|c| anomaly_array.push([c,"negative meal count"]) }
 
+        #pick up date not on a monday
+        wrong_pick_up_date_customers = Customer.where("extract(DOW from next_pick_up_date) != 1")
+        wrong_pick_up_date_customers.each {|c| anomaly_array.push([c,"next pick up not on Monday"])}
+
         if anomaly_array.length > 0 
             CustomerMailer.delay.anomaly_report(anomaly_array)
         end
+
     end
 
     desc 'update everyone\'s start date'
@@ -464,7 +469,7 @@ namespace :customers do
                             if raw_difference > 0
                                 difference = raw_difference 
                                 remain_0 = current_customer.gifts.take.remaining_gift_amount
-                                    ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 }
+                                    ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 && ii.description.match('gift') }
                                 ii_amount =  ii.blank? ? 0 : ii[0].amount.abs
 
                                 chargeable_difference = [(difference * 6.99 * 1.13 * 100).round - remain_0 - ii_amount, 0].max
@@ -483,17 +488,57 @@ namespace :customers do
 
                                 remain_1 = [remain_0 + ii_amount - (difference * 6.99 * 1.13 * 100).round,0].max
                                 applicable_gift.update_attributes(remaining_gift_amount:remain_1)
-                                applicable_gift.gift_remains.delete_all
+                                applicable_gift.gift_remains.destroy_all
+                                applicable_gift.gift_redemptions.destroy_all
+
+                                applicable_gift.gift_redemptions.create(
+                                    stripe_customer_id:current_customer.stripe_customer_id,
+                                    amount_redeemed:[(queue_item.updated_meals.to_i * 6.99 * 1.13 * 100).round,applicable_gift.original_gift_amount].min,
+                                    amount_remaining:remain_1
+                                )
+
                                 ii[0].delete unless ii.blank?
+
+                                if remain_1 == 0 && remain_0 != 0
+                                    associated_cutoff = Chowdy::Application.closest_date(1,4,StartDate.first.start_date) #Thursday after customer starts
+                                    adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
+                                    current_customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"Gift card #{applicable_gift.gift_code} ran out")
+                                end
                                 
                             elsif raw_difference < 0
                                 difference = -raw_difference
-                                remain_0 = current_customer.gifts.take.remaining_gift_amount
-                                    ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 }
-                                ii_amount =  ii.blank? ? 0 : ii[0].amount.abs
-                                remain_1 = remain_0 + ii_amount + (difference * 6.99 * 1.13 * 100).round
+                                ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 && ii.description.match('gift') }
+                                charge = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0]
+                                unrefunded_charge_amount = charge.amount.to_i - charge.amount_refunded.to_i
+                                refundable_difference = [(difference * 6.99 * 1.13 * 100).round,unrefunded_charge_amount].min
+
+                                if refundable_difference > 0
+                                    stripe_refund_response = charge.refunds.create(amount: refundable_difference)
+
+                                    newly_created_refund = Refund.create(
+                                            stripe_customer_id: current_customer.stripe_customer_id, 
+                                            refund_week:StartDate.first.start_date, 
+                                            charge_week:Date.today,
+                                            charge_id:charge.id, 
+                                            meals_refunded: (refundable_difference.to_f/100/6.99/1.13).round.to_i, 
+                                            amount_refunded: refundable_difference, 
+                                            refund_reason: "Subscription adjustment before first week", 
+                                            stripe_refund_id: stripe_refund_response.id
+                                    )
+                                    newly_created_refund.internal_refund_id = newly_created_refund.id
+                                    newly_created_refund.save                                    
+                                end
+
+                                remain_1 = [applicable_gift.original_gift_amount - (queue_item.updated_meals.to_i * 6.99 * 1.13 * 100).round,0].max
                                 applicable_gift.update_attributes(remaining_gift_amount:remain_1)
-                                applicable_gift.gift_remains.delete_all
+                                applicable_gift.gift_remains.destroy_all
+                                applicable_gift.gift_redemptions.destroy_all
+                                applicable_gift.gift_redemptions.create(
+                                    stripe_customer_id:current_customer.stripe_customer_id,
+                                    amount_redeemed:[(queue_item.updated_meals.to_i * 6.99 * 1.13 * 100).round,applicable_gift.original_gift_amount].min,
+                                    amount_remaining:remain_1
+                                )
+                                current_customer.stop_queues.where("stop_type ilike ? and cancel_reason ilike ?", "cancel","%gift%").destroy_all if remain_1 > 0
                                 ii[0].delete unless ii.blank?
                             end
 
@@ -567,7 +612,7 @@ namespace :customers do
                     unless gift_remain.blank? || Date.today < current_customer.first_pick_up_date
                         gift_remain.each do |gr|
                             begin
-                                ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data[0]
+                                ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0  && ii.description.match('gift') }[0]
                                 ii_amount = ii.amount.abs
                                 ii.delete
                                 gr.gift.update_attributes(remaining_gift_amount:gr.gift.remaining_gift_amount+ii_amount)
@@ -645,14 +690,6 @@ namespace :customers do
                         end
                     end
 
-                    #if there's a gift-related cancel auto-cancel, push the cut off date to the Thursday after resume
-                    gift_auto_cancel = current_customer.stop_queues.where("stop_type ilike ? and cancel_reason ilike ?", "cancel","%gift%").take
-                    unless gift_auto_cancel.blank?
-                        associated_cutoff = Chowdy::Application.closest_date(1,4,queue_item.end_date)
-                        adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
-                        gift_auto_cancel.update_attributes(associated_cutoff:associated_cutoff,adjusted_cancel_start_date:adjusted_cancel_start_date)
-                    end
-
                 elsif queue_item.stop_type == 'cancel'
                     if current_customer.stripe_subscription_id.blank?
                         current_customer.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
@@ -691,6 +728,7 @@ namespace :customers do
                             if current_customer.user
                                 current_customer.user.log_activity("System: subscription cancelled")
                             end
+                            current_customer.stop_queues.where("stop_type ilike ?","%pause%").destroy_all
                             queue_item.add_to_record
                             queue_item.destroy
                         end
