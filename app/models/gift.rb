@@ -44,10 +44,10 @@ class Gift < ActiveRecord::Base
                 CustomerMailer.rescued_error(customer,"something went wrong creating gift: "+error.message.inspect).deliver
         else
             if customer_email == recipient_email
-                CustomerMailer.gift_sender_refund_notification(customer_email,sender_name,recipient_name).deliver #delay this
+                CustomerMailer.delay.gift_sender_refund_notification(customer_email,sender_name,recipient_name)
             else
-                CustomerMailer.gift_sender_confirmation(gift).deliver #delay this
-                CustomerMailer.gift_recipient_notification(gift).deliver #delay this
+                CustomerMailer.delay.gift_sender_confirmation(gift)
+                CustomerMailer.delay.gift_recipient_notification(gift)
             end
 
         end
