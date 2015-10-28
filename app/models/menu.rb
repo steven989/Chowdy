@@ -1,5 +1,6 @@
 class Menu < ActiveRecord::Base
     has_many :menu_ratings
+    has_one :nutritional_info
 
     def refresh_rating
         number_of_ratings = self.menu_ratings.length

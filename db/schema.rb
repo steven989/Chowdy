@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151022172546) do
+ActiveRecord::Schema.define(version: 20151028192139) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -236,6 +236,18 @@ ActiveRecord::Schema.define(version: 20151022172546) do
     t.float    "average_score"
     t.integer  "number_of_scores"
     t.string   "meal_count"
+    t.boolean  "no_microwave"
+  end
+
+  create_table "nutritional_infos", force: :cascade do |t|
+    t.integer  "menu_id"
+    t.string   "protein"
+    t.string   "carb"
+    t.string   "fat"
+    t.string   "calories"
+    t.string   "allergen"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "promotion_redemptions", force: :cascade do |t|

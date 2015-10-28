@@ -86,4 +86,52 @@ class MenusController < ApplicationController
         
     end
 
+    def edit_nutritional_info
+        @menu_item = Menu.find(params[:id].to_i)
+        @nutritional_info = @menu_item.nutritional_info.blank? ? @menu_item.build_nutritional_info : @menu_item.nutritional_info
+
+        respond_to do |format|
+          format.html {
+            render partial: 'edit_nutritional_info'
+          }      
+        end 
+    end
+
+    def update_nutritional_info
+        menu_item = Menu.find(params[:id].to_i)
+        if menu_item.nutritional_info.blank?
+            nutrition = menu_item.build_nutritional_info(nutritional_info_params)
+            if nutrition.save
+                overall_status = true
+                overall_errors = []
+            else
+                overall_status = false
+                overall_errors = [nutrition.errors.full_messages.join(", ")]
+            end
+        else
+            nutrition = menu_item.nutritional_info
+            nutrition.assign_attributes(nutritional_info_params)
+            if nutrition.save
+                overall_status = true
+                overall_errors = []
+            else
+                overall_status = false
+                overall_errors = [nutrition.errors.full_messages.join(", ")]
+            end
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: {result: overall_status, errors: overall_errors.join(", ")}
+          }
+        end
+    end
+
+    private
+
+    def nutritional_info_params
+        params.require(:nutritional_info).permit(:protein,:carb,:fat,:calories,:allergen)
+    end
+
+
 end
