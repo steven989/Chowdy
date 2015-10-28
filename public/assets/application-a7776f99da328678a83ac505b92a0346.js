@@ -17635,6 +17635,8 @@ $.fn.editableTableWidget = function (options) {
 								var getThisID = $(this).data('id');
 								var row = $('tr').filter(function(){return $(this).data('id') == plotToID});
 
+
+
 						          $.ajax({
 						            url: individualMealPullPath+'?meal_id='+getThisID,
 						            type: 'GET',
@@ -17658,12 +17660,31 @@ $.fn.editableTableWidget = function (options) {
 
 				                  $('#change_notification').removeClass("hidden");
 				                  $('#update_menu').html("Save changes").removeClass("disabled");
+								
+
+									$.ajax({
+							            url: copiedMenuNutritionalUpdate,
+							            type: 'POST',
+							            contentType: 'application/json',
+							            data: JSON.stringify({'data':{current_menu_id:plotToID,copied_menu_id:getThisID}}),
+							            dataType: 'JSON'
+									}).done(function(data){
+							            if(data.result) {
+
+							            } else {
+							                $('#submitErrorModal .modal-body').html(data.errors);
+							                $('#submitErrorModal').modal();
+							            }										
+									});
 
 						          });
 
 								$('#meal_suggestion').addClass('hidden');
 								$('.scrollable').off('scroll');
 								$('html').off('click');
+
+								
+
 							});
 
 						});			          	
