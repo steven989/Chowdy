@@ -59,13 +59,13 @@ class MenusController < ApplicationController
             veggie = rd[:veggie]
             extra = rd[:extra]
             notes = rd[:notes]
-            dish = rd[:dish]
+            no_microwave = rd[:no_microwave]
 
             if Menu.where(production_day:production_day,meal_type:meal_type).length > 0
                 menu_item = Menu.where(production_day:production_day,meal_type:meal_type).take
-                menu_item.update_attributes(production_day:production_day,meal_type:meal_type,meal_count:meal_count,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,dish:dish)
+                menu_item.update_attributes(production_day:production_day,meal_type:meal_type,meal_count:meal_count,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,no_microwave:no_microwave)
             else
-                menu_item = Menu.new(production_day:production_day,meal_type:meal_type,meal_count:meal_count,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,dish:dish)
+                menu_item = Menu.new(production_day:production_day,meal_type:meal_type,meal_count:meal_count,meal_name:meal_name,protein:protein,carb:carb,veggie:veggie,extra:extra,notes:notes,no_microwave:no_microwave)
             
                 if menu_item.save
                     results.push([production_day,true,nil])

@@ -12,7 +12,6 @@ $("#fakeLoader").fakeLoader({
   var suggestionPath = '<%= pull_suggestion_path %>';
   var individualMealPullPath = '<%= pull_individual_detail_path %>';
   var autoSuggest; 
-  var test;
 
 $(function(){
     $("#fakeLoader").fadeOut();
@@ -142,12 +141,12 @@ $(function(){
                       var veggie = matched_result.length == 1 ? matched_result[0].veggie : "" ;
                       var extra = matched_result.length == 1 ? matched_result[0].extra : "" ;
                       var notes = matched_result.length == 1 ? matched_result[0].notes : "" ;
-                      var dish = matched_result.length == 1 ? matched_result[0].dish : false ;
-                      var dish_check = dish ? "checked" : "";
+                      var no_microwave = matched_result.length == 1 ? matched_result[0].no_microwave : false ;
+                      var no_microwave_check = no_microwave ? "checked" : "";
                       var average_score = matched_result.length == 1 ? (matched_result[0].average_score == null ? "" : matched_result[0].average_score) : "" ;
                       var number_of_scores = matched_result.length == 1 ? (matched_result[0].number_of_scores == null ? "" : matched_result[0].number_of_scores) : "" ;
 
-                      $('#menu_items tbody').append("<tr class='hasData' data-id='"+id+"' data-type='"+e+"'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c9'>"+e+"</td><td class='c9'>"+meal_count+"</td><td class='c3 meal_name'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+dish_check+"></td><td class='disable_editable c9'><a href='/menu/"+id+"/edit_nutritional_info' class='pull_modal'>edit</a></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
+                      $('#menu_items tbody').append("<tr class='hasData' data-id='"+id+"' data-type='"+e+"'><td class='disable_editable c1'>"+production_day_dom+"</td><td class='disable_editable c9'>"+e+"</td><td class='c9'>"+meal_count+"</td><td class='c3 meal_name'>"+meal_name+"</td><td class='c4'>"+protein+"</td><td class='c5'>"+carb+"</td><td class='c6'>"+veggie+"</td><td class='c7'>"+extra+"</td><td class='c8'>"+notes+"</td><td class='disable_editable c9'><input type='checkbox' "+no_microwave_check+"></td><td class='disable_editable c9'><a href='/menu/"+id+"/edit_nutritional_info' class='pull_modal'>edit</a></td><td class='disable_editable c10'><a href='/menu/"+id+"/pull_rating_details' class='load_rating_details' style='font-size: large'>"+average_score+"</a></td><td class='disable_editable c11' style='font-size: large'>"+number_of_scores+"</td></tr>")
                     
                     });
                     $('#menu_items tbody').append("<tr><td colspan='13' style='height:1px; background-color:white;' class='disable_editable'></td></tr>")
@@ -174,7 +173,7 @@ $(function(){
         function submit_menu_table_value() {
           var output_json = [];
           $('#menu_items tbody').children().filter(function(c){return $(this).hasClass("hasData")}).each(function(index){
-            output_json.push({production_day:$(this).children().eq(0).html(), meal_type:$(this).children().eq(1).html(),meal_count:$(this).children().eq(2).html(), meal_name:$(this).children().eq(3).html(), protein:$(this).children().eq(4).html(), carb:$(this).children().eq(5).html(), veggie:$(this).children().eq(6).html(), extra:$(this).children().eq(7).html(), notes:$(this).children().eq(8).html(), dish:$(this).children().eq(9).children().eq(0).is(':checked')})
+            output_json.push({production_day:$(this).children().eq(0).html(), meal_type:$(this).children().eq(1).html(),meal_count:$(this).children().eq(2).html(), meal_name:$(this).children().eq(3).html(), protein:$(this).children().eq(4).html(), carb:$(this).children().eq(5).html(), veggie:$(this).children().eq(6).html(), extra:$(this).children().eq(7).html(), notes:$(this).children().eq(8).html(), no_microwave:$(this).children().eq(9).children().eq(0).is(':checked')})
           });
 
             $.ajax({
@@ -294,7 +293,7 @@ $(function(){
                                     <th class="c6 text-center">Veggies</th>
                                     <th class="c7 text-center">Extra/Garnish</th>
                                     <th class="c8 text-center">Additional Notes</th>
-                                    <th class="c9 text-center">Dish?</th>
+                                    <th class="c9 text-center">Don't Microwave?</th>
                                     <th class="c9 text-center">Nutri Info</th>
                                     <th class="c10 text-center">Rating</th>
                                     <th class="c11 text-center"># Rated</th>

@@ -14033,6 +14033,10 @@ if (typeof jQuery === 'undefined') { throw new Error('Bootstrap\'s JavaScript re
 
 
 }).call(this);
+(function() {
+
+
+}).call(this);
 /*! jQuery UI - v1.10.3 - 2013-09-18
 * http://jqueryui.com
 * Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.draggable.js, jquery.ui.resizable.js, jquery.ui.sortable.js
@@ -17642,7 +17646,7 @@ $.fn.editableTableWidget = function (options) {
 						          	var veggie = data.veggie;
 						          	var extra = data.extra;
 						          	var notes = data.notes;
-						          	var dish = data.dish;
+						          	var no_microwave = data.no_microwave;
 
 						          	row.find('td').eq(3).html(meal_name);
 						          	row.find('td').eq(4).html(protein);
@@ -17650,7 +17654,7 @@ $.fn.editableTableWidget = function (options) {
 						          	row.find('td').eq(6).html(veggie);
 						          	row.find('td').eq(7).html(extra);
 						          	row.find('td').eq(8).html(notes);
-						          	row.find('td').eq(9).find('input').prop('checked',dish);
+						          	row.find('td').eq(9).find('input').prop('checked',no_microwave);
 
 				                  $('#change_notification').removeClass("hidden");
 				                  $('#update_menu').html("Save changes").removeClass("disabled");
