@@ -44,6 +44,7 @@ Chowdy::Application.routes.draw do
   get 'menu/pull_individual_detail' => 'menus#pull_individual_detail', as: 'pull_individual_detail'
   get 'menu/:id/edit_nutritional_info' => 'menus#edit_nutritional_info', as: 'edit_nutritional_info'
   post 'menu/:id/update_nutritional_info' => 'menus#update_nutritional_info', as: 'update_nutritional_info'
+  post 'menu/copied_menu_nutritional_update' => 'menus#copied_menu_nutritional_update', as: 'copied_menu_nutritional_update'
   get 'scheduled_task/:id/run' => 'scheduled_tasks#run', as: 'run_task'
 
   get 'announcement/new' => 'system_settings#new_announcement', as: 'new_announcement'

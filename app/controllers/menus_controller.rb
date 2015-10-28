@@ -10,6 +10,47 @@ class MenusController < ApplicationController
         end
     end
 
+    def copied_menu_nutritional_update
+        received_data = params[:data].to_hash
+
+        current_menu_id = received_data['current_menu_id'].to_i
+        current_menu = Menu.find(current_menu_id)
+        current_menu_nutritional_info = current_menu.nutritional_info
+        
+        copied_menu_id = received_data['copied_menu_id'].to_i
+        copied_menu = Menu.find(copied_menu_id)
+        copied_menu_nutritional_info = copied_menu.nutritional_info
+
+        overall_status = true
+        overall_errors = []
+
+        unless copied_menu_nutritional_info.blank?
+            if current_menu_nutritional_info.blank?
+                created_nutritional_info = current_menu.build_nutritional_info(protein:copied_menu_nutritional_info.protein,carb:copied_menu_nutritional_info.carb,fat:copied_menu_nutritional_info.fat,calories:copied_menu_nutritional_info.calories,allergen:copied_menu_nutritional_info.allergen)
+                if created_nutritional_info.save
+                    overall_status = true
+                else
+                    overall_status = false
+                    overall_errors = [created_nutritional_info.errors.full_messages.join(", ")]
+                end
+            else
+                created_nutritional_info = current_menu.nutritional_info
+                created_nutritional_info.assign_attributes(protein:copied_menu_nutritional_info.protein,carb:copied_menu_nutritional_info.carb,fat:copied_menu_nutritional_info.fat,calories:copied_menu_nutritional_info.calories,allergen:copied_menu_nutritional_info.allergen)
+                if created_nutritional_info.save
+                    overall_status = true
+                else
+                    overall_status = false
+                    overall_errors = [created_nutritional_info.errors.full_messages.join(", ")]
+                end
+            end
+        end
+        respond_to do |format|
+          format.json {
+            render json: {result: overall_status, errors: overall_errors.join(", ")}
+          }
+        end        
+    end
+
     def pull_rating_details
         menu = Menu.find(params[:id])
         details = menu.menu_ratings.order(created_at: :desc).map {|mr| {menu_id:mr.menu_id, id:mr.id, customer_name: "#{mr.customer.name if mr.customer} (#{mr.customer.email if mr.customer})",rating:mr.rating,comment:mr.comment }}
