@@ -26,7 +26,7 @@ class MenusController < ApplicationController
 
         unless copied_menu_nutritional_info.blank?
             if current_menu_nutritional_info.blank?
-                created_nutritional_info = current_menu.build_nutritional_info(protein:copied_menu_nutritional_info.protein,carb:copied_menu_nutritional_info.carb,fat:copied_menu_nutritional_info.fat,calories:copied_menu_nutritional_info.calories,allergen:copied_menu_nutritional_info.allergen)
+                created_nutritional_info = current_menu.build_nutritional_info(protein:copied_menu_nutritional_info.protein,carb:copied_menu_nutritional_info.carb,fat:copied_menu_nutritional_info.fat,calories:copied_menu_nutritional_info.calories,allergen:copied_menu_nutritional_info.allergen,fiber:copied_menu_nutritional_info.fiber,spicy:copied_menu_nutritional_info.spicy)
                 if created_nutritional_info.save
                     overall_status = true
                 else
@@ -35,7 +35,7 @@ class MenusController < ApplicationController
                 end
             else
                 created_nutritional_info = current_menu.nutritional_info
-                created_nutritional_info.assign_attributes(protein:copied_menu_nutritional_info.protein,carb:copied_menu_nutritional_info.carb,fat:copied_menu_nutritional_info.fat,calories:copied_menu_nutritional_info.calories,allergen:copied_menu_nutritional_info.allergen)
+                created_nutritional_info.assign_attributes(protein:copied_menu_nutritional_info.protein,carb:copied_menu_nutritional_info.carb,fat:copied_menu_nutritional_info.fat,calories:copied_menu_nutritional_info.calories,allergen:copied_menu_nutritional_info.allergen,fiber:copied_menu_nutritional_info.fiber,spicy:copied_menu_nutritional_info.spicy)
                 if created_nutritional_info.save
                     overall_status = true
                 else
@@ -171,7 +171,7 @@ class MenusController < ApplicationController
     private
 
     def nutritional_info_params
-        params.require(:nutritional_info).permit(:protein,:carb,:fat,:calories,:allergen)
+        params.require(:nutritional_info).permit(:protein,:carb,:fat,:calories,:allergen,:fiber,:spicy)
     end
 
 
