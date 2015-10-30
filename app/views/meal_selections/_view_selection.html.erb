@@ -1,0 +1,53 @@
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Meal selection for week of <%= @date %></h4>
+  </div>
+  <div class="modal-body">
+      <!-- <div class="panel panel-default"> -->
+        <div class="table-responsive text-center">
+          <% if @selection %>
+            <table class="display table table-striped m-b-none" style="font-size: 12px">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Monday</th>
+                  <th>Thursday</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Beef</td>
+                  <td><%= @selection[:meals_production_day_1][:beef][:number].to_s+" "+@selection[:meals_production_day_1][:beef][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:beef][:number].to_s+" "+@selection[:meals_production_day_2][:beef][:meal_name] %></td>
+                </tr>
+                <tr>
+                  <td>Pork</td>
+                  <td><%= @selection[:meals_production_day_1][:pork][:number].to_s+" "+@selection[:meals_production_day_1][:pork][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:pork][:number].to_s+" "+@selection[:meals_production_day_2][:pork][:meal_name] %></td>
+                </tr>
+                <tr>
+                  <td>Poultry</td>
+                  <td><%= @selection[:meals_production_day_1][:poultry][:number].to_s+" "+@selection[:meals_production_day_1][:poultry][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:poultry][:number].to_s+" "+@selection[:meals_production_day_2][:poultry][:meal_name] %></td>
+                </tr>
+                <tr>
+                  <td>Green</td>
+                  <td><%= @selection[:meals_production_day_1][:green_1][:number].to_s+" "+@selection[:meals_production_day_1][:green_1][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:green_1][:number].to_s+" "+@selection[:meals_production_day_2][:green_1][:meal_name] %></td>
+                </tr>
+                <tr>
+                  <td>Green</td>
+                  <td><%= @selection[:meals_production_day_1][:green_2][:number].to_s+" "+@selection[:meals_production_day_1][:green_2][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:green_2][:number].to_s+" "+@selection[:meals_production_day_2][:green_2][:meal_name] %></td>
+                </tr>
+              </tbody>
+            </table>
+          <% else %>
+            <div>You have not selected meals for this week</div>
+          <% end %>
+        </div>
+      <!-- </div>      -->
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+  </div>

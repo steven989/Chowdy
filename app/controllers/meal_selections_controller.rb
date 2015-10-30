@@ -102,4 +102,43 @@ class MealSelectionsController < ApplicationController
 
     end
 
+
+    def view_selection
+        week_date = params[:week_date].to_date
+        production_day_1 = Chowdy::Application.closest_date(-1,7,week_date)
+        selections_production_day_1 = current_user.customer.meal_selections.where(production_day:production_day_1).take
+        production_day_2 = Chowdy::Application.closest_date(1,3,week_date)
+        selections_production_day_2 = current_user.customer.meal_selections.where(production_day:production_day_2).take
+
+        @date = Chowdy::Application.closest_date(1,1,production_day_1).strftime("%B %e")
+        if !selections_production_day_1.blank? && !selections_production_day_2.blank?
+            @selection = {
+                meals_production_day_1: {
+                    beef:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Beef").take.meal_name,number:selections_production_day_1.beef},
+                    pork:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Pork").take.meal_name,number:selections_production_day_1.pork},
+                    poultry:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Poultry").take.meal_name,number:selections_production_day_1.poultry},
+                    green_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 1").take.meal_name,number:selections_production_day_1.green_1},
+                    green_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 2").take.meal_name,number:selections_production_day_1.green_2}
+                },
+
+                meals_production_day_2: {
+                    beef:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Beef").take.meal_name,number:selections_production_day_2.beef},
+                    pork:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Pork").take.meal_name,number:selections_production_day_2.pork},
+                    poultry:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Poultry").take.meal_name,number:selections_production_day_2.poultry},
+                    green_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 1").take.meal_name,number:selections_production_day_2.green_1},
+                    green_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 2").take.meal_name,number:selections_production_day_2.green_2}
+                }
+            }
+        else 
+            @selection = nil
+        end
+
+        respond_to do |format|
+          format.html {
+            render partial: 'view_selection'
+          }      
+        end 
+
+    end
+
 end

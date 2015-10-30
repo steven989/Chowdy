@@ -80,6 +80,23 @@ $(function(){
       $('#subscription_change_alert').removeClass("hidden");
     };
 
+    // general populate modal
+
+    $('.pull_modal').off('click').on('click',function(){
+      event.preventDefault();
+      $.ajax({
+        url: $(this).attr('href'),
+        type: 'GET',
+        dataType: 'HTML'
+      }).done(function(data){
+          $('#generalModal .modal-content').html(data);
+          $('#generalModal').modal({show:true});
+          $("#generalModal").animate({
+              scrollTop: 0
+          }, 500);
+      });
+    });
+
     // star rating
 
     $('.star_rating').raty({
@@ -1640,6 +1657,9 @@ $(function(){
                                 </div>
                               </div>  
                             </div>
+                            <div class="row">
+                              <div class="col-lg-5"><a href="<%= view_meals_selection_path %>?week_date=<%= @view_meal_selection_date %>" class="pull_modal">View meals selected for week of <%= @view_meal_selection_date.strftime("%B %e") %></a></div>
+                            </div>
                             <div class="row m-t-sm padder">
                               Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none. You have selected all your meals! You can add more meals in <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
                             </div>
@@ -1948,6 +1968,14 @@ $(function(){
             <%= submit_tag 'Submit feedback',class:"btn btn-primary" %>
           </div>
         <% end %>
+      </div>
+  </div>
+</div>
+
+<!-- General modal -->
+<div class="modal fade" id="generalModal" tabindex="-1" role="dialog" aria-labelledby="cancelModal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
       </div>
   </div>
 </div>

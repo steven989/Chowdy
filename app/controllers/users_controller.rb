@@ -222,6 +222,7 @@ class UsersController < ApplicationController
             @display_meal_selection = @current_customer.recurring_delivery.blank? ? false : true
             @active_gift = @current_customer.gifts.order(id: :desc).limit(1).take
 
+
             if @active_gift.blank?
                 @remaining_gift_amount_to_show = 0
             else
@@ -237,6 +238,9 @@ class UsersController < ApplicationController
             @cut_off_date = Chowdy::Application.wday(Date.today) == cut_off_wday ? Date.today : Chowdy::Application.closest_date(1,cut_off_wday)
             @display_production_day_1 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) == 7 ? Date.today : Chowdy::Application.closest_date(1,7)) : (Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.closest_date(1,7) : Chowdy::Application.closest_date(2,7))
             @display_production_day_2 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) < 3 ? Chowdy::Application.closest_date(2,3) : Chowdy::Application.closest_date(1,3)) : (Chowdy::Application.wday(Date.today) < 3  ? Chowdy::Application.closest_date(3,3) : Chowdy::Application.closest_date(2,3))
+
+            @view_meal_selection_date = ([1,2,3,4].include?(Date.today.wday) ? (Date.today.wday == 1 ? Date.today : Chowdy::Application.closest_date(-1,1)) : Chowdy::Application.closest_date(1,1))
+            
 
             coder = HTMLEntities.new
 

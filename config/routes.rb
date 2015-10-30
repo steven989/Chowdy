@@ -34,6 +34,7 @@ Chowdy::Application.routes.draw do
   get 'admin_action/get_user_activity/:id' => 'admin_actions#get_user_activity', as: 'get_user_activity'
 
   post 'meal_selection/update' => 'meal_selections#update', as:'update_meal_choice'
+  get  'meal_selections/view' => 'meal_selections#view_selection', as:'view_meals_selection'
 
   resources :password_resets
   resources :system_settings
