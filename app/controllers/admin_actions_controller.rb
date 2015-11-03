@@ -171,7 +171,7 @@ class AdminActionsController < ApplicationController
         @interval = @customer.interval.blank? ? "week" : @customer.interval
         @interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
         @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3","hub_4"]).map {|hub| hub.setting_value} 
-        @meals_refunded_this_week = Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).group(:internal_refund_id).maximum(:meals_refunded).values.sum {|e| e}
+        @meals_refunded_this_week = Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).group(:internal_refund_id).maximum(:meals_refunded).values.sum {|e| e.blank? ? 0 : e}
         @amount_refunded_this_week = (Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).sum(:amount_refunded).to_f)/100.00
         @active_coupons = Promotion.where(active:true).map {|p| p.code }
         @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value}.push("Non-payment")
@@ -294,17 +294,23 @@ class AdminActionsController < ApplicationController
                 # -------------------------------------------------
             rescue => error
                 flash[:status] = "fail"
+                status = "fail"
                 flash[:notice_customers] = "Error occurred when updating customer information: #{error.message}"
+                notice_customers = "Error occurred when updating customer information: #{error.message}"
                 puts '---------------------------------------------------'
                 puts "Error occurred when updating customer information: #{error.message}"
                 puts '---------------------------------------------------'
             else
                 if @customer.errors.any?
                     flash[:status] = "fail"
+                    status = "fail"
                     flash[:notice_customers] = "Customer information cannot be updated: #{@customer.errors.full_messages.join(", ")}"
+                    notice_customers = "Customer information cannot be updated: #{@customer.errors.full_messages.join(", ")}"
                 else
                     flash[:status] = "success"
+                    status = "success"
                     flash[:notice_customers] = "Customer information updated"
+                    notice_customers = "Customer information updated"
                     if @customer.user
                         @customer.user.log_activity("Admin: customer information updated")
                     end
@@ -378,13 +384,17 @@ class AdminActionsController < ApplicationController
                 end
             rescue => error
                 flash[:status] = "fail"
+                status = "fail"
                 flash[:notice_customers] = "Error occurred when changing meal count: #{error.message}"
+                notice_customers = "Error occurred when changing meal count: #{error.message}"
                 puts '---------------------------------------------------'
                 puts "Error occurred when changing meal count: #{error.message}"
                 puts '---------------------------------------------------'
             else
                 flash[:status] = "success"
+                status = "success"
                 flash[:notice_customers] = "Meal count updated"
+                notice_customers = "Meal count updated"
                 if @customer.user
                     @customer.user.log_activity("Admin: updated customer's meal count")
                 end
@@ -401,18 +411,24 @@ class AdminActionsController < ApplicationController
 
             if @customer.save
                 flash[:status] = "success"
+                status = "success"
                 flash[:notice_customers] = "Hub updated"
+                notice_customers = "Hub updated"
                 if @customer.user
                     @customer.user.log_activity("Admin: updated customer's hub")
                 end
             else 
                 flash[:status] = "fail"
+                status = "fail"
                 flash[:notice_customers] = "Hub could not be updated: #{@customer.errors.full_messages.join(", ")}"
+                notice_customers = "Hub could not be updated: #{@customer.errors.full_messages.join(", ")}"
             end
         elsif params[:todo] == "delivery_info"
             if @customer.update_attributes(delivery_info_params) && @customer.update_attribute(:delivery_set_up?,params[:customer][:delivery_set_up])
                 flash[:status] = "success"
+                status = "success"
                 flash[:notice_customers] = "Delivery info updated"
+                notice_customers = "Delivery info updated"
                 if @customer.user
                     @customer.user.log_activity("Admin: updated customer's delivery info")
                 end
@@ -422,19 +438,25 @@ class AdminActionsController < ApplicationController
                 end
             else
                 flash[:status] = "fail"
+                status = "fail"
                 flash[:notice_customers] = "Delivery info could not be updated: #{@customer.errors.full_messages.join(", ")}"
+                notice_customers = "Delivery info could not be updated: #{@customer.errors.full_messages.join(", ")}"
             end
         elsif params[:todo] == "delivery_toggle"
             if ["Yes","yes"].include? @customer.recurring_delivery
                 if @customer.update_attributes(recurring_delivery: nil)
                     flash[:status] = "success"
+                    status = "success"
                     flash[:notice_customers] = "Delivery turned off"
+                    notice_customers = "Delivery turned off"
                     if @customer.user
                         @customer.user.log_activity("Admin: stopped customer's delivery")
                     end
                 else
                     flash[:status] = "fail"
+                    status = "fail"
                     flash[:notice_customers] = "Delivery cannot be turned off: #{@customer.errors.full_messages.join(", ")}"
+                    notice_customers = "Delivery cannot be turned off: #{@customer.errors.full_messages.join(", ")}"
                 end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Stop Delivery")
                 if (Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
@@ -447,10 +469,15 @@ class AdminActionsController < ApplicationController
                 @customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
                 if @customer.errors.any?
                     flash[:status] = "fail"
+                    status = "fail"
                     flash[:notice_customers] = "Delivery cannot be turned on: #{@customer.errors.full_messages.join(", ")}"
+                    notice_customers = "Delivery cannot be turned on: #{@customer.errors.full_messages.join(", ")}"
                 else
                     flash[:status] = "success"
+
+                    status = "success"
                     flash[:notice_customers] = "Delivery turned on"
+                    notice_customers = "Delivery turned on"
                     if @customer.user
                         @customer.user.log_activity("Admin: started customer's delivery")
                     end
@@ -497,13 +524,17 @@ class AdminActionsController < ApplicationController
                     end
                 rescue => error
                     flash[:status] = "fail"
+                    status = "fail"
                     flash[:notice_customers] = "Error occurred when refunding: #{error.message}"
+                    notice_customers = "Error occurred when refunding: #{error.message}"
                     puts '---------------------------------------------------'
                     puts "Error occurred when refunding: #{error.message}"
                     puts '---------------------------------------------------'
                 else
                     flash[:status] = "success"
+                    status = "success"
                     flash[:notice_customers] = "Successfully refunded"
+                    notice_customers = "Successfully refunded"
                     if @customer.user
                         @customer.user.log_activity("Admin: refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
                     end
@@ -518,13 +549,17 @@ class AdminActionsController < ApplicationController
                     )
                 rescue => error
                     flash[:status] = "fail"
+                    status = "fail"
                     flash[:notice_customers] = "Error occurred when creating refund for upcoming invoice: #{error.message}"
+                    notice_customers = "Error occurred when creating refund for upcoming invoice: #{error.message}"
                     puts '---------------------------------------------------'
                     puts "Error occurred when creating refund for upcoming invoice: #{error.message}"
                     puts '---------------------------------------------------'
                 else 
                     flash[:status] = "success"
+                    status = "success"
                     flash[:notice_customers] = "Invoice item successfully created"
+                    notice_customers = "Invoice item successfully created"
                     if @customer.user
                         @customer.user.log_activity("Admin: refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
                     end
@@ -536,10 +571,14 @@ class AdminActionsController < ApplicationController
             if check_result[:result]
                 PromotionRedemption.delay.redeem(@customer,params[:coupon_code])
                 flash[:status] = check_result[:result] ? "success" : "fail"
+                status = check_result[:result] ? "success" : "fail"
                 flash[:notice_customers] = check_result[:message]
+                notice_customers = check_result[:message]
             else
                 flash[:status] = check_result[:result] ? "success" : "fail"
+                status = check_result[:result] ? "success" : "fail"
                 flash[:notice_customers] = check_result[:message]            
+                notice_customers = check_result[:message]            
             end
         elsif params[:todo] == "apply_referral"
             if !@customer.stripe_subscription_id.blank?
@@ -599,13 +638,17 @@ class AdminActionsController < ApplicationController
                         end
                     rescue => error
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "Error occurred when applying referral credit: #{error.message}"
+                        notice_customers = "Error occurred when applying referral credit: #{error.message}"
                         puts '---------------------------------------------------'
                         puts "Error occurred when applying referral credit: #{error.message}"
                         puts '---------------------------------------------------'
                     else
                         flash[:status] = "success"
+                        status = "success"
                         flash[:notice_customers] = "Referral credit applied"
+                        notice_customers = "Referral credit applied"
                         if @customer.user
                             @customer.user.log_activity("Admin: applied referral credit")
                         end
@@ -662,13 +705,17 @@ class AdminActionsController < ApplicationController
                             end
                         rescue => error
                             flash[:status] = "fail"
+                            status = "fail"
                             flash[:notice_customers] = "Error occurred when applying referral credit: #{error.message}"
+                            notice_customers = "Error occurred when applying referral credit: #{error.message}"
                             puts '---------------------------------------------------'
                             puts "Error occurred when applying referral credit: #{error.message}"
                             puts '---------------------------------------------------'
                         else
                             flash[:status] = "success"
+                            status = "success"
                             flash[:notice_customers] = "Referral credit applied"
+                            notice_customers = "Referral credit applied"
                             if @customer.user
                                 @customer.user.log_activity("Admin: applied referral credit")
                             end
@@ -676,16 +723,22 @@ class AdminActionsController < ApplicationController
                     else 
                         if (Customer.where(referral_code: referral.gsub(" ","").downcase).length == 0)  && (referral_match.length == 0)
                             flash[:status] = "fail"
+                            status = "fail"
                             flash[:notice_customers] = "Referral credit not applied: cannot find any customers matching #{referral}"
+                            notice_customers = "Referral credit not applied: cannot find any customers matching #{referral}"
                         else
                             flash[:status] = "fail"
+                            status = "fail"
                             flash[:notice_customers] = "Referral credit not applied: found multiple customers matching #{referral}"
+                            notice_customers = "Referral credit not applied: found multiple customers matching #{referral}"
                         end
                     end
                 end
             else
                 flash[:status] = "fail"
+                status = "fail"
                 flash[:notice_customers] = "Referral cannot be applied: this customer does not have an active paid subscription"
+                notice_customers = "Referral cannot be applied: this customer does not have an active paid subscription"
             end
         elsif params[:todo] == "stop" 
             if params[:stop_type].downcase == "pause" 
@@ -718,7 +771,9 @@ class AdminActionsController < ApplicationController
                             end
                         rescue => error
                             flash[:status] = "fail"
+                            status = "fail"
                             flash[:notice_customers] = "An error occurred when attempting to pause: #{error.message}" 
+                            notice_customers = "An error occurred when attempting to pause: #{error.message}" 
                             puts '---------------------------------------------------'
                             puts "An error occurred when attempting to pause: #{error.message}" 
                             puts '---------------------------------------------------'
@@ -730,11 +785,14 @@ class AdminActionsController < ApplicationController
                             message ||= "Customer paused"
                             flash[:status] = status
                             flash[:notice_customers] = message
+                            notice_customers = message
 
                         end
                     else
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "Pause cannot be completed: must choose an end date"  
+                        notice_customers = "Pause cannot be completed: must choose an end date"  
                     end
                 else
                     associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
@@ -753,17 +811,23 @@ class AdminActionsController < ApplicationController
 
                         if @customer.errors.any?
                             flash[:status] = "fail"
+                            status = "fail"
                             flash[:notice_customers] = "Pause request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+                            notice_customers = "Pause request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                         else
                             if @customer.user
                                 @customer.user.log_activity("Admin: requested pause for customer until #{end_date}")
                             end
                             flash[:status] = "success"
+                            status = "success"
                             flash[:notice_customers] = "Pause request submitted"    
+                            notice_customers = "Pause request submitted"    
                         end
                     else 
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "Pause cannot be completed: must choose an end date"    
+                        notice_customers = "Pause cannot be completed: must choose an end date"    
                     end
                 end
             elsif params[:stop_type].downcase == "cancel"
@@ -795,7 +859,9 @@ class AdminActionsController < ApplicationController
                         end
                     rescue => error
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "An error occurred when attempting to cancel: #{error.message}" 
+                        notice_customers = "An error occurred when attempting to cancel: #{error.message}" 
                         puts '---------------------------------------------------'
                         puts "An error occurred when attempting to cancel: #{error.message}" 
                         puts '---------------------------------------------------'
@@ -807,6 +873,7 @@ class AdminActionsController < ApplicationController
                         message ||= "Customer cancelled"
                         flash[:status] = status
                         flash[:notice_customers] = message
+                        notice_customers = message
                     end
                 else
                     if [1,2,3,4].include? Date.today.wday
@@ -828,13 +895,17 @@ class AdminActionsController < ApplicationController
 
                     if @customer.errors.any?
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "Cancel request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+                        notice_customers = "Cancel request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                     else
                         if @customer.user
                             @customer.user.log_activity("Admin: requested cancellation")
                         end
                         flash[:status] = "success"
+                        status = "success"
                         flash[:notice_customers] = "Cancel request submitted"    
+                        notice_customers = "Cancel request submitted"    
                     end
                 end
             elsif params[:stop_type].downcase == "restart"
@@ -879,7 +950,9 @@ class AdminActionsController < ApplicationController
                         end
                     rescue => error
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "An error occurred when attempting to restart: #{error.message}" 
+                        notice_customers = "An error occurred when attempting to restart: #{error.message}" 
                         puts '---------------------------------------------------'
                         puts "An error occurred when attempting to restart: #{error.message}" 
                         puts '---------------------------------------------------'
@@ -891,6 +964,7 @@ class AdminActionsController < ApplicationController
                         message ||= "Customer restarted"
                         flash[:status] = status
                         flash[:notice_customers] = message
+                        notice_customers = message
                     end
                 else
                     if [1,2,3,4].include? Date.today.wday
@@ -913,13 +987,17 @@ class AdminActionsController < ApplicationController
 
                     if @customer.errors.any?
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+                        notice_customers = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                     else
                         if @customer.user
                             @customer.user.log_activity("Admin: requested restart")
                         end
                         flash[:status] = "success"
+                        status = "success"
                         flash[:notice_customers] = "Restart request submitted"    
+                        notice_customers = "Restart request submitted"    
                     end
                 end
             end
@@ -928,31 +1006,51 @@ class AdminActionsController < ApplicationController
             if params[:confirm_delete] == "on"
                 result = @customer.delete_with_stripe
                 flash[:status] = result[:status] ? "success" : "fail"
+                status = result[:status] ? "success" : "fail"
                 flash[:notice_customers] = result[:message]
+                notice_customers = result[:message]
             else
                 flash[:status] = "fail"
+                status = "fail"
                 flash[:notice_customers] = "Delete confirmation box must be checked to delete a customer"
+                notice_customers = "Delete confirmation box must be checked to delete a customer"
             end
         elsif params[:todo] == "reset_account" 
             if params[:confirm_reset] == "on"
                 if @customer.user
                     if @customer.user.delete
                         flash[:status] = "success"
+                        status = "success"
                         flash[:notice_customers] = "Customer account reset"
+                        notice_customers = "Customer account reset"
                     else
                         flash[:status] = "fail"
+                        status = "fail"
                         flash[:notice_customers] = "Customer account could not be reset"
+                        notice_customers = "Customer account could not be reset"
                     end
                 else
                     flash[:status] = "fail"
+                    status = "fail"
                     flash[:notice_customers] = "Nothing was reset. Customer did not register an online account"
+                    notice_customers = "Nothing was reset. Customer did not register an online account"
                 end
             else
                 flash[:status] = "fail"
+                status = "fail"
                 flash[:notice_customers] = "Reset confirmation box must be checked to reset a customer account"
+                notice_customers = "Reset confirmation box must be checked to reset a customer account"
             end
         end
-        redirect_to user_profile_path+"#customers"
+
+        respond_to do |format|
+          format.html {
+            redirect_to user_profile_path+"#customers"
+          }
+          format.json {
+            render json: {status:status, message:notice_customers}
+          } 
+        end 
     end
 
     def get_user_activity

@@ -1,10 +1,51 @@
 
+<script>
+  
+  function ajax_submit() {
+      $('.ajax_form').off('submit').on('submit',function(){
+          event.preventDefault();
+          var _this = $(this);
+          var submit_button_original_value = $(this).find('.form_submit').attr('value');
+          var submit_button_width = $(this).find('.form_submit').outerWidth();
+          $(this).find('.form_submit').css('width',submit_button_width);
+          $(this).find('.form_submit').attr('value','Wait...');
+          $.ajax({
+            url: $(this).attr('action'),
+            type: $(this).attr('method'),
+            data: $(this).serialize(),
+            dataType: 'JSON'
+          }).done(function(data){
+            if(data.status == "success"){
+              _this.find('.alert').html(data.message);
+              _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+              _this.find('.form_submit').attr('value',submit_button_original_value);
+
+              // special action for delivery button
+              if (data.message == 'Delivery turned on') {
+                _this.find('.form_submit').removeClass('btn-warning').removeClass('btn-default').addClass('btn-warning').val('Stop delivery');
+              } else if (data.message == 'Delivery turned off') {
+                _this.find('.form_submit').removeClass('btn-warning').removeClass('btn-default').addClass('btn-default').val('Start delivery');
+              }
+
+            } else {
+              _this.find('.alert').html(data.message);
+              _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+              _this.find('.form_submit').attr('value',submit_button_original_value);
+            }
+          });
+      });
+  }
+
+  ajax_submit();
+
+</script>
+
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     <h4 class="modal-title" id="myModalLabel">Customer details</h4>
   </div>
   <div class="modal-body">
-    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=info", method: :put do |f| %>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=info", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
       <div class="form-group">
           <p>Active: <%= @customer.active? %> | Paused: <%= @customer.paused? %></p>
           <p>Outstanding requests: <%= @requests %></p>
@@ -77,10 +118,12 @@
           <%= f.label :sponsored %>
           <%= f.check_box :sponsored, class: "form-control" %>
       </div>
-    <%= f.submit class: "btn btn-md btn-default m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit" %>
     <% end %>
       <div class="line line-dashed b-b line-lg pull-in"></div>
-    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=meal_count", method: :put do |f| %>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=meal_count", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
       <div class="row">
         <div class="col-sm-12">
           <p>Outstanding requests: <%= @requests %></p>
@@ -124,10 +167,12 @@
           </div>
         </div>
       </div>
-    <%= f.submit "Update meal count", class: "btn btn-md btn-default m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+    <%= f.submit "Update meal count", class: "btn btn-md btn-default m-t-sm form_submit" %>
     <% end %>
       <div class="line line-dashed b-b line-lg pull-in"></div>
-    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=hub", method: :put do |f| %>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=hub", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
       <div class="row">
         <div class="col-sm-12">
           <p>Outstanding requests: <%= @requests %></p>  
@@ -161,10 +206,12 @@
           </div>
         </div>
       </div>
-    <%= f.submit "Update hub", class: "btn btn-md btn-default m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+    <%= f.submit "Update hub", class: "btn btn-md btn-default m-t-sm form_submit" %>
     <% end %>
     <div class="line line-dashed b-b line-lg pull-in"></div>
-    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=delivery_info", method: :put do |f| %>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=delivery_info", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
           <div class="form-group">
               <%= f.label :delivery_address %>
               <span><%= @customer.delivery_address.blank? ? '' : link_to('Map', 'https://www.google.com/maps?q='+@customer.delivery_address, target: '_blank') %></span>
@@ -182,20 +229,24 @@
               <%= f.label :special_delivery_instructions %>
               <%= f.text_area :special_delivery_instructions, class: "form-control", rows: 6 %>
           </div>
-    <%= f.submit "Update delivery", class: "btn btn-md btn-default m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+    <%= f.submit "Update delivery", class: "btn btn-md btn-default m-t-sm form_submit" %>
     <% end %>
-    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=delivery_toggle", method: :put do |f| %>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=delivery_toggle", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
+          <div class="alert m-t-xs m-b-xs hidden">
+          </div>
           <div class="form-group">
             <% if ["Yes","yes"].include? @customer.recurring_delivery %>
-              <%= f.submit "Stop delivery", class: "btn btn-md btn-warning m-t-sm" %>
+              <%= f.submit "Stop delivery", class: "btn btn-md btn-warning m-t-sm form_submit" %>
             <% else %>
-              <%= f.submit "Start delivery", class: "btn btn-md btn-default m-t-sm" %>
+              <%= f.submit "Start delivery", class: "btn btn-md btn-default m-t-sm form_submit" %>
             <% end %>
           </div>
     
     <% end %>
     <div class="line line-dashed b-b line-lg pull-in"></div>
-    <%= form_for Refund.new(), url: admin_update_customer_path(@customer)+"?todo=refund", method: :put do |f| %>
+    <%= form_for Refund.new(), url: admin_update_customer_path(@customer)+"?todo=refund", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
           <div class="form-group">
             <p><%= @meals_refunded_this_week %> meals have been refunded this week for a total of $<%= @amount_refunded_this_week %></p>
           </div>
@@ -211,33 +262,39 @@
               <%= f.label :refund_reason, "Reason for refund (type it as if the customer will see it on their invoice)" %>
               <%= f.text_area :refund_reason, class: "form-control" %>
           </div>
-    <%= f.submit "Refund", class: "btn btn-md btn-warning m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+    <%= f.submit "Refund", class: "btn btn-md btn-warning m-t-sm form_submit" %>
     <% end %>
     <div class="line line-dashed b-b line-lg pull-in"></div>
     <div class="row">
       <div class="col-sm-6">
-      <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=attach_coupon", method: :put do |f| %>
+      <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=attach_coupon", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
             <div class="form-group">
                 <%= label_tag :coupon_code %>
                 <div class="">
                 <%= select_tag :coupon_code, options_for_select(@active_coupons), include_blank: true, class:"form-control" %>
                 </div>
             </div>
-      <%= f.submit "Attach coupon", class: "btn btn-md btn-default m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+      <%= f.submit "Attach coupon", class: "btn btn-md btn-default m-t-sm form_submit" %>
       <% end %>
       </div>
       <div class="col-sm-6">
-      <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=apply_referral", method: :put do |f| %>
+      <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=apply_referral", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
             <div class="form-group">
                 <%= label_tag :referral_code %>
                 <%= text_field_tag :referral_code,@customer.matched_referrers_code,class: "form-control" %>
             </div>
-      <%= f.submit "Apply referral", class: "btn btn-md btn-default m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+      <%= f.submit "Apply referral", class: "btn btn-md btn-default m-t-sm form_submit" %>
       <% end %>
       </div>
     </div>
     <div class="line line-dashed b-b line-lg pull-in"></div>
-    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=stop", method: :put do |f| %>
+    <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=stop", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
       <div class="form-group">
         <p>Outstanding requests for this week: <%= @requests %></p>
       </div>
@@ -261,7 +318,9 @@
           <%= label_tag :immediate_effect, "Immediate effect (force change after Thursday deadline but before billing. This does not result in refund. For restarts, it's effective starting the upcoming Monday.)" %>
           <%= check_box_tag :immediate_effect,"1",false,class: "form-control"%>
       </div>
-    <%= f.submit "Request", class: "btn btn-md btn-danger m-t-sm" %>
+      <div class="alert m-t-xs m-b-xs hidden">
+      </div>
+    <%= f.submit "Request", class: "btn btn-md btn-danger m-t-sm form_submit" %>
     <% end %>
     <% if @customer.user %>
     <div class="line line-dashed b-b line-lg pull-in"></div>
