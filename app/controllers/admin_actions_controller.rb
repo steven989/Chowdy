@@ -84,7 +84,7 @@ class AdminActionsController < ApplicationController
                 no_beef:"#{c.no_beef ? 'No Beef' : ''}",
                 no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",
                 extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",
-                gifter_pays_delivery: c.gift_remains.blank? ? '' : (c.gift_remains.order(id: :desc).limit(1).take.gift.pay_delivery? ? c.gift_remains.order(id: :desc).limit(1).take.gift.sender_email : ''),
+                gifter_pays_delivery: c.gift_remains.blank? ? (c.gifts.blank? ? '' : (c.gifts.order(id: :desc).limit(1).take.pay_delivery? && Date.today < (c.first_pick_up_date + 5.days) ? c.gifts.order(id: :desc).limit(1).take.sender_email : '' ) ) : (c.gift_remains.order(id: :desc).limit(1).take.gift.pay_delivery? ? c.gift_remains.order(id: :desc).limit(1).take.gift.sender_email : ''),
                 multiple_delivery_address:"#{c.different_delivery_address ? 'Multiple Delivery Address' : ''}",
                 split_delivery_with:c.split_delivery_with, 
                 beef_monday:c.meal_selections.where(production_day:production_day_1).blank? ? "" : ((c.meal_selections.where(production_day:production_day_1).take.beef == 0 || c.meal_selections.where(production_day:production_day_1).take.beef.blank?) ? "" : "#{c.meal_selections.where(production_day:production_day_1).take.beef} Beef"),
