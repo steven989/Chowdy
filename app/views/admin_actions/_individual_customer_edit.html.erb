@@ -8,7 +8,7 @@
           var submit_button_original_value = $(this).find('.form_submit').attr('value');
           var submit_button_width = $(this).find('.form_submit').outerWidth();
           $(this).find('.form_submit').css('width',submit_button_width);
-          $(this).find('.form_submit').attr('value','Wait...');
+          $(this).find('.form_submit').addClass('disabled').attr('value','Wait...');
           $.ajax({
             url: $(this).attr('action'),
             type: $(this).attr('method'),
@@ -18,7 +18,7 @@
             if(data.status == "success"){
               _this.find('.alert').html(data.message);
               _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
-              _this.find('.form_submit').attr('value',submit_button_original_value);
+              _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
 
               // special action for delivery button
               if (data.message == 'Delivery turned on') {
@@ -30,7 +30,7 @@
             } else {
               _this.find('.alert').html(data.message);
               _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
-              _this.find('.form_submit').attr('value',submit_button_original_value);
+              _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
             }
           });
       });
