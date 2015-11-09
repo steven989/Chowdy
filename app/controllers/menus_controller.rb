@@ -2,7 +2,8 @@ class MenusController < ApplicationController
 
     def show
         month = params[:id].to_i
-        match_result = Menu.where("extract(month from production_day) = ?",month)
+        year = params[:year].to_i
+        match_result = Menu.where("extract(year from production_day) = ? and extract(month from production_day) = ?",year,month)
         respond_to do |format|
           format.json {
             render json: match_result.to_json
