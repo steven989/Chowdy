@@ -28,6 +28,11 @@ namespace :customers do
         wrong_pick_up_date_customers = Customer.where("extract(DOW from next_pick_up_date) != 1")
         wrong_pick_up_date_customers.each {|c| anomaly_array.push([c,"next pick up not on Monday"])}
 
+        #pick up date not updated properly
+        current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+        out_of_date_pick_up_date_customers = Customer.where{(active? >> ["Yes","yes"]) & (next_pick_up_date < current_pick_up_date)}
+        out_of_date_pick_up_date_customers.each {|c| anomaly_array.push([c,"Next pick up date before the current system pick up date"])}
+
         if anomaly_array.length > 0 
             CustomerMailer.delay.anomaly_report(anomaly_array)
         end
