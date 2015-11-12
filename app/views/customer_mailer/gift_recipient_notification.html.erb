@@ -11,9 +11,15 @@
     <p>Your subscription will automatically stop at the end of the week that your gift runs out. To resume, simply login to your account and click "resume" by the Thursday of that week.</p>
 
     <% if @pay_delivery %>
-        <p>Note that <%= @sender_name_short %> will also be covering your delivery charge. If you choose our delivery option you will not be billed for the delivery charges of $10 per drop for the duration of the gift.</p>
+        <p>Note that <%= @sender_name_short %> will also be covering your delivery charge. If you choose our delivery option you <b>will not be</b> billed for the delivery charges of $10 per drop for the duration of the gift.</p>
     <% else%>
         <p>Note that if you choose our delivery option you will be billed for the delivery charges of $10 per drop.</p>
+    <% end %>
+
+    <% if @personal_message %>
+        <p>Message from <%= @sender_name_short %>:</p>
+        <br>
+        <p>"<i><%= @personal_message %></i>"</p>
     <% end %>
 
     <p>- the Chowdy team</p>

@@ -17,6 +17,7 @@ class Gift < ActiveRecord::Base
             sender_name = charge_data[:metadata][:sender_name]
             recipient_name = charge_data[:metadata][:recipient_name]
             recipient_email = charge_data[:metadata][:recipient_email].downcase
+            personal_message = charge_data[:metadata][:personal_message]
             pay_delivery = charge_data[:metadata][:pay_delivery].downcase == "yes" ? true : false
 
             if customer_email == recipient_email
@@ -31,7 +32,8 @@ class Gift < ActiveRecord::Base
                     charge_id:charge_id,
                     original_gift_amount:original_amount,
                     remaining_gift_amount:original_amount,
-                    pay_delivery:pay_delivery
+                    pay_delivery:pay_delivery,
+                    personal_message:personal_message
                     )
                 gift.create_gift_code
             end

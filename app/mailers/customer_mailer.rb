@@ -78,6 +78,7 @@ class CustomerMailer < ActionMailer::Base
     @recipient_email = gift.recipient_email
     @gift_code = gift.gift_code
     @amount = "$"+(gift.original_gift_amount.to_f/100).to_s
+    @personal_message = gift.personal_message
 
     @meals = (gift.original_gift_amount.to_f/1.13/699).round.to_i
 
