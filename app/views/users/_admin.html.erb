@@ -1229,6 +1229,7 @@ $(function(){
                                         <tr>
                                           <th>View Redemption</th>
                                           <th>Sender Stripe</th>
+                                          <th>Purchase date</th>
                                           <th>Sender Name</th>
                                           <th>Sender Email</th>
                                           <th>Recipient Name</th>
@@ -1244,6 +1245,7 @@ $(function(){
                                           <tr>
                                             <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= view_redemption_path(g) %>" style="min-width: 0px;width: 60px;">View</button></td>
                                             <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{g.sender_stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
+                                            <td><%= g.created_at.strftime("%Y-%m-%d") %></td>
                                             <td><%= g.sender_name %></td>
                                             <td><%= g.sender_email %></td>
                                             <td><%= g.recipient_name %></td>
