@@ -1250,8 +1250,8 @@ $(function(){
                                             <td><%= g.sender_email %></td>
                                             <td><%= g.recipient_name %></td>
                                             <td><%= g.recipient_email %></td>
-                                            <td><%= g.original_gift_amount %></td>
-                                            <td><%= g.remaining_gift_amount %></td>
+                                            <td>$<%= (g.original_gift_amount.to_f/100).to_s %></td>
+                                            <td>$<%= (g.remaining_gift_amount.to_f/100).to_s %></td>
                                             <td><%= g.pay_delivery %></td>
                                             <td><%= g.gift_code %></td>
                                           </tr>
