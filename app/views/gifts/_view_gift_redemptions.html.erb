@@ -1,0 +1,35 @@
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Gift redemptions</h4>
+  </div>
+  <div class="modal-body">
+      <!-- <div class="panel panel-default"> -->
+        <div class="table-responsive text-center">
+          <table class="display table table-striped m-b-none" style="font-size: 12px">
+            <thead>
+              <tr>
+                <th>Redemption Date</th>
+                <th>Amount Redeemed</th>
+                <th>Amount Remaining</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if !@gift_redemptions.blank? %>
+                <% @gift_redemptions.each do |gr| %>
+                  <tr>
+                    <td><%= gr.created_at.strftime("%Y-%m-%d") %></td>
+                    <td><%= gr.amount_redeemed %></td>
+                    <td><%= gr.amount_remaining %></td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <td colspan="3"><i>Could not find any redemption record</i></td>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <!-- </div>      -->
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+  </div>

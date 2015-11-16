@@ -57,6 +57,10 @@ $(function(){
         iDisplayLength: 25
        });
 
+       $('#gifts_table').DataTable({
+        iDisplayLength: 25
+       });
+
        $('#feedback').DataTable({
         searching: false,
         order: [[1, "desc"]]
@@ -219,6 +223,13 @@ $(function(){
                             <i class="i i-params icon">
                             </i>
                             <span class="font-bold">System Settings</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#gifts" class="b-b padder-v" data-toggle="tab">
+                            <i class="fa fa-gift">
+                            </i>
+                            <span class="font-bold">Gifts</span>
                           </a>
                         </li>
                         <li>
@@ -1194,6 +1205,66 @@ $(function(){
                         </section>
 
                     </section> 
+
+                    <section class="tab-pane" id="gifts" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder padder-v">
+                              <% if flash[:notice_gifts] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_gifts] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Gifts
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="gifts_table" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <th>View Redemption</th>
+                                          <th>Sender Stripe</th>
+                                          <th>Sender Name</th>
+                                          <th>Sender Email</th>
+                                          <th>Recipient Name</th>
+                                          <th>Recipient Email</th>
+                                          <th>Original Gift Amount</th>
+                                          <th>Remaining Gift Amount</th>
+                                          <th>Sender Pay Deliver?</th>
+                                          <th>Gift Code</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @gifts.each do |g| %>
+                                          <tr>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= view_redemption_path(g) %>" style="min-width: 0px;width: 60px;">View</button></td>
+                                            <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{g.sender_stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
+                                            <td><%= g.sender_name %></td>
+                                            <td><%= g.sender_email %></td>
+                                            <td><%= g.recipient_name %></td>
+                                            <td><%= g.recipient_email %></td>
+                                            <td><%= g.original_gift_amount %></td>
+                                            <td><%= g.remaining_gift_amount %></td>
+                                            <td><%= g.pay_delivery %></td>
+                                            <td><%= g.gift_code %></td>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
+                            </section>                            
+                        </section>
+
+                    </section> 
+
+
                 </section>
             </section>
         

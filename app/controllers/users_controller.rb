@@ -30,6 +30,8 @@ class UsersController < ApplicationController
             current_user.log_activity("admin dashboard")
             current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
             active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
+            @gifts = Gift.all.order(created_at: :desc)
+
             @current_customers_count = MealStatistic.retrieve("total_customer")
             @next_week_customers_count = MealStatistic.retrieve("total_customer_next_week")
             @monday_regular = MealStatistic.retrieve("monday_regular")
