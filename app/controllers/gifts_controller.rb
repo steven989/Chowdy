@@ -1,8 +1,8 @@
 class GiftsController < ApplicationController
     def view_redemption
-        gift = Gift.find(params[:id])
-        if gift
-            @gift_redemptions = gift.gift_redemptions.order(created_at: :asc)
+        @gift = Gift.find(params[:id])
+        if @gift
+            @gift_redemptions = @gift.gift_redemptions.order(created_at: :asc)
         else
             @gift_redemptions = nil
         end
