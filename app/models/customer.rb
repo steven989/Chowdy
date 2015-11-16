@@ -271,7 +271,7 @@ class Customer < ActiveRecord::Base
                     else #match name
                         referral_match = Customer.where("name ilike ? and id <> ?", referral.gsub(/\s$/,"").downcase, customer.id)
                         if referral_match.length == 0
-                            manual_checks.push("Referral typed in but no match")
+                            manual_checks.push("Referral typed in but no match #{referral.gsub(/\s$/,"").downcase}")
                         elsif referral_match.length == 1
                             unless referral_match.take.stripe_subscription_id.blank?
                                 #referrer discount
