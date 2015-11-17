@@ -355,6 +355,8 @@ protect_from_forgery :except => :payment
 
     def resend_sign_up_link_form
         @customer = Customer.where(id:params[:id]).take
+        @path = resend_sign_up_link_path(@customer)
+        @form_title = "Resend link to create profile"
         respond_to do |format|
           format.html {
             render partial: 'resend_sign_up_link_form'
@@ -362,11 +364,80 @@ protect_from_forgery :except => :payment
         end  
     end
 
+    def resend_confirmation_email_form
+        @customer = Customer.where(id:params[:id]).take
+        @path = resend_signup_confirmation_email_path(@customer)
+        @form_title = "Resend sign up confirmation email"
+        respond_to do |format|
+          format.html {
+            render partial: 'resend_sign_up_link_form'
+          }
+        end          
+    end
+
     def resend_sign_up_link
-        customer = Customer.where(id:params[:id]).take
-        target_email = params[:target_email].blank? ? customer.email : params[:target_email]
-        CustomerMailer.delay.resend_profile_link(target_email,customer)
-        redirect_to user_profile_path+"#customers"
+        begin
+            customer = Customer.where(id:params[:id]).take
+            target_email = params[:target_email].blank? ? customer.email : params[:target_email]
+            CustomerMailer.delay.resend_profile_link(target_email,customer)
+        rescue => error 
+            status = "fail"
+            message = error.message
+        else
+            status = "success"
+            message = ""
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: {status:status, message:message}
+          } 
+        end    
+
+    end
+
+    def resend_signup_confirmation_email
+        begin
+            customer = Customer.where(id:params[:id]).take
+
+            hub_email = customer.hub.gsub(/\\/,"")
+            start_date_email = customer.first_pick_up_date
+            first_name_email = customer.name.split(/\s/)[0].capitalize
+            
+            email_monday_regular = customer.regular_meals_on_monday
+            email_thursday_regular = customer.regular_meals_on_thursday
+            email_monday_green = customer.green_meals_on_monday
+            email_thursday_green = customer.green_meals_on_thursday
+
+            referral_name_email = nil
+            meal_per_week = customer.total_meals_per_week
+            customer_email = customer.email
+
+            CustomerMailer.delay.confirmation_email(
+                customer,
+                hub_email,
+                first_name_email,
+                start_date_email,
+                customer_email,
+                meal_per_week,
+                email_monday_regular,
+                email_thursday_regular,
+                email_monday_green,
+                email_thursday_green,
+                referral_name_email)
+        rescue => error 
+            status = "fail"
+            message = error.message
+        else
+            status = "success"
+            message = ""
+        end 
+
+        respond_to do |format|
+          format.json {
+            render json: {status:status, message:message}
+          } 
+        end 
     end
 
     def resend_sign_up_link_customer_request

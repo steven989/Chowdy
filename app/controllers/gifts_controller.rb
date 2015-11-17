@@ -49,7 +49,7 @@ class GiftsController < ApplicationController
             message = error.message
         else
             status = "success"
-            message = "test"
+            message = ""
         end
         
         respond_to do |format|
@@ -70,7 +70,7 @@ class GiftsController < ApplicationController
             message = error.message
         else
             status = "success"
-            message = "test"
+            message = ""
         end
         
         respond_to do |format|

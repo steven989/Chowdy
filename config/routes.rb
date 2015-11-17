@@ -19,8 +19,10 @@ Chowdy::Application.routes.draw do
   post 'customers/submit_meal_rating' => 'customers#rate_menu_item', as: 'submit_meal_rating'
   post 'customers/update/:id' => 'customers#update', as: 'update_customer'
   get 'customers/:id/create_profile' => 'customers#create_profile', as: 'create_customer_profile'
+  get 'customers/:id/resend_confirmation_email_form' => 'customers#resend_confirmation_email_form', as: 'resend_confirmation_email_form'
   get 'customers/:id/resend_sign_up_link_form' => 'customers#resend_sign_up_link_form', as: 'resend_sign_up_link_form'
   post 'customers/:id/resend_sign_up_link' => 'customers#resend_sign_up_link', as: 'resend_sign_up_link'
+  post 'customers/:id/resend_signup_confirmation_email' => 'customers#resend_signup_confirmation_email', as: 'resend_signup_confirmation_email'
   get 'customers/resend_sign_up_link' => 'customers#resend_sign_up_link_customer_request', as: 'resend_sign_up_link_customer_request'
   resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
   get 'user/profile' => 'users#profile', as: 'user_profile'

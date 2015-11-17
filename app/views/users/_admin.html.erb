@@ -1008,6 +1008,7 @@ $(function(){
                                           <th>Link to Stripe dashboard</th>
                                           <th>Account registered?</th>
                                           <th>Resend signup link</th>
+                                          <th>Resend confirmation email</th>
                                           <th>Outstanding requests</th>
                                           <% @customer_column_names.each do |c| %>
                                           <th><%= c %></th>
@@ -1022,6 +1023,7 @@ $(function(){
                                             <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{s.stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
                                             <td><%= s.user.blank? ? "No" : (s.user.facebook_email.blank? ? "Yes" : "Yes - FB") %></td>
                                             <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= resend_sign_up_link_form_path(s) %>" style="min-width: 0px;width: 60px;">Send</button></td>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= resend_confirmation_email_form_path(s) %>" style="min-width: 0px;width: 60px;">Send</button></td>
                                             <td><%= s.formatted_request_queues %></td>
                                             <% @customer_column_names.each do |c| %>
                                               <td><%= s.send(c.to_sym) %></td>
