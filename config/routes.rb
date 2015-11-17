@@ -63,6 +63,10 @@ Chowdy::Application.routes.draw do
   post 'redeem_promo' => 'promotion_redemptions#redeem', as: 'redeem_promo'
 
   get 'gifts/:id/view_redemption' => 'gifts#view_redemption', as: 'view_redemption'
+  get 'gifts/:id/resend_sender_confirmation_form' => 'gifts#resend_sender_confirmation_form', as: 'resend_sender_confirmation_form'
+  get 'gifts/:id/resend_recipient_confirmation_form' => 'gifts#resend_recipient_confirmation_form', as: 'resend_recipient_confirmation_form'
+  post 'gifts/:id/resend_sender_confirmation' => 'gifts#resend_sender_confirmation', as: 'resend_sender_confirmation'
+  post 'gifts/:id/resend_recipient_confirmation' => 'gifts#resend_recipient_confirmation', as: 'resend_recipient_confirmation'
 
   # You can have the root of your site routed with "root"
   # root 'welcome#index'

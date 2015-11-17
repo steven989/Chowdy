@@ -52,10 +52,10 @@ class CustomerMailer < ActionMailer::Base
     end
   end
 
-  def gift_sender_confirmation(gift)
+  def gift_sender_confirmation(gift,alternative_email=nil)
     @pay_delivery = gift.pay_delivery
     @sender_name = gift.sender_name.split(" ")[0].titlecase
-    @sender_email = gift.sender_email
+    @sender_email = alternative_email.blank? ? gift.sender_email : alternative_email
     @recipient_name = gift.recipient_name.split(" ")[0].titlecase
     @recipient_email = gift.recipient_email
     @gift_code = gift.gift_code
@@ -69,13 +69,13 @@ class CustomerMailer < ActionMailer::Base
     end
   end
 
-  def gift_recipient_notification(gift)
+  def gift_recipient_notification(gift,alternative_email=nil)
     @pay_delivery = gift.pay_delivery
     @sender_name = gift.sender_name.titlecase
     @sender_name_short = gift.sender_name.split(" ")[0].titlecase
     @sender_email = gift.sender_email
     @recipient_name = gift.recipient_name.split(" ")[0].titlecase
-    @recipient_email = gift.recipient_email
+    @recipient_email = alternative_email.blank? ? gift.recipient_email : alternative_email
     @gift_code = gift.gift_code
     @amount = "$"+(gift.original_gift_amount.to_f/100).to_s
     @personal_message = gift.personal_message
