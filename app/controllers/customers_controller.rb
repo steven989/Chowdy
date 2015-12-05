@@ -411,7 +411,7 @@ protect_from_forgery :except => :payment
 
             referral_name_email = nil
             meal_per_week = customer.total_meals_per_week
-            customer_email = customer.email
+            customer_email = params[:target_email].blank? ? customer.email : params[:target_email]
 
             CustomerMailer.delay.confirmation_email(
                 customer,
