@@ -382,6 +382,8 @@ class AdminActionsController < ApplicationController
                         end
                     end
                 end
+
+                @customer.stop_queues.where(stop_type:"change_sub").destroy_all #admin change should override whatever existing request there is
             rescue => error
                 flash[:status] = "fail"
                 status = "fail"
