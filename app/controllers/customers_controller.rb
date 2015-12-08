@@ -142,18 +142,25 @@ protect_from_forgery :except => :payment
             
             associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
             
-            if current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
-                if ((["Yes","yes"].include? current_customer.active?) && (["Yes","yes"].include? current_customer.paused?)) || (current_customer.active?.blank? || (["No","no"].include? current_customer.active?))
-                    current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+
+                if current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
+                    if ((["Yes","yes"].include? current_customer.active?) && (["Yes","yes"].include? current_customer.paused?)) || (current_customer.active?.blank? || (["No","no"].include? current_customer.active?))
+                        current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+                    end
+                elsif ["pause","cancel"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
+                    if Date.today.between?("2015-12-18".to_date,"2015-12-24".to_date)
+                        current_customer.stop_queues.where("stop_type ilike ?","cancel").destroy_all
+                        current_user.log_activity("Restart requested")
+                    else
+                        current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
+                        current_user.log_activity("Restart requested")
+                    end
+                elsif ["restart"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
+                        current_customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
+                        current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+                        current_user.log_activity("Requested restart")
                 end
-            elsif ["pause","cancel"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
-                current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
-                current_user.log_activity("Restart requested")
-            elsif ["restart"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
-                    current_customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
-                    current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
-                    current_user.log_activity("Requested restart")
-            end
+
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "change_card"
             begin
