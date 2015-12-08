@@ -239,10 +239,13 @@ class UsersController < ApplicationController
             cut_off_wday = @selection_timing_exception_for_new_customers ? ((Date.today.wday == 0 && DateTime.now.hour >= 14) ? SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i : 7 ) : SystemSetting.where(setting:'meal_selection', setting_attribute:'cut_off_week_day').take.setting_value.to_i
             @cut_off_date = Chowdy::Application.wday(Date.today) == cut_off_wday ? Date.today : Chowdy::Application.closest_date(1,cut_off_wday)
             @display_production_day_1 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) == 7 ? Date.today : Chowdy::Application.closest_date(1,7)) : (Chowdy::Application.wday(Date.today) == 7 ? Chowdy::Application.closest_date(1,7) : Chowdy::Application.closest_date(2,7))
+            @display_production_day_1 = @display_production_day_1 == "2015-12-27".to_date ? Chowdy::Application.closest_date(1,7,@display_production_day_1) : @display_production_day_1 #Christmas break for 2015
+
             @display_production_day_2 = Chowdy::Application.wday(Date.today) <= cut_off_wday ? ( Chowdy::Application.wday(Date.today) < 3 ? Chowdy::Application.closest_date(2,3) : Chowdy::Application.closest_date(1,3)) : (Chowdy::Application.wday(Date.today) < 3  ? Chowdy::Application.closest_date(3,3) : Chowdy::Application.closest_date(2,3))
+            @display_production_day_2 = @display_production_day_2 == "2015-12-30".to_date ? Chowdy::Application.closest_date(1,3,@display_production_day_2) : @display_production_day_2 #Christmas break for 2015
 
             @view_meal_selection_date = ([1,2,3,4].include?(Date.today.wday) ? (Date.today.wday == 1 ? Date.today : Chowdy::Application.closest_date(-1,1)) : Chowdy::Application.closest_date(1,1))
-            
+            @view_meal_selection_date = @view_meal_selection_date == "2015-12-28".to_date ? Chowdy::Application.closest_date(1,1,@view_meal_selection_date) : @view_meal_selection_date #Christmas break for 2015
 
             coder = HTMLEntities.new
 
@@ -313,7 +316,10 @@ class UsersController < ApplicationController
 
             current_user.log_activity("user accessing dashboard")
             @menu_date_sunday = Date.today.wday == 0 ? Chowdy::Application.closest_date(-2,7) : Chowdy::Application.closest_date(-1,7)
+            @menu_date_sunday = @menu_date_sunday == "2015-12-27".to_date ? Chowdy::Application.closest_date(-2,7,@menu_date_sunday) : @menu_date_sunday #Christmas break for 2015
+
             @menu_date_wednesday = Chowdy::Application.closest_date(1,3,@menu_date_sunday)
+            @menu_date_wednesday = @menu_date_wednesday == "2015-12-30".to_date ? Chowdy::Application.closest_date(-1,3,@menu_date_wednesday) : @menu_date_wednesday #Christmas break for 2015
 
             @beef_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").blank?
             @pork_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").blank?

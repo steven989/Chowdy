@@ -73,13 +73,16 @@ protect_from_forgery :except => :payment
     def update #change customer account information from website
 
         current_customer = current_user.customer
-        
+ 
         if params[:id].downcase == "pause"
             
             end_date = params[:pause_date_picker]
             associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
             unless end_date.blank?
+
                 adjusted_pause_end_date = end_date.to_date.wday == 1 ? end_date.to_date : Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                adjusted_pause_end_date = adjusted_pause_end_date == "2015-12-28".to_date ? Chowdy::Application.closest_date(1,1,adjusted_pause_end_date) : adjusted_pause_end_date #Christmas break for 2015
+
                 if [1,2,3,4].include? Date.today.wday
                     adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
                 else
@@ -134,6 +137,9 @@ protect_from_forgery :except => :payment
             else
                 adjusted_restart_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
             end
+
+            adjusted_restart_date = adjusted_restart_date == "2015-12-28".to_date ? Chowdy::Application.closest_date(1,1,adjusted_restart_date) : adjusted_restart_date #Christmas break for 2015
+            
             associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
             
             if current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
