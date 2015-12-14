@@ -67,6 +67,18 @@ namespace :customers do
         end
     end
 
+    desc 'pause all currently active customers for one week 2015'
+    task :pause_all_active_one_week => [:environment] do
+        current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+        active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
+        active_nonpaused_customers.each do |c|
+            if c.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").length == 0
+                c.stop_queues.create(stop_type:'pause',associated_cutoff:Chowdy::Application.closest_date(1,4), end_date:"2016-01-04".to_date, start_date:"2015-12-28".to_date)
+            end
+        end
+    end
+
+
     desc 'automatically increase or reduce meal selection above or below the number of meals subscribed'
     task :adjust_meal_selection_to_match_subscription => [:environment] do
         week = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
