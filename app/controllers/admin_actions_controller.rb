@@ -312,7 +312,7 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Customer information updated"
                     notice_customers = "Customer information updated"
                     if @customer.user
-                        @customer.user.log_activity("Admin: customer information updated")
+                        @customer.user.log_activity("Admin (#{current_user.email}): customer information updated")
                     end
                 end
             end
@@ -398,7 +398,7 @@ class AdminActionsController < ApplicationController
                 flash[:notice_customers] = "Meal count updated"
                 notice_customers = "Meal count updated"
                 if @customer.user
-                    @customer.user.log_activity("Admin: updated customer's meal count")
+                    @customer.user.log_activity("Admin (#{current_user.email}): updated customer's meal count")
                 end
             end
         elsif params[:todo] == "hub"
@@ -417,7 +417,7 @@ class AdminActionsController < ApplicationController
                 flash[:notice_customers] = "Hub updated"
                 notice_customers = "Hub updated"
                 if @customer.user
-                    @customer.user.log_activity("Admin: updated customer's hub")
+                    @customer.user.log_activity("Admin (#{current_user.email}): updated customer's hub")
                 end
             else 
                 flash[:status] = "fail"
@@ -432,7 +432,7 @@ class AdminActionsController < ApplicationController
                 flash[:notice_customers] = "Delivery info updated"
                 notice_customers = "Delivery info updated"
                 if @customer.user
-                    @customer.user.log_activity("Admin: updated customer's delivery info")
+                    @customer.user.log_activity("Admin (#{current_user.email}): updated customer's delivery info")
                 end
                 if (Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Change delivery info")
@@ -452,7 +452,7 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Delivery turned off"
                     notice_customers = "Delivery turned off"
                     if @customer.user
-                        @customer.user.log_activity("Admin: stopped customer's delivery")
+                        @customer.user.log_activity("Admin (#{current_user.email}): stopped customer's delivery")
                     end
                 else
                     flash[:status] = "fail"
@@ -481,7 +481,7 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Delivery turned on"
                     notice_customers = "Delivery turned on"
                     if @customer.user
-                        @customer.user.log_activity("Admin: started customer's delivery")
+                        @customer.user.log_activity("Admin (#{current_user.email}): started customer's delivery")
                     end
                 end
                 CustomerMailer.delay.stop_delivery_notice(@customer, "Start Delivery")
@@ -538,7 +538,7 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Successfully refunded"
                     notice_customers = "Successfully refunded"
                     if @customer.user
-                        @customer.user.log_activity("Admin: refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
+                        @customer.user.log_activity("Admin (#{current_user.email}): refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
                     end
                 end
             else
@@ -563,7 +563,7 @@ class AdminActionsController < ApplicationController
                     flash[:notice_customers] = "Invoice item successfully created"
                     notice_customers = "Invoice item successfully created"
                     if @customer.user
-                        @customer.user.log_activity("Admin: refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
+                        @customer.user.log_activity("Admin (#{current_user.email}): refunded #{params[:refund][:meals_refunded].to_i} meals to customer")
                     end
                 end
             end
@@ -652,7 +652,7 @@ class AdminActionsController < ApplicationController
                         flash[:notice_customers] = "Referral credit applied"
                         notice_customers = "Referral credit applied"
                         if @customer.user
-                            @customer.user.log_activity("Admin: applied referral credit")
+                            @customer.user.log_activity("Admin (#{current_user.email}): applied referral credit")
                         end
                     end
                 else #match name
@@ -719,7 +719,7 @@ class AdminActionsController < ApplicationController
                             flash[:notice_customers] = "Referral credit applied"
                             notice_customers = "Referral credit applied"
                             if @customer.user
-                                @customer.user.log_activity("Admin: applied referral credit")
+                                @customer.user.log_activity("Admin (#{current_user.email}): applied referral credit")
                             end
                         end
                     else 
@@ -781,7 +781,7 @@ class AdminActionsController < ApplicationController
                             puts '---------------------------------------------------'
                         else
                             if @customer.user
-                                @customer.user.log_activity("Admin: paused customer effective immediately until #{end_date}")
+                                @customer.user.log_activity("Admin (#{current_user.email}): paused customer effective immediately until #{end_date}")
                             end
                             status ||= "success"
                             message ||= "Customer paused"
@@ -818,7 +818,7 @@ class AdminActionsController < ApplicationController
                             notice_customers = "Pause request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                         else
                             if @customer.user
-                                @customer.user.log_activity("Admin: requested pause for customer until #{end_date}")
+                                @customer.user.log_activity("Admin (#{current_user.email}): requested pause for customer until #{end_date}")
                             end
                             flash[:status] = "success"
                             status = "success"
@@ -869,7 +869,7 @@ class AdminActionsController < ApplicationController
                         puts '---------------------------------------------------'
                     else
                         if @customer.user
-                            @customer.user.log_activity("Admin: cancelled customer's subscription")
+                            @customer.user.log_activity("Admin (#{current_user.email}): cancelled customer's subscription")
                         end
                         status ||= "success"
                         message ||= "Customer cancelled"
@@ -902,7 +902,7 @@ class AdminActionsController < ApplicationController
                         notice_customers = "Cancel request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                     else
                         if @customer.user
-                            @customer.user.log_activity("Admin: requested cancellation")
+                            @customer.user.log_activity("Admin (#{current_user.email}): requested cancellation")
                         end
                         flash[:status] = "success"
                         status = "success"
@@ -960,7 +960,7 @@ class AdminActionsController < ApplicationController
                         puts '---------------------------------------------------'
                     else
                         if @customer.user
-                            @customer.user.log_activity("Admin: restarted subscription")
+                            @customer.user.log_activity("Admin (#{current_user.email}): restarted subscription")
                         end
                         status ||= "success"
                         message ||= "Customer restarted"
@@ -994,7 +994,7 @@ class AdminActionsController < ApplicationController
                         notice_customers = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
                     else
                         if @customer.user
-                            @customer.user.log_activity("Admin: requested restart")
+                            @customer.user.log_activity("Admin (#{current_user.email}): requested restart")
                         end
                         flash[:status] = "success"
                         status = "success"
