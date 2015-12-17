@@ -15,6 +15,20 @@ namespace :customers do
         end
     end
 
+    desc 'look for unexecuted requests'
+    task :find_unexecuted_requests => [:environment] do
+        anomaly_array = []
+        if StopQueue.where("created_at < ?",Chowdy::Application.closest_date(-1,5)).length > 0
+            StopQueue.where("created_at < ?",Chowdy::Application.closest_date(-1,5)).each do |sq|
+                anomaly_array.push([sq.customer,"unprocessed stop request"])
+            end
+        end
+
+        if anomaly_array.length > 0 
+            CustomerMailer.delay.anomaly_report(anomaly_array)
+        end
+    end
+
     desc 'look for anomalies in the customer data'
     task :scan_customer_data_anomalies => [:environment] do
         anomaly_array = []
