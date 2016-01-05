@@ -705,6 +705,7 @@ namespace :customers do
                         if current_customer.user
                             current_customer.user.log_activity("System: subscription paused until #{queue_item.end_date-1}")
                         end
+                        CustomerMailer.delay.pause_confirmation(current_customer,queue_item.start_date,queue_item.end_date)
                         queue_item.add_to_record
                         queue_item.destroy
                     else
@@ -718,10 +719,13 @@ namespace :customers do
                             if current_customer.user
                                 current_customer.user.log_activity("System: subscription paused until #{queue_item.end_date-1}")
                             end
+                            CustomerMailer.delay.pause_confirmation(current_customer,queue_item.start_date,queue_item.end_date)
                             queue_item.add_to_record
                             queue_item.destroy
                         end
                     end
+
+
 
                 elsif queue_item.stop_type == 'cancel'
                     if current_customer.stripe_subscription_id.blank?

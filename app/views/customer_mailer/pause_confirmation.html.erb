@@ -1,0 +1,13 @@
+<html>
+<head>
+    
+</head>
+<body>
+    <p>Hi <%= @customer.name.split(/\s/)[0].capitalize %>,</p>
+    <p>This is a confirmation that per your request, we have paused your Chowdy subscription from <%= @start_date.strftime("%B %e, %Y") %>, resuming on <%= @end_date.strftime("%B %e, %Y") %>.
+    </p>
+
+    <p>- the Chowdy team</p>
+</body>
+
+</html>

@@ -69,6 +69,20 @@ class CustomerMailer < ActionMailer::Base
     end
   end
 
+  def pause_confirmation(customer,start_date,end_date)
+    @customer = customer
+    @start_date = start_date
+    @end_date = end_date
+
+    mail(
+      to: @customer.email, 
+      subject: "Confirmation of your Chowdy subscription pause"
+      ) do |format|
+        format.html
+    end
+  end
+
+
   def gift_recipient_notification(gift,alternative_email=nil)
     @pay_delivery = gift.pay_delivery
     @sender_name = gift.sender_name.titlecase
