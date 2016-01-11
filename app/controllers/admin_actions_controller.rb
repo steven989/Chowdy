@@ -339,9 +339,9 @@ class AdminActionsController < ApplicationController
 
 
                     if plan_match.blank?
-                        id = total_meals.to_s+"meals"+(@customer.interval_count.to_i > 1 ? @customer.interval_count : "")+@customer.interval.gsub(/[aeioun]/i,"")+(price_increase_2015 ? "_pi" : "")
+                        id = total_meals.to_s+"meals"+(interval_count.to_i > 1 ? interval_count : "")+interval.gsub(/[aeioun]/i,"")+(price_increase_2015 ? "_pi" : "")
                         amount = (total_meals*applicable_price*1.13).round
-                        statement_descriptor = (@customer.interval_count.to_i > 1 ? @customer.interval_count : "") + @customer.interval.gsub(/[aeioun]/i,"").upcase + " PLN " + total_meals.to_s
+                        statement_descriptor = (interval_count.to_i > 1 ? interval_count : "") + interval.gsub(/[aeioun]/i,"").upcase + " PLN " + total_meals.to_s
                         if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:interval,interval_count:interval_count.to_i, name:id, statement_descriptor: statement_descriptor)
                             plan_match = Subscription.create(weekly_meals:total_meals,stripe_plan_id:id,interval:interval,interval_count:interval_count.to_i,price:applicable_price)
 
