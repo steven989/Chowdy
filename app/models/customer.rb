@@ -193,6 +193,10 @@ class Customer < ActiveRecord::Base
                                         stripe_referral_subscription_match.coupon = "referral bonus x 4"
                                     elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
                                         stripe_referral_subscription_match.coupon = "referral bonus x 5"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 5"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 6"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 6"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 7"
                                     else
                                         do_not_increment_referral = true
                                         CustomerMailer.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)").deliver
@@ -290,6 +294,10 @@ class Customer < ActiveRecord::Base
                                             stripe_referral_subscription_match.coupon = "referral bonus x 4"
                                         elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
                                             stripe_referral_subscription_match.coupon = "referral bonus x 5"
+                                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 5"
+                                            stripe_referral_subscription_match.coupon = "referral bonus x 6"
+                                        elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 6"
+                                            stripe_referral_subscription_match.coupon = "referral bonus x 7"
                                         else
                                             do_not_increment_referral = true
                                             CustomerMailer.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)").deliver

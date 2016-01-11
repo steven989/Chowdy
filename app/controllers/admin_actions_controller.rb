@@ -609,6 +609,10 @@ class AdminActionsController < ApplicationController
                                     stripe_referral_subscription_match.coupon = "referral bonus x 4"
                                 elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
                                     stripe_referral_subscription_match.coupon = "referral bonus x 5"
+                                elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 5"
+                                    stripe_referral_subscription_match.coupon = "referral bonus x 6"
+                                elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 6"
+                                    stripe_referral_subscription_match.coupon = "referral bonus x 7"
                                 else
                                     do_not_increment_referral = true
                                     CustomerMailer.delay.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)")
@@ -630,6 +634,10 @@ class AdminActionsController < ApplicationController
                             stripe_subscription.coupon = "referral bonus x 4"
                         elsif stripe_subscription.discount.coupon.id == "referral bonus x 4"
                             stripe_subscription.coupon = "referral bonus x 5"
+                        elsif stripe_subscription.discount.coupon.id == "referral bonus x 5"
+                            stripe_subscription.coupon = "referral bonus x 6"
+                        elsif stripe_subscription.discount.coupon.id == "referral bonus x 6"
+                            stripe_subscription.coupon = "referral bonus x 7"
                         else
                             do_not_increment_referral_referree = true
                             CustomerMailer.delay.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)")
@@ -675,6 +683,10 @@ class AdminActionsController < ApplicationController
                                         stripe_referral_subscription_match.coupon = "referral bonus x 4"
                                     elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 4"
                                         stripe_referral_subscription_match.coupon = "referral bonus x 5"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 5"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 6"
+                                    elsif stripe_referral_subscription_match.discount.coupon.id == "referral bonus x 6"
+                                        stripe_referral_subscription_match.coupon = "referral bonus x 7"
                                     else
                                         do_not_increment_referral = true
                                         CustomerMailer.delay.rescued_error(referral_match.take,"More referrals accrued than available in system (more than 5 referrals)")
@@ -696,6 +708,10 @@ class AdminActionsController < ApplicationController
                                 stripe_subscription.coupon = "referral bonus x 4"
                             elsif stripe_subscription.discount.coupon.id == "referral bonus x 4"
                                 stripe_subscription.coupon = "referral bonus x 5"
+                            elsif stripe_subscription.discount.coupon.id == "referral bonus x 5"
+                                stripe_subscription.coupon = "referral bonus x 6"
+                            elsif stripe_subscription.discount.coupon.id == "referral bonus x 6"
+                                stripe_subscription.coupon = "referral bonus x 7"
                             else
                                 do_not_increment_referral_referree = true
                                 CustomerMailer.delay.rescued_error(@customer,"More referrals accrued than available in system (more than 5 referrals)")
