@@ -337,13 +337,32 @@ class AdminActionsController < ApplicationController
                     interval_count = @customer.interval_count.blank? ? 1 : @customer.interval
                     plan_match = Subscription.where(weekly_meals:total_meals, interval: interval, interval_count:interval_count,price:applicable_price)                    
 
-                    unless @customer.stripe_subscription_id.blank?
-                        subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
-                        _current_period_end = subscription.current_period_end
-                        subscription.plan = plan_match.take.stripe_plan_id
-                        subscription.trial_end = _current_period_end
-                        subscription.prorate = false  
-                        subscription.save
+
+                    if plan_match.blank?
+                        id = total_meals.to_s+"meals"+(@customer.interval_count.to_i > 1 ? @customer.interval_count : "")+@customer.interval.gsub(/[aeioun]/i,"")+(price_increase_2015 ? "_pi" : "")
+                        amount = (total_meals*applicable_price*1.13).round
+                        statement_descriptor = (@customer.interval_count.to_i > 1 ? @customer.interval_count : "") + @customer.interval.gsub(/[aeioun]/i,"").upcase + " PLN " + total_meals.to_s
+                        if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:interval,interval_count:interval_count.to_i, name:id, statement_descriptor: statement_descriptor)
+                            plan_match = Subscription.create(weekly_meals:total_meals,stripe_plan_id:id,interval:interval,interval_count:interval_count.to_i,price:applicable_price)
+
+                            unless @customer.stripe_subscription_id.blank?
+                                subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                                _current_period_end = subscription.current_period_end
+                                subscription.plan = plan_match.stripe_plan_id
+                                subscription.trial_end = _current_period_end
+                                subscription.prorate = false  
+                                subscription.save                      
+                            end
+                        end
+                    else
+                        unless @customer.stripe_subscription_id.blank?
+                            subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                            _current_period_end = subscription.current_period_end
+                            subscription.plan = plan_match.take.stripe_plan_id
+                            subscription.trial_end = _current_period_end
+                            subscription.prorate = false  
+                            subscription.save
+                        end
                     end
                 end
                 # -------------------------------------------------
