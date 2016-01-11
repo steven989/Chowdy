@@ -116,6 +116,10 @@ GEM
       multi_xml (~> 0.5)
       rack (~> 1.2)
     pg (0.17.1)
+    pg_search (1.0.5)
+      activerecord (>= 3.1)
+      activesupport (>= 3.1)
+      arel
     polyamorous (1.1.0)
       activerecord (>= 3.0)
     pretender (0.1.0)
@@ -219,6 +223,7 @@ DEPENDENCIES
   jquery-raty-rails!
   newrelic_rpm
   pg
+  pg_search
   pretender
   puma
   rack-timeout

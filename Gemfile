@@ -85,6 +85,9 @@ gem 'pretender'
 #16) HTML special characters
 gem 'htmlentities'
 
+#17) Full text search using built-in postgres
+gem 'pg_search'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

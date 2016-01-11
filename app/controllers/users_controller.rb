@@ -209,7 +209,7 @@ class UsersController < ApplicationController
                 @customer_column_names.push("created_at")
 
 
-            @all_customers = Customer.all.order(created_at: :desc)
+            # @all_customers = Customer.all.order(created_at: :desc)
 
         elsif @current_user.role == "chef"
             current_user.log_activity("chef dashboard")

@@ -1,4 +1,6 @@
 class Customer < ActiveRecord::Base
+    include PgSearch
+    pg_search_scope :search_by_all, :against => [:name, :email, :referral_code, :matched_referrers_code, :delivery_address, :referral, :phone_number], :using => { :tsearch => {:prefix => true}}
 
     belongs_to :user, primary_key: :stripe_customer_id, foreign_key: :stripe_customer_id
     has_many :feedbacks, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id

@@ -6,6 +6,54 @@ class AdminActionsController < ApplicationController
         redirect_to user_profile_path
     end
 
+    def search_customer
+        keyword = params[:keyword]
+        show_everything = params[:show_everything] == "true" ? true : false
+
+        @result = show_everything ? Customer.all.order(created_at: :desc) : Customer.search_by_all(keyword)
+
+        puts '---------------------------------------------------'
+        puts keyword
+        puts show_everything
+        puts @result.inspect
+        puts '---------------------------------------------------'
+
+        @customer_column_names = [] #make sure this section is identical to what's in users controller
+
+            @customer_column_names.push("email")
+            @customer_column_names.push("name")
+            @customer_column_names.push("active?")
+            @customer_column_names.push("paused?")
+            @customer_column_names.push("recurring_delivery")
+            @customer_column_names.push("first_pick_up_date")
+            @customer_column_names.push("next_pick_up_date")
+            @customer_column_names.push("monday_pickup_hub")
+            @customer_column_names.push("thursday_pickup_hub")
+            @customer_column_names.push("monday_delivery_hub")
+            @customer_column_names.push("thursday_delivery_hub")
+            @customer_column_names.push("total_meals_per_week")
+            @customer_column_names.push("regular_meals_on_monday")
+            @customer_column_names.push("regular_meals_on_thursday")
+            @customer_column_names.push("green_meals_on_monday")
+            @customer_column_names.push("green_meals_on_thursday")
+            @customer_column_names.push("referral")
+            @customer_column_names.push("referral_code")
+            @customer_column_names.push("matched_referrers_code")
+            @customer_column_names.push("sponsored")
+            @customer_column_names.push("pause_end_date")
+            @customer_column_names.push("raw_green_input")
+            @customer_column_names.push("hub")
+            @customer_column_names.push("created_at")
+
+
+        respond_to do |format|
+          format.html {
+            render partial: 'customer_list_row'
+          }      
+        end  
+        
+    end
+
     def customer_sheet  
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
         production_day_sunday = Chowdy::Application.closest_date(-1,7,current_pick_up_date)
@@ -225,6 +273,7 @@ class AdminActionsController < ApplicationController
     def individual_customer_update
         @customer = Customer.where(id:params[:id]).take
         _sponsor = @customer.sponsored? ? "1" : "0"
+        _price_increase_2015 = @customer.price_increase_2015?
         if params[:todo] == "info"
             begin
                 # -------------------------------------------------
@@ -280,13 +329,33 @@ class AdminActionsController < ApplicationController
                     end
                 end
                 # -------------------------------------------------
+                price_increase_2015 = @customer.price_increase_2015?
+                if price_increase_2015 != _price_increase_2015
+                    applicable_price = price_increase_2015 ? 799 : 699
+                    total_meals = @customer.total_meals_per_week
+                    interval = @customer.interval.blank? ? "week" : @customer.interval
+                    interval_count = @customer.interval_count.blank? ? 1 : @customer.interval
+                    plan_match = Subscription.where(weekly_meals:total_meals, interval: interval, interval_count:interval_count,price:applicable_price)                    
+
+                    unless @customer.stripe_subscription_id.blank?
+                        subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                        _current_period_end = subscription.current_period_end
+                        subscription.plan = plan_match.take.stripe_plan_id
+                        subscription.trial_end = _current_period_end
+                        subscription.prorate = false  
+                        subscription.save
+                    end
+                end
+                # -------------------------------------------------
                 no_beef = (params[:customer][:no_beef].blank? || params[:customer][:no_beef] == "0") ? false : true
                 no_pork = (params[:customer][:no_pork].blank? || params[:customer][:no_pork] == "0") ? false : true
                 no_poultry = (params[:customer][:no_poultry].blank? || params[:customer][:no_poultry] == "0") ? false : true
                 extra_ice = (params[:customer][:extra_ice].blank? || params[:customer][:extra_ice] == "0") ? false : true
                 different_delivery_address = (params[:customer][:different_delivery_address].blank? || params[:customer][:different_delivery_address] == "0") ? false : true
                 split_delivery_with = params[:customer][:split_delivery_with]
-                send_notification = ((no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (split_delivery_with != @customer.split_delivery_with) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
+                delivery_address = params[:customer][:delivery_address]
+                phone_number = params[:customer][:phone_number]
+                send_notification = ((delivery_address != @customer.delivery_address) || (phone_number != @customer.phone_number) || (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (split_delivery_with != @customer.split_delivery_with) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
                 @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice,split_delivery_with:split_delivery_with,different_delivery_address:different_delivery_address)
                 if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
@@ -1088,7 +1157,7 @@ class AdminActionsController < ApplicationController
     private 
 
     def individual_attributes_params
-        params.require(:customer).permit(:name,:next_pick_up_date,:phone_number,:notes,:delivery_address,:delivery_time,:special_delivery_instructions, :sponsored)
+        params.require(:customer).permit(:name,:next_pick_up_date,:notes,:delivery_time,:special_delivery_instructions, :sponsored, :price_increase_2015)
     end
 
     def delivery_info_params
