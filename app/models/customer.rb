@@ -50,6 +50,16 @@ class Customer < ActiveRecord::Base
                     meal_per_week = 12
                 when "14mealsweek"
                     meal_per_week = 14
+                when "6mealswk_pi" 
+                    meal_per_week = 6
+                when "8mealswk_pi"
+                    meal_per_week = 8 
+                when "10mealswk_pi" 
+                    meal_per_week = 10
+                when "12mealswk_pi" 
+                    meal_per_week = 12
+                when "14mealswk_pi" 
+                    meal_per_week = 14
             end
 
             unless Customer.where(stripe_customer_id:customer_id).length > 0 #this is so that Stripe doens't ceaselessly create new customers 

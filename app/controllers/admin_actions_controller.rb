@@ -268,7 +268,8 @@ class AdminActionsController < ApplicationController
                     if @customer.stripe_subscription_id.blank?
                         current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
                         current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
-                        meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                        applicable_price = @customer.price_increase_2015? ? 799 : 699
+                        meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count,price:applicable_price).take.stripe_plan_id
                         
                         effective_date = StartDate.first.start_date
 
@@ -324,14 +325,15 @@ class AdminActionsController < ApplicationController
             total_meals = monday_regular + monday_green + thursday_regular + thursday_green
 
             begin
-                plan_match = Subscription.where(weekly_meals:total_meals, interval: params[:interval], interval_count:params[:interval_count].to_i)
+                applicable_price = @customer.price_increase_2015? ? 799 : 699
+                plan_match = Subscription.where(weekly_meals:total_meals, interval: params[:interval], interval_count:params[:interval_count].to_i,price:applicable_price)
 
                 if plan_match.blank?
-                    id = total_meals.to_s+"meals"+(params[:interval_count].to_i > 1 ? params[:interval_count] : "")+params[:interval].gsub(/[aeioun]/i,"")
-                    amount = (total_meals*6.99*1.13*100).round
+                    id = total_meals.to_s+"meals"+(params[:interval_count].to_i > 1 ? params[:interval_count] : "")+params[:interval].gsub(/[aeioun]/i,"")+(@customer.price_increase_2015? ? "_pi" : "")
+                    amount = (total_meals*applicable_price*1.13).round
                     statement_descriptor = (params[:interval_count].to_i > 1 ? params[:interval_count] : "") + params[:interval].gsub(/[aeioun]/i,"").upcase + " PLN " + total_meals.to_s
                     if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:params[:interval],interval_count:params[:interval_count].to_i, name:id, statement_descriptor: statement_descriptor)
-                        plan_match = Subscription.create(weekly_meals:total_meals,stripe_plan_id:id,interval:params[:interval],interval_count:params[:interval_count].to_i)
+                        plan_match = Subscription.create(weekly_meals:total_meals,stripe_plan_id:id,interval:params[:interval],interval_count:params[:interval_count].to_i,price:applicable_price)
 
                         if (total_meals == @customer.total_meals_per_week) && (params[:interval] == (@customer.interval.blank? ? "week" : @customer.interval)) && (params[:interval_count].to_i == (@customer.interval_count.blank? ? 1 : @customer.interval))
                             @customer.update_attributes(regular_meals_on_monday:monday_regular, green_meals_on_monday:monday_green, regular_meals_on_thursday: thursday_regular, green_meals_on_thursday: thursday_green)
@@ -491,7 +493,8 @@ class AdminActionsController < ApplicationController
             end
         elsif params[:todo] == "refund"
             recent_charges = Stripe::Charge.all(customer:@customer.stripe_customer_id, limit:20).data.select {|c| c.paid == true}.inject([]) do |array, data| array.push(data.id) end
-            amount = (params[:refund][:meals_refunded].to_i * 6.99 * 1.13 * 100).round
+            price = @customer.price_increase_2015? ? 799 : 699
+            amount = (params[:refund][:meals_refunded].to_i * price * 1.13).round
             immediate_refund = params[:refund][:attach_to_next_invoice] == "0" ? true : false
 
             if immediate_refund
@@ -938,7 +941,8 @@ class AdminActionsController < ApplicationController
                             else
                                 current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
                                 current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
-                                meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                                applicable_price = @customer.price_increase_2015? ? 799 : 699
+                                meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count,price:applicable_price).take.stripe_plan_id
                                 
                                 if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:(start_date_update + 23.9.hours).to_time.to_i)
                                     new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id

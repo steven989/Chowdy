@@ -463,10 +463,11 @@ namespace :customers do
                         if applicable_gift.blank?
                             if raw_difference > 0
                                 difference = raw_difference
+                                price = current_customer.price_increase_2015? ? 799 : 699
 
                                 Stripe::InvoiceItem.create(
                                     customer: current_customer.stripe_customer_id,
-                                    amount: (difference * 6.99 * 1.13 * 100).round,
+                                    amount: (difference * price * 1.13).round,
                                     currency: 'CAD',
                                     description: "First-week adjustment for #{difference} extra meals requested after sign up"
                                 )
@@ -481,7 +482,8 @@ namespace :customers do
                                 
                                 charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
                                 charge = Stripe::Charge.retrieve(charge_id)
-                                stripe_refund_response = charge.refunds.create(amount: (difference * 6.99 * 1.13 * 100).round)
+                                price = current_customer.price_increase_2015? ? 799 : 699 
+                                stripe_refund_response = charge.refunds.create(amount: (difference * price * 1.13).round)
 
                                 newly_created_refund = Refund.create(
                                         stripe_customer_id: current_customer.stripe_customer_id, 
@@ -489,7 +491,7 @@ namespace :customers do
                                         charge_week:Date.today,
                                         charge_id:charge_id, 
                                         meals_refunded: difference, 
-                                        amount_refunded: (difference * 6.99 * 1.13 * 100).round, 
+                                        amount_refunded: (difference * price * 1.13).round, 
                                         refund_reason: "Subscription adjustment before first week", 
                                         stripe_refund_id: stripe_refund_response.id
                                 )
@@ -500,12 +502,13 @@ namespace :customers do
                             end
                         else
                             if raw_difference > 0
+                                price = current_customer.price_increase_2015? ? 799 : 699 
                                 difference = raw_difference 
                                 remain_0 = current_customer.gifts.take.remaining_gift_amount
                                     ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 && ii.description.match('gift') }
                                 ii_amount =  ii.blank? ? 0 : ii[0].amount.abs
 
-                                chargeable_difference = [(difference * 6.99 * 1.13 * 100).round - remain_0 - ii_amount, 0].max
+                                chargeable_difference = [(difference * price * 1.13).round - remain_0 - ii_amount, 0].max
 
                                 if chargeable_difference > 0
                                     Stripe::InvoiceItem.create(
@@ -519,14 +522,14 @@ namespace :customers do
                                     )
                                 end
 
-                                remain_1 = [remain_0 + ii_amount - (difference * 6.99 * 1.13 * 100).round,0].max
+                                remain_1 = [remain_0 + ii_amount - (difference * price * 1.13).round,0].max
                                 applicable_gift.update_attributes(remaining_gift_amount:remain_1)
                                 applicable_gift.gift_remains.destroy_all
                                 applicable_gift.gift_redemptions.destroy_all
 
                                 applicable_gift.gift_redemptions.create(
                                     stripe_customer_id:current_customer.stripe_customer_id,
-                                    amount_redeemed:[(queue_item.updated_meals.to_i * 6.99 * 1.13 * 100).round,applicable_gift.original_gift_amount].min,
+                                    amount_redeemed:[(queue_item.updated_meals.to_i * price * 1.13).round,applicable_gift.original_gift_amount].min,
                                     amount_remaining:remain_1
                                 )
 
@@ -540,10 +543,11 @@ namespace :customers do
                                 
                             elsif raw_difference < 0
                                 difference = -raw_difference
+                                price = current_customer.price_increase_2015? ? 799 : 699 
                                 ii = Stripe::InvoiceItem.all(customer:current_customer.stripe_customer_id,limit:1).data.select {|ii| ii.amount < 0 && ii.description.match('gift') }
                                 charge = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0]
                                 unrefunded_charge_amount = charge.amount.to_i - charge.amount_refunded.to_i
-                                refundable_difference = [(difference * 6.99 * 1.13 * 100).round,unrefunded_charge_amount].min
+                                refundable_difference = [(difference * price * 1.13).round,unrefunded_charge_amount].min
 
                                 if refundable_difference > 0
                                     stripe_refund_response = charge.refunds.create(amount: refundable_difference)
@@ -553,7 +557,7 @@ namespace :customers do
                                             refund_week:StartDate.first.start_date, 
                                             charge_week:Date.today,
                                             charge_id:charge.id, 
-                                            meals_refunded: (refundable_difference.to_f/100/6.99/1.13).round.to_i, 
+                                            meals_refunded: (refundable_difference.to_f/price.to_f/1.13).round.to_i, 
                                             amount_refunded: refundable_difference, 
                                             refund_reason: "Subscription adjustment before first week", 
                                             stripe_refund_id: stripe_refund_response.id
@@ -562,13 +566,13 @@ namespace :customers do
                                     newly_created_refund.save                                    
                                 end
 
-                                remain_1 = [applicable_gift.original_gift_amount - (queue_item.updated_meals.to_i * 6.99 * 1.13 * 100).round,0].max
+                                remain_1 = [applicable_gift.original_gift_amount - (queue_item.updated_meals.to_i * price * 1.13).round,0].max
                                 applicable_gift.update_attributes(remaining_gift_amount:remain_1)
                                 applicable_gift.gift_remains.destroy_all
                                 applicable_gift.gift_redemptions.destroy_all
                                 applicable_gift.gift_redemptions.create(
                                     stripe_customer_id:current_customer.stripe_customer_id,
-                                    amount_redeemed:[(queue_item.updated_meals.to_i * 6.99 * 1.13 * 100).round,applicable_gift.original_gift_amount].min,
+                                    amount_redeemed:[(queue_item.updated_meals.to_i * price * 1.13).round,applicable_gift.original_gift_amount].min,
                                     amount_remaining:remain_1
                                 )
                                 current_customer.stop_queues.where("stop_type ilike ? and cancel_reason ilike ?", "cancel","%gift%").destroy_all if remain_1 > 0
@@ -578,14 +582,15 @@ namespace :customers do
                         end
                     end
 
-                    plan_match = Subscription.where(weekly_meals:queue_item.updated_meals, interval: "week",interval_count:1)
+                    applicable_price = current_customer.price_increase_2015? ? 799 : 699
+                    plan_match = Subscription.where(weekly_meals:queue_item.updated_meals, interval: "week",interval_count:1, price:applicable_price)
 
                     if plan_match.blank?
-                        id = queue_item.updated_meals.to_s+"mealswk"
-                        amount = ((queue_item.updated_meals)*6.99*1.13*100).round
+                        id = current_customer.price_increase_2015? ? queue_item.updated_meals.to_s+"mealswk_pi" : queue_item.updated_meals.to_s+"mealswk"
+                        amount = ((queue_item.updated_meals)*applicable_price*1.13).round
                         statement_descriptor = "WK PLN " + queue_item.updated_meals.to_s
                         if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:"week",interval_count:1, name:id, statement_descriptor: statement_descriptor)
-                            plan_match = Subscription.create(weekly_meals:queue_item.updated_meals,stripe_plan_id:id,interval:"week",interval_count:1)
+                            plan_match = Subscription.create(weekly_meals:queue_item.updated_meals,stripe_plan_id:id,interval:"week",interval_count:1, price:applicable_price)
 
                             if (queue_item.updated_meals == current_customer.total_meals_per_week) && ((current_customer.interval.blank? ? "week" : current_customer.interval) == "week") && ((current_customer.interval_count.blank? ? 1 : current_customer.interval) == 1)
                                 current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu)
@@ -738,6 +743,7 @@ namespace :customers do
                         queue_item.destroy                        
                     else
                         if Date.today < current_customer.first_pick_up_date
+                            price = current_customer.price_increase_2015? ? 799 : 699
                             charge_id = Stripe::Charge.all(customer:current_customer.stripe_customer_id,limit:1).data[0].id
                             charge = Stripe::Charge.retrieve(charge_id)
                             internal_refund_id = nil
@@ -748,7 +754,7 @@ namespace :customers do
                                         charge_week:Date.today,
                                         charge_id:charge_id, 
                                         meals_refunded: current_customer.total_meals_per_week, 
-                                        amount_refunded: (current_customer.total_meals_per_week * 6.99 * 1.13 * 100).round, 
+                                        amount_refunded: (current_customer.total_meals_per_week * price * 1.13).round, 
                                         refund_reason: "Customer cancelled before starting", 
                                         stripe_refund_id: stripe_refund_response.id
                                 )
@@ -784,7 +790,8 @@ namespace :customers do
                         else
                             current_customer_interval = current_customer.interval.blank? ? "week" : current_customer.interval
                             current_customer_interval_count = current_customer.interval_count.blank? ? 1 : current_customer.interval_count
-                            meals_per_week = Subscription.where(weekly_meals:current_customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count).take.stripe_plan_id
+                            applicable_price = current_customer.price_increase_2015? ? 799 : 699
+                            meals_per_week = Subscription.where(weekly_meals:current_customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count,price: applicable_price).take.stripe_plan_id
                             
                             if Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:(start_date_update + 23.9.hours).to_time.to_i)
                                 new_subscription_id = Stripe::Customer.retrieve(current_customer.stripe_customer_id).subscriptions.all.data[0].id
@@ -822,14 +829,15 @@ namespace :customers do
 
 
                 begin
+                    applicable_price = current_customer.price_increase_2015? ? 799 : 699
                     plan_match = Subscription.where(weekly_meals:queue_item.updated_meals, interval: "week",interval_count:1)
 
                     if plan_match.blank?
-                        id = queue_item.updated_meals.to_s+"mealswk"
-                        amount = ((queue_item.updated_meals)*6.99*1.13*100).round
+                        id = current_customer.price_increase_2015? ? queue_item.updated_meals.to_s+"mealswk_pi" : queue_item.updated_meals.to_s+"mealswk"
+                        amount = ((queue_item.updated_meals)*applicable_price*1.13).round
                         statement_descriptor = "WK PLN " + queue_item.updated_meals.to_s
                         if Stripe::Plan.create(id:id, amount:amount,currency:"CAD",interval:"week",interval_count:1, name:id, statement_descriptor: statement_descriptor)
-                            plan_match = Subscription.create(weekly_meals:queue_item.updated_meals,stripe_plan_id:id,interval:"week",interval_count:1)
+                            plan_match = Subscription.create(weekly_meals:queue_item.updated_meals,stripe_plan_id:id,interval:"week",interval_count:1, price:applicable_price)
 
                             if (queue_item.updated_meals == current_customer.total_meals_per_week) && ((current_customer.interval.blank? ? "week" : current_customer.interval) == "week") && ((current_customer.interval_count.blank? ? 1 : current_customer.interval) == 1)
                                 current_customer.update_attributes(regular_meals_on_monday:queue_item.updated_reg_mon, green_meals_on_monday:queue_item.updated_grn_mon, regular_meals_on_thursday: queue_item.updated_reg_thu, green_meals_on_thursday: queue_item.updated_grn_thu)
