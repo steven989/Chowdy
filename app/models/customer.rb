@@ -497,14 +497,28 @@ class Customer < ActiveRecord::Base
         failed_invoice.update_attributes(paid:true,date_paid:Date.today,closed:nil) unless failed_invoice.blank?
         
         remaining_gift = GiftRemain.where("stripe_customer_id ilike ? and created_at < ?",stripe_customer_id,Date.today.to_datetime).take #ignore any remain gift created today because Stripe sends a payment_succeeeded webhook immediately after customer_create webhook
+        applicable_price = remaining_gift.customer.price_increase_2015? ? 799 : 699
         unless remaining_gift.blank?
             if remaining_gift.amount_remaining > 0
                 Gift.redeem_gift_code(remaining_gift.gift.gift_code,nil,Customer.where(stripe_customer_id:stripe_customer_id).take,false)
+            
+                if remaining_gift.amount_remaining < (remaining_gift.customer.total_meals_per_week * applicable_price * 1.13).round
+                    customer = Customer.where(stripe_customer_id:stripe_customer_id).take
+                    associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
+                    customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"Gift card #{remaining_gift.gift.gift_code} fell below subscription amount")
+                    if customer.user
+                        customer.user.log_activity("System: cancelled customer's subscription due to gift amount below subscription")
+                    end
+                end
             else
                 customer = Customer.where(stripe_customer_id:stripe_customer_id).take
                 associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
                 adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
                 customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"Gift card #{remaining_gift.gift.gift_code} ran out")
+                if customer.user
+                    customer.user.log_activity("System: cancelled customer's subscription due to gift card running out")
+                end
             end
             remaining_gift.destroy
         end

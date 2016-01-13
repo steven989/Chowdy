@@ -135,12 +135,26 @@ class Gift < ActiveRecord::Base
 
                     gift.update_attributes(remaining_gift_amount:remaining_gift_amount)
 
+                    applicable_price = customer.price_increase_2015? ? 799 : 699
                     if remaining_gift_amount > 0
                         Gift.redeem_gift_code(gift_code,nil,customer,false) #attach a negative invoice item 
+                    
+                        if remaining_gift_amount < (customer.total_meals_per_week * applicable_price * 1.13).round
+                            associated_cutoff = Chowdy::Application.closest_date(1,4,StartDate.first.start_date) #Thursday after customer starts
+                            adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
+                            customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"Gift card #{gift_code} fell below subscription threshold")
+                            if customer.user
+                                customer.user.log_activity("System: cancelled customer's subscription due to gift amount below subscription")
+                            end
+                        end
+
                     else #if gift card is completely used up upon first redemption, then submit a cancel request dated the Thursday after the first pick up date
                         associated_cutoff = Chowdy::Application.closest_date(1,4,StartDate.first.start_date) #Thursday after customer starts
                         adjusted_cancel_start_date = Chowdy::Application.closest_date(1,1,associated_cutoff)
                         customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:"Gift card #{gift_code} ran out")
+                        if customer.user
+                            customer.user.log_activity("System: cancelled customer's subscription due to gift card running out")
+                        end
                     end
                 end
             else
