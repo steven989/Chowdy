@@ -990,7 +990,21 @@ class AdminActionsController < ApplicationController
                     else
                         adjusted_cancel_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
                     end
-                    associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
+
+                    if Date.today < @customer.first_pick_up_date
+                        if Date.today == @customer.created_at.to_date
+                            associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                        else
+                            if [4,5,6,0].include?(Date.today.wday) 
+                                associated_cutoff = Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                            else
+                                associated_cutoff = Chowdy::Application.closest_date(2,4) #Thursday next week
+                            end
+                        end
+                    else
+                        associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
+                    end
+
                     if ["Yes","yes"].include? @customer.active?
                         @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                         @customer.stop_queues.create(stop_type:'cancel',associated_cutoff:associated_cutoff,start_date:adjusted_cancel_start_date,cancel_reason:params[:cancel_reason])
