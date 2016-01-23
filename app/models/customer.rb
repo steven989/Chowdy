@@ -497,8 +497,8 @@ class Customer < ActiveRecord::Base
         failed_invoice.update_attributes(paid:true,date_paid:Date.today,closed:nil) unless failed_invoice.blank?
         
         remaining_gift = GiftRemain.where("stripe_customer_id ilike ? and created_at < ?",stripe_customer_id,Date.today.to_datetime).take #ignore any remain gift created today because Stripe sends a payment_succeeeded webhook immediately after customer_create webhook
-        applicable_price = remaining_gift.customer.price_increase_2015? ? 799 : 699
         unless remaining_gift.blank?
+            applicable_price = remaining_gift.customer.price_increase_2015? ? 799 : 699
             if remaining_gift.amount_remaining > 0
                 Gift.redeem_gift_code(remaining_gift.gift.gift_code,nil,Customer.where(stripe_customer_id:stripe_customer_id).take,false)
             
