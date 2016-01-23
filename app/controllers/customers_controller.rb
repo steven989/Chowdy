@@ -355,7 +355,7 @@ protect_from_forgery :except => :payment
     end
 
     def fail #failed charges
-        Customer.delay.handle_failed_payment(params[:data][:object][:customer],params[:data][:object][:id],params[:data][:object][:attempt_count].to_i,Time.at(params[:data][:object][:next_payment_attempt]).to_date,params[:data][:object][:lines][:data][0][:amount].to_i,Date.today,Time.at(params[:data][:object][:date]).to_date)
+        Customer.delay.handle_failed_payment(params[:data][:object][:customer],params[:data][:object][:id],params[:data][:object][:attempt_count].to_i,(params[:data][:object][:next_payment_attempt].nil? ? nil : Time.at(params[:data][:object][:next_payment_attempt]).to_date),params[:data][:object][:lines][:data][0][:amount].to_i,Date.today,Time.at(params[:data][:object][:date]).to_date)
         render nothing:true, status:200, content_type:'text/html'
     end
 
