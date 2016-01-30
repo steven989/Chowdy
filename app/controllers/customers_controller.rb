@@ -309,6 +309,7 @@ protect_from_forgery :except => :payment
             current_customer.feedbacks.create(feedback:params[:feedback], occasion: 'regular') 
             flash[:status] = "success"
             flash[:notice_customer_setting] = "Feedback received. We appreciate it!"
+            current_user.log_activity("Submitted feedback")
             redirect_to user_profile_path+"#settings"
         elsif params[:id].downcase == "change_subscription"
             total_updated_meals = params[:monday_reg_hidden].to_i + params[:monday_grn_hidden].to_i + params[:thursday_reg_hidden].to_i + params[:thursday_grn_hidden].to_i
@@ -344,7 +345,7 @@ protect_from_forgery :except => :payment
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Meal preference has changed")
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Meal preference has changed")
             end
-            current_user.log_activity("Requested subscription change")
+            current_user.log_activity("Requested subscription change to #{total_updated_meals} meals per week, no beef: #{no_beef}, no poultry: #{no_poultry}, no pork: #{no_pork}")
             redirect_to user_profile_path+"#changePlan"
         end
 
