@@ -188,7 +188,22 @@ class Customer < ActiveRecord::Base
                     if Customer.where(referral_code: referral.gsub(" ","").downcase).length == 1 #match code
                         referral_match = Customer.where(referral_code: referral.gsub(" ","").downcase)
                         
-                        unless referral_match.take.stripe_subscription_id.blank?
+                        if referral_match.take.stripe_subscription_id.blank?
+                            begin
+                                Stripe::InvoiceItem.create(
+                                    customer: referral_match.take.stripe_customer_id,
+                                    amount: -1000,
+                                    currency: 'CAD',
+                                    description: "referral bonus"
+                                )
+                            rescue => error
+                                puts '---------------------------------------------------'
+                                puts 'Something went wrong while creating Stripe referral bonus invoice item'
+                                puts error.message
+                                puts '---------------------------------------------------'
+                                CustomerMailer.rescued_error(customer,'Something went wrong while creating Stripe referral bonus invoice item: '+error.message.inspect).deliver
+                            end
+                        else
                             #referrer discount
                             begin
                                 stripe_referral_match = Stripe::Customer.retrieve(referral_match.take.stripe_customer_id)
