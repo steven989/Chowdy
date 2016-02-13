@@ -1,0 +1,123 @@
+<script>
+  
+      function formRetrievalAjax() {      // this block of code is copy and pasted form _admin because this is required to run in the modal but modal can't access the function in the main _admin code
+          $('.pull_system_setting_form, .pull_next_week_total, .nestedForm').off("click").on("click",function(){
+            event.preventDefault();
+            $.ajax({
+              url: $(this).attr('href'),
+              type: 'GET',
+              dataType: 'html'
+            }).done(function(data){
+              $('#formModal .modal-content').html(data);
+              $('#formModal').modal({show:true});
+              $("#formModal").animate({
+                  scrollTop: 0
+              }, 500);
+
+              formRetrievalAjax();
+            });
+          });
+      };  
+
+  function ajax_submit() {
+      $('.ajax_form').off('submit').on('submit',function(){
+          event.preventDefault();
+          var _this = $(this);
+          var submit_button_original_value = $(this).find('.form_submit').attr('value');
+          var submit_button_width = $(this).find('.form_submit').outerWidth();
+          $(this).find('.form_submit').css('width',submit_button_width);
+          $(this).find('.form_submit').addClass('disabled').attr('value','Wait...');
+          $.ajax({
+            url: $(this).attr('action')+"?vendor_id="+<%= @vendor.id.to_s %>,
+            type: $(this).attr('method'),
+            data: $(this).serialize(),
+            dataType: 'JSON'
+          }).done(function(data){
+            if(data.status == "success"){
+              _this.find('.alert').html(data.message);
+              _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+              _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+
+            $.ajax({
+              url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
+              type: 'GET',
+              dataType: 'html'
+            }).done(function(data){
+              $('#formModal .modal-content').html(data);
+              $('#formModal').modal({show:true});
+              $("#formModal").animate({
+                  scrollTop: 0
+              }, 500);
+
+              formRetrievalAjax();
+            });
+
+
+            } else {
+              _this.find('.alert').html(data.message);
+              _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+              _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+            }
+          });
+      });
+  }
+  ajax_submit();
+
+</script>
+
+
+
+<%= form_for @partner_product, html: {class: "ajax_form"} do |f| %>
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Partner Product</h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+        <%= f.label :product_name, "Product Name (required)" %>
+        <%= f.text_field :product_name, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :product_description, "Product Description (required)" %>
+        <%= f.text_field :product_description, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :product_size, "Product Size (required)" %>
+        <%= f.text_field :product_size, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :vendor_product_sku, "Vendor's Product SKU / Internal ID" %>
+        <%= f.text_field :vendor_product_sku, class: "form-control" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :vendor_product_upc, "Product UPC" %>
+        <%= f.text_field :vendor_product_upc, class: "form-control" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :cost_in_cents %>
+        <%= f.text_field :cost_in_cents, class: "form-control" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :suggested_retail_price_in_cents %>
+        <%= f.text_field :suggested_retail_price_in_cents, class: "form-control" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :price_in_cents %>
+        <%= f.text_field :price_in_cents, class: "form-control" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :url_of_photo %>
+        <%= f.text_field :url_of_photo, class: "form-control" %>
+    </div>
+    <div class="alert m-t-xs m-b-xs hidden">
+    </div>
+    <% if @edit %>
+      <%= link_to "Delete This Product", partner_product_path(@partner_product), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-md btn-default m-t-sm nestedForm" href="<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>" style="min-width: 0px;">Back</button>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit" %>
+  </div>
+<% end %>

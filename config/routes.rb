@@ -11,7 +11,6 @@ Chowdy::Application.routes.draw do
   get "user_sessions/destroy"
   get 'login' => 'user_sessions#new', :as => :login
   get 'logout' => 'user_sessions#destroy', :as => :logout
-  match '/:id' => "shortener/shortened_urls#show", via: [:get]
 
   post 'customers/create' => 'customers#create', as: 'create_customer'
   post 'customers/failed_invoice' => 'customers#fail', as: 'failed_invoice'
@@ -42,6 +41,8 @@ Chowdy::Application.routes.draw do
 
   resources :password_resets
   resources :system_settings
+  resources :vendors
+  resources :partner_products
   resources :scheduled_tasks
   resources :menus, only: [:update, :show]
   get 'menu/:id/pull_rating_details' => 'menus#pull_rating_details', as: 'pull_rating_details'
@@ -71,6 +72,8 @@ Chowdy::Application.routes.draw do
   get 'gifts/:id/resend_recipient_confirmation_form' => 'gifts#resend_recipient_confirmation_form', as: 'resend_recipient_confirmation_form'
   post 'gifts/:id/resend_sender_confirmation' => 'gifts#resend_sender_confirmation', as: 'resend_sender_confirmation'
   post 'gifts/:id/resend_recipient_confirmation' => 'gifts#resend_recipient_confirmation', as: 'resend_recipient_confirmation'
+
+  match '/:id' => "shortener/shortened_urls#show", via: [:get]
 
   # You can have the root of your site routed with "root"
   # root 'welcome#index'

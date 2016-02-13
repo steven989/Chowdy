@@ -1,0 +1,52 @@
+<%= form_for @vendor do |f| %>
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Vendor</h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+        <%= f.label :vendor_name, "Vendor Name (required)" %>
+        <%= f.text_field :vendor_name, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :vendor_description, "Vendor Description (required)"  %>
+        <%= f.text_field :vendor_description, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :contact_name, "Contact Name (required)"  %>
+        <%= f.text_field :contact_name, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :phone_number, "Phone number (required)"  %>
+        <%= f.text_field :phone_number, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :email_address, "Email (required)"  %>
+        <%= f.text_field :email_address, class: "form-control", required: true  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :alt_contact_name, "Alternative Contact Name"  %>
+        <%= f.text_field :alt_contact_name, class: "form-control"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :alt_phone_number, "Alternative Phone Number" %>
+        <%= f.text_field :alt_phone_number, class: "form-control"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :alt_email_address, "Alternative Email" %>
+        <%= f.text_field :alt_email_address, class: "form-control"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :vendor_address, "Vendor Address" %>
+        <%= f.text_field :vendor_address, class: "form-control"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :alt_vendor_address, "Alternative Vendor Address" %>
+        <%= f.text_field :alt_vendor_address, class: "form-control"  %>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm" %>
+  </div>
+<% end %>

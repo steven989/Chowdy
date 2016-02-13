@@ -111,6 +111,13 @@ $(function(){
         paging: false
        });
 
+       $('#vendors_table').DataTable({
+        searching: true,
+        scrollX: true,
+        paging: true,
+        order: [[3, "asc"]]
+       });
+
 
       //collapse
 
@@ -254,6 +261,13 @@ $(function(){
                             <i class="fa fa-gift">
                             </i>
                             <span class="font-bold">Gifts</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#partner_products" class="b-b padder-v" data-toggle="tab">
+                            <i class="fa fa-truck">
+                            </i>
+                            <span class="font-bold">Partner Products</span>
                           </a>
                         </li>
                         <li>
@@ -1306,6 +1320,78 @@ $(function(){
                                             <td>$<%= (g.remaining_gift_amount.to_f/100).to_s %></td>
                                             <td><%= g.pay_delivery %></td>
                                             <td><%= g.gift_code %></td>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
+                            </section>                            
+                        </section>
+
+                    </section> 
+
+                    <section class="tab-pane" id="partner_products" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder padder-v">
+                              <% if flash[:notice_partner_products] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_partner_products] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Vendors
+                                    <button class="btn btn-s-md btn-info btn-rounded pull_system_setting_form" href="<%= new_vendor_path %>">Add vendor</button>
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="vendors_table" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <th>View Products</th>
+                                          <th>Edit</th>
+                                          <th>Delete</th>
+                                          <th>ID</th>
+                                          <th>External ID</th>
+                                          <th>Name</th>
+                                          <th>Description</th>
+                                          <th>Contact Name</th>
+                                          <th>Phone</th>
+                                          <th>Email</th>
+                                          <th>Alternative Contact Name</th>
+                                          <th>Alternative Phone</th>
+                                          <th>Alternative Email</th>
+                                          <th>Address</th>
+                                          <th>Alternative Address</th>
+                                          <th>Created At</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @vendors.each do |v| %>
+                                          <tr>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= partner_products_path+'?vendor_id='+v.id.to_s %>" style="min-width: 0px;width: 60px;">View</button></td>
+                                            <td>
+                                              <button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_vendor_path(v) %>" style="min-width: 0px;width: 60px;">Edit</button></td>
+                                            <td><%= link_to "Delete", vendor_path(v), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style: "min-width: 0px;width: 60px;" %></td>
+                                            <td><%= v.id %></td>
+                                            <td><%= v.ext_vendor_id %></td>
+                                            <td><%= v.vendor_name %></td>
+                                            <td><%= v.vendor_description %></td>
+                                            <td><%= v.contact_name %></td>
+                                            <td><%= v.phone_number %></td>
+                                            <td><%= v.email_address %></td>
+                                            <td><%= v.alt_contact_name %></td>
+                                            <td><%= v.alt_phone_number %></td>
+                                            <td><%= v.alt_email_address %></td>
+                                            <td><%= v.vendor_address %></td>
+                                            <td><%= v.alt_vendor_address %></td>
+                                            <td><%= v.created_at.strftime("%Y-%m-%d") %></td>
                                           </tr>
                                         <% end %>
                                       </tbody>
