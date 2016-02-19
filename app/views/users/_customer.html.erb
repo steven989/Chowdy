@@ -1,5 +1,12 @@
 
 <script>
+
+  // create variables to hold products for when people make selection
+  var partner_products_cart = [];
+  var partner_products_menu = <%= @parter_products_menu.to_json.html_safe %>;
+
+
+
 $(function(){
     // remove menu rating cards that have alreay been rated by this customer
     (function() {
@@ -8,6 +15,8 @@ $(function(){
             return rated_items.indexOf($(this).data('menu-id')) > -1
           }).remove();
         })();
+
+
 
     // create hub map
     function create_hub_map () {
@@ -349,6 +358,14 @@ $(function(){
 
     update_display_guide();
 
+
+
+    $('.partner_product_spinner').TouchSpin({
+      min: 0,
+      max: 3,
+      step: 1
+    });
+
     $('#monday_beef_1_spinner').TouchSpin({
       min: 0,
       max: Math.max($('#monday_beef_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_beef_1_spinner').val()*1),
@@ -408,6 +425,29 @@ $(function(){
       max: Math.max($('#thursday_green_2_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_green_2_1_spinner').val()*1),
       step: 1
     });
+
+    $('.partner_product_spinner').off("change").on("change",function(){
+      $(this).closest('.display_number_container').find('.selection_display').html($(this).val());
+      var product_id_chosen = $(this).data("product-id");
+      
+      update_partner_products_cart(product_id_chosen,$(this).val());
+
+    });
+
+    function update_partner_products_cart (product_id, number) {
+      var cart_item = partner_products_cart.filter(function(ci){return ci.product_id == product_id});
+      if (cart_item.length == 0) {
+        partner_products_cart.push({product_id:product_id,quantity:number});
+      } else if (cart_item.length == 1) {
+        cart_item[0].quantity = number;
+      } else {
+        for (var i = 0; i < partner_products_cart.length; i++){
+          if (partner_products_cart[i].product_id == product_id) { 
+              partner_products_cart.splice(i, 1);
+          }
+        }
+      };
+    };
 
     $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner, #thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').off("change").on("change", function(){
 
@@ -581,6 +621,14 @@ $(function(){
                             <span class="font-bold">Choose Meals</span>
                           </a>
                         </li>
+                        <li class="highlight">
+                          <a href="#partner_product_selection" class="auto b-b padder-v" data-toggle="tab">
+                            <i class="fa fa-truck">
+                            </i>
+                            <span class="font-bold">Partner Products (new)</span>
+                          </a>
+                        </li>
+
                         <% end %>
                         <li>
                           <a href="#changePlan" class="b-b padder-v" data-toggle="tab">
@@ -629,7 +677,6 @@ $(function(){
                 </nav>
                 
             </aside>
-
 
             <section id="content container">
                 <section class="hbox stretch bg-light tab-content">
@@ -1879,6 +1926,57 @@ $(function(){
                           </section>
                         </section>                      
                       </section> 
+
+                      <section class="tab-pane" id="partner_product_selection" role="tabpanel">
+                        <section class="vbox">
+                          <section class="scrollable padder"> 
+                            <div class="row m-t-lg">
+                              <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                                <button class="btn btn-s-md btn-success disabled" id="submit_partner_product_selection">Submit Selection</button>                            
+                              </div>
+                              <div class="col-lg-5 col-md-5 col-sm-5 col-xs-8">
+                                <div class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; margin: 0;" id="unsaved_warning_meal_selection">
+                                  
+                                  You have unsaved changes
+                                </div>
+                              </div>  
+                            </div>
+                            <div class="row">
+                              <div class="col-lg-5"><a href="<%= view_meals_selection_path %>?week_date=<%= @view_meal_selection_date %>" class="pull_modal">View meals selected for week of <%= @view_meal_selection_date.strftime("%B %e") %></a></div>
+                            </div>
+                            <div class="row m-t-sm padder">
+                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none. You have selected all your meals! You can add more meals in <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
+                            </div>
+                            <div class="row m-t-sm padder">
+                                <% @parter_products.each do |pp| %>
+                                  <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card">
+                                    <div class="inner">
+                                      <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                        <h5 style="color:#555;"><%= pp.product_name %></h5>
+                                        <p style="color:#555; font-size: 12px;"><%= pp.product_description %></p>
+                                      </div>
+                                      <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                        <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                          <div class="row">
+                                              <span class="h1 block selection_display" id="thursday_green_2_1" style="font-size:30px;color:#5cb85c;">0</span>
+                                          </div>
+                                          <div class="row row-centered">
+                                            <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                              <input type="text" class="partner_product_spinner" value="0" data-product-id="<%= pp.id %>" style="opacity: 0;">
+                                            </div>
+                                          </div>
+                                        </div>                                    
+                                      </div>                                 
+                                    </div>
+                                  </div>
+                                <% end %>
+                            </div>
+                          </section>
+                        </section>                      
+                      </section> 
+
+
+
                     <% end %> 
 
                 </section>

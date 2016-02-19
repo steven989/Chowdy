@@ -225,6 +225,8 @@ class UsersController < ApplicationController
             @display_meal_selection = @current_customer.recurring_delivery.blank? ? false : true
             @active_gift = @current_customer.gifts.order(id: :desc).limit(1).take
 
+            @parter_products = PartnerProduct.order(created_at: :desc).page(1)
+            @parter_products_menu = @parter_products.map{|pp| {product_id:pp.id, price:pp.price_in_cents}}
 
             if @active_gift.blank?
                 @remaining_gift_amount_to_show = 0
