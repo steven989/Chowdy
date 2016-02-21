@@ -1,6 +1,6 @@
 Hi <%= @name %>,
 
-This is just a heads up that your Chowdy charges was declined. Our system will automatically attempt the charge again in a few days. To avoid service interruption, please ensure that the charges are accepted, or update your credit card. Note that your account will be cancelled automatically for non-payment after 2 weeks of unpaid invoices.
+This is an automated notification to give you a heads up that your Chowdy charges was declined. Our system will automatically attempt the charge again in a few days. To avoid service interruption, please ensure that the charges are accepted, or update your credit card. Note that your account will be cancelled automatically for non-payment after 2 weeks of unpaid invoices.
 
 <% if  (@customer.created_at < "2015-06-12 04:00:00 EDT".to_datetime) && (@customer.user.nil?) %>
 If there's a new credit card you'd like to use, simply use our regular sign up page (http://chowdy.ca/signup) to input your new card, and we will update your account in the backend.
