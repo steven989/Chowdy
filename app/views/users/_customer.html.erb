@@ -426,6 +426,8 @@ $(function(){
       step: 1
     });
 
+    // market place 
+
     $('.partner_product_spinner').off("change").on("change",function(){
       $(this).closest('.display_number_container').find('.selection_display').html($(this).val());
       var product_id_chosen = $(this).data("product-id");
@@ -454,10 +456,32 @@ $(function(){
 
       total_partner_products_amount = 0;
 
-      partner_products_cart.forEach(function(pp){total_partner_products_amount = total_partner_products_amount + parseInt(pp.quantity) * Math.round(partner_products_menu.filter(function(i){return i.product_id == pp.product_id})[0].price * 1.13) });
+      partner_products_cart.forEach(function(pp){total_partner_products_amount = total_partner_products_amount + parseInt(pp.quantity) * partner_products_menu.filter(function(i){return i.product_id == pp.product_id})[0].price });
+
+      total_partner_products_amount = Math.round(total_partner_products_amount * 1.13)
 
       $('#partner_product_total_dollar').html((total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString());
     };
+
+    $('#submit_partner_product_selection').off('click').on('click',function(){
+      var subtotal = 0;
+      $('#partner_products_checkout_summary tbody').empty();
+      partner_products_cart.forEach(function(pp){
+        var product_info = partner_products_menu.filter(function(ppmi){return ppmi.product_id == pp.product_id})[0]
+        var pp_qty = pp.quantity;
+        var pp_name = product_info.name;
+        var pp_description = product_info.description;
+        var pp_price = product_info.price;
+        var total_price_before_hst = pp_qty * pp_price;
+        subtotal = subtotal + total_price_before_hst;
+        $('#partner_products_checkout_summary tbody').append("<tr><td>"+pp_qty+"</td><td>"+pp_name+"</td><td>"+pp_description+"</td><td>$"+(pp_price.toFixed(2)/100.00).toFixed(2).toString()+"</td><td>$"+(total_price_before_hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></<tr>")
+      });
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='4' class='text-right'>Subtotal</td><td>$"+(subtotal.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
+      var hst = total_partner_products_amount - subtotal;
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='4' class='text-right'>HST</td><td>$"+(hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='4' class='text-right'><b>Total</b></td><td><b>$"+(total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString()+"</b></td></tr>");
+      $('#partner_product_cart_modal').modal({show:true});
+    });
 
     $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner, #thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').off("change").on("change", function(){
 
@@ -635,7 +659,7 @@ $(function(){
                           <a href="#partner_product_selection" class="auto b-b padder-v" data-toggle="tab">
                             <i class="fa fa-truck">
                             </i>
-                            <span class="font-bold">Partner Products (new)</span>
+                            <span class="font-bold">Marketplace (new)</span>
                           </a>
                         </li>
 
@@ -1940,16 +1964,7 @@ $(function(){
                       <section class="tab-pane" id="partner_product_selection" role="tabpanel">
                         <section class="vbox">
                           <section class="scrollable padder"> 
-                            <div class="row m-t-lg padder">
-                              <div class="well col-lg-5">
-                                <span><b>Total amount: $<span id="partner_product_total_dollar">0.00</span> (including HST)</b></span>
-                                <br>
-                                  <button class="btn btn-s-md btn-success m-t-sm" data-toggle="modal" data-target="#partner_product_cart_modal" id="submit_partner_product_selection">View Cart and Checkout</button>
-                                  <br>
-                                  <span class="m-t-sm" style="display:block;">Order will be delivered on Monday xxxx-xx-xx</span>                            
-                              </div>
-                            </div>
-                            <div class="row padder">
+                            <div class="row padder m-t-xl">
                                 <% @parter_products.each do |pp| %>
                                   <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-r-md meal_card">
                                     <div class="inner">
@@ -1972,6 +1987,15 @@ $(function(){
                                     </div>
                                   </div>
                                 <% end %>
+                            </div>
+                            <div class="row m-t-lg padder">
+                              <div class="well col-lg-5">
+                                <span><b>Total amount: $<span id="partner_product_total_dollar">0.00</span> (including HST)</b></span>
+                                <br>
+                                  <button class="btn btn-s-md btn-success m-t-sm" id="submit_partner_product_selection">View Cart and Checkout</button>
+                                  <br>
+                                  <span class="m-t-sm" style="display:block;">Order will be delivered on Monday xxxx-xx-xx</span>                            
+                              </div>
                             </div>
                           </section>
                         </section>                      
@@ -2105,10 +2129,21 @@ $(function(){
       <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Cart</h4>
+            <h4 class="modal-title" id="myModalLabel">Marketplace Cart</h4>
           </div>
           <div class="modal-body">
-
+            <table class="table" id="partner_products_checkout_summary" style="font-size:12px;">
+              <thead>
+                <th>QTY</th>
+                <th>PRODUCT</th>
+                <th>DESCRIPTION</th>
+                <th>UNIT PRICE</th>
+                <th>TOTAL</th>
+              </thead>
+              <tbody>
+                
+              </tbody>
+            </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

@@ -1,4 +1,5 @@
 class PartnerProductSalesController < ApplicationController
+
     def order
         #parse data
 
