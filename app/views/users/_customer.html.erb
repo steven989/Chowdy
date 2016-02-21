@@ -4,7 +4,7 @@
   // create variables to hold products for when people make selection
   var partner_products_cart = [];
   var partner_products_menu = <%= @parter_products_menu.to_json.html_safe %>;
-
+  var total_partner_products_amount = 0;
 
 
 $(function(){
@@ -437,16 +437,26 @@ $(function(){
     function update_partner_products_cart (product_id, number) {
       var cart_item = partner_products_cart.filter(function(ci){return ci.product_id == product_id});
       if (cart_item.length == 0) {
+
         partner_products_cart.push({product_id:product_id,quantity:number});
+
       } else if (cart_item.length == 1) {
         cart_item[0].quantity = number;
-      } else {
+
+      } else { // if for some reason there are multiple entries of the same product in the cart, delete all the same products first and then add the product again
         for (var i = 0; i < partner_products_cart.length; i++){
           if (partner_products_cart[i].product_id == product_id) { 
               partner_products_cart.splice(i, 1);
           }
-        }
+        };
+        partner_products_cart.push({product_id:product_id,quantity:number});
       };
+
+      total_partner_products_amount = 0;
+
+      partner_products_cart.forEach(function(pp){total_partner_products_amount = total_partner_products_amount + parseInt(pp.quantity) * Math.round(partner_products_menu.filter(function(i){return i.product_id == pp.product_id})[0].price * 1.13) });
+
+      $('#partner_product_total_dollar').html((total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString());
     };
 
     $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner, #thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').off("change").on("change", function(){
@@ -1930,26 +1940,18 @@ $(function(){
                       <section class="tab-pane" id="partner_product_selection" role="tabpanel">
                         <section class="vbox">
                           <section class="scrollable padder"> 
-                            <div class="row m-t-lg">
-                              <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
-                                <button class="btn btn-s-md btn-success disabled" id="submit_partner_product_selection">Submit Selection</button>                            
+                            <div class="row m-t-lg padder">
+                              <div class="well col-lg-5">
+                                <span><b>Total amount: $<span id="partner_product_total_dollar">0.00</span> (including HST)</b></span>
+                                <br>
+                                  <button class="btn btn-s-md btn-success m-t-sm" data-toggle="modal" data-target="#partner_product_cart_modal" id="submit_partner_product_selection">View Cart and Checkout</button>
+                                  <br>
+                                  <span class="m-t-sm" style="display:block;">Order will be delivered on Monday xxxx-xx-xx</span>                            
                               </div>
-                              <div class="col-lg-5 col-md-5 col-sm-5 col-xs-8">
-                                <div class="alert alert-warning alert-block text-center hidden" style="height:34px; padding-top:8px; margin: 0;" id="unsaved_warning_meal_selection">
-                                  
-                                  You have unsaved changes
-                                </div>
-                              </div>  
                             </div>
-                            <div class="row">
-                              <div class="col-lg-5"><a href="<%= view_meals_selection_path %>?week_date=<%= @view_meal_selection_date %>" class="pull_modal">View meals selected for week of <%= @view_meal_selection_date.strftime("%B %e") %></a></div>
-                            </div>
-                            <div class="row m-t-sm padder">
-                              Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none. You have selected all your meals! You can add more meals in <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
-                            </div>
-                            <div class="row m-t-sm padder">
+                            <div class="row padder">
                                 <% @parter_products.each do |pp| %>
-                                  <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card">
+                                  <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-r-md meal_card">
                                     <div class="inner">
                                       <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
                                         <h5 style="color:#555;"><%= pp.product_name %></h5>
@@ -2092,6 +2094,25 @@ $(function(){
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Partner product cart modal -->
+<div class="modal fade" id="partner_product_cart_modal" tabindex="-1" role="dialog" aria-labelledby="partner_product_cart_modal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Cart</h4>
+          </div>
+          <div class="modal-body">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-success" id="place_order">Order</button>
           </div>
       </div>
   </div>

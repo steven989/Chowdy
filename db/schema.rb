@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160213184803) do
+ActiveRecord::Schema.define(version: 20160220172249) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -278,6 +278,9 @@ ActiveRecord::Schema.define(version: 20160213184803) do
     t.string   "url_of_photo"
     t.datetime "created_at",                      null: false
     t.datetime "updated_at",                      null: false
+    t.boolean  "available"
+    t.integer  "max_quantity"
+    t.integer  "quantity_available"
   end
 
   create_table "promotion_redemptions", force: :cascade do |t|
