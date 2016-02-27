@@ -34,6 +34,7 @@ Chowdy::Application.routes.draw do
   get 'admin_action/impersonate_user/:id' => 'admin_actions#impersonate', as: 'impersonate_user'
   get 'admin_action/get_user_activity/:id' => 'admin_actions#get_user_activity', as: 'get_user_activity'
   post 'admin_action/search_customer' => 'admin_actions#search_customer', as: 'search_customer'
+  
   post 'partner_product_sales/order' => 'partner_product_sales#order', as: 'order_partner_product'
 
   post 'meal_selection/update' => 'meal_selections#update', as:'update_meal_choice'

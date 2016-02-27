@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160220172249) do
+ActiveRecord::Schema.define(version: 20160227141210) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -254,14 +254,24 @@ ActiveRecord::Schema.define(version: 20160220172249) do
     t.boolean  "spicy"
   end
 
+  create_table "partner_product_sale_details", force: :cascade do |t|
+    t.integer  "partner_product_sale_id"
+    t.integer  "partner_product_id"
+    t.integer  "quantity"
+    t.integer  "cost_in_cents"
+    t.integer  "sale_price_before_hst_in_cents"
+    t.integer  "total_discounts_in_cents"
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+  end
+
   create_table "partner_product_sales", force: :cascade do |t|
     t.string   "stripe_customer_id"
     t.date     "delivery_week"
-    t.integer  "partner_product_id"
-    t.integer  "quantity_ordered"
     t.string   "order_status"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.integer  "total_amount_including_hst_in_cents"
   end
 
   create_table "partner_products", force: :cascade do |t|
