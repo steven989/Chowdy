@@ -79,7 +79,8 @@ class Customer < ActiveRecord::Base
                     first_pick_up_date: StartDate.first.start_date,
                     purchase:"Recurring",
                     next_pick_up_date: StartDate.first.start_date,
-                    date_signed_up_for_recurring: Time.now
+                    date_signed_up_for_recurring: Time.now,
+                    price_increase_2015:true
                     )
 
                 customer.create_referral_code
