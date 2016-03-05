@@ -436,7 +436,8 @@ class UsersController < ApplicationController
 
             @show_pick_up_info_window = (@current_customer.recurring_delivery.blank? && ((!@current_customer.monday_pickup_hub.nil? && !@current_customer.thursday_pickup_hub.nil?) || (@current_customer.stop_queues.where(stop_type:"change_hub").length == 1))) ? true : false
 
-            @announcements = SystemSetting.where{(setting == "announcement") & ((setting_attribute == "all") | (setting_attribute =~ "%#{monday_pickup_hub_match_string||= "xxx"}%")|(setting_attribute =~ "%#{thursday_pickup_hub_match_string ||= "xxx"}%") | (setting_attribute =~ "%#{next_week_hub_match_string ||= "xxx"}%"))}
+            cc = @current_customer #this is for the announcement search as for some reason it doesn't work with instance variable
+            @announcements = SystemSetting.where{(setting == "announcement") & ( (setting_attribute =~ "%#{cc.price_increase_2015? ? "xxx" : "6.99"}%" ) | (setting_attribute == "all") | (setting_attribute =~ "%#{monday_pickup_hub_match_string||= "xxx"}%")|(setting_attribute =~ "%#{thursday_pickup_hub_match_string ||= "xxx"}%") | (setting_attribute =~ "%#{next_week_hub_match_string ||= "xxx"}%"))}
 
             
             if @current_customer.stop_queues.where(stop_type:'change_sub').limit(1).take.blank? || @selection_timing_exception_for_new_customers
