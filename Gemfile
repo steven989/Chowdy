@@ -88,8 +88,17 @@ gem 'htmlentities'
 #17) Full text search using built-in postgres
 gem 'pg_search'
 
-#17) Pagination
+#18) Pagination
 gem 'kaminari'
+
+#19) Image upload
+gem 'carrierwave', github: 'carrierwaveuploader/carrierwave'
+
+#20) Work with Amazon S3
+gem 'fog'
+
+#21) Modify images
+gem 'rmagick'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'

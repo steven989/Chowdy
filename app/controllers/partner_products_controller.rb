@@ -87,7 +87,8 @@ class PartnerProductsController < ApplicationController
     private
 
     def partner_product_params
-      params.require(:partner_product).permit(:vendor_id,:product_id,:product_name,:product_description,:product_size,:vendor_product_sku,:vendor_product_upc,:cost_in_cents,:suggested_retail_price_in_cents,:price_in_cents,:url_of_photo)        
+      params.require(:partner_product).permit(:vendor_id,:product_id,:product_name,:product_description,:product_size,:vendor_product_sku,:vendor_product_upc,:cost_in_cents,:suggested_retail_price_in_cents,:price_in_cents,{photos: []})
     end
+
 
 end
