@@ -24,8 +24,10 @@ class PartnerProductsController < ApplicationController
     end
 
     def create
-        vendor = Vendor.where(id: params[:vendor_id]).take
+        vendor = Vendor.where(id:params[:partner_product][:vendor_id]).take
         partner_product = vendor.partner_products.new(partner_product_params)
+        partner_product.photos = params[:photos].values
+
         if partner_product.save
           status = "success"
           notice_partner_product = "Partner product created"
@@ -87,7 +89,7 @@ class PartnerProductsController < ApplicationController
     private
 
     def partner_product_params
-      params.require(:partner_product).permit(:vendor_id,:product_id,:product_name,:product_description,:product_size,:vendor_product_sku,:vendor_product_upc,:cost_in_cents,:suggested_retail_price_in_cents,:price_in_cents,{photos: []})
+      params.require(:partner_product).permit(:vendor_id,:product_id,:product_name,:product_description,:product_size,:vendor_product_sku,:vendor_product_upc,:cost_in_cents,:suggested_retail_price_in_cents,:price_in_cents)
     end
 
 

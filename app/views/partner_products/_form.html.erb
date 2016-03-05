@@ -19,55 +19,140 @@
           });
       };  
 
-  function ajax_submit() {
-      $('.ajax_form').off('submit').on('submit',function(){
-          event.preventDefault();
-          var _this = $(this);
-          var submit_button_original_value = $(this).find('.form_submit').attr('value');
-          var submit_button_width = $(this).find('.form_submit').outerWidth();
-          $(this).find('.form_submit').css('width',submit_button_width);
-          $(this).find('.form_submit').addClass('disabled').attr('value','Wait...');
-          $.ajax({
-            url: $(this).attr('action')+"?vendor_id="+<%= @vendor.id.to_s %>,
-            type: $(this).attr('method'),
-            data: $(this).serialize(),
-            dataType: 'JSON'
-          }).done(function(data){
-            if(data.status == "success"){
-              _this.find('.alert').html(data.message);
-              _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
-              _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
 
-            $.ajax({
-              url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
-              type: 'GET',
-              dataType: 'html'
-            }).done(function(data){
-              $('#formModal .modal-content').html(data);
-              $('#formModal').modal({show:true});
-              $("#formModal").animate({
-                  scrollTop: 0
-              }, 500);
+    // drop zone  
+    function configureDropZone() {
+        Dropzone.options.partnerProductCreation = {
+          url: $('#partner-product-creation').attr('action'),
+          paramName: 'photos',
+          autoProcessQueue: false,
+          uploadMultiple: true,
+          parallelUploads: 100,
+          maxFiles: 5,
+          maxFilesize: 0.5, // MB
+          forceFallback: false,
+          acceptedFiles: 'image/jpg,image/jpeg,image/png',
+          dictDefaultMessage: "<i class='fa fa-cloud-upload'> Drag and drop up to 5 images here or click to upload (JPG or PNG files only, up to 0.5MB)",
+          init: function() {
+                myDropzone = this; // closure
 
-              formRetrievalAjax();
+            var submitButton = $(".form_submit")
+
+            var submit_button_original_value = submitButton.attr('value');
+            var submit_button_width = submitButton.outerWidth();
+
+            submitButton.off("click").on("click", function(event) {
+              if(event.preventDefault) {
+                event.preventDefault();
+                submitButton.css('width',submit_button_width);
+                submitButton.addClass('disabled').attr('value','Wait...');
+              } else {
+                event.returnValue = false;
+                submitButton.css('width',submit_button_width);
+                submitButton.addClass('disabled').attr('value','Wait...');
+              };
+              myDropzone.processQueue(); // Tell Dropzone to process all queued files.
             });
+            // this is the hover effect
+            this.on('dragover', function(){
+                $('.upload .dropzone').addClass('draghover');
+            });
+            this.on('dragleave', function(){
+                $('.upload .dropzone').removeClass('draghover');
+            }); 
+            this.on('drop',function(){
+                $('.upload .dropzone').removeClass('draghover');
+                $('.dz-default.dz-message').html("");
+            });
+            // spinner when file is uploading
+            this.on('sending',function(){
+                $('.dz-default.dz-message').html("<i class='fa fa-circle-o-notch fa-2x upload spinner'></i>");
+            });
+            this.on('removedfile',function(){
+                $('.dz-default.dz-message').html("<i class='fa fa-cloud-upload'> Drop your logo here or click to upload");
+            });
+            this.on('success',function(file, data){
+
+                if(data.status == "success"){
+                  $('#partner-product-creation').find('.alert').html(data.message);
+                  $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+                  $('#partner-product-creation').find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+
+                $.ajax({
+                  url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
+                  type: 'GET',
+                  dataType: 'html'
+                }).done(function(data){
+                  $('#formModal .modal-content').html(data);
+                  $('#formModal').modal({show:true});
+                  $("#formModal").animate({
+                      scrollTop: 0
+                  }, 500);
+
+                  formRetrievalAjax();
+                });
+
+                } else {
+                  $('#partner-product-creation').find('.alert').html(data.message);
+                  $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+                  $('#partner-product-creation').find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+                }              
+
+            });
+          }
+        };
+    }
 
 
-            } else {
-              _this.find('.alert').html(data.message);
-              _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
-              _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
-            }
-          });
-      });
-  }
-  ajax_submit();
+  // function ajax_submit() {
+  //     $('.ajax_form').off('submit').on('submit',function(){
+  //         event.preventDefault();
+  //         var _this = $(this);
+  //         var submit_button_original_value = $(this).find('.form_submit').attr('value');
+  //         var submit_button_width = $(this).find('.form_submit').outerWidth();
+  //         $(this).find('.form_submit').css('width',submit_button_width);
+  //         $(this).find('.form_submit').addClass('disabled').attr('value','Wait...');
+  //         $.ajax({
+  //           url: $(this).attr('action')+"?vendor_id="+<%= @vendor.id.to_s %>,
+  //           type: $(this).attr('method'),
+  //           data: $(this).serialize(),
+  //           dataType: 'JSON'
+  //         }).done(function(data){
+  //           if(data.status == "success"){
+  //             _this.find('.alert').html(data.message);
+  //             _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+  //             _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+
+  //           $.ajax({
+  //             url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
+  //             type: 'GET',
+  //             dataType: 'html'
+  //           }).done(function(data){
+  //             $('#formModal .modal-content').html(data);
+  //             $('#formModal').modal({show:true});
+  //             $("#formModal").animate({
+  //                 scrollTop: 0
+  //             }, 500);
+
+  //             formRetrievalAjax();
+  //           });
+
+
+  //           } else {
+  //             _this.find('.alert').html(data.message);
+  //             _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+  //             _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+  //           }
+  //         });
+  //     });
+  // }
+  // ajax_submit();
 
 </script>
 
 
 
-<%= form_for @partner_product, html: {class: "ajax_form", multipart:true} do |f| %>
+<%= form_for @partner_product, html: {class: "dropzone", multipart:true, id:"partner-product-creation"} do |f| %>
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     <h4 class="modal-title" id="myModalLabel">Partner Product</h4>
@@ -93,6 +178,7 @@
         <%= f.label :vendor_product_sku, "Vendor's Product SKU / Internal ID" %>
         <%= f.text_field :vendor_product_sku, class: "form-control" %>
     </div>
+    <%= f.hidden_field :vendor_id, value: @vendor.id %>
     <div class="form-group">
         <%= f.label :vendor_product_upc, "Product UPC" %>
         <%= f.text_field :vendor_product_upc, class: "form-control" %>
@@ -105,7 +191,7 @@
         <%= f.label :suggested_retail_price_in_cents %>
         <%= f.text_field :suggested_retail_price_in_cents, class: "form-control" %>
     </div>
-    <div class="form-group">
+    <div class="form-group hidden">
         <%= f.label :photos %>
         <%= f.file_field :photos, class: "form-control", multiple:true %>
     </div>
@@ -121,3 +207,7 @@
     <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit" %>
   </div>
 <% end %>
+<script>  
+configureDropZone(); 
+Dropzone.discover();
+</script>

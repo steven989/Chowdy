@@ -100,6 +100,9 @@ gem 'fog'
 #21) Modify images
 gem 'rmagick'
 
+#22) Dropzone for AJAX file upload
+gem 'dropzonejs-rails'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
