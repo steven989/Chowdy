@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160305182214) do
+ActiveRecord::Schema.define(version: 20160306162445) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -286,12 +286,12 @@ ActiveRecord::Schema.define(version: 20160305182214) do
     t.integer  "suggested_retail_price_in_cents"
     t.integer  "price_in_cents"
     t.string   "url_of_photo"
-    t.datetime "created_at",                      null: false
-    t.datetime "updated_at",                      null: false
+    t.datetime "created_at",                                   null: false
+    t.datetime "updated_at",                                   null: false
     t.boolean  "available"
     t.integer  "max_quantity"
     t.integer  "quantity_available"
-    t.json     "photos"
+    t.string   "photos",                          default: [],              array: true
   end
 
   create_table "promotion_redemptions", force: :cascade do |t|

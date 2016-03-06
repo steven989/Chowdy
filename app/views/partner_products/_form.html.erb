@@ -32,11 +32,11 @@
           maxFilesize: 0.5, // MB
           forceFallback: false,
           acceptedFiles: 'image/jpg,image/jpeg,image/png',
-          dictDefaultMessage: "<i class='fa fa-cloud-upload'> Drag and drop up to 5 images here or click to upload (JPG or PNG files only, up to 0.5MB)",
+          dictDefaultMessage: "<i class='fa fa-cloud-upload'> Click or drag and drop up to 5 images here (JPG or PNG files only, up to 0.5MB per file)",
           init: function() {
                 myDropzone = this; // closure
 
-            var submitButton = $(".form_submit")
+            var submitButton = $(".form_submit_add_product")
 
             var submit_button_original_value = submitButton.attr('value');
             var submit_button_width = submitButton.outerWidth();
@@ -76,7 +76,7 @@
                 if(data.status == "success"){
                   $('#partner-product-creation').find('.alert').html(data.message);
                   $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
-                  $('#partner-product-creation').find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+                  $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
 
                 $.ajax({
                   url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
@@ -95,7 +95,7 @@
                 } else {
                   $('#partner-product-creation').find('.alert').html(data.message);
                   $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
-                  $('#partner-product-creation').find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+                  $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
                 }              
 
             });
@@ -104,55 +104,11 @@
     }
 
 
-  // function ajax_submit() {
-  //     $('.ajax_form').off('submit').on('submit',function(){
-  //         event.preventDefault();
-  //         var _this = $(this);
-  //         var submit_button_original_value = $(this).find('.form_submit').attr('value');
-  //         var submit_button_width = $(this).find('.form_submit').outerWidth();
-  //         $(this).find('.form_submit').css('width',submit_button_width);
-  //         $(this).find('.form_submit').addClass('disabled').attr('value','Wait...');
-  //         $.ajax({
-  //           url: $(this).attr('action')+"?vendor_id="+<%= @vendor.id.to_s %>,
-  //           type: $(this).attr('method'),
-  //           data: $(this).serialize(),
-  //           dataType: 'JSON'
-  //         }).done(function(data){
-  //           if(data.status == "success"){
-  //             _this.find('.alert').html(data.message);
-  //             _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
-  //             _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
-
-  //           $.ajax({
-  //             url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
-  //             type: 'GET',
-  //             dataType: 'html'
-  //           }).done(function(data){
-  //             $('#formModal .modal-content').html(data);
-  //             $('#formModal').modal({show:true});
-  //             $("#formModal").animate({
-  //                 scrollTop: 0
-  //             }, 500);
-
-  //             formRetrievalAjax();
-  //           });
-
-
-  //           } else {
-  //             _this.find('.alert').html(data.message);
-  //             _this.find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
-  //             _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
-  //           }
-  //         });
-  //     });
-  // }
-  // ajax_submit();
-
 </script>
 
 
 
-<%= form_for @partner_product, html: {class: "dropzone", multipart:true, id:"partner-product-creation"} do |f| %>
+<%= form_for @partner_product, html: {class: "dropzone", multipart:true, id:"partner-product-creation", style:"border:none; border-radius: 5px;"} do |f| %>
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     <h4 class="modal-title" id="myModalLabel">Partner Product</h4>
@@ -191,9 +147,17 @@
         <%= f.label :suggested_retail_price_in_cents %>
         <%= f.text_field :suggested_retail_price_in_cents, class: "form-control" %>
     </div>
-    <div class="form-group hidden">
+    <div class="form-group html_photo_uploader hidden">
         <%= f.label :photos %>
         <%= f.file_field :photos, class: "form-control", multiple:true %>
+    </div>
+    <div class="form-group ajax_uploader">
+      <label>Product photos</label>
+        <% if @photos_exist %>
+          <% @photos.each do |p| %>
+            <%= image_tag p.thumb.url %>
+          <% end %>
+        <% end %>
     </div>
     <div class="alert m-t-xs m-b-xs hidden">
     </div>
@@ -204,10 +168,13 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
     <button type="button" class="btn btn-md btn-default m-t-sm nestedForm" href="<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>" style="min-width: 0px;">Back</button>
-    <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit" %>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit_add_product" %>
   </div>
 <% end %>
 <script>  
 configureDropZone(); 
-Dropzone.discover();
+<% unless @photos_exist %>
+  Dropzone.discover();
+  $('div.dz-default.dz-message').appendTo('div.ajax_uploader label');
+<% end %>
 </script>

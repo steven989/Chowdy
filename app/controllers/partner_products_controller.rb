@@ -47,6 +47,8 @@ class PartnerProductsController < ApplicationController
         @edit = true
         @vendor = Vendor.where(id: params[:vendor_id]).take
         @partner_product = PartnerProduct.find(params[:id])
+        @photos_exist = @partner_product.photos?
+        @photos = @partner_product.photos
         respond_to do |format|
           format.html {
             render partial: 'form'
