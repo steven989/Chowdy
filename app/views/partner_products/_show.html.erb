@@ -1,0 +1,17 @@
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">View details for <%= @partner_product.product_name.titlecase %></h4>
+  </div>
+  <div class="modal-body">
+    <ul id="gallery">
+        <% @photos.each do |p| %>
+            <li><img src="<%= p.url %>" alt="product photo"></li>
+        <% end %>
+    </ul>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+  </div>
+<script>
+  $('#gallery').pikachoose({autoPlay:false,carousel:true}); 
+</script>

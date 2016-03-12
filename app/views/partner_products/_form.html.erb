@@ -20,6 +20,48 @@
       };  
 
 
+      function updateWithoutFile() {
+
+            var submitButton = $(".form_submit_add_product")
+
+            var submit_button_original_value = submitButton.attr('value');
+            var submit_button_width = submitButton.outerWidth();
+
+            $.ajax({
+              url: $('#partner-product-creation').attr('action'),
+              type: 'PUT',
+              data: $('#partner-product-creation').serialize(),
+              dataType: 'JSON'
+            }).done(function(data){
+
+              if(data.status == "success"){
+                $('#partner-product-creation').find('.alert').html(data.message);
+                $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+                $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
+
+              $.ajax({
+                url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
+                type: 'GET',
+                dataType: 'html'
+              }).done(function(data){
+                $('#formModal .modal-content').html(data);
+                $('#formModal').modal({show:true});
+                $("#formModal").animate({
+                    scrollTop: 0
+                }, 500);
+
+                formRetrievalAjax();
+              });
+
+              } else {
+                $('#partner-product-creation').find('.alert').html(data.message);
+                $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+                $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
+              }      
+
+            })        
+      }
+
     // drop zone  
     function configureDropZone() {
         Dropzone.options.partnerProductCreation = {
@@ -51,7 +93,13 @@
                 submitButton.css('width',submit_button_width);
                 submitButton.addClass('disabled').attr('value','Wait...');
               };
-              myDropzone.processQueue(); // Tell Dropzone to process all queued files.
+
+              if (myDropzone.getQueuedFiles().length > 0) {                        
+                  myDropzone.processQueue();  
+              } else {                       
+                  updateWithoutFile();
+              }         
+
             });
             // this is the hover effect
             this.on('dragover', function(){
@@ -104,6 +152,23 @@
     }
 
 
+    $('#remove_photo_inner').off('click').on('click',function(){
+      event.preventDefault();
+      $.ajax({
+        url: $(this).attr('href'),
+        type: 'GET',
+        dataType: 'JSON'
+      }).done(function(data){
+        if (data.status == "success") {
+          $('.delete_after_photo_removal').remove();
+          $('div.dz-default.dz-message').show();
+          $('div.dz-default.dz-message').appendTo('div.ajax_uploader label');          
+        } else {
+          alert(data.notice_partner_product);
+        }
+      });      
+    });
+
 </script>
 
 
@@ -114,67 +179,71 @@
     <h4 class="modal-title" id="myModalLabel">Partner Product</h4>
   </div>
   <div class="modal-body">
-    <div class="form-group">
-        <%= f.label :product_name, "Product Name (required)" %>
-        <%= f.text_field :product_name, class: "form-control", required: true  %>
+    <div class="form-group" style="cursor:pointer;">
+        <%= f.label :product_name, "Product Name (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :product_name, class: "form-control", required: true, style:"cursor:text;"  %>
     </div>
     <div class="form-group">
-        <%= f.label :product_description, "Product Description (required)" %>
-        <%= f.text_field :product_description, class: "form-control", required: true  %>
+        <%= f.label :product_description, "Product Description (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :product_description, class: "form-control", required: true, style:"cursor:text;"  %>
     </div>
     <div class="form-group">
-        <%= f.label :product_size, "Product Size (required)" %>
-        <%= f.text_field :product_size, class: "form-control", required: true  %>
+        <%= f.label :product_size, "Product Size (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :product_size, class: "form-control", required: true, style:"cursor:text;"  %>
     </div>
     <div class="form-group">
-        <%= f.label :price_in_cents, "Price in Cents (required)" %>
-        <%= f.text_field :price_in_cents, class: "form-control", required: true%>
+        <%= f.label :price_in_cents, "Price in Cents (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :price_in_cents, class: "form-control", required: true, style:"cursor:text;" %>
     </div>
     <div class="form-group">
-        <%= f.label :vendor_product_sku, "Vendor's Product SKU / Internal ID" %>
-        <%= f.text_field :vendor_product_sku, class: "form-control" %>
+        <%= f.label :vendor_product_sku, "Vendor's Product SKU / Internal ID", style:"cursor:pointer;" %>
+        <%= f.text_field :vendor_product_sku, class: "form-control", style:"cursor:text;" %>
     </div>
     <%= f.hidden_field :vendor_id, value: @vendor.id %>
     <div class="form-group">
-        <%= f.label :vendor_product_upc, "Product UPC" %>
-        <%= f.text_field :vendor_product_upc, class: "form-control" %>
+        <%= f.label :vendor_product_upc, "Product UPC", style:"cursor:pointer;" %>
+        <%= f.text_field :vendor_product_upc, class: "form-control", style:"cursor:text;"  %>
     </div>
     <div class="form-group">
-        <%= f.label :cost_in_cents %>
-        <%= f.text_field :cost_in_cents, class: "form-control" %>
+        <%= f.label :cost_in_cents, style:"cursor:pointer;" %>
+        <%= f.text_field :cost_in_cents, class: "form-control", style:"cursor:text;" %>
     </div>
     <div class="form-group">
-        <%= f.label :suggested_retail_price_in_cents %>
-        <%= f.text_field :suggested_retail_price_in_cents, class: "form-control" %>
+        <%= f.label :suggested_retail_price_in_cents, style:"cursor:pointer;" %>
+        <%= f.text_field :suggested_retail_price_in_cents, class: "form-control", style:"cursor:text;" %>
     </div>
     <div class="form-group html_photo_uploader hidden">
         <%= f.label :photos %>
         <%= f.file_field :photos, class: "form-control", multiple:true %>
     </div>
     <div class="form-group ajax_uploader">
-      <label>Product photos</label>
+      <label>Product photos <% if @photos_exist %><span class="delete_after_photo_removal">(<a id="remove_photo_inner" href="<%= remove_partner_product_photos_path(@partner_product) %>" style="cursor:pointer;">remove all photos</a>)</span><% end %></label><br>
         <% if @photos_exist %>
-          <% @photos.each do |p| %>
-            <%= image_tag p.thumb.url %>
-          <% end %>
+          <section class="delete_after_photo_removal">
+            <% @photos.each do |p| %>
+              <%= image_tag p.thumb.url, size:"150x100", class:"m-r-sm" %>
+            <% end %>
+          </section>
         <% end %>
     </div>
     <div class="alert m-t-xs m-b-xs hidden">
     </div>
     <% if @edit %>
-      <%= link_to "Delete This Product", partner_product_path(@partner_product), method: :delete, class: "btn btn-s-md btn-danger btn-rounded" %>
+      <%= link_to "Delete This Product", partner_product_path(@partner_product), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style:"cursor:pointer;" %>
     <% end %>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
-    <button type="button" class="btn btn-md btn-default m-t-sm nestedForm" href="<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>" style="min-width: 0px;">Back</button>
-    <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit_add_product" %>
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal" style="cursor:pointer;">Close</button>
+    <button type="button" class="btn btn-md btn-default m-t-sm nestedForm" href="<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>" style="min-width: 0px; cursor:pointer;">Back</button>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit_add_product", style:"cursor:pointer;" %>
   </div>
 <% end %>
 <script>  
 configureDropZone(); 
-<% unless @photos_exist %>
-  Dropzone.discover();
+Dropzone.discover();
+<% if @photos_exist %>
+  $('div.dz-default.dz-message').hide();
+<% else %>
   $('div.dz-default.dz-message').appendTo('div.ajax_uploader label');
 <% end %>
 </script>

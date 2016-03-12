@@ -12,6 +12,16 @@ class PartnerProductsController < ApplicationController
         end      
     end
 
+    def show
+      @partner_product = PartnerProduct.find(params[:id])
+      @photos = @partner_product.photos
+      respond_to do |format|
+        format.html {
+          render partial: 'show'
+        }
+      end
+    end
+
     def new
         @vendor = Vendor.where(id: params[:vendor_id]).take
         @partner_product = @vendor.partner_products.new
@@ -26,7 +36,7 @@ class PartnerProductsController < ApplicationController
     def create
         vendor = Vendor.where(id:params[:partner_product][:vendor_id]).take
         partner_product = vendor.partner_products.new(partner_product_params)
-        partner_product.photos = params[:photos].values
+        partner_product.photos = params[:photos].values unless params[:photos].blank?
 
         if partner_product.save
           status = "success"
@@ -58,14 +68,15 @@ class PartnerProductsController < ApplicationController
 
     def update
         partner_product = PartnerProduct.where(id:params[:id]).take
-        partner_product.update_attributes(partner_product_params)
+        partner_product.assign_attributes(partner_product_params)
+        partner_product.photos = params[:photos].values unless params[:photos].blank?
 
-        if partner_product.errors.any?
-          status = "fail"
-          notice_partner_product = "Partner product could not be updated: #{partner_product.errors.full_messages.join(", ")}"
-        else
+        if partner_product.save
           status = "success"
           notice_partner_product = "Partner product updated"
+        else
+          status = "fail"
+          notice_partner_product = "Partner product could not be updated: #{partner_product.errors.full_messages.join(", ")}"
         end
 
         respond_to do |format|
@@ -73,6 +84,24 @@ class PartnerProductsController < ApplicationController
             render json: {status:status, message:notice_partner_product}
           } 
         end         
+    end
+
+    def remove_photos
+      partner_product = PartnerProduct.find(params[:id])
+      partner_product.remove_photos!
+      if partner_product.save
+        status = "success"
+        notice_partner_product = "Photos successfully removed"
+      else
+        status = "fail"
+        notice_partner_product = "Photos could not be removed: #{partner_product.errors.full_messages.join(', ')}"
+      end
+
+        respond_to do |format|
+          format.json {
+            render json: {status:status, message:notice_partner_product}
+          }   
+        end    
     end
 
     def destroy

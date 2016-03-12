@@ -44,6 +44,8 @@ Chowdy::Application.routes.draw do
   resources :system_settings
   resources :vendors
   resources :partner_products
+  get  'partner_product/:id/remove_photos' => 'partner_products#remove_photos', as:'remove_partner_product_photos'
+
   resources :scheduled_tasks
   resources :menus, only: [:update, :show]
   get 'menu/:id/pull_rating_details' => 'menus#pull_rating_details', as: 'pull_rating_details'
