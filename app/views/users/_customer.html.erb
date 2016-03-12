@@ -5,6 +5,7 @@
   var partner_products_cart = [];
   var partner_products_menu = <%= @parter_products_menu.to_json.html_safe %>;
   var total_partner_products_amount = 0;
+  var subtotal = 0;
 
 
 $(function(){
@@ -15,7 +16,6 @@ $(function(){
             return rated_items.indexOf($(this).data('menu-id')) > -1
           }).remove();
         })();
-
 
 
     // create hub map
@@ -428,11 +428,50 @@ $(function(){
 
     // marketplace 
 
-    $('.partner_product_spinner').off("change").on("change",function(){
-      $(this).closest('.display_number_container').find('.selection_display').html($(this).val());
+    $('.add_to_cart').off("submit").on("submit",function(){
+      event.preventDefault();
       var product_id_chosen = $(this).data("product-id");
-      
-      update_partner_products_cart(product_id_chosen,$(this).val());
+      update_partner_products_cart(product_id_chosen,$(this).find('.qty').val());
+      $(this).find('input:submit').val('Update Cart');
+
+    });
+
+    function update_partner_products_cart (product_id, number) {
+      var cart_item = partner_products_cart.filter(function(ci){return ci.product_id == product_id});
+      if (cart_item.length == 0) {
+        if (number <= 0) {
+
+        } else {
+          partner_products_cart.push({product_id:product_id,quantity:number});  
+        }
+      } else if (cart_item.length == 1) {
+        if (number <= 0) {
+          for (var i = 0; i < partner_products_cart.length; i++){
+            if (partner_products_cart[i].product_id == product_id) { 
+                partner_products_cart.splice(i, 1);
+            }
+          };          
+        } else {
+          cart_item[0].quantity = number;
+        }
+      } else { // if for some reason there are multiple entries of the same product in the cart, delete all the same products first and then add the product again
+        for (var i = 0; i < partner_products_cart.length; i++){
+          if (partner_products_cart[i].product_id == product_id) { 
+              partner_products_cart.splice(i, 1);
+          }
+        };
+
+        if (number <= 0) {
+
+        } else {
+          partner_products_cart.push({product_id:product_id,quantity:number});  
+        }
+
+      };
+
+      update_total_and_subtotal();
+
+      $('#partner_product_total_dollar').html((total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString());
 
       if (partner_products_cart.length == 0 ) {
 
@@ -456,47 +495,22 @@ $(function(){
         $('#place_order').removeClass('disabled');
         }
       }
-    });
 
-    function update_partner_products_cart (product_id, number) {
-      var cart_item = partner_products_cart.filter(function(ci){return ci.product_id == product_id});
-      if (cart_item.length == 0) {
-        if (number == 0) {
+      $('.qty*[data-product-id="'+product_id+'"]').val(number);
 
-        } else {
-          partner_products_cart.push({product_id:product_id,quantity:number});  
-        }
-      } else if (cart_item.length == 1) {
-        if (number == 0) {
-          for (var i = 0; i < partner_products_cart.length; i++){
-            if (partner_products_cart[i].product_id == product_id) { 
-                partner_products_cart.splice(i, 1);
-            }
-          };          
-        } else {
-          cart_item[0].quantity = number;
-        }
-      } else { // if for some reason there are multiple entries of the same product in the cart, delete all the same products first and then add the product again
-        for (var i = 0; i < partner_products_cart.length; i++){
-          if (partner_products_cart[i].product_id == product_id) { 
-              partner_products_cart.splice(i, 1);
-          }
-        };
-        partner_products_cart.push({product_id:product_id,quantity:number});
-      };
-
-      total_partner_products_amount = 0;
-
-      partner_products_cart.forEach(function(pp){total_partner_products_amount = total_partner_products_amount + parseInt(pp.quantity) * partner_products_menu.filter(function(i){return i.product_id == pp.product_id})[0].price });
-
-      total_partner_products_amount = Math.round(total_partner_products_amount * 1.13)
-
-      $('#partner_product_total_dollar').html((total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString());
     };
 
+    function update_total_and_subtotal() {
+      total_partner_products_amount = 0;
+      subtotal = 0;
+
+      partner_products_cart.forEach(function(pp){total_partner_products_amount = total_partner_products_amount + parseInt(pp.quantity) * partner_products_menu.filter(function(i){return i.product_id == pp.product_id})[0].price });
+      subtotal = total_partner_products_amount;
+      total_partner_products_amount = Math.round(total_partner_products_amount * 1.13);
+    }
 
     $('#submit_partner_product_selection').off('click').on('click',function(){
-      var subtotal = 0;
+      
       $('#partner_products_checkout_summary tbody').empty();
       partner_products_cart.forEach(function(pp){
         if (pp.quantity == 0) {
@@ -504,20 +518,45 @@ $(function(){
         } 
         else {
         var product_info = partner_products_menu.filter(function(ppmi){return ppmi.product_id == pp.product_id})[0]
+        var pp_id = pp.product_id;
         var pp_qty = pp.quantity;
         var pp_name = product_info.name;
-        var pp_description = product_info.description;
         var pp_price = product_info.price;
         var total_price_before_hst = pp_qty * pp_price;
-        subtotal = subtotal + total_price_before_hst;
-        $('#partner_products_checkout_summary tbody').append("<tr><td>"+pp_qty+"</td><td>"+pp_name+"</td><td>"+pp_description+"</td><td>$"+(pp_price.toFixed(2)/100.00).toFixed(2).toString()+"</td><td>$"+(total_price_before_hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></<tr>")
+        $('#partner_products_checkout_summary tbody').append("<tr><td><input class='checkout_qty_input' data-product-id='"+pp_id+"' type='number' style='width:40px; text-align:center;' min='0' value='"+pp_qty+"'></input></td><td>"+pp_name+"</td><td>$"+(pp_price.toFixed(2)/100.00).toFixed(2).toString()+"</td><td class='total_item_price'>$"+(total_price_before_hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></<tr>")
         }
       });
-      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='4' class='text-right'>Subtotal</td><td>$"+(subtotal.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
+
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='3' class='text-right'>Subtotal</td><td class='subtotal'>$"+(subtotal.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
       var hst = total_partner_products_amount - subtotal;
-      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='4' class='text-right'>HST</td><td>$"+(hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
-      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='4' class='text-right'><b>Total</b></td><td><b>$"+(total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString()+"</b></td></tr>");
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='3' class='text-right'>HST</td><td class='hst'>$"+(hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='3' class='text-right'><b>Total</b></td><td><b class='total'>$"+(total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString()+"</b></td></tr>");
       $('#partner_product_cart_modal').modal({show:true});
+
+      $('.checkout_qty_input').off('change').on('change',function(){
+        var product_id = $(this).data('product-id');
+        if ($(this).val() < 0 ) {
+          $(this).val('0');
+        } 
+        var updated_qty_at_checkout = $(this).val();
+        update_partner_products_cart (product_id, updated_qty_at_checkout);
+        var product_info = partner_products_menu.filter(function(ppmi){return ppmi.product_id == product_id})[0];
+        var product_price = product_info.price;
+        var item_total_price_before_hst = updated_qty_at_checkout * product_price;
+        update_total_and_subtotal();
+
+        hst = total_partner_products_amount - subtotal;
+
+        $(this).parent().parent().find('.total_item_price').html("$"+(item_total_price_before_hst.toFixed(2)/100.00).toFixed(2).toString());
+
+        $(this).parent().parent().parent().find('.subtotal').html("$"+(subtotal.toFixed(2)/100.00).toFixed(2).toString());
+
+        $(this).parent().parent().parent().find('.hst').html("$"+(hst.toFixed(2)/100.00).toFixed(2).toString());
+
+        $(this).parent().parent().parent().find('.total').html("$"+(total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString());
+        
+      });
+
     });
 
 
@@ -2039,25 +2078,23 @@ $(function(){
                             </div> 
                             <div class="row padder m-t-none">
                                 <% @parter_products.each do |pp| %>
-                                  <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-b-sm m-r-md meal_card" style="width:300px; background-image: url('<%= pp.photos[0].thumb.url if pp.photos[0] %>'); background-repeat: no-repeat; background-size: 300px 200px;">
-                                    <div class="inner">
-                                      <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                        <h5 style="color:#555;"><%= pp.product_name %></h5>
-                                        <p style="color:#555; font-size: 12px;"><%= pp.product_description %></p>
+                                  <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-b-sm m-r-md hovereffect" style="width:300px; height: 200px;">
+                                      <img class="img-responsive" src="<%= pp.photos[0].thumb.url if pp.photos[0] %>" alt="" style="height:200px; width:300px;padding:0;">
+                                      <div class="overlay">
+                                         <h2><%= pp.product_name %></h2>
+                                         <section class="info">
+                                            <section class="content">
+                                              <p>by <%= pp.vendor.vendor_name %></p>
+                                              <p><%= pp.product_description[0...60] + (pp.product_description.length > 60 ? "..." : "") %> <a href="#">more</a></p>
+                                              <form class="add_to_cart" data-product-id="<%= pp.id %>" style="color:black">
+                                                <div class="form-group">
+                                                  <input type="number" class="qty" data-product-id="<%= pp.id %>" required="true" placeholder="Qty" min="0" style="width:60px;height:32px; float:left; margin-left: 32px; margin-right: 10px; border:1px solid white; text-align: center;">
+                                                </div>
+                                                <input type="submit" class="btn btn-s-md btn-default" style="float:left; border: none; border-radius: 0px;" value="Add to Cart">
+                                              </form>
+                                            </section>
+                                         </section>
                                       </div>
-                                      <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
-                                        <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
-                                          <div class="row">
-                                              <span class="h1 block selection_display" id="thursday_green_2_1" style="font-size:30px;color:#5cb85c;">0</span>
-                                          </div>
-                                          <div class="row row-centered">
-                                            <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
-                                              <input type="text" class="partner_product_spinner" value="0" data-product-id="<%= pp.id %>" style="opacity: 0;">
-                                            </div>
-                                          </div>
-                                        </div>                                    
-                                      </div>                                 
-                                    </div>
                                   </div>
                                 <% end %>
                             </div>
@@ -2209,7 +2246,6 @@ $(function(){
               <thead>
                 <th>QTY</th>
                 <th>PRODUCT</th>
-                <th>DESCRIPTION</th>
                 <th>UNIT PRICE</th>
                 <th>TOTAL</th>
               </thead>

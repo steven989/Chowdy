@@ -15,6 +15,8 @@ class PartnerProductSalesController < ApplicationController
             }
         end
 
+        cart.delete_if {|ci| ci[:quantity] <= 0 }
+
         if cart.blank? || cart.map {|c| c[:quantity]}.sum == 0 
             result = {result:"fail", message: "You must select at least one product"}
         else 
