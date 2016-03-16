@@ -1,17 +1,61 @@
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <h4 class="modal-title" id="myModalLabel">View details for <%= @partner_product.product_name.titlecase %></h4>
+    <h4 class="modal-title" id="myModalLabel"><%= @partner_product.product_name.titlecase %> by <%= @partner_product.vendor.vendor_name %></h4>
   </div>
   <div class="modal-body">
-    <ul id="gallery">
-        <% @photos.each do |p| %>
-            <li><img src="<%= p.url %>" alt="product photo"></li>
+
+      <div id="gallery" class="carousel slide" data-ride="carousel">
+        <!-- Indicators -->
+        <% @counter = 0 %>
+        <% @first_indicator = true %>
+        <% if @photos.length > 1 %>
+          <ol class="carousel-indicators">
+            <% @photos.each do |p| %>
+              <li data-target="#gallery" data-slide-to="<%= @counter %>" <%= "class=active" if @first_indicator %>></li>
+              <% @counter += 1 %>
+              <% @first_indicator = false %>
+            <% end %>
+          </ol>
         <% end %>
-    </ul>
+       
+        <!-- Wrapper for slides -->
+        <div class="carousel-inner">
+          <% @first = true %>
+          <% @photos.each do |p| %>
+            <div class="item <%= "active" if @first %>">
+              <img src="<%= p.url %>" alt="...">
+            </div>
+            <% @first = false %>
+          <% end %>
+        </div>
+       
+       <% if @photos.length > 1 %>
+        <!-- Controls -->
+        <a class="left carousel-control" href="#gallery" role="button" data-slide="prev">
+          <i class="fa fa-chevron-left "></i>
+        </a>
+        <a class="right carousel-control" href="#gallery" role="button" data-slide="next">
+          <i class="fa fa-chevron-right "></i>
+        </a>
+       <% end %>
+
+      </div> <!-- Carousel -->
+
+      <div class="row">
+        Product size
+        Price
+      </div>
+      <div class="row">
+        Production Description
+      </div>
+      <div class="row">
+        Vendor description
+      </div>
+      <div class="row">
+        Add to cart
+      </div>
+
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
   </div>
-<script>
-  $('#gallery').pikachoose({autoPlay:false,carousel:true}); 
-</script>
