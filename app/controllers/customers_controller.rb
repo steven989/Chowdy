@@ -76,22 +76,28 @@ protect_from_forgery :except => :payment
  
         if params[:id].downcase == "pause"
             
+            start_date = params[:pause_date_start_picker]
             end_date = params[:pause_date_picker]
             associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
-            unless end_date.blank?
 
-                adjusted_pause_end_date = end_date.to_date.wday == 1 ? end_date.to_date : Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
-                adjusted_pause_end_date = adjusted_pause_end_date == "2015-12-28".to_date ? Chowdy::Application.closest_date(1,1,adjusted_pause_end_date) : adjusted_pause_end_date #Christmas break for 2015
+            if [1,2,3,4].include? Date.today.wday
+                min_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+            else
+                min_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+            end
 
-                if [1,2,3,4].include? Date.today.wday
-                    adjusted_pause_start_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
-                else
-                    adjusted_pause_start_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
-                end
-                if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? current_customer.active?)
-                    current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel","restart").destroy_all
-                    current_customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
-                    current_user.log_activity("Requested pause until #{end_date}")
+            unless end_date.blank? || start_date.blank? 
+                unless end_date.to_date < start_date.to_date + 7 || start_date.to_date < min_start_date
+                    associated_cutoff = [associated_cutoff, Chowdy::Application.closest_date(-1,4,start_date.to_date)].max
+
+                    adjusted_pause_end_date = end_date.to_date.wday == 1 ? end_date.to_date : Chowdy::Application.closest_date(1,1,end_date) #closest Monday to the requested day
+                    adjusted_pause_start_date = [min_start_date,start_date.to_date].max #upcoming Monday
+
+                    if (adjusted_pause_end_date > adjusted_pause_start_date) && (["Yes","yes"].include? current_customer.active?)
+                        current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel","restart").destroy_all
+                        current_customer.stop_queues.create(stop_type:'pause',associated_cutoff:associated_cutoff, end_date:adjusted_pause_end_date, start_date:adjusted_pause_start_date)
+                        current_user.log_activity("Requested pause until #{end_date}")
+                    end
                 end
             end
 

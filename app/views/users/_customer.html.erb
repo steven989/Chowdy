@@ -267,19 +267,48 @@ $(function(){
     // date picker
 
     var earliest_resume_date = new Date(<%= @earliest_pause_end_date.year %>,<%= @earliest_pause_end_date.month.to_i - 1 %>,<%= @earliest_pause_end_date.day %>,0,0,0,0)
+    var earliest_pause_start_date = new Date(<%= @earliest_pause_start_date.year %>,<%= @earliest_pause_start_date.month.to_i - 1 %>,<%= @earliest_pause_start_date.day %>,0,0,0,0)
 
-    var pauseEndDate = $('#pause_date_picker').datepicker({
+    var pauseStartDate = $('#pause_date_start_picker').datepicker({
       format: "yyyy-mm-dd",
       onRender: function(date) {
-        return date.valueOf() < earliest_resume_date.valueOf() ? 'disabled' : '';
+        return (date.valueOf() < earliest_pause_start_date.valueOf() || date.getDay() != 1 ) ? 'disabled' : '';
       }
     }).on('changeDate', function() {
-        pauseDateValidate();
-        $('#pause_date_picker').datepicker('hide');
+        // pauseDateValidate();
+        var userSelectedPauseStartDate = new Date($('#pause_date_start_picker').val().split("-")[0],$('#pause_date_start_picker').val().split("-")[1]-1,$('#pause_date_start_picker').val().split("-")[2]);
+        earliest_resume_date.setDate(userSelectedPauseStartDate.getDate() + 7);
+        createResumeDatePicker ();
+        $('#pause_date_start_picker').datepicker('hide');
       });
 
-    $('#pause_date_picker').datepicker('setValue', earliest_resume_date)
+    $('#pause_date_start_picker').datepicker('setValue', earliest_pause_start_date);
 
+
+
+    function createResumeDatePicker () {
+      $('#pause_date_picker').datepicker({
+        format: "yyyy-mm-dd",
+        onRender: function(date) {
+          return (date.valueOf() < earliest_resume_date.valueOf() || date.getDay() != 1) ? 'disabled' : '';
+        }
+      }).on('changeDate', function() {
+          pauseDateValidate();
+          $('#pause_date_picker').datepicker('hide');
+        });
+
+      var existingResumeDate = new Date($('#pause_date_picker').val().split("-")[0],$('#pause_date_picker').val().split("-")[1]-1,$('#pause_date_picker').val().split("-")[2]);
+
+      existingResumeDate = (isNaN( existingResumeDate.getTime() )) ? new Date(1999,1,1) : existingResumeDate;
+
+      var resumeDateToSet = new Date(Math.max.apply(null,[existingResumeDate,earliest_resume_date]))  //get the higher of earliest resume and existing
+
+      $('#pause_date_picker').datepicker('setValue', resumeDateToSet);      
+    
+
+    }
+
+    createResumeDatePicker ();
 
     // pause date validation
     // function pauseDateValidate() {
@@ -288,7 +317,7 @@ $(function(){
     // }
 
     function pauseDateValidate() {
-      userSelectedDate = new Date($('#pause_date_picker').val().split("-")[0],$('#pause_date_picker').val().split("-")[1]-1,$('#pause_date_picker').val().split("-")[2]);
+      var userSelectedDate = new Date($('#pause_date_picker').val().split("-")[0],$('#pause_date_picker').val().split("-")[1]-1,$('#pause_date_picker').val().split("-")[2]);
       if (userSelectedDate.valueOf() < earliest_resume_date.valueOf()) {
         $("#pauseModal form input:submit").prop("disabled",true);
       } else {
@@ -683,7 +712,7 @@ $(function(){
                                 <% unless @sub_status.blank? %>
                                   <section class="row m-t-md">
                                     <div class="col-sm-12">
-                                      <div class="alert alert-success" style="margin-bottom:0 !important; font-size: 18px;">
+                                      <div class="alert alert-<%= @sub_status_color.blank? ? 'success' : @sub_status_color %>" style="margin-bottom:0 !important; font-size: 18px;">
                                         <button type="button" class="close" data-dismiss="alert">×</button>
                                         <%= raw @sub_status %>
                                       </div>
@@ -801,7 +830,7 @@ $(function(){
                               <% unless @sub_status.blank? %>
                                 <section class="row m-t-md">
                                   <div class="col-sm-12">
-                                    <div class="alert alert-success" style="margin-bottom:0 !important; font-size: 18px;">
+                                    <div class="alert alert-<%= @sub_status_color.blank? ? 'success' : @sub_status_color %>" style="margin-bottom:0 !important; font-size: 18px;">
                                       <button type="button" class="close" data-dismiss="alert">×</button>
                                       <%= raw @sub_status %>
                                     </div>
@@ -1895,9 +1924,13 @@ $(function(){
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title" id="myModalLabel">Set your <b>resume date</b> - your subscription will be paused <b>until</b> this date</h4>
+          <h4 class="modal-title" id="myModalLabel">Choose your pause start date and resume date - weekly cutoff is end of day every Thursday</h4>
         </div>
         <div class="modal-body">
+          <div class="form-group">
+            <%= label_tag 'pause_date_start_picker', "Select the pause start date" %>
+            <%= text_field_tag 'pause_date_start_picker',nil,class: "input-sm input-s form-control datepicker-input readonly", size: "16", data: {date_format: "yyyy-mm-dd"}%>
+          </div>
           <div class="form-group">
             <%= label_tag 'pause_date_picker', "Select a resume date" %>
             <%= text_field_tag 'pause_date_picker',nil,class: "input-sm input-s form-control datepicker-input readonly", size: "16", data: {date_format: "yyyy-mm-dd"}%>
@@ -1959,7 +1992,7 @@ $(function(){
           </div>
           <div class="modal-body">
             <div class="form-group">
-              <%= label_tag 'feedback', "Submit feedback to help improve Chowdy" %>
+              <p><b>Submit feedback to help improve Chowdy (for immediate assistance, please email <a href='mailto:help@chowdy'>help@chowdy.ca</a>)</b></p>
               <%= text_area_tag 'feedback',nil,class: "input-sm input-s form-control", rows: "6", placeholder: "Type your comments" %>
             </div>
           </div>
