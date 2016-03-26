@@ -151,7 +151,7 @@ class PartnerProductSalesController < ApplicationController
             end
         end
 
-        @results = @results.sort {|x,y| [b[:customer_id],b[:created_at]] <=> [a[:customer_id],a[:created_at]] }
+        @results = @results.sort {|a,b| [b[:customer_id],b[:created_at]] <=> [a[:customer_id],a[:created_at]] }
  
         respond_to do |format|
           format.html {
@@ -163,7 +163,7 @@ class PartnerProductSalesController < ApplicationController
 
     def search_order_details_by_id
         sales_id = params[:sales_id]
-        sales = PartnerProductSale.where(sales_id:sales_id)
+        sales = PartnerProductSale.where(sale_id:sales_id)
         unless sales.length != 1
             @sales_details = sales.take.partner_product_sale_details
         end

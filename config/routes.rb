@@ -37,7 +37,9 @@ Chowdy::Application.routes.draw do
   
   get  'partner_product_sales/weekly_sales_total_report' => 'partner_product_sales#weekly_sales_total_report', as: 'weekly_marketplace_totals'
   get  'partner_product_sales/weekly_sales_report' => 'partner_product_sales#weekly_sales_report', as: 'weekly_marketplace_deliveries'
-  
+  post 'partner_product_sales/search_order_by_customer' => 'partner_product_sales#search_order_by_customer', as: 'search_order_by_customer'
+  post 'partner_product_sales/search_order_details_by_id' => 'partner_product_sales#search_order_details_by_id', as: 'search_order_details_by_id'
+
   post 'partner_product_sales/order' => 'partner_product_sales#order', as: 'order_partner_product'
 
   post 'meal_selection/update' => 'meal_selections#update', as:'update_meal_choice'

@@ -1,16 +1,28 @@
 <% if @results.blank? %>
     No customer found
 <% else %>
-    <% @results.each do |r| %>
-      <tr>
-        <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{r.stripe_customer_id}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
-        <td><%= r.name %></td>
-        <td><%= r.email %></td>
-        <td><%= r.sale_id %></td>
-        <td><%= r.delivery_date.strftime("%Y-%m-%d") %></td>
-        <td><%= r.total_amount_including_hst_in_cents %></td>
-        <td><%= r.created_at.strftime("%Y-%m-%d") %></td>
-        <td><%= r.order_status %></td>
-      </tr>
-    <% end %>
+    <thead>
+        <th>Stripe</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Sales ID (Order ID)</th>
+        <th>Delivery Date</th>
+        <th>Total Sale Price including HST</th>
+        <th>Created</th>
+        <th>Order Status</th>
+    </thead>
+    <tbody>
+        <% @results.each do |r| %>
+          <tr>
+            <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{r[:stripe_customer_id]}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
+            <td><%= r[:name] %></td>
+            <td><%= r[:email] %></td>
+            <td><%= r[:sale_id] %></td>
+            <td><%= r[:delivery_date].strftime("%Y-%m-%d") %></td>
+            <td><%= r[:total_amount_including_hst_in_cents] %></td>
+            <td><%= r[:created_at].strftime("%Y-%m-%d") %></td>
+            <td><%= r[:order_status] %></td>
+          </tr>
+        <% end %>
+    </tbody>
 <% end %>
