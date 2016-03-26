@@ -12,12 +12,6 @@ class AdminActionsController < ApplicationController
 
         @result = show_everything ? Customer.all.order(created_at: :desc) : Customer.search_by_all(keyword)
 
-        puts '---------------------------------------------------'
-        puts keyword
-        puts show_everything
-        puts @result.inspect
-        puts '---------------------------------------------------'
-
         @customer_column_names = [] #make sure this section is identical to what's in users controller
 
             @customer_column_names.push("email")

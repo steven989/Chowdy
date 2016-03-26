@@ -1349,6 +1349,10 @@ $(function(){
                                   <header class="panel-heading">
                                     Vendors
                                     <button class="btn btn-s-md btn-info btn-rounded pull_system_setting_form" href="<%= new_vendor_path %>">Add vendor</button>
+                                    <%= link_to "Download total orders for #{PartnerProductSale.pull_date.strftime("%Y-%m-%d")}", weekly_marketplace_totals_path(format: :csv), class:"btn btn-s-md btn-default btn-rounded" %>
+
+                                     <%= link_to "Download deliveries for #{PartnerProductSale.pull_date.strftime("%Y-%m-%d")}", weekly_marketplace_deliveries_path(format: :csv), class:"btn btn-s-md btn-default btn-rounded" %>
+
                                   </header>
                                   <div class="table-responsive">
                                     <table id="vendors_table" class="display table table-striped m-b-none" style="font-size: 12px">

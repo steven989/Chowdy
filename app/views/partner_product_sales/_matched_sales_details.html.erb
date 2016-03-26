@@ -1,0 +1,18 @@
+<% if @sales_details.blank? %>
+    No matched Sales ID
+<% else %>
+    <% @sales_details.each do |ss| %>
+      <tr>
+        <td><%= ss.partner_product_sale.customer.email %></td>
+        <td><%= ss.partner_product_sale.customer.name %></td>
+        <td><%= ss.partner_product_sale.sales_id %></td>
+        <td><%= ss.partner_product_sale.delivery_date.strftime("%Y-%m-%d") %></td>
+        <td><%= ss.quantity %></td>
+        <td><%= ss.partner_product.product_name %></td>
+        <td><%= ss.partner_product.product_size %></td>
+        <td><%= ss.partner_product.vendor.vendor_name %></td>
+        <td><%= ss.partner_product.sale_price_before_hst_in_cents %></td>
+        <td><%= ss.created_at.strftime("%Y-%m-%d") %></td>
+      </tr>
+    <% end %>
+<% end %>
