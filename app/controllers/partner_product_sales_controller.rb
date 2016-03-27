@@ -39,19 +39,20 @@ class PartnerProductSalesController < ApplicationController
             rescue => error
                result = {result:"fail", message: "An error was encountered during the trasaction. Please try again"}
             else
-                if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received')
+                if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received',delivery_date: PartnerProductDeliveryDate.first.delivery_date)
                     cart.each do |c|
                         PartnerProductSaleDetail.create(
                             partner_product_sale_id:pps.id,
                             partner_product_id:c[:product_id],
                             quantity:c[:quantity],
                             cost_in_cents:PartnerProduct.find(c[:product_id]).cost_in_cents,
-                            sale_price_before_hst_in_cents:PartnerProduct.find(c[:product_id]).price_in_cents,
-                            delivery_date: PartnerProductDeliveryDate.first.delivery_date
+                            sale_price_before_hst_in_cents:PartnerProduct.find(c[:product_id]).price_in_cents
                         )                    
                     end
                     pps.create_unique_id
-                    result = {result:"success", message: "Your order has been placed. You will receive an email receipt from us shortly"}
+                    CustomerMailer.email_purchase_confirmation(customer,pps,total_dollars_after_hst).deliver
+                    result = {result:"success", message: "Your order has been placed. You will receive a confirmation email receipt from us shortly with your order details. If you do not receive an email within 10 minutes, please email <a href='mailto:help@chowdy.ca'>help@chowdy.ca</a> for assistance"}
+                
                 else
                     result = {result:"fail", message: "An error has occurred"}
                 end

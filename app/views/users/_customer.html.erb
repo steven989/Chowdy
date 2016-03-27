@@ -581,6 +581,9 @@ $(function(){
           _this.removeClass('disabled').html('Order');
           partner_products_cart = [];
           total_partner_products_amount = 0;
+          subtotal = 0;
+          $('#partner_product_total_dollar').html("$0.00");
+
         } else {
           if ($('#partner_product_success_alert').hasClass('hidden')) {} else {$('#partner_product_success_alert').addClass('hidden')};
           $('#partner_product_purchase_alert').html(data.message);
@@ -2239,7 +2242,7 @@ $(function(){
       <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Marketplace Cart</h4>
+            <h4 class="modal-title" id="myModalLabel">Marketplace Cart (Delivery on <%= @marketplace_delivery_date %>)</h4>
           </div>
           <div class="modal-body">
             <table class="table" id="partner_products_checkout_summary" style="font-size:12px;">

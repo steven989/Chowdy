@@ -218,6 +218,7 @@ class UsersController < ApplicationController
         else
 
             @current_customer = current_user.customer
+            @marketplace_delivery_date = PartnerProductDeliveryDate.first.delivery_date.strftime("%A %b. %e, %Y")
             @display_cancel = true
             @display_pause = true
             @display_restart = true
