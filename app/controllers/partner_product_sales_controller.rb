@@ -176,4 +176,28 @@ class PartnerProductSalesController < ApplicationController
         end  
     end
 
+    def edit_header
+        
+    end
+
+    def update_header
+        
+    end
+    
+    def destroy_header
+        
+    end
+
+    def edit_detail
+        
+    end
+
+    def update_detail
+        
+    end
+    
+    def destroy_detail
+        
+    end
+
 end
