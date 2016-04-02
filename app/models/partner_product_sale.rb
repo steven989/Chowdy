@@ -20,7 +20,7 @@ class PartnerProductSale < ActiveRecord::Base
     end
 
     def self.pull_date
-        delivery_date = Chowdy::Application.closest_date(2,1)
+        delivery_date = Chowdy::Application.closest_date(1,1)
         delivery_date
     end
 

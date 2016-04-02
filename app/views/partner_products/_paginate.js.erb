@@ -1,0 +1,9 @@
+$('#pagination_section_wrapper').html("<%= j render partial: 'partner_products/paginate_content', locals: {partner_products:@parter_products, page: @page} %>");
+var new_items_to_add = <%= @parter_products_menu.to_json.html_safe %>;
+
+new_items_to_add.forEach(function(nita){
+    var matched_product = partner_products_menu.filter(function(ppm){ return ppm.product_id == nita.product_id });
+    if (matched_product.length == 0 ) {
+        partner_products_menu.push(nita);
+    }
+});

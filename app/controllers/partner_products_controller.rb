@@ -22,6 +22,19 @@ class PartnerProductsController < ApplicationController
       end
     end
 
+    def paginate
+      @parter_products = PartnerProduct.order(created_at: :desc).page(params[:page])
+      @page = params[:page]
+      @parter_products_menu = @parter_products.map{|pp| {product_id:pp.id, price:pp.price_in_cents, name:pp.product_name, description:pp.product_description}}
+      
+      respond_to do |format|
+        format.js {
+          render partial: 'paginate'
+        }
+      end
+    end
+
+
     def new
         @vendor = Vendor.where(id: params[:vendor_id]).take
         @partner_product = @vendor.partner_products.new

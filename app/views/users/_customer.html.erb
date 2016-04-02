@@ -89,22 +89,27 @@ $(function(){
       $('#subscription_change_alert').removeClass("hidden");
     };
 
+
     // general populate modal
 
-    $('.pull_modal').off('click').on('click',function(){
-      event.preventDefault();
-      $.ajax({
-        url: $(this).attr('href'),
-        type: 'GET',
-        dataType: 'HTML'
-      }).done(function(data){
-          $('#generalModal .modal-content').html(data);
-          $('#generalModal').modal({show:true});
-          $("#generalModal").animate({
-              scrollTop: 0
-          }, 500);
+    function pull_modal_listener() {
+      $('.pull_modal').off('click').on('click',function(){
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr('href'),
+          type: 'GET',
+          dataType: 'HTML'
+        }).done(function(data){
+            $('#generalModal .modal-content').html(data);
+            $('#generalModal').modal({show:true});
+            $("#generalModal").animate({
+                scrollTop: 0
+            }, 500);
+        });
       });
-    });
+    }
+
+    pull_modal_listener();
 
     // star rating
 
@@ -428,13 +433,16 @@ $(function(){
 
     // marketplace 
 
-    $('.add_to_cart').off("submit").on("submit",function(){
-      event.preventDefault();
-      var product_id_chosen = $(this).data("product-id");
-      update_partner_products_cart(product_id_chosen,$(this).find('.qty').val());
-      $(this).find('input:submit').val('Update Cart');
+    function partner_product_card_listener() {
+      $('.add_to_cart').off("submit").on("submit",function(){
+        event.preventDefault();
+        var product_id_chosen = $(this).data("product-id");
+        update_partner_products_cart(product_id_chosen,$(this).find('.qty').val());
+        $(this).find('input:submit').val('Update Cart');
+      });
+    }
 
-    });
+    partner_product_card_listener();
 
     function update_partner_products_cart (product_id, number) {
       var cart_item = partner_products_cart.filter(function(ci){return ci.product_id == product_id});
@@ -727,6 +735,37 @@ $(function(){
       $('#disp_reg').html(parseInt($('#monday_reg_hidden').val())+parseInt($('#monday_grn_hidden').val())+parseInt($('#thursday_reg_hidden').val())+parseInt($('#thursday_grn_hidden').val()));
       $('#disp_grn').html(parseInt($('#monday_grn_hidden').val())+parseInt($('#thursday_grn_hidden').val()));
     };
+
+    function pagination_listener() {
+      $('.pagination a').off("click").on("click",function(){
+        event.preventDefault();
+
+        $.ajax({
+          url: $(this).attr('href'),
+          type: 'GET',
+          dataType: 'script'
+        }).done(function(data){
+          pull_modal_listener();
+          partner_product_card_listener();
+          pagination_listener();
+
+
+          $('.add_to_cart input[type=number]').each(function(){
+              var product_id = $(this).data('product-id');
+              var product_in_cart = partner_products_cart.filter(function(ppc){return ppc.product_id == product_id});
+
+              if (product_in_cart.length > 0) {
+                  var quantity = product_in_cart[0].quantity;
+                  $(this).val(quantity);
+                  console.log($(this).parent().find('input[type=submit]'));
+                  $(this).closest('form').find('input[type=submit]').val('Update Cart');
+              }
+          });
+
+        });
+      });
+    }
+    pagination_listener();
 });
 
 </script>
@@ -2079,28 +2118,33 @@ $(function(){
                               <div class="alert alert-success hidden" style="margin-bottom:0 !important;font-size: 18px;" id="partner_product_success_alert">
                               </div>
                             </div> 
-                            <div class="row padder m-t-none">
-                                <% @parter_products.each do |pp| %>
-                                  <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-b-sm m-r-md hovereffect" style="width:300px; height: 200px; padding:0; border-radius:5px; overflow:hidden; z-index:2;">
-                                      <img class="img-responsive" src="<%= pp.photos[0].thumb.url if pp.photos[0] %>" alt="" style=" width:300px;max-width:300px;">
-                                      <div class="overlay">
-                                         <h2><%= pp.product_name %></h2>
-                                         <section class="info">
-                                            <section class="content">
-                                              <p>by <%= pp.vendor.vendor_name %> ($<%= (pp.price_in_cents.to_f / 100).round(2).to_s %> + HST)</p>
-                                              <p><%= pp.product_description[0...60] + (pp.product_description.length > 60 ? "..." : "") %> <a class="pull_modal" href="<%= partner_product_path(pp) %>">more</a></p>
-                                              <form class="add_to_cart" data-product-id="<%= pp.id %>" style="color:black">
-                                                <div class="form-group">
-                                                  <input type="number" class="qty" data-product-id="<%= pp.id %>" required="true" placeholder="Qty" min="0" style="width:60px;height:32px; float:left; margin-left: 32px; margin-right: 10px; border:1px solid white; text-align: center;">
-                                                </div>
-                                                <input type="submit" class="btn btn-s-md btn-default" style="float:left; border: none; border-radius: 0px;" value="Add to Cart">
-                                              </form>
-                                            </section>
-                                         </section>
-                                      </div>
-                                  </div>
-                                <% end %>
-                            </div>
+                            <section id="pagination_section_wrapper">
+                              <div class="row padder m-t-none">
+                                  <% @parter_products.each do |pp| %>
+                                    <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-b-sm m-r-md hovereffect" style="width:300px; height: 200px; padding:0; border-radius:5px; overflow:hidden; z-index:2;">
+                                        <img class="img-responsive" src="<%= pp.photos[0].thumb.url if pp.photos[0] %>" alt="" style=" width:300px;max-width:300px;">
+                                        <div class="overlay">
+                                           <h2><%= pp.product_name %></h2>
+                                           <section class="info">
+                                              <section class="content">
+                                                <p>by <%= pp.vendor.vendor_name %> ($<%= (pp.price_in_cents.to_f / 100).round(2).to_s %> + HST)</p>
+                                                <p><%= pp.product_description[0...60] + (pp.product_description.length > 60 ? "..." : "") %> <a class="pull_modal" href="<%= partner_product_path(pp) %>">more</a></p>
+                                                <form class="add_to_cart" data-product-id="<%= pp.id %>" style="color:black">
+                                                  <div class="form-group">
+                                                    <input type="number" class="qty" data-product-id="<%= pp.id %>" required="true" placeholder="Qty" min="0" style="width:60px;height:32px; float:left; margin-left: 32px; margin-right: 10px; border:1px solid white; text-align: center;">
+                                                  </div>
+                                                  <input type="submit" class="btn btn-s-md btn-default" style="float:left; border: none; border-radius: 0px;" value="Add to Cart">
+                                                </form>
+                                              </section>
+                                           </section>
+                                        </div>
+                                    </div>
+                                  <% end %>
+                              </div>
+                              <div class="row padder m-t-none">
+                                <%= paginate PartnerProduct.all.order(created_at: :desc).page(1), params: {controller: :partner_products, action: :paginate} %>
+                              </div>
+                            </section>
                             <div class="row m-t-lg padder">
                               <div class="well col-lg-5">
                                 <span><b>Total amount: $<span id="partner_product_total_dollar">0.00</span> (including HST)</b></span>

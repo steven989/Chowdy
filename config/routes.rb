@@ -49,6 +49,7 @@ Chowdy::Application.routes.draw do
   resources :system_settings
   resources :vendors
   resources :partner_products
+  get  'partner_product/paginate' => 'partner_products#paginate', as:'paginate_partner_products'
   get  'partner_product/:id/remove_photos' => 'partner_products#remove_photos', as:'remove_partner_product_photos'
 
   resources :scheduled_tasks
