@@ -1,12 +1,20 @@
 
 namespace :customers do
-    desc 'push system start date to the next next Monday'
+    desc 'push system start date to the next Monday'
     task :push_start_date, [:number_of_weeks] => [:environment] do |t, args|        
         new_start_date = Chowdy::Application.closest_date(args[:number_of_weeks],1)
         new_start_date = new_start_date == "2015-12-28".to_date ? Chowdy::Application.closest_date(1,1,new_start_date) : new_start_date #Christmas break for 2015
         if StartDate.first.update(start_date: new_start_date)        
             puts "Start date pushed to #{Chowdy::Application.closest_date(args[:number_of_weeks],1)}" 
             
+        end
+    end
+
+    desc 'push Marketplace delivery date to the next  Monday'
+    task :push_marketplace_delivery_date, [:number_of_weeks] => [:environment] do |t, args|        
+        new_start_date = Chowdy::Application.closest_date(args[:number_of_weeks],1)
+        if PartnerProductDeliveryDate.first.update(delivery_date: new_start_date)        
+            puts "Delivery date pushed to #{Chowdy::Application.closest_date(args[:number_of_weeks],1)}" 
         end
     end
 

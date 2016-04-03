@@ -74,6 +74,9 @@ Chowdy::Application.routes.draw do
   get 'start_date/edit' => 'start_dates#edit', as: 'edit_start_date'
   put 'start_date/update' => 'start_dates#update', as: 'update_start_date'
 
+  get 'partner_product_delivery_dates/edit' => 'partner_product_delivery_dates#edit', as: 'edit_partner_product_delivery_date'
+  put 'partner_product_delivery_dates/update' => 'partner_product_delivery_dates#update', as: 'update_partner_product_delivery_date'
+
   post 'redeem_promo' => 'promotion_redemptions#redeem', as: 'redeem_promo'
 
   get 'gifts/:id/view_redemption' => 'gifts#view_redemption', as: 'view_redemption'

@@ -1,0 +1,2 @@
+module PartnerProductDeliveryDatesHelper
+end

@@ -1,0 +1,15 @@
+<%= form_for @delivery_date, url: update_partner_product_delivery_date_path, method: :put do |f| %>
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Change delivery date</h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+        <%= f.label :delivery_date %>
+        <%= f.date_field :delivery_date, class: "form-control"  %>
+    </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+    <%= f.submit class: "btn btn-md btn-default m-t-sm" %>
+  </div>
+<% end %>
