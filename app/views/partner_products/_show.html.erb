@@ -41,18 +41,44 @@
 
       </div> <!-- Carousel -->
 
-      <div class="row">
-        Product size
-        Price
+      <div class="row padder m-t-md">
+        <div class="col-sm-12 b-t padder padder-v">
+          <b>Price</b><br> 
+          $<%= (@partner_product.price_in_cents.to_f / 100).round(2).to_s %> + HST    
+        </div>
       </div>
-      <div class="row">
-        Production Description
+
+      <div class="row padder">
+        <div class="col-sm-12 b-t padder padder-v">
+          <b>Size</b><br>
+          <%= @partner_product.product_size %>
+        </div>
       </div>
-      <div class="row">
-        Vendor description
+
+      <div class="row padder">
+        <div class="col-sm-12 b-t padder padder-v">
+          <b>What we love about it</b><br>
+          <%= @partner_product.product_description %>
+        </div>
       </div>
-      <div class="row">
-        Add to cart
+
+      <div class="row padder">
+        <div class="col-sm-12 b-t padder padder-v">
+          <b>About <%= @partner_product.vendor.vendor_name %></b><br> 
+          <%= @partner_product.vendor.vendor_description %>
+        </div>
+      </div>
+
+
+      <div class="row padder">
+        <div class="col-sm-12 b-t padder padder-v">
+          <form class="add_to_cart" data-product-id="<%= @partner_product.id %>" style="color:black">
+            <div class="form-group">
+              <input type="number" class="qty" data-product-id="<%= @partner_product.id %>" required="true" placeholder="Qty" min="0" style="width:100px;height:34px; float:left; margin-right: 10px; border:1px solid #ccc; text-align: center;">
+            </div>
+            <input type="submit" class="btn btn-s-md btn-default" style="float:left; border: 1px solid #f0ad4e; background-color:#f0ad4e; border-radius: 5px; color: white !important;" value="Add to Cart">
+          </form>
+        </div>
       </div>
 
   </div>
