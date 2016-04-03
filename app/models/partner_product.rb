@@ -9,4 +9,5 @@ class PartnerProduct < ActiveRecord::Base
         PartnerProduct.joins{partner_product_order_summaries.outer}.where{((partner_product_order_summaries.delivery_date == PartnerProductDeliveryDate.first.delivery_date) | (partner_product_order_summaries.delivery_date == nil)) & ((partner_product_order_summaries.ordered_quantity <= partner_products.max_quantity) | (partner_product_order_summaries.ordered_quantity == nil)) & (partner_products.available == true)}
     end
 
+
 end

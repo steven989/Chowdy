@@ -26,7 +26,7 @@ class PartnerProductSalesController < ApplicationController
             charge_description = "#{cart.map{|c| c[:quantity].to_s+' '+c[:product_name]+' from '+c[:vendor_name]+': unit price $'+((c[:price].to_f/100).round(2).to_s)}.join(', ')}"
 
             begin
-                Stripe::Charge.create(
+                charge = Stripe::Charge.create(
                     amount: total_dollars_after_hst,
                     currency: 'CAD',
                     customer: customer.stripe_customer_id,
@@ -39,7 +39,7 @@ class PartnerProductSalesController < ApplicationController
             rescue => error
                result = {result:"fail", message: "An error was encountered during the trasaction. Please try again"}
             else
-                if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received',delivery_date: PartnerProductDeliveryDate.first.delivery_date)
+                if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received',delivery_date: PartnerProductDeliveryDate.first.delivery_date, stripe_charge_id:[charge.id])
                     cart.each do |c|
                         PartnerProductSaleDetail.create(
                             partner_product_sale_id:pps.id,
