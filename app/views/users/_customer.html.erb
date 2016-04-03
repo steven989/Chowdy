@@ -2142,7 +2142,7 @@ $(function(){
                                   <% end %>
                               </div>
                               <div class="row padder m-t-none">
-                                <%= paginate PartnerProduct.all.order(created_at: :desc).page(1), params: {controller: :partner_products, action: :paginate} %>
+                                <%= paginate PartnerProduct.products_to_display.page, params: {controller: :partner_products, action: :paginate} %>
                               </div>
                             </section>
                             <div class="row m-t-lg padder">
@@ -2151,7 +2151,7 @@ $(function(){
                                 <br>
                                   <button class="btn btn-s-md btn-success m-t-sm disabled" id="submit_partner_product_selection">View Cart and Checkout</button>
                                   <br>
-                                  <span class="m-t-sm" style="display:block;">Order will be delivered on Monday xxxx-xx-xx</span>                            
+                                  <span class="m-t-sm" style="display:block;">Order will be delivered on <%= @marketplace_delivery_date %></span>                            
                               </div>
                             </div>
                           </section>

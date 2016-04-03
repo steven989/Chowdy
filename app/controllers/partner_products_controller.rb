@@ -23,7 +23,7 @@ class PartnerProductsController < ApplicationController
     end
 
     def paginate
-      @parter_products = PartnerProduct.order(created_at: :desc).page(params[:page])
+      @parter_products = PartnerProduct.products_to_display.order(created_at: :desc).page(params[:page])
       @page = params[:page]
       @parter_products_menu = @parter_products.map{|pp| {product_id:pp.id, price:pp.price_in_cents, name:pp.product_name, description:pp.product_description}}
       
@@ -38,6 +38,7 @@ class PartnerProductsController < ApplicationController
     def new
         @vendor = Vendor.where(id: params[:vendor_id]).take
         @partner_product = @vendor.partner_products.new
+        @method = "POST"
 
         respond_to do |format|
           format.html {
@@ -50,6 +51,7 @@ class PartnerProductsController < ApplicationController
         vendor = Vendor.where(id:params[:partner_product][:vendor_id]).take
         partner_product = vendor.partner_products.new(partner_product_params)
         partner_product.photos = params[:photos].values unless params[:photos].blank?
+        
 
         if partner_product.save
           status = "success"
@@ -68,6 +70,7 @@ class PartnerProductsController < ApplicationController
 
     def edit
         @edit = true
+        @method = "PUT"
         @vendor = Vendor.where(id: params[:vendor_id]).take
         @partner_product = PartnerProduct.find(params[:id])
         @photos_exist = @partner_product.photos?
@@ -133,7 +136,7 @@ class PartnerProductsController < ApplicationController
     private
 
     def partner_product_params
-      params.require(:partner_product).permit(:vendor_id,:product_id,:product_name,:product_description,:product_size,:vendor_product_sku,:vendor_product_upc,:cost_in_cents,:suggested_retail_price_in_cents,:price_in_cents)
+      params.require(:partner_product).permit(:vendor_id,:product_id,:product_name,:product_description,:product_size,:vendor_product_sku,:vendor_product_upc,:cost_in_cents,:suggested_retail_price_in_cents,:price_in_cents,:max_quantity,:available)
     end
 
 

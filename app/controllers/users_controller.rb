@@ -218,7 +218,7 @@ class UsersController < ApplicationController
         else
 
             @current_customer = current_user.customer
-            @marketplace_delivery_date = PartnerProductDeliveryDate.first.delivery_date.strftime("%A %b. %e, %Y")
+            @marketplace_delivery_date = PartnerProductDeliveryDate.first.delivery_date.strftime("%A %B %e, %Y")
             @display_cancel = true
             @display_pause = true
             @display_restart = true
@@ -226,7 +226,7 @@ class UsersController < ApplicationController
             @display_meal_selection = @current_customer.recurring_delivery.blank? ? false : true
             @active_gift = @current_customer.gifts.order(id: :desc).limit(1).take
 
-            @parter_products = PartnerProduct.order(created_at: :desc).page(1)
+            @parter_products = PartnerProduct.products_to_display.order(created_at: :desc).page(1)
             @parter_products_menu = @parter_products.map{|pp| {product_id:pp.id, price:pp.price_in_cents, name:pp.product_name, description:pp.product_description}}
 
 

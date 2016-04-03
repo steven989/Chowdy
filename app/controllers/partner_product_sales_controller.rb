@@ -48,6 +48,14 @@ class PartnerProductSalesController < ApplicationController
                             cost_in_cents:PartnerProduct.find(c[:product_id]).cost_in_cents,
                             sale_price_before_hst_in_cents:PartnerProduct.find(c[:product_id]).price_in_cents
                         )                    
+                    
+                        if PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).length == 1
+                            quantity = PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).take.ordered_quantity + c[:quantity]
+                            PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).take.update_attributes(ordered_quantity:quantity)
+                        elsif PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).length == 0
+                            PartnerProductOrderSummary.create(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date,ordered_quantity:c[:quantity])
+                        end
+
                     end
                     pps.create_unique_id
                     CustomerMailer.email_purchase_confirmation(customer,pps,total_dollars_after_hst).deliver
@@ -121,7 +129,7 @@ class PartnerProductSalesController < ApplicationController
             pps.partner_product_sale_details.each do |ppsd|
                 
                 if products_to_order.select {|pto| pto[:product_id] == ppsd.partner_product_id}.length > 0
-                    products_to_order.map! {|e| e[:product_id] == ppsd.partner_product_id ? {product_id:ppsd.partner_product_id, product_name:ppsd.partner_product.product_name,product_size:ppsd.partner_product.product_size,vendor_product_sku:ppsd.partner_product.vendor_product_sku, vendor:ppsd.partner_product.vendor.vendor_name, cost:e[:cost]+ppsd.partner_product.cost_in_cents, quantity:e[:quantity]+ppsd.quantity} : e}
+                    products_to_order.map! {|e| e[:product_id] == ppsd.partner_product_id ? {product_id:ppsd.partner_product_id, product_name:ppsd.partner_product.product_name,product_size:ppsd.partner_product.product_size,vendor_product_sku:ppsd.partner_product.vendor_product_sku, vendor:ppsd.partner_product.vendor.vendor_name, cost:e[:cost].to_i+ppsd.partner_product.cost_in_cents.to_i, quantity:e[:quantity]+ppsd.quantity} : e}
                 else
                     products_to_order.push({product_id:ppsd.partner_product_id, product_name:ppsd.partner_product.product_name,product_size:ppsd.partner_product.product_size,vendor_product_sku:ppsd.partner_product.vendor_product_sku, vendor:ppsd.partner_product.vendor.vendor_name, cost:ppsd.partner_product.cost_in_cents, quantity:ppsd.quantity})
                 end
