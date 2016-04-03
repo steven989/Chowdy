@@ -17,6 +17,7 @@ class PartnerProductSale < ActiveRecord::Base
             code_candidate = first_letters + six_digit + rand_letters
         end
         self.update_attribute(:sale_id, code_candidate)
+        code_candidate
     end
 
     def self.pull_date

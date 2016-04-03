@@ -57,10 +57,10 @@ class PartnerProductSalesController < ApplicationController
                         end
 
                     end
-                    pps.create_unique_id
+                    purchase_id = pps.create_unique_id
+                    current_user.log_activity("Customer made purchase from marketplace. Order ID: #{purchase_id}")
                     CustomerMailer.email_purchase_confirmation(customer,pps,total_dollars_after_hst).deliver
                     result = {result:"success", message: "Your order has been placed. You will receive a confirmation email receipt from us shortly with your order details. If you do not receive an email within 10 minutes, please email <a href='mailto:help@chowdy.ca'>help@chowdy.ca</a> for assistance"}
-                
                 else
                     result = {result:"fail", message: "An error has occurred"}
                 end
