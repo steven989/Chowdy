@@ -104,6 +104,7 @@ class CustomerMailer < ActionMailer::Base
     end    
   end
 
+
   def gift_sender_refund_notification(sender_email,sender_name,recipient_name)
     @sender_name = sender_name.titlecase
     @recipient_name = recipient_name.titlecase
@@ -225,6 +226,20 @@ class CustomerMailer < ActionMailer::Base
         format.text
     end 
   end
+
+  def email_purchase_confirmation(customer,order,total_dollars)
+    @customer = customer
+    @order = order
+    @total_dollars = total_dollars
+    @delivery_date = PartnerProductDeliveryDate.first.delivery_date.strftime("%A %b. %e, %Y")
+    mail(
+      to: @customer.email, 
+      subject: 'Confirmation of Chowdy Marketplace Purchase'
+      ) do |format|
+        format.html
+    end 
+  end
+
 
   def rescued_error(customer=nil,message)
     @customer = customer

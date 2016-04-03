@@ -58,8 +58,27 @@ $(function(){
               data: $(this).serialize(),
               dataType: 'html'
             }).done(function(data){
-              console.log(data);
               $('#customer_list_body').html(data);
+              _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
+              formRetrievalAjax();
+            });        
+      })
+
+      $('.search_order_on_server').off('submit').on('submit',function(){
+            event.preventDefault();
+            var _this = $(this);
+            var submit_button_original_value = $(this).find('.form_submit').attr('value');
+            var submit_button_width = $(this).find('.form_submit').outerWidth();
+            $(this).find('.form_submit').css('width',submit_button_width);
+            $(this).find('.form_submit').addClass('disabled').attr('value','Wait...');
+
+            $.ajax({
+              url: $(this).attr('action'),
+              type: 'POST',
+              data: $(this).serialize(),
+              dataType: 'html'
+            }).done(function(data){
+              $('#order_search_result').html('').html(data);
               _this.find('.form_submit').removeClass('disabled').attr('value',submit_button_original_value);
               formRetrievalAjax();
             });        
@@ -109,6 +128,13 @@ $(function(){
         searching: false,
         scrollX: true,
         paging: false
+       });
+
+       $('#vendors_table').DataTable({
+        searching: true,
+        scrollX: true,
+        paging: true,
+        order: [[3, "asc"]]
        });
 
 
@@ -254,6 +280,13 @@ $(function(){
                             <i class="fa fa-gift">
                             </i>
                             <span class="font-bold">Gifts</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#partner_products" class="b-b padder-v" data-toggle="tab">
+                            <i class="fa fa-truck">
+                            </i>
+                            <span class="font-bold">Marketplace</span>
                           </a>
                         </li>
                         <li>
@@ -1316,6 +1349,133 @@ $(function(){
                             </section>                            
                         </section>
 
+                    </section> 
+
+                    <section class="tab-pane" id="partner_products" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder padder-v">
+                              <% if flash[:notice_partner_products] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] == "success" ? "success" : "danger" %>" style="margin-bottom:0 !important;">
+                                      <%= flash[:notice_partner_products] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    Vendors
+                                    <button class="btn btn-s-md btn-info btn-rounded pull_system_setting_form" href="<%= new_vendor_path %>">Add vendor</button>
+
+                                    <button class="btn btn-s-md btn-default btn-rounded pull_system_setting_form" href="<%= edit_partner_product_delivery_date_path %>">Current delivery date: <%= PartnerProductDeliveryDate.first.delivery_date.strftime("%Y-%m-%d") %>)</button>
+
+
+                                    <%= link_to "Total orders for #{PartnerProductSale.pull_date.strftime("%Y-%m-%d")}", weekly_marketplace_totals_path(format: :csv), class:"btn btn-s-md btn-default btn-rounded" %>
+
+                                     <%= link_to "Deliveries for #{PartnerProductSale.pull_date.strftime("%Y-%m-%d")}", weekly_marketplace_deliveries_path(format: :csv), class:"btn btn-s-md btn-default btn-rounded" %>
+                                     <a href="#search_order" class="btn btn-s-md btn-default btn-rounded" data-toggle="tab">Search Order</a>
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="vendors_table" class="display table table-striped m-b-none" style="font-size: 12px">
+                                      <thead>
+                                        <tr>
+                                          <th>View Products</th>
+                                          <th>Edit</th>
+                                          <th>Delete</th>
+                                          <th>ID</th>
+                                          <th>External ID</th>
+                                          <th>Name</th>
+                                          <th>Description</th>
+                                          <th>Contact Name</th>
+                                          <th>Phone</th>
+                                          <th>Email</th>
+                                          <th>Alternative Contact Name</th>
+                                          <th>Alternative Phone</th>
+                                          <th>Alternative Email</th>
+                                          <th>Address</th>
+                                          <th>Alternative Address</th>
+                                          <th>Created At</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <% @vendors.each do |v| %>
+                                          <tr>
+                                            <td><button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= partner_products_path+'?vendor_id='+v.id.to_s %>" style="min-width: 0px;width: 60px;">View</button></td>
+                                            <td>
+                                              <button class="btn btn-s-md btn-warning btn-rounded pull_system_setting_form" href="<%= edit_vendor_path(v) %>" style="min-width: 0px;width: 60px;">Edit</button></td>
+                                            <td><%= link_to "Delete", vendor_path(v), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style: "min-width: 0px;width: 60px;" %></td>
+                                            <td><%= v.id %></td>
+                                            <td><%= v.ext_vendor_id %></td>
+                                            <td><%= v.vendor_name %></td>
+                                            <td><%= v.vendor_description %></td>
+                                            <td><%= v.contact_name %></td>
+                                            <td><%= v.phone_number %></td>
+                                            <td><%= v.email_address %></td>
+                                            <td><%= v.alt_contact_name %></td>
+                                            <td><%= v.alt_phone_number %></td>
+                                            <td><%= v.alt_email_address %></td>
+                                            <td><%= v.vendor_address %></td>
+                                            <td><%= v.alt_vendor_address %></td>
+                                            <td><%= v.created_at.strftime("%Y-%m-%d") %></td>
+                                          </tr>
+                                        <% end %>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
+                            </section>                            
+                        </section>
+
+                    </section> 
+
+                    <section class="tab-pane" id="search_order" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder padder-v">
+                              <section class="row padder">
+                                <div class="panel panel-default">
+                                  <header class="panel-heading">
+                                    <div class="row">
+                                      <div class="col-lg-2 col-md-2 col-sm-4 col-xs-5">
+                                        <a href="#partner_products" class="btn btn-s-md btn-warning btn-rounded" data-toggle="tab">Back</a>
+                                      </div>
+                                      <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4" style="height: 34px;">
+                                        <%= form_tag search_order_by_customer_path, :method => :post, class: "m-b-none search_order_on_server" do %>
+                                        <div class="row">
+                                          <div class="col-sm-5">
+                                            <%= text_field_tag :keyword, nil, placeholder:"Search by customer", class: "form-control" %>                              
+                                          </div>
+                                          <div class="col-sm-2">
+                                            <%= submit_tag "Search", class:"form_submit btn btn-s-md btn-default btn-rounded" %>
+                                          </div>
+                                        </div>
+                                        <% end %>                                        
+                                      </div>
+
+                                      <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4" style="height: 34px;">
+                                        <%= form_tag search_order_details_by_id_path, :method => :post, class: "m-b-none search_order_on_server" do %>
+                                        <div class="row">
+                                          <div class="col-sm-5">
+                                            <%= text_field_tag :sales_id, nil, placeholder:"Search by Sales ID", class: "form-control" %>                              
+                                          </div>
+                                          <div class="col-sm-2">
+                                            <%= submit_tag "Search", class:"form_submit btn btn-s-md btn-default btn-rounded" %>
+                                          </div>
+                                        </div>
+                                        <% end %>                                        
+                                      </div>
+                                    </div>
+                                  </header>
+                                  <div class="table-responsive">
+                                    <table id="order_search_result" class="display table table-striped m-b-none" style="font-size: 12px">
+                                    </table>
+                                  </div>
+                                </div> 
+                              </section>
+                            </section>
+                        </section>
                     </section> 
 
 

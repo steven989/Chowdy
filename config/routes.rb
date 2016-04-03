@@ -11,7 +11,6 @@ Chowdy::Application.routes.draw do
   get "user_sessions/destroy"
   get 'login' => 'user_sessions#new', :as => :login
   get 'logout' => 'user_sessions#destroy', :as => :logout
-  match '/:id' => "shortener/shortened_urls#show", via: [:get]
 
   post 'customers/create' => 'customers#create', as: 'create_customer'
   post 'customers/failed_invoice' => 'customers#fail', as: 'failed_invoice'
@@ -35,13 +34,24 @@ Chowdy::Application.routes.draw do
   get 'admin_action/impersonate_user/:id' => 'admin_actions#impersonate', as: 'impersonate_user'
   get 'admin_action/get_user_activity/:id' => 'admin_actions#get_user_activity', as: 'get_user_activity'
   post 'admin_action/search_customer' => 'admin_actions#search_customer', as: 'search_customer'
+  
+  get  'partner_product_sales/weekly_sales_total_report' => 'partner_product_sales#weekly_sales_total_report', as: 'weekly_marketplace_totals'
+  get  'partner_product_sales/weekly_sales_report' => 'partner_product_sales#weekly_sales_report', as: 'weekly_marketplace_deliveries'
+  post 'partner_product_sales/search_order_by_customer' => 'partner_product_sales#search_order_by_customer', as: 'search_order_by_customer'
+  post 'partner_product_sales/search_order_details_by_id' => 'partner_product_sales#search_order_details_by_id', as: 'search_order_details_by_id'
 
+  post 'partner_product_sales/order' => 'partner_product_sales#order', as: 'order_partner_product'
 
   post 'meal_selection/update' => 'meal_selections#update', as:'update_meal_choice'
   get  'meal_selections/view' => 'meal_selections#view_selection', as:'view_meals_selection'
 
   resources :password_resets
   resources :system_settings
+  resources :vendors
+  resources :partner_products
+  get  'partner_product/paginate' => 'partner_products#paginate', as:'paginate_partner_products'
+  get  'partner_product/:id/remove_photos' => 'partner_products#remove_photos', as:'remove_partner_product_photos'
+
   resources :scheduled_tasks
   resources :menus, only: [:update, :show]
   get 'menu/:id/pull_rating_details' => 'menus#pull_rating_details', as: 'pull_rating_details'
@@ -64,6 +74,9 @@ Chowdy::Application.routes.draw do
   get 'start_date/edit' => 'start_dates#edit', as: 'edit_start_date'
   put 'start_date/update' => 'start_dates#update', as: 'update_start_date'
 
+  get 'partner_product_delivery_dates/edit' => 'partner_product_delivery_dates#edit', as: 'edit_partner_product_delivery_date'
+  put 'partner_product_delivery_dates/update' => 'partner_product_delivery_dates#update', as: 'update_partner_product_delivery_date'
+
   post 'redeem_promo' => 'promotion_redemptions#redeem', as: 'redeem_promo'
 
   get 'gifts/:id/view_redemption' => 'gifts#view_redemption', as: 'view_redemption'
@@ -71,6 +84,8 @@ Chowdy::Application.routes.draw do
   get 'gifts/:id/resend_recipient_confirmation_form' => 'gifts#resend_recipient_confirmation_form', as: 'resend_recipient_confirmation_form'
   post 'gifts/:id/resend_sender_confirmation' => 'gifts#resend_sender_confirmation', as: 'resend_sender_confirmation'
   post 'gifts/:id/resend_recipient_confirmation' => 'gifts#resend_recipient_confirmation', as: 'resend_recipient_confirmation'
+
+  match '/:id' => "shortener/shortened_urls#show", via: [:get]
 
   # You can have the root of your site routed with "root"
   # root 'welcome#index'

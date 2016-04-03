@@ -31,6 +31,7 @@ class UsersController < ApplicationController
             current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
             active_nonpaused_customers = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:current_pick_up_date)
             @gifts = Gift.all.order(created_at: :desc)
+            @vendors = Vendor.all.order(vendor_name: :asc)
 
             @current_customers_count = MealStatistic.retrieve("total_customer")
             @next_week_customers_count = MealStatistic.retrieve("total_customer_next_week")
@@ -215,14 +216,18 @@ class UsersController < ApplicationController
             current_user.log_activity("chef dashboard")
             @menu = Menu.all.order(production_day: :asc)
         else
-
+            @display_marketplace_to_customers = true
             @current_customer = current_user.customer
+            @marketplace_delivery_date = PartnerProductDeliveryDate.first.delivery_date.strftime("%A %B %e, %Y")
             @display_cancel = true
             @display_pause = true
             @display_restart = true
             @disable_sub_update = false
             @display_meal_selection = @current_customer.recurring_delivery.blank? ? false : true
             @active_gift = @current_customer.gifts.order(id: :desc).limit(1).take
+
+            @parter_products = PartnerProduct.products_to_display.order(created_at: :desc).page(1)
+            @parter_products_menu = @parter_products.map{|pp| {product_id:pp.id, price:pp.price_in_cents, name:pp.product_name, description:pp.product_description}}
 
 
             if @active_gift.blank?

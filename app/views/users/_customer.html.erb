@@ -1,5 +1,13 @@
 
 <script>
+
+  // create variables to hold products for when people make selection
+  var partner_products_cart = [];
+  var partner_products_menu = <%= @parter_products_menu.to_json.html_safe %>;
+  var total_partner_products_amount = 0;
+  var subtotal = 0;
+
+
 $(function(){
     // remove menu rating cards that have alreay been rated by this customer
     (function() {
@@ -8,6 +16,7 @@ $(function(){
             return rated_items.indexOf($(this).data('menu-id')) > -1
           }).remove();
         })();
+
 
     // create hub map
     function create_hub_map () {
@@ -80,22 +89,27 @@ $(function(){
       $('#subscription_change_alert').removeClass("hidden");
     };
 
+
     // general populate modal
 
-    $('.pull_modal').off('click').on('click',function(){
-      event.preventDefault();
-      $.ajax({
-        url: $(this).attr('href'),
-        type: 'GET',
-        dataType: 'HTML'
-      }).done(function(data){
-          $('#generalModal .modal-content').html(data);
-          $('#generalModal').modal({show:true});
-          $("#generalModal").animate({
-              scrollTop: 0
-          }, 500);
+    function pull_modal_listener() {
+      $('.pull_modal').off('click').on('click',function(){
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr('href'),
+          type: 'GET',
+          dataType: 'HTML'
+        }).done(function(data){
+            $('#generalModal .modal-content').html(data);
+            $('#generalModal').modal({show:true});
+            $("#generalModal").animate({
+                scrollTop: 0
+            }, 500);
+        });
       });
-    });
+    }
+
+    pull_modal_listener();
 
     // star rating
 
@@ -378,6 +392,14 @@ $(function(){
 
     update_display_guide();
 
+
+
+    $('.partner_product_spinner').TouchSpin({
+      min: 0,
+      max: 3,
+      step: 1
+    });
+
     $('#monday_beef_1_spinner').TouchSpin({
       min: 0,
       max: Math.max($('#monday_beef_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_beef_1_spinner').val()*1),
@@ -437,6 +459,181 @@ $(function(){
       max: Math.max($('#thursday_green_2_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_green_2_1_spinner').val()*1),
       step: 1
     });
+
+    // marketplace 
+
+    <% if @display_marketplace_to_customers %>
+
+    function partner_product_card_listener() {
+      $('.add_to_cart').off("submit").on("submit",function(){
+        event.preventDefault();
+        var product_id_chosen = $(this).data("product-id");
+        update_partner_products_cart(product_id_chosen,$(this).find('.qty').val());
+        $(this).find('input:submit').val('Update Cart');
+      });
+    }
+
+    partner_product_card_listener();
+
+    function update_partner_products_cart (product_id, number) {
+      var cart_item = partner_products_cart.filter(function(ci){return ci.product_id == product_id});
+      if (cart_item.length == 0) {
+        if (number <= 0) {
+
+        } else {
+          partner_products_cart.push({product_id:product_id,quantity:number});  
+        }
+      } else if (cart_item.length == 1) {
+        if (number <= 0) {
+          for (var i = 0; i < partner_products_cart.length; i++){
+            if (partner_products_cart[i].product_id == product_id) { 
+                partner_products_cart.splice(i, 1);
+            }
+          };          
+        } else {
+          cart_item[0].quantity = number;
+        }
+      } else { // if for some reason there are multiple entries of the same product in the cart, delete all the same products first and then add the product again
+        for (var i = 0; i < partner_products_cart.length; i++){
+          if (partner_products_cart[i].product_id == product_id) { 
+              partner_products_cart.splice(i, 1);
+          }
+        };
+
+        if (number <= 0) {
+
+        } else {
+          partner_products_cart.push({product_id:product_id,quantity:number});  
+        }
+
+      };
+
+      update_total_and_subtotal();
+
+      $('#partner_product_total_dollar').html((total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString());
+
+      if (partner_products_cart.length == 0 ) {
+
+        if ($('#submit_partner_product_selection').hasClass('disabled')) {
+        } else {
+          $('#submit_partner_product_selection').addClass('disabled');
+        }
+      
+        if ($('#place_order').hasClass('disabled')) {
+        } else {
+          $('#place_order').addClass('disabled');
+        }
+
+      } else {
+
+        if ($('#submit_partner_product_selection').hasClass('disabled')) {
+        $('#submit_partner_product_selection').removeClass('disabled');
+        }
+
+        if ($('#place_order').hasClass('disabled')) {
+        $('#place_order').removeClass('disabled');
+        }
+      }
+
+      $('.qty*[data-product-id="'+product_id+'"]').val(number);
+
+    };
+
+    function update_total_and_subtotal() {
+      total_partner_products_amount = 0;
+      subtotal = 0;
+
+      partner_products_cart.forEach(function(pp){total_partner_products_amount = total_partner_products_amount + parseInt(pp.quantity) * partner_products_menu.filter(function(i){return i.product_id == pp.product_id})[0].price });
+      subtotal = total_partner_products_amount;
+      total_partner_products_amount = Math.round(total_partner_products_amount * 1.13);
+    }
+
+    $('#submit_partner_product_selection').off('click').on('click',function(){
+      
+      $('#partner_products_checkout_summary tbody').empty();
+      partner_products_cart.forEach(function(pp){
+        if (pp.quantity == 0) {
+
+        } 
+        else {
+        var product_info = partner_products_menu.filter(function(ppmi){return ppmi.product_id == pp.product_id})[0]
+        var pp_id = pp.product_id;
+        var pp_qty = pp.quantity;
+        var pp_name = product_info.name;
+        var pp_price = product_info.price;
+        var total_price_before_hst = pp_qty * pp_price;
+        $('#partner_products_checkout_summary tbody').append("<tr><td><input class='checkout_qty_input' data-product-id='"+pp_id+"' type='number' style='width:40px; text-align:center;' min='0' value='"+pp_qty+"'></input></td><td>"+pp_name+"</td><td>$"+(pp_price.toFixed(2)/100.00).toFixed(2).toString()+"</td><td class='total_item_price'>$"+(total_price_before_hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></<tr>")
+        }
+      });
+
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='3' class='text-right'>Subtotal</td><td class='subtotal'>$"+(subtotal.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
+      var hst = total_partner_products_amount - subtotal;
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='3' class='text-right'>HST</td><td class='hst'>$"+(hst.toFixed(2)/100.00).toFixed(2).toString()+"</td></tr>");
+      $('#partner_products_checkout_summary tbody').append("<tr><td colspan='3' class='text-right'><b>Total</b></td><td><b class='total'>$"+(total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString()+"</b></td></tr>");
+      $('#partner_product_cart_modal').modal({show:true});
+
+      $('.checkout_qty_input').off('change').on('change',function(){
+        var product_id = $(this).data('product-id');
+        if ($(this).val() < 0 ) {
+          $(this).val('0');
+        } 
+        var updated_qty_at_checkout = $(this).val();
+        update_partner_products_cart (product_id, updated_qty_at_checkout);
+        var product_info = partner_products_menu.filter(function(ppmi){return ppmi.product_id == product_id})[0];
+        var product_price = product_info.price;
+        var item_total_price_before_hst = updated_qty_at_checkout * product_price;
+        update_total_and_subtotal();
+
+        hst = total_partner_products_amount - subtotal;
+
+        $(this).parent().parent().find('.total_item_price').html("$"+(item_total_price_before_hst.toFixed(2)/100.00).toFixed(2).toString());
+
+        $(this).parent().parent().parent().find('.subtotal').html("$"+(subtotal.toFixed(2)/100.00).toFixed(2).toString());
+
+        $(this).parent().parent().parent().find('.hst').html("$"+(hst.toFixed(2)/100.00).toFixed(2).toString());
+
+        $(this).parent().parent().parent().find('.total').html("$"+(total_partner_products_amount.toFixed(2)/100.00).toFixed(2).toString());
+        
+      });
+
+    });
+
+
+    $('#place_order').off('click').on('click',function(){
+
+      var _this = $(this);
+      var submit_button_original_value = $(this).attr('value');
+      var submit_button_width = $(this).outerWidth();
+
+      $(this).css('width',submit_button_width).addClass('disabled').html('Wait...');
+
+      $.ajax({
+        url: $(this).attr('href'),
+        type: 'POST',
+        data: {cart: JSON.stringify(partner_products_cart)},
+        dataType: 'JSON'
+      }).done(function(data){
+        if (data.result == 'success') {
+          if ($('#partner_product_purchase_alert').hasClass('hidden')) {} else {$('#partner_product_purchase_alert').addClass('hidden')};
+          $('#partner_product_cart_modal').modal('hide');
+          $('#partner_product_success_alert').html(data.message).removeClass('hidden');
+          _this.removeClass('disabled').html('Order');
+          partner_products_cart = [];
+          total_partner_products_amount = 0;
+          subtotal = 0;
+          $('#partner_product_total_dollar').html("$0.00");
+
+        } else {
+          if ($('#partner_product_success_alert').hasClass('hidden')) {} else {$('#partner_product_success_alert').addClass('hidden')};
+          $('#partner_product_purchase_alert').html(data.message);
+          $('#partner_product_purchase_alert').removeClass('alert-danger').removeClass('alert-success').addClass('alert-danger').removeClass('hidden');
+          _this.removeClass('disabled').html('Order');
+        }
+      });
+
+    });
+
+    <% end %>
 
     $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner, #thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').off("change").on("change", function(){
 
@@ -571,6 +768,37 @@ $(function(){
       $('#disp_reg').html(parseInt($('#monday_reg_hidden').val())+parseInt($('#monday_grn_hidden').val())+parseInt($('#thursday_reg_hidden').val())+parseInt($('#thursday_grn_hidden').val()));
       $('#disp_grn').html(parseInt($('#monday_grn_hidden').val())+parseInt($('#thursday_grn_hidden').val()));
     };
+
+    function pagination_listener() {
+      $('.pagination a').off("click").on("click",function(){
+        event.preventDefault();
+
+        $.ajax({
+          url: $(this).attr('href'),
+          type: 'GET',
+          dataType: 'script'
+        }).done(function(data){
+          pull_modal_listener();
+          partner_product_card_listener();
+          pagination_listener();
+
+
+          $('.add_to_cart input[type=number]').each(function(){
+              var product_id = $(this).data('product-id');
+              var product_in_cart = partner_products_cart.filter(function(ppc){return ppc.product_id == product_id});
+
+              if (product_in_cart.length > 0) {
+                  var quantity = product_in_cart[0].quantity;
+                  $(this).val(quantity);
+                  console.log($(this).parent().find('input[type=submit]'));
+                  $(this).closest('form').find('input[type=submit]').val('Update Cart');
+              }
+          });
+
+        });
+      });
+    }
+    pagination_listener();
 });
 
 </script>
@@ -610,6 +838,15 @@ $(function(){
                             <span class="font-bold">Choose Meals</span>
                           </a>
                         </li>
+                          <% if @display_marketplace_to_customers %>
+                            <li class="highlight">
+                              <a href="#partner_product_selection" class="auto b-b padder-v" data-toggle="tab">
+                                <i class="fa fa-truck">
+                                </i>
+                                <span class="font-bold">Marketplace (new)</span>
+                              </a>
+                            </li>
+                          <% end %>
                         <% end %>
                         <li>
                           <a href="#changePlan" class="b-b padder-v" data-toggle="tab">
@@ -658,7 +895,6 @@ $(function(){
                 </nav>
                 
             </aside>
-
 
             <section id="content container">
                 <section class="hbox stretch bg-light tab-content">
@@ -1908,6 +2144,59 @@ $(function(){
                           </section>
                         </section>                      
                       </section> 
+
+          
+                      <% if @display_marketplace_to_customers %>
+                        <section class="tab-pane" id="partner_product_selection" role="tabpanel">
+                          <section class="vbox">
+                            <section class="scrollable padder"> 
+                              <div class="row padder padder-v">
+                                <div class="alert alert-success hidden" style="margin-bottom:0 !important;font-size: 18px;" id="partner_product_success_alert">
+                                </div>
+                              </div> 
+                              <section id="pagination_section_wrapper">
+                                <div class="row padder m-t-none">
+                                    <% @parter_products.each do |pp| %>
+                                      <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-b-sm m-r-md hovereffect" style="width:300px; height: 200px; padding:0; border-radius:5px; overflow:hidden; z-index:2;">
+                                          <img class="img-responsive" src="<%= pp.photos[0].thumb.url if pp.photos[0] %>" alt="" style=" width:300px;max-width:300px;">
+                                          <div class="overlay">
+                                             <h2><%= pp.product_name %></h2>
+                                             <section class="info">
+                                                <section class="content">
+                                                  <p>by <%= pp.vendor.vendor_name %> ($<%= (pp.price_in_cents.to_f / 100).round(2).to_s %> + HST)</p>
+                                                  <p><%= pp.product_description[0...60] + (pp.product_description.length > 60 ? "..." : "") %> <a class="pull_modal" href="<%= partner_product_path(pp) %>">more</a></p>
+                                                  <form class="add_to_cart" data-product-id="<%= pp.id %>" style="color:black">
+                                                    <div class="form-group">
+                                                      <input type="number" class="qty" data-product-id="<%= pp.id %>" required="true" placeholder="Qty" min="0" style="width:60px;height:32px; float:left; margin-left: 32px; margin-right: 10px; border:1px solid white; text-align: center;">
+                                                    </div>
+                                                    <input type="submit" class="btn btn-s-md btn-default" style="float:left; border: none; border-radius: 0px; color:white !important; background-color:#f0ad4e;" value="Add to Cart">
+                                                  </form>
+                                                </section>
+                                             </section>
+                                          </div>
+                                      </div>
+                                    <% end %>
+                                </div>
+                                <div class="row padder m-t-none">
+                                  <%= paginate PartnerProduct.products_to_display.page, params: {controller: :partner_products, action: :paginate} %>
+                                </div>
+                              </section>
+                              <div class="row m-t-lg padder">
+                                <div class="well col-lg-5">
+                                  <span><b>Total amount: $<span id="partner_product_total_dollar">0.00</span> (including HST)</b></span>
+                                  <br>
+                                    <button class="btn btn-s-md btn-success m-t-sm disabled" id="submit_partner_product_selection">View Cart and Checkout</button>
+                                    <br>
+                                    <span class="m-t-sm" style="display:block;">Order will be delivered on <%= @marketplace_delivery_date %></span>                            
+                                </div>
+                              </div>
+                            </section>
+                          </section>                      
+                        </section> 
+                      <% end %>
+
+
+
                     <% end %> 
 
                 </section>
@@ -2027,6 +2316,36 @@ $(function(){
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Partner product cart modal -->
+<div class="modal fade" id="partner_product_cart_modal" tabindex="-1" role="dialog" aria-labelledby="partner_product_cart_modal" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Marketplace Cart (Delivery on <%= @marketplace_delivery_date %>)</h4>
+          </div>
+          <div class="modal-body">
+            <table class="table" id="partner_products_checkout_summary" style="font-size:12px;">
+              <thead>
+                <th>QTY</th>
+                <th>PRODUCT</th>
+                <th>UNIT PRICE</th>
+                <th>TOTAL</th>
+              </thead>
+              <tbody>
+                
+              </tbody>
+            </table>
+          <div class="alert hidden" id="partner_product_purchase_alert" style="margin-bottom:0 !important;"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-success disabled" id="place_order" href="<%= order_partner_product_path %>">Order</button>
           </div>
       </div>
   </div>

@@ -1,0 +1,36 @@
+<html>
+<head>
+    
+</head>
+<body>
+    <p>Hi <%= @customer.name.split(/\s/)[0].capitalize %>,</p>
+    <p>This is a confirmation that we have received your order from the Chowdy marketplace. The order number is <b><%= @order.sale_id %></b>. Please reference this number if you require assistance from us.</p><br> 
+
+    <p>Order Summary:</p>
+    <table style="border:1px solid black; border-collapse:collapse;padding:3px;">
+        <thead style="border:1px solid black; border-collapse:collapse;">
+            <th style="border:1px solid black; border-collapse:collapse;padding:3px;">Quantity</th>
+            <th style="border:1px solid black; border-collapse:collapse;padding:3px;">Product</th>
+            <th style="border:1px solid black; border-collapse:collapse;padding:3px;">Vendor</th>
+            <th style="border:1px solid black; border-collapse:collapse;padding:3px;">Unit Price Before HST</th>
+        </thead>
+        <tbody style="border:1px solid black; border-collapse:collapse;">
+            <% @order.partner_product_sale_details.each do |pps| %>
+                <tr style="border:1px solid black; border-collapse:collapse;">
+                    <td style="border:1px solid black; border-collapse:collapse;padding:3px;"><%= pps.quantity %></td>
+                    <td style="border:1px solid black; border-collapse:collapse;padding:3px;"><%= pps.partner_product.product_name %></td>
+                    <td style="border:1px solid black; border-collapse:collapse;padding:3px;"><%= pps.partner_product.vendor.vendor_name %></td>
+                    <td style="border:1px solid black; border-collapse:collapse;padding:3px;">$<%= (pps.sale_price_before_hst_in_cents.to_f/100).round(2).to_s %></td>
+                </tr>
+            <% end %>
+        </tbody>
+    </table>
+    <br>
+    <p>Total amount (including HST): <b>$<%= (@total_dollars.to_f/100).round(2).to_s %></b></p>
+    <p>Delivery Date: <b><%= @delivery_date %> (Please note that if you do not have your regular Chowdy delivery scheduled on this day, you will be charged a delivery charge of $8.)</b></p>
+
+    <p>Enjoy! Let us know if you have any questions.</p>
+    <p>- the Chowdy team</p>
+</body>
+
+</html>

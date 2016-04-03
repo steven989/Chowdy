@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160111180347) do
+ActiveRecord::Schema.define(version: 20160402235901) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -254,6 +254,62 @@ ActiveRecord::Schema.define(version: 20160111180347) do
     t.boolean  "spicy"
   end
 
+  create_table "partner_product_delivery_dates", force: :cascade do |t|
+    t.date     "delivery_date"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
+
+  create_table "partner_product_order_summaries", force: :cascade do |t|
+    t.integer  "product_id"
+    t.date     "delivery_date"
+    t.integer  "ordered_quantity"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+  end
+
+  create_table "partner_product_sale_details", force: :cascade do |t|
+    t.integer  "partner_product_sale_id"
+    t.integer  "partner_product_id"
+    t.integer  "quantity"
+    t.integer  "cost_in_cents"
+    t.integer  "sale_price_before_hst_in_cents"
+    t.integer  "total_discounts_in_cents"
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+  end
+
+  create_table "partner_product_sales", force: :cascade do |t|
+    t.string   "stripe_customer_id"
+    t.date     "delivery_week"
+    t.string   "order_status"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.integer  "total_amount_including_hst_in_cents"
+    t.string   "sale_id"
+    t.date     "delivery_date"
+  end
+
+  create_table "partner_products", force: :cascade do |t|
+    t.integer  "vendor_id"
+    t.integer  "product_id"
+    t.string   "product_name"
+    t.text     "product_description"
+    t.string   "product_size"
+    t.string   "vendor_product_sku"
+    t.string   "vendor_product_upc"
+    t.integer  "cost_in_cents"
+    t.integer  "suggested_retail_price_in_cents"
+    t.integer  "price_in_cents"
+    t.string   "url_of_photo"
+    t.datetime "created_at",                                   null: false
+    t.datetime "updated_at",                                   null: false
+    t.boolean  "available"
+    t.integer  "max_quantity"
+    t.integer  "quantity_available"
+    t.string   "photos",                          default: [],              array: true
+  end
+
   create_table "promotion_redemptions", force: :cascade do |t|
     t.string   "stripe_customer_id"
     t.integer  "promotion_id"
@@ -415,5 +471,21 @@ ActiveRecord::Schema.define(version: 20160111180347) do
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", using: :btree
+
+  create_table "vendors", force: :cascade do |t|
+    t.string   "ext_vendor_id"
+    t.string   "vendor_name"
+    t.text     "vendor_description"
+    t.string   "contact_name"
+    t.string   "phone_number"
+    t.string   "email_address"
+    t.string   "alt_contact_name"
+    t.string   "alt_phone_number"
+    t.string   "alt_email_address"
+    t.string   "vendor_address"
+    t.string   "alt_vendor_address"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
 
 end

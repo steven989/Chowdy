@@ -1,6 +1,7 @@
 class Customer < ActiveRecord::Base
     include PgSearch
     pg_search_scope :search_by_all, :against => [:name, :email, :referral_code, :matched_referrers_code, :delivery_address, :referral, :phone_number], :using => { :tsearch => {:prefix => true}}
+    pg_search_scope :search_by_name_or_email, :against => [:name, :email], :using => { :tsearch => {:prefix => true}}
 
     belongs_to :user, primary_key: :stripe_customer_id, foreign_key: :stripe_customer_id
     has_many :feedbacks, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
@@ -15,7 +16,7 @@ class Customer < ActiveRecord::Base
     has_many :gifts, through: :gift_redemptions
     has_many :gift_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :gift_remains, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
-
+    has_many :partner_product_sales, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
     validates :email, uniqueness: true
     validates :referral_code, uniqueness: true, allow_nil: :true, allow_blank: :true

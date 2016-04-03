@@ -1,0 +1,275 @@
+<script>
+  
+      function formRetrievalAjax() {      // this block of code is copy and pasted form _admin because this is required to run in the modal but modal can't access the function in the main _admin code
+          $('.pull_system_setting_form, .pull_next_week_total, .nestedForm').off("click").on("click",function(){
+            event.preventDefault();
+            $.ajax({
+              url: $(this).attr('href'),
+              type: 'GET',
+              dataType: 'html'
+            }).done(function(data){
+              $('#formModal .modal-content').html(data);
+              $('#formModal').modal({show:true});
+              $("#formModal").animate({
+                  scrollTop: 0
+              }, 500);
+
+              formRetrievalAjax();
+            });
+          });
+      };  
+
+      $('#partner-product-creation input[required=required]').off('keyup').on('keyup',check_required_fields)
+
+      function check_required_fields () {
+        if ($('#partner-product-creation input[required=required]').filter(function(){return $(this).val() == "" }).length == 0) {
+          $('.form_submit_add_product').removeClass('disabled');
+        }  else {
+          $('.form_submit_add_product').addClass('disabled');
+        }
+      };
+
+      function updateWithoutFile() {
+
+            var submitButton = $(".form_submit_add_product")
+
+            var submit_button_original_value = submitButton.attr('value');
+            var submit_button_width = submitButton.outerWidth();
+
+            $.ajax({
+              url: $('#partner-product-creation').attr('action'),
+              type: '<%= @method %>',
+              data: $('#partner-product-creation').serialize(),
+              dataType: 'JSON'
+            }).done(function(data){
+
+              if(data.status == "success"){
+                $('#partner-product-creation').find('.alert').html(data.message);
+                $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+                $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
+
+              $.ajax({
+                url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
+                type: 'GET',
+                dataType: 'html'
+              }).done(function(data){
+                $('#formModal .modal-content').html(data);
+                $('#formModal').modal({show:true});
+                $("#formModal").animate({
+                    scrollTop: 0
+                }, 500);
+
+                formRetrievalAjax();
+              });
+
+              } else {
+                $('#partner-product-creation').find('.alert').html(data.message);
+                $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+                $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
+              }      
+
+            })        
+      }
+
+    // drop zone  
+    function configureDropZone() {
+        Dropzone.options.partnerProductCreation = {
+          url: $('#partner-product-creation').attr('action'),
+          paramName: 'photos',
+          autoProcessQueue: false,
+          uploadMultiple: true,
+          parallelUploads: 100,
+          maxFiles: 5,
+          maxFilesize: 0.5, // MB
+          forceFallback: false,
+          acceptedFiles: 'image/jpg,image/jpeg,image/png',
+          dictDefaultMessage: "<i class='fa fa-cloud-upload'> Click or drag and drop up to 5 images here (JPG or PNG files only, up to 0.5MB per file)",
+          init: function() {
+                myDropzone = this; // closure
+
+            var submitButton = $(".form_submit_add_product")
+
+            var submit_button_original_value = submitButton.attr('value');
+            var submit_button_width = submitButton.outerWidth();
+
+            submitButton.off("click").on("click", function(event) {
+              if(event.preventDefault) {
+                event.preventDefault();
+                submitButton.css('width',submit_button_width);
+                submitButton.addClass('disabled').attr('value','Wait...');
+              } else {
+                event.returnValue = false;
+                submitButton.css('width',submit_button_width);
+                submitButton.addClass('disabled').attr('value','Wait...');
+              };
+
+              if (myDropzone.getQueuedFiles().length > 0) {                        
+                  myDropzone.processQueue();  
+              } else {                       
+                  updateWithoutFile();
+              }         
+
+            });
+            // this is the hover effect
+            this.on('dragover', function(){
+                $('.upload .dropzone').addClass('draghover');
+            });
+            this.on('dragleave', function(){
+                $('.upload .dropzone').removeClass('draghover');
+            }); 
+            this.on('drop',function(){
+                $('.upload .dropzone').removeClass('draghover');
+                $('.dz-default.dz-message').html("");
+            });
+            // spinner when file is uploading
+            this.on('sending',function(){
+                $('.dz-default.dz-message').html("<i class='fa fa-circle-o-notch fa-2x upload spinner'></i>");
+            });
+            this.on('removedfile',function(){
+                $('.dz-default.dz-message').html("<i class='fa fa-cloud-upload'> Drop your logo here or click to upload");
+            });
+            this.on('success',function(file, data){
+
+                if(data.status == "success"){
+                  $('#partner-product-creation').find('.alert').html(data.message);
+                  $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+                  $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
+
+                $.ajax({
+                  url: "<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>",
+                  type: 'GET',
+                  dataType: 'html'
+                }).done(function(data){
+                  $('#formModal .modal-content').html(data);
+                  $('#formModal').modal({show:true});
+                  $("#formModal").animate({
+                      scrollTop: 0
+                  }, 500);
+
+                  formRetrievalAjax();
+                });
+
+                } else {
+                  $('#partner-product-creation').find('.alert').html(data.message);
+                  $('#partner-product-creation').find('.alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+                  $('#partner-product-creation').find('.form_submit_add_product').removeClass('disabled').attr('value',submit_button_original_value);
+                }              
+
+            });
+          }
+        };
+    }
+
+
+    $('#remove_photo_inner').off('click').on('click',function(){
+      event.preventDefault();
+      $.ajax({
+        url: $(this).attr('href'),
+        type: 'GET',
+        dataType: 'JSON'
+      }).done(function(data){
+        if (data.status == "success") {
+          $('.delete_after_photo_removal').remove();
+          $('div.dz-default.dz-message').show();
+          $('div.dz-default.dz-message').appendTo('div.ajax_uploader label');          
+        } else {
+          alert(data.notice_partner_product);
+        }
+      });      
+    });
+
+</script>
+
+
+
+<%= form_for @partner_product, html: {class: "dropzone", multipart:true, id:"partner-product-creation", style:"border:none; border-radius: 5px;"} do |f| %>
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Partner Product</h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group" style="cursor:pointer;">
+        <%= f.label :product_name, "Product Name (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :product_name, class: "form-control", required: true, style:"cursor:text;"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :product_description, "Product Description (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :product_description, class: "form-control", required: true, style:"cursor:text;"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :product_size, "Product Size (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :product_size, class: "form-control", required: true, style:"cursor:text;"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :price_in_cents, "Price in Cents (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :price_in_cents, class: "form-control", required: true, style:"cursor:text;" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :vendor_product_sku, "Vendor's Product SKU / Internal ID", style:"cursor:pointer;" %>
+        <%= f.text_field :vendor_product_sku, class: "form-control", style:"cursor:text;" %>
+    </div>
+    <%= f.hidden_field :vendor_id, value: @vendor.id %>
+    <div class="form-group">
+        <%= f.label :vendor_product_upc, "Product UPC", style:"cursor:pointer;" %>
+        <%= f.text_field :vendor_product_upc, class: "form-control", style:"cursor:text;"  %>
+    </div>
+    <div class="form-group">
+        <%= f.label :cost_in_cents, "Cost in Cents (required)", style:"cursor:pointer;" %>
+        <%= f.text_field :cost_in_cents, class: "form-control",required: true, style:"cursor:text;" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :suggested_retail_price_in_cents, style:"cursor:pointer;" %>
+        <%= f.text_field :suggested_retail_price_in_cents, class: "form-control", style:"cursor:text;" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :max_quantity, "Max Weekly Units (required)", style:"cursor:pointer;" %>
+        <%= f.number_field :max_quantity, class: "form-control", required: true, style:"cursor:text;" %>
+    </div>
+    <div class="form-group">
+        <%= f.label :available, 'Show on Marketplace?' %>
+        <% if @edit %>
+          <%= f.check_box :available, class: "form-control" %>
+        <% else %>
+          <%= f.check_box :available, class: "form-control", checked:true %>
+        <% end %>
+        
+    </div>  
+    <div class="form-group html_photo_uploader hidden">
+        <%= f.label :photos %>
+        <%= f.file_field :photos, class: "form-control", multiple:true %>
+    </div>
+    <div class="form-group ajax_uploader">
+      <label>Product photos <% if @photos_exist %><span class="delete_after_photo_removal">(<a id="remove_photo_inner" href="<%= remove_partner_product_photos_path(@partner_product) %>" style="cursor:pointer;">remove all photos</a>)</span><% end %></label><br>
+        <% if @photos_exist %>
+          <section class="delete_after_photo_removal">
+            <% @photos.each do |p| %>
+              <%= image_tag p.thumb.url, size:"150x100", class:"m-r-sm" %>
+            <% end %>
+          </section>
+        <% end %>
+    </div>
+    <div class="alert m-t-xs m-b-xs hidden">
+    </div>
+    <% if @edit %>
+      <%= link_to "Delete This Product", partner_product_path(@partner_product), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style:"cursor:pointer;" %>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal" style="cursor:pointer;">Close</button>
+    <button type="button" class="btn btn-md btn-default m-t-sm nestedForm" href="<%= partner_products_path+'?vendor_id='+@vendor.id.to_s %>" style="min-width: 0px; cursor:pointer;">Back</button>
+    <% if @edit %>
+      <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit_add_product ", style:"cursor:pointer;" %>
+    <% else %>
+      <%= f.submit class: "btn btn-md btn-default m-t-sm form_submit_add_product disabled", style:"cursor:pointer;" %>
+    <% end %>
+  </div>
+<% end %>
+<script>  
+configureDropZone(); 
+Dropzone.discover();
+<% if @photos_exist %>
+  $('div.dz-default.dz-message').hide();
+<% else %>
+  $('div.dz-default.dz-message').appendTo('div.ajax_uploader label');
+<% end %>
+</script>
