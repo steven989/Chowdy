@@ -184,28 +184,99 @@ class PartnerProductSalesController < ApplicationController
         end  
     end
 
-    def edit_header
-        
+    def cancel_order
+        force_cancel = params[:force_cancel]
+        admin = current_user.role == "admin"
+
+        order = PartnerProductSale.where(sale_id:params[:sale_id])
+        if order.length == 1
+            result = order.take.cancel_order(force_cancel,admin)
+        elsif order.length == 0
+            result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
+        else
+            result = {result:"fail", message:"Order could not be cancelled. Multiple orders with ID #{params[:sale_id]} found"}
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: result
+          }      
+        end     
     end
 
-    def update_header
-        
-    end
-    
-    def destroy_header
-        
+    def edit_order
+        @order = PartnerProductSale.where(sale_id:params[:sale_id])
+
+        if @order.length == 1
+            scheduled_delivery_date = @order.delivery_date
+            cut_off_date = Chowdy::Application.closest_date(-1,4,scheduled_delivery_date)
+            @editable = Date.today <= cut_off_date
+
+            @partner_product_sale_details = @order.partner_product_sale_details
+            @cart = @partner_product_sale_details.map {|ppsd| {product_id:ppsd.partner_product_id, quantity:quantity, price:sale_price_before_hst_in_cents} }
+            @subtotal = @partner_product_sale_details.map{|ppsd| ppsd.quantity * ppsd.sale_price_before_hst_in_cents}.sum 
+            @total = (@subtotal * 1.13).round
+            @hst = @total - @subtotal
+        end
+
+        respond_to do |format|
+          format.html {
+            render partial: 'edit_order'
+          }      
+        end   
     end
 
-    def edit_detail
-        
+    def update_order
+        update_volume = params[:update_volume]
+        admin = current_user.role == "admin"
+        force_update = admin && params[:force_update]
+        updated_order_array_raw = params[:updated_order_array]
+        updated_order_array = updated_order_array_raw.map do |order_item| 
+            {           
+            product_id:updated_order_array_raw[:product_id],
+            quantity:updated_order_array_raw[:quantity],
+            product_name:PartnerProduct.find(updated_order_array_raw[:product_id]).product_name,
+            vendor_name:PartnerProduct.find(updated_order_array_raw[:product_id]).vendor.vendor_name,
+            price:updated_order_array_raw[:price]
+            } 
+        end
+
+        updated_order_array.delete_if {|ci| ci[:quantity] <= 0 }
+
+        order = PartnerProductSale.where(sale_id:params[:sale_id])
+        if order.length == 1
+            result = modify_order(updated_order_array,force_update,update_volume,admin)
+        elsif  order.length == 0 
+            result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
+        else
+            result = {result:"fail", message:"Order could not be cancelled. Multiple orders with ID #{params[:sale_id]} found"}
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: result
+          }      
+        end    
     end
 
-    def update_detail
-        
-    end
-    
-    def destroy_detail
-        
+
+    def refund
+        order = PartnerProductSale.where(sale_id:params[:sale_id])
+        refund_amount = params[:refund_amount]
+
+        if order.length == 1
+            result = lump_sum_refund_not_linked_to_items(refund_amount)
+        elsif  order.length == 0 
+            result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
+        else
+            result = {result:"fail", message:"Order could not be cancelled. Multiple orders with ID #{params[:sale_id]} found"}
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: result
+          }      
+        end    
     end
 
 end

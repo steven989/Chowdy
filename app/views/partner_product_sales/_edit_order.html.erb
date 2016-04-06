@@ -1,0 +1,131 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Edit order</h4>
+</div>
+
+<div class="modal-body">
+    <% if @partner_product_sale_details.blank? %>
+        
+    <% else %>
+        <table>
+            <thead>
+                <tr>
+                    <th>QTY</th>
+                    <th>PRODUCT</th>
+                    <th>SIZE</th>
+                    <th>VENDOR</th>
+                    <th>UNIT PRICE</th>
+                    <th>TOTAL PRICE(BEFORE HST)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% @partner_product_sale_details.each do |ppsd| %>
+                    <tr>
+                        <% if @editable %>
+                            <td><input class='edit_popup_qty_input' data-product-id='<%= ppsd.partner_product.id %>' type='number' style='width:40px; text-align:center;' min='0' value='<%= ppsd.quantity %>'></input></td>
+                        <% else %>
+                            <td><%= ppsd.quantity %>'></td>
+                        <% end %>
+                        <td><%= ppsd.partner_product.product_name %></td>
+                        <td><%= ppsd.partner_product.product_size %></td>
+                        <td><%= ppsd.partner_product.vendor.vendor_name %></td>
+                        <td><%= "$"+(ppsd.sale_price_before_hst_in_cents.to_f/100).to_s %></td>
+                        <td class='edit_popup_item_total' data-product-id='<%= ppsd.partner_product.id %>'><%= "$"+((ppsd.quantity * ppsd.sale_price_before_hst_in_cents).round.to_f/100).to_s %></td>
+                    </tr>
+                <% end %>
+                <tr>
+                    <td colspan='4'>Subtotal</td>
+                    <td id='edit_popup_subtotal'>$<%= (@subtotal.to_f/100).to_s %></td>
+                </tr>
+                <tr>
+                    <td colspan='4'>HST</td>
+                    <td id='edit_popup_hst'>$<%= (@hst.to_f/100).to_s %></td>
+                </tr>
+                <tr>
+                    <td colspan='4'>Total</td>
+                    <td id='edit_popup_total'>$<%= (@total.to_f/100).to_s %></td>
+                </tr>
+            </tbody>
+
+        </table>
+        <div class="row padder padder-v">
+            <div class="col-sm-12">
+                <div class="alert alert-danger alert-block text-center hidden" id="modify_order_alert">
+
+                </div>
+            </div>
+        </div>
+    <% end %>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+    <% if @editable %>
+        <button type="button" id="submit_modify_order" href="<%= update_order_path %>" class="btn btn-md btn-success m-t-sm disabled">Update Order</button>
+    <% end %>
+</div>
+<script>
+    var popup_current_total = <%= @total %>;
+    var popup_total = <%= @total %>;
+    var popup_hst = <%= @hst %>;
+    var popup_subtotal = <%= @subtotal %>;
+    var popup_cart_original = <%= @cart.to_json.html_safe %>;
+    var popup_cart = <%= @cart.to_json.html_safe %>;
+    $('.edit_popup_qty_input').on('change',function(){
+        var popup_product_id = $(this).data('product-id');
+        var popup_new_quantity = $(this).val();
+        var popup_cart_item = popup_cart.filter(function(ci){return ci.product_id == popup_product_id})[0]
+        popup_cart_item.quantity = popup_new_quantity;
+        update_totals_and_visuals();
+
+    })
+
+    function update_totals_and_visuals(){
+        popup_subtotal = 0;
+        popup_total = 0;
+        var enable_update = false;
+
+        popup_cart.forEach(function(ci){
+            $('.edit_popup_item_total').filter(function(){
+                return $(this).data('product-id') == ci.product_id
+            }).html("$"+((ci.item_total_price_before_hst*ci.quantity).toFixed(2)/100.00).toFixed(2).toString());
+            popup_subtotal = popup_subtotal + ci.item_total_price_before_hst*ci.quantity;
+        });
+
+        popup_total = Math.round(popup_subtotal * 1.13);
+        popup_hst = popup_total - popup_subtotal;
+
+        $('#edit_popup_subtotal').html("$"+(popup_subtotal.toFixed(2)/100.00).toFixed(2).toString());
+        $('#edit_popup_hst').html("$"+(popup_hst.toFixed(2)/100.00).toFixed(2).toString());
+        $('#edit_popup_total').html("$"+(popup_total.toFixed(2)/100.00).toFixed(2).toString());
+        
+        popup_cart_original.forEach(function(cio){
+            if (popup_cart.filter(function(pci){return pci.product_id == cio.product_id})[0].quantity != cio.quantity) {
+                enable_update = true;
+            }
+        })
+
+        if (enable_update) {
+            $('#submit_modify_order').removeClass('disabled');
+        } else {
+            $('#submit_modify_order').addClass('disabled');
+        }
+    }
+
+    $('#submit_modify_order').on('click',function(){
+            var data_to_send = {update_volume:'true',force_update:'false',sale_id:'<%= @order.sale_id %>',updated_order_array:popup_cart}
+          $.ajax({
+            url: $(this).attr('href'),
+            type: 'PUT',
+            data: data_to_send,
+            dataType: 'JSON'
+          }).done(function(data){
+            if (data.result == 'success') {
+                
+            } else {
+                $('#modify_order_alert').html(data.message);
+                $('#modify_order_alert').removeClass('hidden');
+            }
+          })
+    })
+
+</script>
