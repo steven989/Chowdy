@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160402235901) do
+ActiveRecord::Schema.define(version: 20160403144813) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -279,15 +279,26 @@ ActiveRecord::Schema.define(version: 20160402235901) do
     t.datetime "updated_at",                     null: false
   end
 
+  create_table "partner_product_sale_refunds", force: :cascade do |t|
+    t.string   "stripe_refund_id"
+    t.integer  "partner_product_sale_id"
+    t.integer  "partner_product_sale_detail_id"
+    t.integer  "amount_refunded"
+    t.string   "refund_reason"
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
+  end
+
   create_table "partner_product_sales", force: :cascade do |t|
     t.string   "stripe_customer_id"
     t.date     "delivery_week"
     t.string   "order_status"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
+    t.datetime "created_at",                                       null: false
+    t.datetime "updated_at",                                       null: false
     t.integer  "total_amount_including_hst_in_cents"
     t.string   "sale_id"
     t.date     "delivery_date"
+    t.string   "stripe_charge_id",                    default: [],              array: true
   end
 
   create_table "partner_products", force: :cascade do |t|

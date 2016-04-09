@@ -26,7 +26,7 @@ class PartnerProductSalesController < ApplicationController
             charge_description = "#{cart.map{|c| c[:quantity].to_s+' '+c[:product_name]+' from '+c[:vendor_name]+': unit price $'+((c[:price].to_f/100).round(2).to_s)}.join(', ')}"
 
             begin
-                Stripe::Charge.create(
+                charge = Stripe::Charge.create(
                     amount: total_dollars_after_hst,
                     currency: 'CAD',
                     customer: customer.stripe_customer_id,
@@ -39,7 +39,7 @@ class PartnerProductSalesController < ApplicationController
             rescue => error
                result = {result:"fail", message: "An error was encountered during the trasaction. Please try again"}
             else
-                if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received',delivery_date: PartnerProductDeliveryDate.first.delivery_date)
+                if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received',delivery_date: PartnerProductDeliveryDate.first.delivery_date, stripe_charge_id:[charge.id])
                     cart.each do |c|
                         PartnerProductSaleDetail.create(
                             partner_product_sale_id:pps.id,
@@ -59,7 +59,7 @@ class PartnerProductSalesController < ApplicationController
                     end
                     purchase_id = pps.create_unique_id
                     current_user.log_activity("Customer made purchase from marketplace. Order ID: #{purchase_id}")
-                    CustomerMailer.email_purchase_confirmation(customer,pps,total_dollars_after_hst).deliver
+                    CustomerMailer.delay.email_purchase_confirmation(customer,pps,total_dollars_after_hst)
                     result = {result:"success", message: "Your order has been placed. You will receive a confirmation email receipt from us shortly with your order details. If you do not receive an email within 10 minutes, please email <a href='mailto:help@chowdy.ca'>help@chowdy.ca</a> for assistance"}
                 else
                     result = {result:"fail", message: "An error has occurred"}
@@ -77,7 +77,7 @@ class PartnerProductSalesController < ApplicationController
     def weekly_sales_report #this is to produce the list to package items to ship
 
         delivery_date = PartnerProductSale.pull_date
-        sales = PartnerProductSale.where(delivery_date:delivery_date)
+        sales = PartnerProductSale.where{(delivery_date == delivery_date) && (order_status !~ "Cancelled")}
 
         customers = sales.map {|s| s.customer }
         customers = customers.uniq
@@ -121,7 +121,7 @@ class PartnerProductSalesController < ApplicationController
     def weekly_sales_total_report #this will aggregate the amount ordered by customers for vendor purchase purposes
 
         delivery_date = PartnerProductSale.pull_date
-        sales = PartnerProductSale.where(delivery_date:delivery_date)
+        sales = PartnerProductSale.where{(delivery_date == delivery_date) && (order_status !~ "Cancelled")}
 
         products_to_order = []
 
@@ -184,28 +184,120 @@ class PartnerProductSalesController < ApplicationController
         end  
     end
 
-    def edit_header
-        
+    def view_orders
+        customer = current_user.role == "admin" ? Customer.find(params[:customer_id]) : current_user.customer
+        @orders = customer.partner_product_sales.where{order_status !~ 'Cancelled'}.order(created_at: :desc)
+
+        respond_to do |format|
+          format.html {
+            render partial: 'view_orders'
+          }      
+        end 
     end
 
-    def update_header
-        
-    end
-    
-    def destroy_header
-        
+    def cancel_order
+        force_cancel = params[:force_cancel]
+        admin = current_user.role == "admin"
+
+        order = PartnerProductSale.where(sale_id:params[:sale_id])
+        if order.length == 1
+            result = order.take.cancel_order(force_cancel,admin)
+            if result[:result] == 'success' 
+                CustomerMailer.delay.order_cancellation_confirmation(order.take.customer,order.take)
+            end
+        elsif order.length == 0
+            result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
+        else
+            result = {result:"fail", message:"Order could not be cancelled. Multiple orders with ID #{params[:sale_id]} found"}
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: result
+          }      
+        end     
     end
 
-    def edit_detail
-        
+    def edit_order
+        sale_ids = params[:sale_id]
+        @order = PartnerProductSale.where{(sale_id =~ sale_ids) & (order_status !~ "Cancelled")}
+
+        if @order.length == 1
+            scheduled_delivery_date = @order.take.delivery_date
+            cut_off_date = Chowdy::Application.closest_date(-1,4,scheduled_delivery_date)
+            @editable = Date.today <= cut_off_date
+
+            @partner_product_sale_details = @order.take.partner_product_sale_details
+            @cart = @partner_product_sale_details.map {|ppsd| {product_id:ppsd.partner_product_id, quantity:ppsd.quantity, price:ppsd.sale_price_before_hst_in_cents} }
+            @subtotal = @partner_product_sale_details.map{|ppsd| ppsd.quantity * ppsd.sale_price_before_hst_in_cents}.sum 
+            @total = (@subtotal * 1.13).round
+            @hst = @total - @subtotal
+        end
+
+        respond_to do |format|
+          format.html {
+            render partial: 'edit_order'
+          }      
+        end   
     end
 
-    def update_detail
-        
+    def update_order
+        update_volume = params[:update_volume]
+
+        admin = current_user.role == "admin"
+        force_update = admin && params[:force_update]
+        updated_order_array_raw = params[:updated_order_array]
+        order = PartnerProductSale.where(sale_id:params[:sale_id])
+
+        if order.length == 1 
+            updated_order_array = updated_order_array_raw.map do |order_item| 
+                matched_product = PartnerProduct.find(order_item[:product_id])
+                {           
+                product_id:order_item[:product_id],
+                quantity:order_item[:quantity],
+                product_name:matched_product.product_name,
+                vendor_name:matched_product.vendor.vendor_name,
+                price:order.take.partner_product_sale_details.where(partner_product_id:order_item[:product_id]).take.sale_price_before_hst_in_cents
+                } 
+            end
+            updated_order_array.delete_if {|ci| ci[:quantity] <= 0 }
+            result = order.take.modify_order(updated_order_array,force_update,update_volume,admin)
+            if result[:result] == "success"
+                total_dollars = result[:new_amount].to_i
+                diff = result[:new_amount].to_i - result[:old_amount].to_i
+                CustomerMailer.delay.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date)
+            end
+        elsif  order.length == 0 
+            result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
+        else
+            result = {result:"fail", message:"Order could not be cancelled. Multiple orders with ID #{params[:sale_id]} found"}
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: result
+          }      
+        end    
     end
-    
-    def destroy_detail
-        
+
+
+    def refund
+        order = PartnerProductSale.where(sale_id:params[:sale_id])
+        refund_amount = params[:refund_amount]
+
+        if order.length == 1
+            result = lump_sum_refund_not_linked_to_items(refund_amount)
+        elsif  order.length == 0 
+            result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
+        else
+            result = {result:"fail", message:"Order could not be cancelled. Multiple orders with ID #{params[:sale_id]} found"}
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: result
+          }      
+        end    
     end
 
 end
