@@ -184,6 +184,17 @@ class PartnerProductSalesController < ApplicationController
         end  
     end
 
+    def view_orders
+        customer = current_user.role == "admin" ? Customer.find(params[:customer_id]) : current_user.customer
+        @orders = customer.partner_product_sales.where{order_status !~ 'Cancelled'}.order(created_at: :desc)
+
+        respond_to do |format|
+          format.html {
+            render partial: 'view_orders'
+          }      
+        end 
+    end
+
     def cancel_order
         force_cancel = params[:force_cancel]
         admin = current_user.role == "admin"
@@ -191,6 +202,9 @@ class PartnerProductSalesController < ApplicationController
         order = PartnerProductSale.where(sale_id:params[:sale_id])
         if order.length == 1
             result = order.take.cancel_order(force_cancel,admin)
+            if result[:result] == 'success' 
+                CustomerMailer.order_cancellation_confirmation(order.take.customer,order.take).deliver
+            end
         elsif order.length == 0
             result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
         else
@@ -205,15 +219,16 @@ class PartnerProductSalesController < ApplicationController
     end
 
     def edit_order
-        @order = PartnerProductSale.where(sale_id:params[:sale_id])
+        sale_ids = params[:sale_id]
+        @order = PartnerProductSale.where{(sale_id =~ sale_ids) & (order_status !~ "Cancelled")}
 
         if @order.length == 1
-            scheduled_delivery_date = @order.delivery_date
+            scheduled_delivery_date = @order.take.delivery_date
             cut_off_date = Chowdy::Application.closest_date(-1,4,scheduled_delivery_date)
             @editable = Date.today <= cut_off_date
 
-            @partner_product_sale_details = @order.partner_product_sale_details
-            @cart = @partner_product_sale_details.map {|ppsd| {product_id:ppsd.partner_product_id, quantity:quantity, price:sale_price_before_hst_in_cents} }
+            @partner_product_sale_details = @order.take.partner_product_sale_details
+            @cart = @partner_product_sale_details.map {|ppsd| {product_id:ppsd.partner_product_id, quantity:ppsd.quantity, price:ppsd.sale_price_before_hst_in_cents} }
             @subtotal = @partner_product_sale_details.map{|ppsd| ppsd.quantity * ppsd.sale_price_before_hst_in_cents}.sum 
             @total = (@subtotal * 1.13).round
             @hst = @total - @subtotal
@@ -228,24 +243,30 @@ class PartnerProductSalesController < ApplicationController
 
     def update_order
         update_volume = params[:update_volume]
+
         admin = current_user.role == "admin"
         force_update = admin && params[:force_update]
         updated_order_array_raw = params[:updated_order_array]
-        updated_order_array = updated_order_array_raw.map do |order_item| 
-            {           
-            product_id:updated_order_array_raw[:product_id],
-            quantity:updated_order_array_raw[:quantity],
-            product_name:PartnerProduct.find(updated_order_array_raw[:product_id]).product_name,
-            vendor_name:PartnerProduct.find(updated_order_array_raw[:product_id]).vendor.vendor_name,
-            price:updated_order_array_raw[:price]
-            } 
-        end
-
-        updated_order_array.delete_if {|ci| ci[:quantity] <= 0 }
-
         order = PartnerProductSale.where(sale_id:params[:sale_id])
-        if order.length == 1
-            result = modify_order(updated_order_array,force_update,update_volume,admin)
+
+        if order.length == 1 
+            updated_order_array = updated_order_array_raw.map do |order_item| 
+                matched_product = PartnerProduct.find(order_item[:product_id])
+                {           
+                product_id:order_item[:product_id],
+                quantity:order_item[:quantity],
+                product_name:matched_product.product_name,
+                vendor_name:matched_product.vendor.vendor_name,
+                price:order.take.partner_product_sale_details.where(partner_product_id:order_item[:product_id]).take.sale_price_before_hst_in_cents
+                } 
+            end
+            updated_order_array.delete_if {|ci| ci[:quantity] <= 0 }
+            result = order.take.modify_order(updated_order_array,force_update,update_volume,admin)
+            if result[:result] == "success"
+                total_dollars = result[:new_amount].to_i
+                diff = result[:new_amount].to_i - result[:old_amount].to_i
+                CustomerMailer.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date).deliver
+            end
         elsif  order.length == 0 
             result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
         else

@@ -67,6 +67,43 @@ $(function(){
 
     create_hub_map();
 
+
+    // ajax with json only response
+
+    var tracker = 0;
+    function ajax_json_response() {
+      $('.ajax_json_response_only').off('click').on('click',function(){
+        event.preventDefault();
+        tracker += 1;
+        _this = $(this).clone();
+        id = "temporarily_replaced_item_"+tracker;
+        $(this).replaceWith("<span id='"+id+"'>Wait...</span>");
+        
+        $.ajax({
+          url: $(this).attr('href'),
+          type: $(this).data('ajax_method'),
+          dataType: 'JSON'
+        }).done(function(data){
+            if(data.result == 'success') {
+              alert_element = _this.data('message-target')
+              $(alert_element).addClass('alert-success');
+              $(alert_element).html(data.message);
+              $(alert_element).removeClass('hidden');
+              $('#'+id).replaceWith("Cancelled");
+            } else {
+              alert_element = _this.data('message-target')
+              $(alert_element).addClass('alert-danger');
+              $(alert_element).html(data.message);
+              $(alert_element).removeClass('hidden');
+              $('#'+id).replaceWith(_this);
+              ajax_json_response();
+            }
+        });      
+      });
+    }
+
+    ajax_json_response();
+
     //URL segment
 
       //retrieve
@@ -633,6 +670,27 @@ $(function(){
 
     });
 
+    function add_listener_to_order_history() {
+      $('#view_order_history').off("click").on("click",function(){
+        event.preventDefault();
+
+        $.ajax({
+          url: $(this).attr('href'),
+          type: 'GET',
+          dataType: 'HTML'
+        }).done(function(data){
+          $('#order_history_table_container').html(data);
+          ajax_json_response();
+          $('#main-nav li a[href="#view_orders"]').tab('show');
+          pull_modal_listener();
+        })
+
+      });
+    }
+
+    add_listener_to_order_history();
+
+
     <% end %>
 
     $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner, #thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').off("change").on("change", function(){
@@ -781,7 +839,7 @@ $(function(){
           pull_modal_listener();
           partner_product_card_listener();
           pagination_listener();
-
+          add_listener_to_order_history();
 
           $('.add_to_cart input[type=number]').each(function(){
               var product_id = $(this).data('product-id');
@@ -874,6 +932,13 @@ $(function(){
                             <i class="i i-settings icon">
                             </i>
                             <span class="font-bold">Settings</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#view_orders" class="b-b padder-v hidden" data-toggle="tab">
+                            <i class="i i-settings icon">
+                            </i>
+                            <span class="font-bold"></span>
                           </a>
                         </li>
                         <li>
@@ -2150,11 +2215,18 @@ $(function(){
                         <section class="tab-pane" id="partner_product_selection" role="tabpanel">
                           <section class="vbox">
                             <section class="scrollable padder"> 
-                              <div class="row padder padder-v">
-                                <div class="alert alert-success hidden" style="margin-bottom:0 !important;font-size: 18px;" id="partner_product_success_alert">
-                                </div>
-                              </div> 
                               <section id="pagination_section_wrapper">
+                                <div class="row m-b-md" >
+                                  <div class="col-l-md-12" style="width:100%">
+                                    <div style="background-image:url('https://s3.amazonaws.com/toronto-chowdy/marketplace-banner.jpg'); background-size:contain; background-repeat:no-repeat; width:100%; padding-bottom:35%;">
+                                    <a href="<%= view_orders_path %>" class="pull-right" id="view_order_history" style="font-weight: bold; margin-right:20px; margin-top:10px;">View Order History</a>
+                                      <div class="row padder">
+                                        <div class="alert alert-success hidden" style="margin-bottom:0 !important;font-size: 18px;" id="partner_product_success_alert">
+                                        </div>
+                                      </div> 
+                                    </div>
+                                  </div>
+                                </div>
                                 <div class="row padder m-t-none">
                                     <% @parter_products.each do |pp| %>
                                       <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-b-sm m-r-md hovereffect" style="width:300px; height: 200px; padding:0; border-radius:5px; overflow:hidden; z-index:2;">
@@ -2178,7 +2250,7 @@ $(function(){
                                     <% end %>
                                 </div>
                                 <div class="row padder m-t-none">
-                                  <%= paginate PartnerProduct.products_to_display.page, params: {controller: :partner_products, action: :paginate} %>
+                                  <%= paginate Kaminari.paginate_array(PartnerProduct.products_to_display).page, params: {controller: :partner_products, action: :paginate} %>
                                 </div>
                               </section>
                               <div class="row m-t-lg padder">
@@ -2193,10 +2265,23 @@ $(function(){
                             </section>
                           </section>                      
                         </section> 
+
+                        <section class="tab-pane" id="view_orders" role="tabpanel">
+                          <section class="vbox">
+                            <section class="scrollable padder"> 
+                              <div class="row padder">
+                                <div class="alert alert-success hidden" style="margin-bottom:0 !important;font-size: 18px;" id="marketplace_view_order_alert">
+                                </div>
+                              </div> 
+                              <div class="row padder padder-v">
+                                <div class="col-sm-12" id="order_history_table_container">
+                                  
+                                </div>
+                              </div>
+                            </section>
+                          </section>
+                        </section>
                       <% end %>
-
-
-
                     <% end %> 
 
                 </section>

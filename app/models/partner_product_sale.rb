@@ -30,16 +30,23 @@ class PartnerProductSale < ActiveRecord::Base
     def cancel_order(force_change=false,admin=false)
         scheduled_delivery_date = self.delivery_date
         cut_off_date = Chowdy::Application.closest_date(-1,4,scheduled_delivery_date)
+        refund_array = []
 
         if Date.today <= cut_off_date || force_change
-            begin            
-                refund = Stripe::Refund.create(charge:self.stripe_charge_id)
+            begin
+                self.stripe_charge_id.each do |stripe_charge_id|
+                    charge = Stripe::Charge.retrieve(stripe_charge_id)
+                    if charge.amount - charge.amount_refunded > 0
+                        stripe_refund_response = charge.refunds.create
+                        refund_array.push(stripe_refund_response.id)
+                    end
+                end      
             rescue => error
                 {result:"fail", message:"#{error.message}"}
             else
                 self.partner_product_sale_details.each do |ppsd|
                     PartnerProductSaleRefund.create(
-                        stripe_refund_id: refund.id,
+                        stripe_refund_id: refund_array.to_s,
                         partner_product_sale_id: self.id,
                         partner_product_sale_detail_id:ppsd.id,
                         amount_refunded:ppsd.sale_price_before_hst_in_cents,
@@ -47,10 +54,10 @@ class PartnerProductSale < ActiveRecord::Base
                     )    
                 end
                 self.update_attributes(order_status:"Cancelled")
-                {result:"success", message:"Order #{self.sale_id} cancelled"}
                 if self.customer.user
                     self.customer.user.log_activity("Order #{self.sale_id} cancelled by #{admin ? 'admin' : 'customer'}")
                 end
+                {result:"success", message:"Order #{self.sale_id} cancelled"}
             end
         else
             {result:"fail", message:"Order could not be cancelled: the cut off date to cancel this order was #{cut_off_date.("%A %B %e, %Y")}. Please email help@chowdy.ca for assistance."}
@@ -61,27 +68,19 @@ class PartnerProductSale < ActiveRecord::Base
 
     def modify_order(updated_order_array,force=false,update_volume=true,admin=false)
         if updated_order_array.blank?
-            result = {result:"fail", message:"You must pass an array of updated order"}
+            result = {result:"fail", message:"You must have at least one product in your order"}
         else
             scheduled_delivery_date = self.delivery_date
             cut_off_date = Chowdy::Application.closest_date(-1,4,scheduled_delivery_date)
 
             if Date.today <= cut_off_date || force_change
-                cart = updated_order_array.map do |uoa|
-                    {
-                        product_id:product_id,
-                        quantity:quantity,
-                        product_name:product_name,
-                        vendor_name:vendor_name,
-                        price:price
-                    }
-                end
-                cart.delete_if {|ci| ci[:quantity] <= 0 }
+                cart = updated_order_array
                 if cart.blank? || cart.map {|c| c[:quantity]}.sum == 0 
                     result = {result:"fail", message: "You must select at least one product"}
                 else 
                     total_dollars_before_hst = cart.map{|c| c[:price]*c[:quantity] }.sum
                     total_dollars_after_hst = (total_dollars_before_hst * 1.13).round
+                    old_amount = self.total_amount_including_hst_in_cents
                     
                     if total_dollars_after_hst > self.total_amount_including_hst_in_cents
                         charge_description = "Extra charge from updating order: #{cart.map{|c| c[:quantity].to_s+' '+c[:product_name]+' from '+c[:vendor_name]+': unit price $'+((c[:price].to_f/100).round(2).to_s)}.join(', ')}"
@@ -99,53 +98,29 @@ class PartnerProductSale < ActiveRecord::Base
                         rescue Stripe::CardError => error
                             result = {result:"fail", message: "Purchase could not be update. Your card was declined"}
                         rescue => error
-                            result = {result:"fail", message: "An error was encountered during the trasaction. Please try again"}
+                            result = {result:"fail", message:"#{error.message}"}
                         else
-                            if update_volume
-                                updated_charge_array = self.stripe_charge_id
-                                updated_charge_array.push(charge.id)
-                                self.update_attributes(total_amount_including_hst_in_cents:total_dollars_after_hst,stripe_charge_id:updated_charge_array)
+                            updated_charge_array = self.stripe_charge_id
+                            updated_charge_array.push(charge.id)
+                            self.update_attributes(total_amount_including_hst_in_cents:total_dollars_after_hst,stripe_charge_id:updated_charge_array)
 
-                                self.partner_product_sale_details.each do |ppsd|
-                                    if PartnerProductOrderSummary.where(product_id:ppsd.partner_product_id,delivery_date:self.delivery_date).length == 1
-                                        quantity = PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).take.ordered_quantity - ppsd.quantity
-                                        PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).take.update_attributes(ordered_quantity:quantity)
-                                    end
-                                    ppsd.destroy
-                                end
-
-                                cart.each do |c|
-                                    PartnerProductSaleDetail.create(
-                                        partner_product_sale_id:self.id,
-                                        partner_product_id:c[:product_id],
-                                        quantity:c[:quantity],
-                                        cost_in_cents:PartnerProduct.find(c[:product_id]).cost_in_cents,
-                                        sale_price_before_hst_in_cents:c[:price]
-                                    )  
-
-                                    if PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).length == 1
-                                        quantity = PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).take.ordered_quantity + c[:quantity]
-                                        PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).take.update_attributes(ordered_quantity:quantity)
-                                    elsif PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).length == 0
-                                        PartnerProductOrderSummary.create(product_id:c[:product_id],delivery_date:self.delivery_date,ordered_quantity:c[:quantity])
-                                    end
-                                end
-                            end
-                            result = {result:"success", message: "Order #{self.sale_id} is updated"}
+                            result = {result:"success", message: "Order #{self.sale_id} is updated", action:"charge", old_amount:old_amount, new_amount:total_dollars_after_hst}
                             if self.customer.user
                                 self.customer.user.log_activity("Order #{self.sale_id} updated by #{admin ? 'admin' : 'customer'}; extra charge of $#{extra_charge.to_f/100}")
                             end
                         end
+                        action = "additional charge of #{(extra_charge.to_f/100).round(2).to_s}"
                     elsif total_dollars_after_hst == self.total_amount_including_hst_in_cents
                         result = {result:"success", message: "Order updated"}
                         if self.customer.user
                             self.customer.user.log_activity("Order updated by #{admin ? 'admin' : 'customer'} with no effect on total charge")
                         end
+                        action = "no charge or refund"
                     else
                         refund_amount = self.total_amount_including_hst_in_cents - total_dollars_after_hst
                         refund_amount_loop = self.total_amount_including_hst_in_cents - total_dollars_after_hst
                         list_of_charges = self.stripe_charge_id
-                        max_loop_count = [list_of_charges.length - 1,0].max
+                        max_loop_count = list_of_charges.length
                         min_loop_count = 0
 
                         if max_loop_count == 0
@@ -161,9 +136,11 @@ class PartnerProductSale < ActiveRecord::Base
                                     if available_charge_amount >= refund_amount_loop
                                         stripe_refund_response = charge.refunds.create(amount:refund_amount_loop)
                                         loop_var = false
-                                    else
+                                    elsif available_charge_amount < refund_amount_loop && available_charge_amount > 0
                                         stripe_refund_response = charge.refunds.create(amount:available_charge_amount)
                                         refund_amount_loop -= available_charge_amount
+                                        min_loop_count += 1
+                                    else 
                                         min_loop_count += 1
                                     end                                
                                 end
@@ -177,16 +154,50 @@ class PartnerProductSale < ActiveRecord::Base
                                     amount_refunded:refund_amount,
                                     refund_reason:"Order #{self.sale_id} (#{self.delivery_date.strftime("%A %B %e, %Y")} delivery) updated by #{admin ? 'admin' : 'customer'} resulting in refund"
                                 )
+                                self.update_attributes(total_amount_including_hst_in_cents:total_dollars_after_hst)
                                 if self.customer.user
                                     self.customer.user.log_activity("Order updated by #{admin ? 'admin' : 'customer'} resulting in a refund of $#{refund_amount.to_f/100}")
                                 end
-                                result = {result:"success", message: "Order #{self.sale_id} is updated"}
+                                result = {result:"success", message: "Order #{self.sale_id} is updated", action:"refund", old_amount:old_amount, new_amount:total_dollars_after_hst}
+
                             end
                         end
+
+                        action = "refund of #{(refund_amount.to_f/100).round(2).to_s}"
+                    end
+
+                    if update_volume
+                        self.partner_product_sale_details.each do |ppsd|
+                            if PartnerProductOrderSummary.where(product_id:ppsd.partner_product_id,delivery_date:self.delivery_date).length == 1
+                                quantity = PartnerProductOrderSummary.where(product_id:ppsd.partner_product_id,delivery_date:self.delivery_date).take.ordered_quantity - ppsd.quantity
+                                PartnerProductOrderSummary.where(product_id:ppsd.partner_product_id,delivery_date:self.delivery_date).take.update_attributes(ordered_quantity:quantity)
+                            end
+                        end
+                        self.partner_product_sale_details.destroy_all
+
+                        cart.each do |c|
+                            c = self.partner_product_sale_details.create(
+                                partner_product_id:c[:product_id],
+                                quantity:c[:quantity],
+                                cost_in_cents:PartnerProduct.find(c[:product_id]).cost_in_cents,
+                                sale_price_before_hst_in_cents:c[:price]
+                            )  
+
+
+                            if PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).length == 1
+                                quantity = PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).take.ordered_quantity + c[:quantity]
+                                PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).take.update_attributes(ordered_quantity:quantity)
+                            elsif PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:self.delivery_date).length == 0
+                                PartnerProductOrderSummary.create(product_id:c[:product_id],delivery_date:self.delivery_date,ordered_quantity:c[:quantity])
+                            end
+                        end
+
+                    else
+                        result = {result:"success", message: "Order #{self.sale_id} is updated with #{action}; no volume change"}
                     end
                 end
             else
-                result = {result:"fail", message:"Order could not be cancelled: the cut off date to cancel this order was #{cut_off_date.("%A %B %e, %Y")}. Please email help@chowdy.ca for assistance."}
+                result = {result:"fail", message:"Order could not be update: the cut off date to update this order was #{cut_off_date.("%A %B %e, %Y")}. Please email help@chowdy.ca for assistance."}
             end
         end
 

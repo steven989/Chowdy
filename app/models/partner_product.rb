@@ -6,8 +6,7 @@ class PartnerProduct < ActiveRecord::Base
     mount_uploaders :photos, PartnerProductUploader #for uploading multiple files, this has to be mount_uploaders insteat of mount_uploader
 
     def self.products_to_display
-        PartnerProduct.joins{partner_product_order_summaries.outer}.where{((partner_product_order_summaries.delivery_date == PartnerProductDeliveryDate.first.delivery_date) | (partner_product_order_summaries.delivery_date == nil)) & ((partner_product_order_summaries.ordered_quantity <= partner_products.max_quantity) | (partner_product_order_summaries.ordered_quantity == nil)) & (partner_products.available == true)}
+        PartnerProduct.find_by_sql("Select a.* From partner_products a left join partner_product_order_summaries b on a.id = b.product_id and b.delivery_date = '#{PartnerProductDeliveryDate.first.delivery_date}' where coalesce(b.ordered_quantity,0) <= a.max_quantity and a.available = true Order by a.created_at desc")
     end
-
 
 end

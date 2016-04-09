@@ -5,9 +5,9 @@
 
 <div class="modal-body">
     <% if @partner_product_sale_details.blank? %>
-        
+        Could not locate order
     <% else %>
-        <table>
+        <table class="display table table-striped m-b-none text-center" style="font-size: 12px">
             <thead>
                 <tr>
                     <th>QTY</th>
@@ -15,7 +15,7 @@
                     <th>SIZE</th>
                     <th>VENDOR</th>
                     <th>UNIT PRICE</th>
-                    <th>TOTAL PRICE(BEFORE HST)</th>
+                    <th>TOTAL PRICE</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,7 +24,7 @@
                         <% if @editable %>
                             <td><input class='edit_popup_qty_input' data-product-id='<%= ppsd.partner_product.id %>' type='number' style='width:40px; text-align:center;' min='0' value='<%= ppsd.quantity %>'></input></td>
                         <% else %>
-                            <td><%= ppsd.quantity %>'></td>
+                            <td><%= ppsd.quantity %></td>
                         <% end %>
                         <td><%= ppsd.partner_product.product_name %></td>
                         <td><%= ppsd.partner_product.product_size %></td>
@@ -34,22 +34,26 @@
                     </tr>
                 <% end %>
                 <tr>
-                    <td colspan='4'>Subtotal</td>
-                    <td id='edit_popup_subtotal'>$<%= (@subtotal.to_f/100).to_s %></td>
+                    <td colspan='5' class='text-right'>Subtotal</td>
+                    <td id='edit_popup_subtotal' >$<%= (@subtotal.to_f/100).to_s %></td>
                 </tr>
                 <tr>
-                    <td colspan='4'>HST</td>
+                    <td colspan='5' class='text-right'>HST</td>
                     <td id='edit_popup_hst'>$<%= (@hst.to_f/100).to_s %></td>
                 </tr>
                 <tr>
-                    <td colspan='4'>Total</td>
+                    <td colspan='5' class='text-right'>Total</td>
                     <td id='edit_popup_total'>$<%= (@total.to_f/100).to_s %></td>
                 </tr>
             </tbody>
-
         </table>
-        <div class="row padder padder-v">
+        <div class="row">
             <div class="col-sm-12">
+                    <div colspan='1' class='text-center hidden pull-right' id='difference_action_message_box'><em><span id='difference_amount'></span> <span id="difference_action_message"></span></em></div>
+            </div>
+        </div>
+        <div class="row padder padder-v">
+            <div class="col-sm-12" style="height:30px;">
                 <div class="alert alert-danger alert-block text-center hidden" id="modify_order_alert">
 
                 </div>
@@ -57,75 +61,110 @@
         </div>
     <% end %>
 </div>
+
 <div class="modal-footer">
     <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
     <% if @editable %>
         <button type="button" id="submit_modify_order" href="<%= update_order_path %>" class="btn btn-md btn-success m-t-sm disabled">Update Order</button>
     <% end %>
 </div>
-<script>
-    var popup_current_total = <%= @total %>;
-    var popup_total = <%= @total %>;
-    var popup_hst = <%= @hst %>;
-    var popup_subtotal = <%= @subtotal %>;
-    var popup_cart_original = <%= @cart.to_json.html_safe %>;
-    var popup_cart = <%= @cart.to_json.html_safe %>;
-    $('.edit_popup_qty_input').on('change',function(){
-        var popup_product_id = $(this).data('product-id');
-        var popup_new_quantity = $(this).val();
-        var popup_cart_item = popup_cart.filter(function(ci){return ci.product_id == popup_product_id})[0]
-        popup_cart_item.quantity = popup_new_quantity;
-        update_totals_and_visuals();
 
-    })
+<% unless @partner_product_sale_details.blank? %>
 
-    function update_totals_and_visuals(){
-        popup_subtotal = 0;
-        popup_total = 0;
-        var enable_update = false;
+    <script>
+        var popup_current_total = <%= @total %>;
+        var popup_total = <%= @total %>;
+        var popup_hst = <%= @hst %>;
+        var popup_subtotal = <%= @subtotal %>;
+        var popup_cart_original = <%= @cart.to_json.html_safe %>;
+        var popup_cart = <%= @cart.to_json.html_safe %>;
+        $('.edit_popup_qty_input').on('change',function(){
+            var popup_product_id = $(this).data('product-id');
+            var popup_new_quantity = parseInt($(this).val());
+            var popup_cart_item = popup_cart.filter(function(ci){return ci.product_id == popup_product_id})[0];
+            popup_cart_item.quantity = popup_new_quantity;
+            update_totals_and_visuals();
 
-        popup_cart.forEach(function(ci){
-            $('.edit_popup_item_total').filter(function(){
-                return $(this).data('product-id') == ci.product_id
-            }).html("$"+((ci.item_total_price_before_hst*ci.quantity).toFixed(2)/100.00).toFixed(2).toString());
-            popup_subtotal = popup_subtotal + ci.item_total_price_before_hst*ci.quantity;
-        });
-
-        popup_total = Math.round(popup_subtotal * 1.13);
-        popup_hst = popup_total - popup_subtotal;
-
-        $('#edit_popup_subtotal').html("$"+(popup_subtotal.toFixed(2)/100.00).toFixed(2).toString());
-        $('#edit_popup_hst').html("$"+(popup_hst.toFixed(2)/100.00).toFixed(2).toString());
-        $('#edit_popup_total').html("$"+(popup_total.toFixed(2)/100.00).toFixed(2).toString());
-        
-        popup_cart_original.forEach(function(cio){
-            if (popup_cart.filter(function(pci){return pci.product_id == cio.product_id})[0].quantity != cio.quantity) {
-                enable_update = true;
-            }
         })
 
-        if (enable_update) {
-            $('#submit_modify_order').removeClass('disabled');
-        } else {
-            $('#submit_modify_order').addClass('disabled');
-        }
-    }
+        function update_totals_and_visuals(){
+            popup_subtotal = 0;
+            popup_total = 0;
+            var enable_update = false;
 
-    $('#submit_modify_order').on('click',function(){
-            var data_to_send = {update_volume:'true',force_update:'false',sale_id:'<%= @order.sale_id %>',updated_order_array:popup_cart}
-          $.ajax({
-            url: $(this).attr('href'),
-            type: 'PUT',
-            data: data_to_send,
-            dataType: 'JSON'
-          }).done(function(data){
-            if (data.result == 'success') {
-                
+            popup_cart.forEach(function(ci){
+                $('.edit_popup_item_total').filter(function(){
+                    return $(this).data('product-id') == ci.product_id
+                }).html("$"+((ci.price*ci.quantity).toFixed(2)/100.00).toFixed(2).toString());
+                popup_subtotal = popup_subtotal + ci.price*ci.quantity;
+            });
+
+            popup_total = Math.round(popup_subtotal * 1.13);
+            popup_hst = popup_total - popup_subtotal;
+
+            if (popup_total - popup_current_total > 0 ) {
+                var diff = popup_total - popup_current_total;
+                $('#difference_amount').html("$"+(diff.toFixed(2)/100.00).toFixed(2).toString());
+                $('#difference_action_message').html("will be charged");
+                $('#difference_action_message_box').removeClass('hidden');
+            } else if (popup_total - popup_current_total == 0) {
+                $('#difference_action_message_box').addClass('hidden');
             } else {
-                $('#modify_order_alert').html(data.message);
-                $('#modify_order_alert').removeClass('hidden');
+                var diff =  popup_current_total - popup_total;
+                $('#difference_amount').html("$"+(diff.toFixed(2)/100.00).toFixed(2).toString());
+                $('#difference_action_message').html("will be refunded");
+                $('#difference_action_message_box').removeClass('hidden');
             }
-          })
-    })
 
-</script>
+            
+
+            $('#edit_popup_subtotal').html("$"+(popup_subtotal.toFixed(2)/100.00).toFixed(2).toString());
+            $('#edit_popup_hst').html("$"+(popup_hst.toFixed(2)/100.00).toFixed(2).toString());
+            $('#edit_popup_total').html("$"+(popup_total.toFixed(2)/100.00).toFixed(2).toString());
+            
+            popup_cart_original.forEach(function(cio){
+                if (popup_cart.filter(function(pci){return pci.product_id == cio.product_id})[0].quantity != cio.quantity) {
+                    enable_update = true;
+                }
+            })
+
+
+
+            if (enable_update) {
+                $('#submit_modify_order').removeClass('disabled');
+            } else {
+                $('#submit_modify_order').addClass('disabled');
+            }
+        }
+
+        $('#submit_modify_order').on('click',function(){
+                var data_to_send = {update_volume:'true',force_update:'false',sale_id:'<%= @order.take.sale_id %>',updated_order_array:popup_cart}
+
+              var _this = $(this);
+              var submit_button_original_value = $(this).attr('value');
+              var submit_button_width = $(this).outerWidth();
+
+              $(this).css('width',submit_button_width).addClass('disabled').html('Wait...');
+
+              $.ajax({
+                url: $(this).attr('href'),
+                type: 'PUT',
+                dataType: 'JSON',
+                contentType: 'application/json',
+                data: JSON.stringify(data_to_send)
+              }).done(function(data){
+                if (data.result == 'success') {
+                    $('#customer_order_details_alert').addClass('alert-success');
+                    $('#customer_order_details_alert').html(data.message);
+                    _this.html('Update Order');
+                    $('#generalModal').modal('hide');
+                } else {
+                    $('#modify_order_alert').html(data.message);
+                    $('#modify_order_alert').removeClass('hidden');
+                    _this.removeClass('disabled').html('Update Order');
+                }
+              })
+        })
+
+    </script>
+<% end %>

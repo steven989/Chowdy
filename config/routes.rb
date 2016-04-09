@@ -39,6 +39,7 @@ Chowdy::Application.routes.draw do
   get  'partner_product_sales/weekly_sales_report' => 'partner_product_sales#weekly_sales_report', as: 'weekly_marketplace_deliveries'
   post 'partner_product_sales/search_order_by_customer' => 'partner_product_sales#search_order_by_customer', as: 'search_order_by_customer'
   post 'partner_product_sales/search_order_details_by_id' => 'partner_product_sales#search_order_details_by_id', as: 'search_order_details_by_id'
+  get 'partner_product_sales/view_orders' => 'partner_product_sales#view_orders', as: 'view_orders'
   get 'partner_product_sales/edit_order' => 'partner_product_sales#edit_order', as: 'edit_order'
   put 'partner_product_sales/update_order' => 'partner_product_sales#update_order', as: 'update_order'
   get 'partner_product_sales/cancel_order' => 'partner_product_sales#cancel_order', as: 'cancel_order'

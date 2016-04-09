@@ -240,6 +240,39 @@ class CustomerMailer < ActionMailer::Base
     end 
   end
 
+  def order_cancellation_confirmation(customer,order)
+    @customer = customer
+    @order = order
+
+    mail(
+      to: @customer.email, 
+      subject: 'Confirmation of Chowdy Marketplace Order Cancellation'
+      ) do |format|
+        format.html
+    end 
+  end
+
+  def order_modification_confirmation(customer,order, total_dollars, diff,delivery_date)
+    @customer = customer
+    @order = order
+    @total_dollars = total_dollars
+    @diff = diff
+    @delivery_date = delivery_date
+    if @diff > 0
+      @action = "You have been charged $#{(@diff.to_f/100).round(2).to_s} for the difference to your original order amount."
+    elsif @diff < 0
+      @action = "You have been refunded $#{(-@diff.to_f/100).round(2).to_s} for the difference to your original order amount."
+    else
+      @action = "No extra charge or refund has been issued as the new total is the same as your original order amount."
+    end
+
+    mail(
+      to: @customer.email, 
+      subject: 'Confirmation of Chowdy Marketplace Order Update'
+      ) do |format|
+        format.html
+    end 
+  end
 
   def rescued_error(customer=nil,message)
     @customer = customer
