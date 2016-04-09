@@ -57,6 +57,14 @@ class PartnerProductSale < ActiveRecord::Base
                 if self.customer.user
                     self.customer.user.log_activity("Order #{self.sale_id} cancelled by #{admin ? 'admin' : 'customer'}")
                 end
+
+                self.partner_product_sale_details.each do |ppsd|
+                    if PartnerProductOrderSummary.where(product_id:ppsd.partner_product_id,delivery_date:self.delivery_date).length == 1
+                        quantity = PartnerProductOrderSummary.where(product_id:ppsd.partner_product_id,delivery_date:self.delivery_date).take.ordered_quantity - ppsd.quantity
+                        PartnerProductOrderSummary.where(product_id:ppsd.partner_product_id,delivery_date:self.delivery_date).take.update_attributes(ordered_quantity:quantity)
+                    end
+                end
+
                 {result:"success", message:"Order #{self.sale_id} cancelled"}
             end
         else
