@@ -2243,8 +2243,8 @@ $(function(){
                               <section id="pagination_section_wrapper">
                                 <div class="row m-b-md" >
                                   <div class="col-l-md-12" style="width:100%">
-                                    <div style="background-image:url('https://s3.amazonaws.com/toronto-chowdy/marketplace-banner.jpg'); background-size:contain; background-repeat:no-repeat; width:100%; padding-bottom:35%;">
-                                    <a href="<%= view_orders_path %>" class="pull-right" id="view_order_history" style="font-weight: bold; margin-right:20px; margin-top:10px;">View Order History</a>
+                                    <div style="background-image:url('https://s3.amazonaws.com/toronto-chowdy/marketplace-banner.jpg'); background-size:contain; background-repeat:no-repeat; width:100%; padding-bottom:17%;">
+                                    <a href="<%= view_orders_path %>" class="pull-right" id="view_order_history" style="color:white; font-weight: bold; margin-right:20px; margin-top:10px;">View Order History</a>
                                       <div class="row padder">
                                         <div class="alert alert-success hidden" style="margin-bottom:0 !important;font-size: 18px;" id="partner_product_success_alert">
                                         </div>
@@ -2257,7 +2257,7 @@ $(function(){
                                       <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-none m-b-sm m-r-md hovereffect" style="width:300px; height: 200px; padding:0; border-radius:5px; overflow:hidden; z-index:2;">
                                           <img class="img-responsive" src="<%= pp.photos[0].thumb.url if pp.photos[0] %>" alt="" style=" width:300px;max-width:300px;">
                                           <div class="overlay">
-                                             <h2><%= pp.product_name %></h2>
+                                             <h2 style="text-transform:none;"><%= pp.product_name %></h2>
                                              <section class="info">
                                                 <section class="content">
                                                   <p>by <%= pp.vendor.vendor_name %> ($<%= (pp.price_in_cents.to_f / 100).round(2).to_s %> + HST)</p>
