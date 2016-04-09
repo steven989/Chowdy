@@ -59,7 +59,7 @@ class PartnerProductSalesController < ApplicationController
                     end
                     purchase_id = pps.create_unique_id
                     current_user.log_activity("Customer made purchase from marketplace. Order ID: #{purchase_id}")
-                    CustomerMailer.email_purchase_confirmation(customer,pps,total_dollars_after_hst).deliver
+                    CustomerMailer.delay.email_purchase_confirmation(customer,pps,total_dollars_after_hst)
                     result = {result:"success", message: "Your order has been placed. You will receive a confirmation email receipt from us shortly with your order details. If you do not receive an email within 10 minutes, please email <a href='mailto:help@chowdy.ca'>help@chowdy.ca</a> for assistance"}
                 else
                     result = {result:"fail", message: "An error has occurred"}
@@ -203,7 +203,7 @@ class PartnerProductSalesController < ApplicationController
         if order.length == 1
             result = order.take.cancel_order(force_cancel,admin)
             if result[:result] == 'success' 
-                CustomerMailer.order_cancellation_confirmation(order.take.customer,order.take).deliver
+                CustomerMailer.delay.order_cancellation_confirmation(order.take.customer,order.take)
             end
         elsif order.length == 0
             result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
@@ -265,7 +265,7 @@ class PartnerProductSalesController < ApplicationController
             if result[:result] == "success"
                 total_dollars = result[:new_amount].to_i
                 diff = result[:new_amount].to_i - result[:old_amount].to_i
-                CustomerMailer.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date).deliver
+                CustomerMailer.delay.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date)
             end
         elsif  order.length == 0 
             result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
