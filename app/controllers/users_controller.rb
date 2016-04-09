@@ -216,7 +216,7 @@ class UsersController < ApplicationController
             current_user.log_activity("chef dashboard")
             @menu = Menu.all.order(production_day: :asc)
         else
-            @display_marketplace_to_customers = @current_user.email == "tiffany.bayliss@gmail.com" true : false #testing account
+            @display_marketplace_to_customers = @current_user.email == "tiffany.bayliss@gmail.com" ? true : false #testing account
             @current_customer = current_user.customer
             @marketplace_delivery_date = PartnerProductDeliveryDate.first.delivery_date.strftime("%A %B %e, %Y")
             @display_cancel = true
