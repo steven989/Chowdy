@@ -21,48 +21,67 @@ class PartnerProductSalesController < ApplicationController
             result = {result:"fail", message: "You must select at least one product"}
         else 
 
-            total_dollars_before_hst = cart.map{|c| c[:price]*c[:quantity] }.sum
-            total_dollars_after_hst = (total_dollars_before_hst * 1.13).round
-            charge_description = "#{cart.map{|c| c[:quantity].to_s+' '+c[:product_name]+' from '+c[:vendor_name]+': unit price $'+((c[:price].to_f/100).round(2).to_s)}.join(', ')}"
+            not_enough_array = []
 
-            begin
-                charge = Stripe::Charge.create(
-                    amount: total_dollars_after_hst,
-                    currency: 'CAD',
-                    customer: customer.stripe_customer_id,
-                    description: charge_description,
-                    metadata: {email: customer.email},
-                    statement_descriptor: 'CHOWDY MKTPLCE PRCHSE'
-                )
-            rescue Stripe::CardError => error
-               result = {result:"fail", message: "Purchase could not be completed. Your card was declined"}
-            rescue => error
-               result = {result:"fail", message: "An error was encountered during the trasaction. Please try again"}
+            cart.each do |ci|
+                product_id = ci[:product_id]
+                delivery_date = 
+                max_quantity = PartnerProduct.find(product_id).max_quantity
+                amount_sold = PartnerProductOrderSummary.where(product_id:product_id,delivery_date:PartnerProductDeliveryDate.first.delivery_date).blank? ? 0 : PartnerProductOrderSummary.where(product_id:product_id,delivery_date:PartnerProductDeliveryDate.first.delivery_date).take.ordered_quantity
+                amount_available_for_sale = max_quantity - amount_sold
+                if amount_available_for_sale < ci[:quantity]
+                    not_enough_array.push({product_id:ci[:product_id],product_name:ci[:product_name],ordered_quantity:ci[:quantity],available_quantity:amount_available_for_sale})
+                end
+            end
+
+            if not_enough_array.length > 0
+                phrase_array = not_enough_array.map {|nea| "#{nea[:available_quantity]} units of #{nea[:product_name]} (you ordered #{nea[:ordered_quantity]})"}
+                result = {result:"fail", message: "Purchase not completed. Only #{phrase_array.join(', ')} are still available for sale this week. Please update your order and try again."}
             else
-                if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received',delivery_date: PartnerProductDeliveryDate.first.delivery_date, stripe_charge_id:[charge.id])
-                    cart.each do |c|
-                        PartnerProductSaleDetail.create(
-                            partner_product_sale_id:pps.id,
-                            partner_product_id:c[:product_id],
-                            quantity:c[:quantity],
-                            cost_in_cents:PartnerProduct.find(c[:product_id]).cost_in_cents,
-                            sale_price_before_hst_in_cents:PartnerProduct.find(c[:product_id]).price_in_cents
-                        )                    
-                    
-                        if PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).length == 1
-                            quantity = PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).take.ordered_quantity + c[:quantity]
-                            PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).take.update_attributes(ordered_quantity:quantity)
-                        elsif PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).length == 0
-                            PartnerProductOrderSummary.create(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date,ordered_quantity:c[:quantity])
-                        end
 
-                    end
-                    purchase_id = pps.create_unique_id
-                    current_user.log_activity("Customer made purchase from marketplace. Order ID: #{purchase_id}")
-                    CustomerMailer.delay.email_purchase_confirmation(customer,pps,total_dollars_after_hst)
-                    result = {result:"success", message: "Your order has been placed. You will receive a confirmation email receipt from us shortly with your order details. If you do not receive an email within 10 minutes, please email <a href='mailto:help@chowdy.ca'>help@chowdy.ca</a> for assistance"}
+                total_dollars_before_hst = cart.map{|c| c[:price]*c[:quantity] }.sum
+                total_dollars_after_hst = (total_dollars_before_hst * 1.13).round
+                charge_description = "#{cart.map{|c| c[:quantity].to_s+' '+c[:product_name]+' from '+c[:vendor_name]+': unit price $'+((c[:price].to_f/100).round(2).to_s)}.join(', ')}"
+
+                begin
+                    charge = Stripe::Charge.create(
+                        amount: total_dollars_after_hst,
+                        currency: 'CAD',
+                        customer: customer.stripe_customer_id,
+                        description: charge_description,
+                        metadata: {email: customer.email},
+                        statement_descriptor: 'CHOWDY MKTPLCE PRCHSE'
+                    )
+                rescue Stripe::CardError => error
+                   result = {result:"fail", message: "Purchase could not be completed. Your card was declined"}
+                rescue => error
+                   result = {result:"fail", message: "An error was encountered during the trasaction. Please try again"}
                 else
-                    result = {result:"fail", message: "An error has occurred"}
+                    if pps = PartnerProductSale.create(stripe_customer_id:customer.stripe_customer_id, total_amount_including_hst_in_cents:total_dollars_after_hst,order_status:'Received',delivery_date: PartnerProductDeliveryDate.first.delivery_date, stripe_charge_id:[charge.id])
+                        cart.each do |c|
+                            PartnerProductSaleDetail.create(
+                                partner_product_sale_id:pps.id,
+                                partner_product_id:c[:product_id],
+                                quantity:c[:quantity],
+                                cost_in_cents:PartnerProduct.find(c[:product_id]).cost_in_cents,
+                                sale_price_before_hst_in_cents:PartnerProduct.find(c[:product_id]).price_in_cents
+                            )                    
+                        
+                            if PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).length == 1
+                                quantity = PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).take.ordered_quantity + c[:quantity]
+                                PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).take.update_attributes(ordered_quantity:quantity)
+                            elsif PartnerProductOrderSummary.where(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date).length == 0
+                                PartnerProductOrderSummary.create(product_id:c[:product_id],delivery_date:PartnerProductDeliveryDate.first.delivery_date,ordered_quantity:c[:quantity])
+                            end
+
+                        end
+                        purchase_id = pps.create_unique_id
+                        current_user.log_activity("Customer made purchase from marketplace. Order ID: #{purchase_id}")
+                        CustomerMailer.delay.email_purchase_confirmation(customer,pps,total_dollars_after_hst)
+                        result = {result:"success", message: "Your order has been placed. You will receive a confirmation email receipt from us shortly with your order details. If you do not receive an email within 10 minutes, please email <a href='mailto:help@chowdy.ca'>help@chowdy.ca</a> for assistance"}
+                    else
+                        result = {result:"fail", message: "An error has occurred"}
+                    end
                 end
             end
         end
