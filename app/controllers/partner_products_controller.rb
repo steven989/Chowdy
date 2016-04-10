@@ -12,6 +12,7 @@ class PartnerProductsController < ApplicationController
         end      
     end
 
+
     def show
       @partner_product = PartnerProduct.find(params[:id])
       @photos = @partner_product.photos

@@ -1,5 +1,15 @@
 class PartnerProductSalesController < ApplicationController
 
+
+    def intro
+        respond_to do |format|
+          format.html {
+            render partial: 'intro'
+          }      
+        end        
+    end
+
+
     def order
         customer = current_user.customer
         puts params.inspect 
