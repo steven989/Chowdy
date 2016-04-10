@@ -1,6 +1,6 @@
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <h4 class="modal-title" id="myModalLabel">Edit order</h4>
+    <h4 class="modal-title" id="myModalLabel">Edit order<% unless @partner_product_sale_details.blank? %> (scheduled delivery date for this order is <%= @order.take.delivery_date.strftime("%Y-%m-%d") %>; changes must be made by the Thursday before delivery) <% end %></h4>
 </div>
 
 <div class="modal-body">
@@ -45,6 +45,12 @@
                     <td colspan='5' class='text-right'>Total</td>
                     <td id='edit_popup_total'>$<%= (@total.to_f/100).to_s %></td>
                 </tr>
+                <% if @refund_amount %>
+                    <tr>
+                        <td colspan='5' class='text-right'><em>Amount Refunded</em></td>
+                        <td><em>$<%= (@refund_amount.to_f/100).to_s %></em></td>
+                    </tr>
+                <% end %>
             </tbody>
         </table>
         <div class="row">
@@ -52,6 +58,65 @@
                     <div colspan='1' class='text-center hidden pull-right' id='difference_action_message_box'><em><span id='difference_amount'></span> <span id="difference_action_message"></span></em></div>
             </div>
         </div>
+        <% if @admin %>
+            <% if @past_due %>
+                <hr>
+                    <div class="row">
+                        <div class="col-sm-10">
+                          <b><p>This order is past update deadline (Thursday before delivery date). Force change?</p></b>
+                        </div>
+                        <div class="col-sm-2">
+                            <%= check_box_tag :force_update,nil,false%>  
+                        </div>                    
+                    </div>
+                <hr>
+                    <div class="row" style="vertical-align:middle;">
+                        <div class="col-sm-10" style="vertical-align:middle;">
+                          <b><p>Change volume? (If unchecked, the extra charge/refund will be processed but order volume will not be changed. Uncheck this if you want to refund items but not update the order volume)</p></b>
+                        </div>
+                        <div class="col-sm-2" style="vertical-align:middle;">
+                            <%= check_box_tag :update_volume,nil,false, checked:"checked"%>  
+                        </div>                    
+                    </div>
+                <span id='email_customer_checkbox_wrapper'>
+                    <hr>
+                        <div class="row" style="vertical-align:middle;">
+                            <div class="col-sm-10" style="vertical-align:middle;">
+                              <b><p>Email customer with confirmation of change?</p></b>
+                            </div>
+                            <div class="col-sm-2" style="vertical-align:middle;">
+                                <%= check_box_tag :email_customer,nil,false, checked:"checked"%>  
+                            </div>                    
+                        </div>
+                    </span>
+                <hr>
+                    <div class="row">
+                        <%= form_tag order_refund_path, id:'lump_sum_refund_form', method:'PUT' do %>
+                            <div class="col-sm-9" style="vertical-align:middle;">
+                                    <div class="row padder">
+                                        <div class="form-group">
+                                            <div class="col-sm-8 m-l-n" style="vertical-align:middle;">
+                                                <%= label_tag :refund_amount, 'Lump Sum Refund Amount in Cents (do NOT use this field if refund is for individual products - use the volume update above instead):' %>
+                                            </div>
+                                            <div class="col-sm-4" style="vertical-align:middle;">
+                                                <%= number_field_tag :refund_amount %>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                            <div class="col-sm-3"s tyle="vertical-align:middle;">
+                                    <div class="form-group">
+                                        <%= hidden_field_tag 'sale_id', @order.take.sale_id %>
+                                        <%= submit_tag 'Refund', class:'btn btn-sm btn-danger btn-block disabled'%>  
+                                    </div>
+                                    <div class="alert alert-block text-center hidden" id="refund_button_alert">
+
+                                    </div>
+                            </div>
+                        <% end %>
+                    </div>
+            <% end %>
+        <% end %>
         <div class="row padder padder-v">
             <div class="col-sm-12" style="height:30px;">
                 <div class="alert alert-danger alert-block text-center hidden" id="modify_order_alert">
@@ -64,107 +129,194 @@
 
 <div class="modal-footer">
     <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+    <% if @admin_cancellable %>
+        <button type="button" id="admin_cancel_order" href="<%= cancel_order_path+"?sale_id=#{@order.take.sale_id}" %>" class="btn btn-md btn-danger m-t-sm" data-method="GET" >Cancel Order</button>
+    <% end %>
     <% if @editable %>
-        <button type="button" id="submit_modify_order" href="<%= update_order_path %>" class="btn btn-md btn-success m-t-sm disabled">Update Order</button>
+        <button type="button" id="submit_modify_order" href="<%= update_order_path %>" class="btn btn-md btn-success m-t-sm disabled" data-method="PUT">Update Order</button>
     <% end %>
 </div>
 
 <% unless @partner_product_sale_details.blank? %>
 
     <script>
-        var popup_current_total = <%= @total %>;
-        var popup_total = <%= @total %>;
-        var popup_hst = <%= @hst %>;
-        var popup_subtotal = <%= @subtotal %>;
-        var popup_cart_original = <%= @cart.to_json.html_safe %>;
-        var popup_cart = <%= @cart.to_json.html_safe %>;
-        $('.edit_popup_qty_input').on('change',function(){
-            var popup_product_id = $(this).data('product-id');
-            var popup_new_quantity = parseInt($(this).val());
-            var popup_cart_item = popup_cart.filter(function(ci){return ci.product_id == popup_product_id})[0];
-            popup_cart_item.quantity = popup_new_quantity;
-            update_totals_and_visuals();
 
-        })
+        <% if @admin %>
 
-        function update_totals_and_visuals(){
-            popup_subtotal = 0;
-            popup_total = 0;
-            var enable_update = false;
+            var past_deadline = <%= @past_due %>;
+            var admin = true;
+            var force_update = $('#force_update').is(':checked');
+            var update_volume = $('#update_volume').is(':checked');
+            var email_customer = $('#email_customer').is(':checked');
 
-            popup_cart.forEach(function(ci){
-                $('.edit_popup_item_total').filter(function(){
-                    return $(this).data('product-id') == ci.product_id
-                }).html("$"+((ci.price*ci.quantity).toFixed(2)/100.00).toFixed(2).toString());
-                popup_subtotal = popup_subtotal + ci.price*ci.quantity;
+            $('#force_update, #update_volume, #email_customer').on('click',function(){
+                update_totals_and_visuals();
             });
 
-            popup_total = Math.round(popup_subtotal * 1.13);
-            popup_hst = popup_total - popup_subtotal;
 
-            if (popup_total - popup_current_total > 0 ) {
-                var diff = popup_total - popup_current_total;
-                $('#difference_amount').html("$"+(diff.toFixed(2)/100.00).toFixed(2).toString());
-                $('#difference_action_message').html("will be charged");
-                $('#difference_action_message_box').removeClass('hidden');
-            } else if (popup_total - popup_current_total == 0) {
-                $('#difference_action_message_box').addClass('hidden');
-            } else {
-                var diff =  popup_current_total - popup_total;
-                $('#difference_amount').html("$"+(diff.toFixed(2)/100.00).toFixed(2).toString());
-                $('#difference_action_message').html("will be refunded");
-                $('#difference_action_message_box').removeClass('hidden');
-            }
-
-            
-
-            $('#edit_popup_subtotal').html("$"+(popup_subtotal.toFixed(2)/100.00).toFixed(2).toString());
-            $('#edit_popup_hst').html("$"+(popup_hst.toFixed(2)/100.00).toFixed(2).toString());
-            $('#edit_popup_total').html("$"+(popup_total.toFixed(2)/100.00).toFixed(2).toString());
-            
-            popup_cart_original.forEach(function(cio){
-                if (popup_cart.filter(function(pci){return pci.product_id == cio.product_id})[0].quantity != cio.quantity) {
-                    enable_update = true;
+            $('#refund_amount').on('keyup',function(){
+                if ($(this).val() > 0 ) {
+                    $('#lump_sum_refund_form input[type=submit]').removeClass('disabled');
+                } else {
+                    $('#lump_sum_refund_form input[type=submit]').addClass('disabled');
                 }
             })
 
+            $('#lump_sum_refund_form').on('submit',function(){
+                event.preventDefault();
+
+                  var _this = $(this).find('input[type=submit]');
+                  var submit_button_original_value = _this.attr('value');
+                  var submit_button_width = _this.outerWidth();
+
+                  _this.css('width',submit_button_width).addClass('disabled').val('Wait...');
+
+                  $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'PUT',
+                    dataType: 'JSON',
+                    data: $(this).serialize()
+                  }).done(function(data){
+                    if (data.result == 'success') {
+                            $('#refund_button_alert').html(data.message);
+                            $('#refund_button_alert').addClass('alert-success').removeClass('hidden');
+                            $('#refund_amount').val('');
+                            _this.attr('value',submit_button_original_value);
+                    } else {
+                            $('#refund_button_alert').html(data.message);
+                            $('#refund_button_alert').addClass('alert-danger').removeClass('hidden');
+                             _this.removeClass('disabled').attr('value',submit_button_original_value);
+                    }
+                  })
+            });
+
+        <% else %>
+
+            var admin = false;
+
+        <% end %>
 
 
-            if (enable_update) {
-                $('#submit_modify_order').removeClass('disabled');
-            } else {
-                $('#submit_modify_order').addClass('disabled');
-            }
-        }
+            var popup_current_total = <%= @total %>;
+            var popup_total = <%= @total %>;
+            var popup_hst = <%= @hst %>;
+            var popup_subtotal = <%= @subtotal %>;
+            var popup_cart_original = <%= @cart.to_json.html_safe %>;
+            var popup_cart = <%= @cart.to_json.html_safe %>;
+            $('.edit_popup_qty_input').on('change',function(){
+                var popup_product_id = $(this).data('product-id');
+                var popup_new_quantity = parseInt($(this).val());
+                var popup_cart_item = popup_cart.filter(function(ci){return ci.product_id == popup_product_id})[0];
+                popup_cart_item.quantity = popup_new_quantity;
+                update_totals_and_visuals();
 
-        $('#submit_modify_order').on('click',function(){
-                var data_to_send = {update_volume:'true',force_update:'false',sale_id:'<%= @order.take.sale_id %>',updated_order_array:popup_cart}
+            })
 
-              var _this = $(this);
-              var submit_button_original_value = $(this).attr('value');
-              var submit_button_width = $(this).outerWidth();
+            function update_totals_and_visuals(){
+                popup_subtotal = 0;
+                popup_total = 0;
+                var enable_update = false;
 
-              $(this).css('width',submit_button_width).addClass('disabled').html('Wait...');
+                <% if @admin %>
+                    force_update = $('#force_update').is(':checked');
+                    update_volume = $('#update_volume').is(':checked');
+                    email_customer = $('#email_customer').is(':checked');
 
-              $.ajax({
-                url: $(this).attr('href'),
-                type: 'PUT',
-                dataType: 'JSON',
-                contentType: 'application/json',
-                data: JSON.stringify(data_to_send)
-              }).done(function(data){
-                if (data.result == 'success') {
-                    $('#customer_order_details_alert').addClass('alert-success');
-                    $('#customer_order_details_alert').html(data.message);
-                    _this.html('Update Order');
-                    $('#generalModal').modal('hide');
+                    if (!update_volume) {
+                        $('#email_customer').attr('disabled', 'disabled');
+                    } else {
+                        console.log('hii');
+                        $('#email_customer').removeAttr('disabled');
+                    }
+                <% end %>
+
+                popup_cart.forEach(function(ci){
+                    $('.edit_popup_item_total').filter(function(){
+                        return $(this).data('product-id') == ci.product_id
+                    }).html("$"+((ci.price*ci.quantity).toFixed(2)/100.00).toFixed(2).toString());
+                    popup_subtotal = popup_subtotal + ci.price*ci.quantity;
+                });
+
+                popup_total = Math.round(popup_subtotal * 1.13);
+                popup_hst = popup_total - popup_subtotal;
+
+                if (popup_total - popup_current_total > 0 ) {
+                    var diff = popup_total - popup_current_total;
+                    $('#difference_amount').html("$"+(diff.toFixed(2)/100.00).toFixed(2).toString());
+                    $('#difference_action_message').html("will be charged");
+                    $('#difference_action_message_box').removeClass('hidden');
+                } else if (popup_total - popup_current_total == 0) {
+                    $('#difference_action_message_box').addClass('hidden');
                 } else {
-                    $('#modify_order_alert').html(data.message);
-                    $('#modify_order_alert').removeClass('hidden');
-                    _this.removeClass('disabled').html('Update Order');
+                    var diff =  popup_current_total - popup_total;
+                    $('#difference_amount').html("$"+(diff.toFixed(2)/100.00).toFixed(2).toString());
+                    $('#difference_action_message').html("will be refunded");
+                    $('#difference_action_message_box').removeClass('hidden');
                 }
-              })
-        })
+
+            
+                $('#edit_popup_subtotal').html("$"+(popup_subtotal.toFixed(2)/100.00).toFixed(2).toString());
+                $('#edit_popup_hst').html("$"+(popup_hst.toFixed(2)/100.00).toFixed(2).toString());
+                $('#edit_popup_total').html("$"+(popup_total.toFixed(2)/100.00).toFixed(2).toString());
+                
+                popup_cart_original.forEach(function(cio){
+                    if (popup_cart.filter(function(pci){return pci.product_id == cio.product_id})[0].quantity != cio.quantity) {
+                        <% if @admin %>
+                            if (!past_deadline || force_update) {
+                                enable_update = true;
+                            }
+                        <% else %>
+                            enable_update = true;
+                        <% end %>
+                    }
+                })
+
+
+                if (enable_update) {
+                    $('#submit_modify_order').removeClass('disabled');
+                } else {
+                    $('#submit_modify_order').addClass('disabled');
+                }
+            }
+
+            $('#submit_modify_order, #admin_cancel_order').on('click',function(){
+                <% if @admin && @past_due %>
+                    var data_to_send = {update_volume:update_volume,force_update:force_update,sale_id:'<%= @order.take.sale_id %>',updated_order_array:popup_cart,email_customer:email_customer}
+                <% else %>
+                    var data_to_send = {update_volume:'true',email_customer:'true',force_update:'false',sale_id:'<%= @order.take.sale_id %>',updated_order_array:popup_cart}
+                <% end %>
+
+                  var _this = $(this);
+                  var submit_button_original_value = $(this).attr('value');
+                  var submit_button_width = $(this).outerWidth();
+
+                  $(this).css('width',submit_button_width).addClass('disabled').html('Wait...');
+
+                  $.ajax({
+                    url: $(this).attr('href'),
+                    type: $(this).data('method'),
+                    dataType: 'JSON',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data_to_send)
+                  }).done(function(data){
+                    if (data.result == 'success') {
+                            $('#customer_order_details_alert').html(data.message);
+                            $('#customer_order_details_alert').addClass('alert-success').removeClass('hidden');
+                        _this.html('Update Order');
+                        <% if @admin %>
+                            $('#formModal').modal('hide');
+                        <% else %>
+                            $('#generalModal').modal('hide');
+                        <% end %>
+                    } else {
+                        $('#modify_order_alert').html(data.message);
+                        $('#modify_order_alert').removeClass('hidden');
+                        _this.removeClass('disabled').html('Update Order');
+                    }
+                  })
+            })
+
+
 
     </script>
 <% end %>

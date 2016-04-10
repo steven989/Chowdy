@@ -11,7 +11,6 @@
         <th class="text-center">Order ID</th>
         <th class="text-center">Delivery Date</th>
         <th class="text-center">Amount</th>
-        <th class="text-center">Cancel Order</th>
         <th class="text-center">Change Order</th>
     </thead>
     <tbody>
@@ -21,11 +20,6 @@
                 <td><%= order.sale_id %></td>
                 <td><%= order.delivery_date.strftime("%Y-%m-%d") %></td>
                 <td>$<%= (order.total_amount_including_hst_in_cents.to_f/100).round(2).to_s %></td>
-                <td>
-                    <% if Date.today <= Chowdy::Application.closest_date(-1,4,order.delivery_date) %>
-                        <a href="<%= cancel_order_path+"?sale_id=#{order.sale_id}" %>" class="ajax_json_response_only" data-ajax-method="GET" data-message-target="#customer_order_details_alert">Cancel</a>
-                    <% end %>
-                </td>
                 <td>
                     <% if Date.today <= Chowdy::Application.closest_date(-1,4,order.delivery_date) %>
                         <a href="<%= edit_order_path+"?sale_id=#{order.sale_id}" %>" class="pull_modal">Change</a>

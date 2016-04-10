@@ -26,7 +26,7 @@ $(function(){
       // ajax
 
       function formRetrievalAjax() {
-          $('.pull_system_setting_form, .pull_next_week_total, .nestedForm').off("click").on("click",function(){
+          $('.pull_system_setting_form, .pull_next_week_total, .nestedForm, .pull_modal').off("click").on("click",function(){
             event.preventDefault();
             $.ajax({
               url: $(this).attr('href'),
@@ -1435,6 +1435,7 @@ $(function(){
                     <section class="tab-pane" id="search_order" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder padder-v">
+                              <div class="alert hidden" style="font-size: 12px;" id="customer_order_details_alert"></div>
                               <section class="row padder">
                                 <div class="panel panel-default">
                                   <header class="panel-heading">

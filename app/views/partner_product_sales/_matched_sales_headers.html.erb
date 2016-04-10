@@ -3,6 +3,7 @@
 <% else %>
     <thead>
         <th>Stripe</th>
+        <th>Edit Order</th>
         <th>Name</th>
         <th>Email</th>
         <th>Sales ID (Order ID)</th>
@@ -15,6 +16,9 @@
         <% @results.each do |r| %>
           <tr>
             <td><%= link_to "Stripe", "https://dashboard.stripe.com/customers/#{r[:stripe_customer_id]}", target: "_blank", class:"btn btn-s-md btn-primary btn-rounded", style:"min-width: 0px;width: 60px;" %></td>
+            <td>
+                <a href="<%= edit_order_path+"?sale_id=#{r[:sale_id]}" %>" class="pull_modal">Edit</a>
+            </td>
             <td><%= r[:name] %></td>
             <td><%= r[:email] %></td>
             <td><%= r[:sale_id] %></td>

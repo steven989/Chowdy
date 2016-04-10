@@ -222,14 +222,23 @@ class PartnerProductSalesController < ApplicationController
         sale_ids = params[:sale_id]
         @order = PartnerProductSale.where{(sale_id =~ sale_ids) & (order_status !~ "Cancelled")}
 
+        @admin = current_user.role == 'admin'
+
         if @order.length == 1
             scheduled_delivery_date = @order.take.delivery_date
             cut_off_date = Chowdy::Application.closest_date(-1,4,scheduled_delivery_date)
-            @editable = Date.today <= cut_off_date
+            @past_due = Date.today > cut_off_date
+            @admin_cancellable = Date.today < scheduled_delivery_date
+            @editable = ( !@past_due || @admin)
+
+            refund_list = @order.take.partner_product_sale_refunds.where{(refund_type =~ '%lump%sum%') | (refund_type =~ '%item%linked%no%volume%')}
+            if refund_list.length > 0
+                @refund_amount = refund_list.map {|rl| rl.amount_refunded }.sum
+            end
 
             @partner_product_sale_details = @order.take.partner_product_sale_details
             @cart = @partner_product_sale_details.map {|ppsd| {product_id:ppsd.partner_product_id, quantity:ppsd.quantity, price:ppsd.sale_price_before_hst_in_cents} }
-            @subtotal = @partner_product_sale_details.map{|ppsd| ppsd.quantity * ppsd.sale_price_before_hst_in_cents}.sum 
+            @subtotal = @partner_product_sale_details.map{|ppsd| ppsd.quantity.to_i * ppsd.sale_price_before_hst_in_cents.to_i}.sum 
             @total = (@subtotal * 1.13).round
             @hst = @total - @subtotal
         end
@@ -242,12 +251,13 @@ class PartnerProductSalesController < ApplicationController
     end
 
     def update_order
-        update_volume = params[:update_volume]
 
+        update_volume = params[:update_volume]
         admin = current_user.role == "admin"
         force_update = admin && params[:force_update]
         updated_order_array_raw = params[:updated_order_array]
         order = PartnerProductSale.where(sale_id:params[:sale_id])
+        email_customer = params[:email_customer]
 
         if order.length == 1 
             updated_order_array = updated_order_array_raw.map do |order_item| 
@@ -265,7 +275,15 @@ class PartnerProductSalesController < ApplicationController
             if result[:result] == "success"
                 total_dollars = result[:new_amount].to_i
                 diff = result[:new_amount].to_i - result[:old_amount].to_i
-                CustomerMailer.delay.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date)
+                if admin 
+                    if email_customer && update_volume
+                        CustomerMailer.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date).deliver
+                    end
+
+                else
+                    CustomerMailer.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date).deliver
+                end
+                
             end
         elsif  order.length == 0 
             result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
@@ -282,11 +300,12 @@ class PartnerProductSalesController < ApplicationController
 
 
     def refund
+
         order = PartnerProductSale.where(sale_id:params[:sale_id])
         refund_amount = params[:refund_amount]
 
         if order.length == 1
-            result = lump_sum_refund_not_linked_to_items(refund_amount)
+            result = order.take.lump_sum_refund_not_linked_to_items(refund_amount)
         elsif  order.length == 0 
             result = {result:"fail", message:"Could not find order #{params[:sale_id]}"}
         else
