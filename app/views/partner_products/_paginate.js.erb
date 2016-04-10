@@ -1,4 +1,4 @@
-$('#pagination_section_wrapper').html("<%= j render partial: 'partner_products/paginate_content', locals: {partner_products:@parter_products, page: @page} %>");
+$('#pagination_section_wrapper').html("<%= j render partial: 'partner_products/paginate_content', locals: {partner_products:@parter_products, page: @page, disable_markplace_purchase:@disable_markplace_purchase} %>");
 var new_items_to_add = <%= @parter_products_menu.to_json.html_safe %>;
 
 new_items_to_add.forEach(function(nita){

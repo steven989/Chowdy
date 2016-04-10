@@ -15,6 +15,7 @@ class PartnerProductsController < ApplicationController
     def show
       @partner_product = PartnerProduct.find(params[:id])
       @photos = @partner_product.photos
+      @disable_markplace_purchase =  SystemSetting.where(setting:"marketplace",setting_attribute:"order").blank? ? true : (SystemSetting.where(setting:"marketplace",setting_attribute:"order").take.setting_value == "true" ? false : true)
       respond_to do |format|
         format.html {
           render partial: 'show'
@@ -26,7 +27,8 @@ class PartnerProductsController < ApplicationController
       @parter_products = Kaminari.paginate_array(PartnerProduct.products_to_display).page(params[:page])
       @page = params[:page]
       @parter_products_menu = @parter_products.map{|pp| {product_id:pp.id, price:pp.price_in_cents, name:pp.product_name, description:pp.product_description}}
-      
+      @disable_markplace_purchase =  SystemSetting.where(setting:"marketplace",setting_attribute:"order").blank? ? true : (SystemSetting.where(setting:"marketplace",setting_attribute:"order").take.setting_value == "true" ? false : true)
+
       respond_to do |format|
         format.js {
           render partial: 'paginate'

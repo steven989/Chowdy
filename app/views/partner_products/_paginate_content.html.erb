@@ -21,9 +21,9 @@
                   <p><%= pp.product_description[0...60] + (pp.product_description.length > 60 ? "..." : "") %> <a class="pull_modal" href="<%= partner_product_path(pp) %>">more</a></p>
                   <form class="add_to_cart" data-product-id="<%= pp.id %>" style="color:black">
                     <div class="form-group">
-                      <input type="number" class="qty" data-product-id="<%= pp.id %>" required="true" placeholder="Qty" min="0" style="width:60px;height:32px; float:left; margin-left: 32px; margin-right: 10px; border:1px solid white; text-align: center;">
+                      <input type="number" class="qty" data-product-id="<%= pp.id %>" required="true" placeholder="Qty" min="0" style="width:60px;height:32px; float:left; margin-left: 32px; margin-right: 10px; border:1px solid white; text-align: center;" <% if disable_markplace_purchase %>disabled="disabled"<% end %>>
                     </div>
-                    <input type="submit" class="btn btn-s-md btn-default" style="float:left; border: none; border-radius: 0px; color:white !important; background-color:#f0ad4e;" value="Add to Cart">
+                    <input type="submit" class="btn btn-s-md btn-default" style="float:left; border: none; border-radius: 0px; color:white !important; background-color:#f0ad4e;" value="Add to Cart" <% if disable_markplace_purchase %>disabled="disabled"<% end %>>
                   </form>
                 </section>
              </section>
