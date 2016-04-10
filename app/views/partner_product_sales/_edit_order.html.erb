@@ -1,6 +1,6 @@
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <h4 class="modal-title" id="myModalLabel">Edit order<% unless @partner_product_sale_details.blank? %> (scheduled delivery date for this order is <%= @order.take.delivery_date.strftime("%Y-%m-%d") %>; changes must be made by the Thursday before delivery) <% end %></h4>
+    <h4 class="modal-title" id="myModalLabel">Edit order<% unless @partner_product_sale_details.blank? %> <% if Date.today <= @order.take.delivery_date %> (scheduled delivery date for this order is <%= @order.take.delivery_date.strftime("%Y-%m-%d") %>; changes must be made by the Thursday before delivery) <% else %> (order delivered on <%= @order.take.delivery_date.strftime("%Y-%m-%d") %>) <% end %> <% end %></h4>
 </div>
 
 <div class="modal-body">
