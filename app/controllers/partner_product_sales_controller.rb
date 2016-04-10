@@ -361,11 +361,11 @@ class PartnerProductSalesController < ApplicationController
                 diff = result[:new_amount].to_i - result[:old_amount].to_i
                 if admin 
                     if email_customer && update_volume
-                        CustomerMailer.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date).deliver
+                        CustomerMailer.delay.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date)
                     end
 
                 else
-                    CustomerMailer.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date).deliver
+                    CustomerMailer.delay.order_modification_confirmation(order.take.customer,order,total_dollars, diff,order.take.delivery_date)
                 end
                 
             end
