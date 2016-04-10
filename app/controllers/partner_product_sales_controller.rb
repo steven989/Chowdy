@@ -151,14 +151,33 @@ class PartnerProductSalesController < ApplicationController
 
     def search_order_by_customer
         keyword = params[:keyword]
+        partner_product_sale = PartnerProductSale.where(sale_id:keyword)
         customer_results = Customer.search_by_name_or_email(keyword)
+        
         @results = []
         
-        customer_results.each do |cr|
-            cr.partner_product_sales.each do |pps|
-                @results.push({stripe_customer_id: pps.customer.stripe_customer_id,name:pps.customer.name, email:pps.customer.email, customer_id:pps.customer.id,sale_id:pps.sale_id,total_amount_including_hst_in_cents:pps.total_amount_including_hst_in_cents, delivery_date:pps.delivery_date, created_at:pps.created_at, order_status:pps.order_status})
+        if partner_product_sale.length > 0 
+            partner_product_sale.each do |pps|
+                @results.push({
+                    stripe_customer_id: pps.customer.stripe_customer_id,
+                    name:pps.customer.name, 
+                    email:pps.customer.email, 
+                    customer_id:pps.customer.id,
+                    sale_id:pps.sale_id,
+                    total_amount_including_hst_in_cents:pps.total_amount_including_hst_in_cents, 
+                    delivery_date:pps.delivery_date, 
+                    created_at:pps.created_at, 
+                    order_status:pps.order_status
+                })
+            end
+        else 
+            customer_results.each do |cr|
+                cr.partner_product_sales.each do |pps|
+                    @results.push({stripe_customer_id: pps.customer.stripe_customer_id,name:pps.customer.name, email:pps.customer.email, customer_id:pps.customer.id,sale_id:pps.sale_id,total_amount_including_hst_in_cents:pps.total_amount_including_hst_in_cents, delivery_date:pps.delivery_date, created_at:pps.created_at, order_status:pps.order_status})
+                end
             end
         end
+
 
         @results = @results.sort {|a,b| [b[:customer_id],b[:created_at]] <=> [a[:customer_id],a[:created_at]] }
  
@@ -171,17 +190,47 @@ class PartnerProductSalesController < ApplicationController
     end
 
     def search_order_details_by_id
+
         sales_id = params[:sales_id]
-        sales = PartnerProductSale.where(sale_id:sales_id)
-        unless sales.length != 1
-            @sales_details = sales.take.partner_product_sale_details
+        partner_product_sale = PartnerProductSale.where(sale_id:sales_id)
+        @results = []
+
+        unless partner_product_sale.length != 1
+            partner_product_sale.each do |pps|
+                @results.push({
+                    stripe_customer_id: pps.customer.stripe_customer_id,
+                    name:pps.customer.name, 
+                    email:pps.customer.email, 
+                    customer_id:pps.customer.id,
+                    sale_id:pps.sale_id,
+                    total_amount_including_hst_in_cents:pps.total_amount_including_hst_in_cents, 
+                    delivery_date:pps.delivery_date, 
+                    created_at:pps.created_at, 
+                    order_status:pps.order_status
+                })
+            end
         end
 
         respond_to do |format|
           format.html {
-            render partial: 'matched_sales_details'
+            render partial: 'matched_sales_headers'
           }      
         end  
+
+
+        #  original here below
+
+        # sales_id = params[:sales_id]
+        # sales = PartnerProductSale.where(sale_id:sales_id)
+        # unless sales.length != 1
+        #     @sales_details = sales.take.partner_product_sale_details
+        # end
+
+        # respond_to do |format|
+        #   format.html {
+        #     render partial: 'matched_sales_details'
+        #   }      
+        # end  
     end
 
     def view_orders
