@@ -1370,7 +1370,7 @@ $(function(){
                                     Vendors
                                     <button class="btn btn-s-md btn-info btn-rounded pull_system_setting_form" href="<%= new_vendor_path %>">Add vendor</button>
 
-                                    <button class="btn btn-s-md btn-default btn-rounded pull_system_setting_form" href="<%= edit_partner_product_delivery_date_path %>">Current delivery date: <%= PartnerProductDeliveryDate.first.delivery_date.strftime("%Y-%m-%d") %>)</button>
+                                    <button class="btn btn-s-md btn-default btn-rounded pull_system_setting_form" href="<%= edit_partner_product_delivery_date_path %>">Current delivery date: <%= PartnerProductDeliveryDate.first.delivery_date.strftime("%Y-%m-%d") %></button>
 
 
                                     <%= link_to "Total orders for #{PartnerProductSale.pull_date.strftime("%Y-%m-%d")}", weekly_marketplace_totals_path(format: :csv), class:"btn btn-s-md btn-default btn-rounded" %>
