@@ -115,6 +115,31 @@
                             </div>
                         <% end %>
                     </div>
+            <% else %>
+                <hr>
+                <%= form_tag update_order_delivery_date_path, method: :put, id:'update_delivery_date' do %>
+                    <div class="col-sm-9" style="vertical-align:middle;">
+                            <div class="row padder">
+                                <div class="form-group">
+                                    <div class="col-sm-6 m-l-n" style="vertical-align:middle;">
+                                        <%= label_tag :delivery_date, "Change delivery date" %>
+                                    </div>
+                                    <div class="col-sm-4" style="vertical-align:middle;">
+                                        <%= text_field_tag 'delivery_date',nil,class: "input-sm input-s form-control datepicker-input readonly", size: "16", data: {date_format: "yyyy-mm-dd"}%>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                    <div class="col-sm-3"s tyle="vertical-align:middle;">
+                            <div class="form-group">
+                                <%= hidden_field_tag 'sale_id', @order.take.sale_id %>
+                                <%= submit_tag 'Change Date', class:'btn btn-sm btn-info btn-block disabled' %>
+                            </div>
+                            <div class="alert alert-block text-center hidden" id="refund_button_alert">
+                            </div>
+                    </div>
+                <% end %>
+
             <% end %>
         <% end %>
         <div class="row padder padder-v">
@@ -154,6 +179,22 @@
             });
 
 
+            var earliest_delivery_date = new Date(<%= @earliest_delivery_date.year %>,<%= @earliest_delivery_date.month.to_i - 1 %>,<%= @earliest_delivery_date.day %>,0,0,0,0)
+
+            var current_delivery_date = new Date(<%= @scheduled_delivery_date.year %>,<%= @scheduled_delivery_date.month.to_i - 1 %>,<%= @scheduled_delivery_date.day %>,0,0,0,0)
+
+            var deliveryDate = $('#delivery_date').datepicker({
+              format: "yyyy-mm-dd",
+              onRender: function(date) {
+                return (date.valueOf() < earliest_delivery_date.valueOf() || date.getDay() != 1 ) ? 'disabled' : '';
+              }
+            }).on('changeDate', function() {
+              $('#update_delivery_date input[type=submit]').removeClass('disabled');
+              $('#delivery_date').datepicker('hide');
+              });
+
+            $('#delivery_date').datepicker('setValue', current_delivery_date);
+
             $('#refund_amount').on('keyup',function(){
                 if ($(this).val() > 0 ) {
                     $('#lump_sum_refund_form input[type=submit]').removeClass('disabled');
@@ -162,7 +203,7 @@
                 }
             })
 
-            $('#lump_sum_refund_form').on('submit',function(){
+            $('#lump_sum_refund_form, #update_delivery_date').on('submit',function(){
                 event.preventDefault();
 
                   var _this = $(this).find('input[type=submit]');

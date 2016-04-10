@@ -43,6 +43,7 @@ Chowdy::Application.routes.draw do
   get 'partner_product_sales/edit_order' => 'partner_product_sales#edit_order', as: 'edit_order'
   put 'partner_product_sales/update_order' => 'partner_product_sales#update_order', as: 'update_order'
   get 'partner_product_sales/cancel_order' => 'partner_product_sales#cancel_order', as: 'cancel_order'
+  put 'partner_product_sales/update_delivery_date' => 'partner_product_sales#update_delivery_date', as: 'update_order_delivery_date'
   put 'partner_product_sales/refund' => 'partner_product_sales#refund', as: 'order_refund'
 
   

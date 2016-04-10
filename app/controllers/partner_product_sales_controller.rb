@@ -274,15 +274,22 @@ class PartnerProductSalesController < ApplicationController
         @admin = current_user.role == 'admin'
 
         if @order.length == 1
-            scheduled_delivery_date = @order.take.delivery_date
-            cut_off_date = Chowdy::Application.closest_date(-1,4,scheduled_delivery_date)
+            @scheduled_delivery_date = @order.take.delivery_date
+            cut_off_date = Chowdy::Application.closest_date(-1,4,@scheduled_delivery_date)
             @past_due = Date.today > cut_off_date
-            @admin_cancellable = Date.today < scheduled_delivery_date
+            @admin_cancellable = Date.today < @scheduled_delivery_date
             @editable = ( !@past_due || @admin)
 
             refund_list = @order.take.partner_product_sale_refunds.where{(refund_type =~ '%lump%sum%') | (refund_type =~ '%item%linked%no%volume%')}
             if refund_list.length > 0
                 @refund_amount = refund_list.map {|rl| rl.amount_refunded }.sum
+            end
+
+
+            if [1,2,3,4].include? Date.today.wday
+                @earliest_delivery_date =  Chowdy::Application.closest_date(1,1) #upcoming Monday
+            else
+                @earliest_delivery_date =  Chowdy::Application.closest_date(2,1) #Two Mondays from now
             end
 
             @partner_product_sale_details = @order.take.partner_product_sale_details
@@ -298,6 +305,34 @@ class PartnerProductSalesController < ApplicationController
           }      
         end   
     end
+
+    def update_delivery_date
+        delivery_date_selected = params[:delivery_date]
+        sale_id = params[:sale_id]
+
+        order = PartnerProductSale.where(sale_id:sale_id)
+        
+        if order.length == 1
+            if order.take.update_attributes(delivery_date:delivery_date_selected.to_date)
+                result = {result:"success",message:"Delivery date successfully updated to #{delivery_date_selected.to_date.strftime("%Y-%m-%d")}"}
+
+                if order.take.customer.user
+                    order.take.customer.user.log_activity("Admin updated delivery date for order #{order.take.sale_id} to #{delivery_date_selected.to_date.strftime("%Y-%m-%d")}")
+                end
+
+            else
+                result = {result:"fail",message:"Something went wrong"}
+            end
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: result
+          }      
+        end 
+
+    end
+
 
     def update_order
 
