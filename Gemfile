@@ -104,6 +104,9 @@ gem 'rmagick'
 #22) Dropzone for AJAX file upload
 gem 'dropzonejs-rails'
 
+#23) Ordering items
+gem 'acts_as_list'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

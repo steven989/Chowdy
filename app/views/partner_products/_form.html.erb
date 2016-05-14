@@ -214,11 +214,11 @@
         <%= f.text_field :vendor_product_upc, class: "form-control", style:"cursor:text;"  %>
     </div>
     <div class="form-group">
-        <%= f.label :cost_in_cents, "Cost in Cents (required)", style:"cursor:pointer;" %>
+        <%= f.label :cost_in_cents, "Unit cost to Chowdy in Cents (required)", style:"cursor:pointer;" %>
         <%= f.text_field :cost_in_cents, class: "form-control",required: true, style:"cursor:text;" %>
     </div>
     <div class="form-group">
-        <%= f.label :suggested_retail_price_in_cents, style:"cursor:pointer;" %>
+        <%= f.label :suggested_retail_price_in_cents, "Vendor suggested retail price (this is not the actual price customers see)", style:"cursor:pointer;" %>
         <%= f.text_field :suggested_retail_price_in_cents, class: "form-control", style:"cursor:text;" %>
     </div>
     <div class="form-group">
@@ -232,7 +232,10 @@
         <% else %>
           <%= f.check_box :available, class: "form-control", checked:true %>
         <% end %>
-        
+    </div>
+    <div class="form-group">
+        <%= f.label :position, 'Position on marketplace (blank will be placed first, -1 will be placed last)' %>
+        <%= f.number_field :position, class: "form-control", style:"cursor:text;", min:"-1" %>
     </div>  
     <div class="form-group html_photo_uploader hidden">
         <%= f.label :photos %>
@@ -251,7 +254,7 @@
     <div class="alert m-t-xs m-b-xs hidden">
     </div>
     <% if @edit %>
-      <%= link_to "Delete This Product", partner_product_path(@partner_product), method: :delete, class: "btn btn-s-md btn-danger btn-rounded", style:"cursor:pointer;" %>
+      <%= link_to "Delete This Product", partner_product_path(@partner_product), method: :delete, style:"cursor:pointer;" %>
     <% end %>
   </div>
   <div class="modal-footer">

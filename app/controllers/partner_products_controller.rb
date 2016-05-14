@@ -54,9 +54,17 @@ class PartnerProductsController < ApplicationController
         vendor = Vendor.where(id:params[:partner_product][:vendor_id]).take
         partner_product = vendor.partner_products.new(partner_product_params)
         partner_product.photos = params[:photos].values unless params[:photos].blank?
-        
 
         if partner_product.save
+
+          if params[:partner_product][:position].blank? 
+            partner_product.insert_at(1)
+          elsif params[:partner_product][:position].to_i == -1
+            partner_product.move_to_bottom
+          else 
+            partner_product.insert_at(params[:partner_product][:position].to_i)
+          end
+          
           status = "success"
           notice_partner_product = "Partner product created"
         else
@@ -91,6 +99,15 @@ class PartnerProductsController < ApplicationController
         partner_product.photos = params[:photos].values unless params[:photos].blank?
 
         if partner_product.save
+
+          if params[:partner_product][:position].blank? 
+            partner_product.insert_at(1)
+          elsif params[:partner_product][:position].to_i == -1
+            partner_product.move_to_bottom
+          else 
+            partner_product.insert_at(params[:partner_product][:position].to_i)
+          end
+
           status = "success"
           notice_partner_product = "Partner product updated"
         else
