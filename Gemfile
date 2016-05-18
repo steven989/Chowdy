@@ -49,7 +49,7 @@ gem 'hirb'
 gem 'stripe', :git => 'https://github.com/stripe/stripe-ruby'
 
 #5) Login with Sorcery
-gem 'sorcery'
+gem 'sorcery', '~> 0.9.1'
 
 #6) More complex SQL queries
 gem 'squeel'
