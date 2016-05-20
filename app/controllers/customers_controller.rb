@@ -42,13 +42,18 @@ protect_from_forgery :except => :payment
                     render json: {result: false, message: "Rating cannot be blank"}
                 else
                     menu = Menu.find(menu_id)
-                    menu.menu_ratings.where(stripe_customer_id: current_customer.stripe_customer_id).delete_all
-                    rating_obj = menu.menu_ratings.new(comment:comment,rating:rating,stripe_customer_id:current_customer.stripe_customer_id)
-                    if rating_obj.save
-                        menu.delay.refresh_rating
-                        render json: {result: true, message: "Rating saved"}
-                    else
-                        render json: {result: false, message: rating_obj.errors.full_messages.join(", ")}
+
+                    if menu.production_day > Date.today
+                        render json: {result: false, message: "You cannot rate future meals"}
+                    else 
+                        menu.menu_ratings.where(stripe_customer_id: current_customer.stripe_customer_id).delete_all
+                        rating_obj = menu.menu_ratings.new(comment:comment,rating:rating,stripe_customer_id:current_customer.stripe_customer_id)
+                        if rating_obj.save
+                            menu.delay.refresh_rating
+                            render json: {result: true, message: "Rating saved"}
+                        else
+                            render json: {result: false, message: rating_obj.errors.full_messages.join(", ")}
+                        end
                     end
                 end
             }
