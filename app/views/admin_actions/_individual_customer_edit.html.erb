@@ -221,7 +221,7 @@
     <div class="line line-dashed b-b line-lg pull-in"></div>
     <%= form_for @customer, url: admin_update_customer_path(@customer)+"?todo=delivery_info", method: :put, html: {class: "edit_customer ajax_form"} do |f| %>
           <div class="form-group">
-              <%= f.label :delivery_address %>
+              <%= f.label :delivery_address, "Delivery Address (#{@customer.delivery_boundary})" %>
               <span><%= @customer.delivery_address.blank? ? '' : link_to('Map', 'https://www.google.com/maps?q='+@customer.delivery_address, target: '_blank') %></span>
               <%= f.text_field :delivery_address, class: "form-control" %>
           </div>
