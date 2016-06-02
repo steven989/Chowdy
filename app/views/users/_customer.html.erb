@@ -1,5 +1,4 @@
-
-<script>
+ <script>
 
   // create variables to hold products for when people make selection
   var partner_products_cart = [];
@@ -33,7 +32,7 @@ $(function(){
 
       addresses_to_display.forEach(function(a){
         GMaps.geocode({
-          address: a.location+', Toronto',
+          address: a.location,
           callback: function(results, status) {
             if (status == 'OK') {
               var latlng = results[0].geometry.location;
@@ -235,55 +234,57 @@ $(function(){
       $("#delivery_change_warning").removeClass("hidden");
     });
 
-    $('#delivery_request_form input').off("focusout").on("focusout",function(e){
-        GMaps.geocode({
-          address: $('#delivery_request_form #delivery_address').val()+", Toronto",
-          callback: function(results, status) {
-            if (status == 'OK') {
-              if (results.length > 1) {
-                var result_array = results.map(function(result){
-                    return result.formatted_address+"<br>"
-                  });
-              $('#address_match_warning strong').html("We found multiple matching locations. <i>Did you mean:</i><br>"+result_array.join(" "));
-              $('#address_match_warning').removeClass("hidden");
-              $("#delivery_request_form input:submit").addClass("disabled");
-              } else {
-                if (results[0].geometry.location_type == "APPROXIMATE") {
-                  $('#address_match_warning strong').html("We could not locate your address. Please be more specific.");
+    // $('#delivery_request_form input').off("focusout").on("focusout",delivery_check);
+
+    function delivery_check(){
+            GMaps.geocode({
+              address: $('#delivery_request_form #delivery_address').val()+", Toronto",
+              callback: function(results, status) {
+                if (status == 'OK') {
+                  if (results.length > 1) {
+                    var result_array = results.map(function(result){
+                        return result.formatted_address+"<br>"
+                      });
+                  $('#address_match_warning strong').html("We found multiple matching locations. <i>Did you mean:</i><br>"+result_array.join(" "));
                   $('#address_match_warning').removeClass("hidden");
                   $("#delivery_request_form input:submit").addClass("disabled");
-                } else {
-                var latlng = results[0].geometry.location;
-                  if (contains_location(latlng)=="downtown") {
-                    $('#address_match_warning strong').html("Note that the default delivery time is every <span class='text-danger-lt'>Monday and Thursday between 11am and 1pm</span> unless otherwise requested below.<br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will be in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery) <br><br>If our courier cannot drop off the meals, they will return them to the hub, where you are welcome to pick up the meals yourself");
-                    $('#address_match_warning').removeClass("hidden");
-                    $("label[for='note']").html("Additional note (we cannot deliver after 5pm)")
-                    $('#boundary').val("downtown");
-                    if ($("#delivery_request_form #phone_number").val() != "" ){
-                      $("#delivery_request_form input:submit").removeClass("disabled");
-                    }
-                  } else if (contains_location(latlng)=="gta") {
-                    $('#boundary').val("GTA");
-                    $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>10am and 3pm every Monday and Thursday in a thermal insulated bag</span>. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door. <br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste");
-                    $("label[for='note']").html("Additional note")
-                    $('#address_match_warning').removeClass("hidden");
-                    if ($("#delivery_request_form #phone_number").val() != "" ){
-                      $("#delivery_request_form input:submit").removeClass("disabled");
-                    }
                   } else {
-                    $('#address_match_warning strong').html("Your location is outside of our delivery zone");
-                    $('#address_match_warning').removeClass("hidden");
-                    $("#delivery_request_form input:submit").addClass("disabled");                    
+                    if (results[0].geometry.location_type == "APPROXIMATE") {
+                      $('#address_match_warning strong').html("We could not locate your address. Please be more specific.");
+                      $('#address_match_warning').removeClass("hidden");
+                      $("#delivery_request_form input:submit").addClass("disabled");
+                    } else {
+                    var latlng = results[0].geometry.location;
+                      if (contains_location(latlng)=="downtown") {
+                        $('#address_match_warning strong').html("Note that the default delivery time is every <span class='text-danger-lt'>Monday and Thursday between 11am and 1pm</span> unless otherwise requested below.<br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will be in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery) <br><br>If our courier cannot drop off the meals, they will return them to the hub, where you are welcome to pick up the meals yourself");
+                        $('#address_match_warning').removeClass("hidden");
+                        $("label[for='note']").html("Additional note (we cannot deliver after 5pm)")
+                        $('#boundary').val("downtown");
+                        if ($("#delivery_request_form #phone_number").val() != "" ){
+                          $("#delivery_request_form input:submit").removeClass("disabled");
+                        }
+                      } else if (contains_location(latlng)=="gta") {
+                        $('#boundary').val("GTA");
+                        $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>10am and 3pm every Monday and Thursday in a thermal insulated bag</span>. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door. <br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste");
+                        $("label[for='note']").html("Additional note")
+                        $('#address_match_warning').removeClass("hidden");
+                        if ($("#delivery_request_form #phone_number").val() != "" ){
+                          $("#delivery_request_form input:submit").removeClass("disabled");
+                        }
+                      } else {
+                        $('#address_match_warning strong').html("Your location is outside of our delivery zone");
+                        $('#address_match_warning').removeClass("hidden");
+                        $("#delivery_request_form input:submit").addClass("disabled");                    
+                      }
+                    }
                   }
+                } else {
+                  $('#address_match_warning strong').html("Uh oh, something went wrong")
                 }
               }
-            } else {
-              $('#address_match_warning strong').html("Uh oh, something went wrong")
-            }
-          }
-        });
+            });
 
-    });
+        }
 
     function contains_location(loc) {
 
@@ -314,6 +315,13 @@ $(function(){
         return false
       }
     }
+
+
+
+    // autocomplete the address
+
+    $('#delivery_address').geocomplete().bind("geocode:result", delivery_check);
+
 
 
     // date picker
@@ -1493,11 +1501,15 @@ $(function(){
                                       <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control" %>
                                     </div>
                                     <div class="form-group">
-                                      <%= label_tag 'delivery_address', "Delivery address with unit number" %>
+                                      <%= label_tag 'delivery_address', "Delivery address" %>
                                       <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control" %>
                                       <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
                                           <strong></strong>
                                       </div>
+                                    </div>
+                                    <div class="form-group">
+                                      <%= label_tag 'unit_number', "Unit number" %>
+                                      <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                     </div>
                                     <div class="form-group">
                                       <%= label_tag 'note', "Additional note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>

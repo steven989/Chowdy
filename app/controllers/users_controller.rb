@@ -589,6 +589,7 @@ class UsersController < ApplicationController
                 end
             end
             @delivery_address = @current_customer.delivery_address
+            @unit_number = @current_customer.unit_number
             @phone_number = @current_customer.phone_number
             @note = @current_customer.special_delivery_instructions
             @delivery_boundary = @current_customer.delivery_boundary

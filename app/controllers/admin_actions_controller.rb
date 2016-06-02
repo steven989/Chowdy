@@ -117,6 +117,7 @@ class AdminActionsController < ApplicationController
                 email:c.email,
                 name:c.name,
                 address:c.delivery_address,
+                unit:c.unit_number,
                 phone_number:c.phone_number, 
                 reg_mon:"#{[nil,'',0].include?(c.regular_meals_on_monday) ? '' : c.regular_meals_on_monday.to_s()+ ' Reg'}" , 
                 grn_mon:"#{[nil,'',0].include?(c.green_meals_on_monday) ? '' : c.green_meals_on_monday.to_s() + ' Grn'}", 
@@ -153,7 +154,7 @@ class AdminActionsController < ApplicationController
                 disposition = "attachment; filename='deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","gifter_pays_delivery","multiple_delivery_address","split_delivery_with","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","unit_number","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","gifter_pays_delivery","multiple_delivery_address","split_delivery_with","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 else 
                     send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 end
