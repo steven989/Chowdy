@@ -234,6 +234,10 @@ $(function(){
       $("#delivery_change_warning").removeClass("hidden");
     });
 
+    $('#delivery_address').off("input").on("input",function(){
+      $('#request_delivery_submit').removeClass("disabled").addClass("disabled");
+    })
+
     // $('#delivery_request_form input').off("focusout").on("focusout",delivery_check);
 
     function delivery_check(){
