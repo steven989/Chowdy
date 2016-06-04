@@ -933,15 +933,6 @@ $(function(){
                             <span class="font-bold">Choose Meals</span>
                           </a>
                         </li>
-                          <% if @display_marketplace_to_customers %>
-                            <li class="highlight">
-                              <a href="#partner_product_selection" class="auto b-b padder-v" data-toggle="tab">
-                                <i class="fa fa-truck">
-                                </i>
-                                <span class="font-bold">Marketplace (new)</span>
-                              </a>
-                            </li>
-                          <% end %>
                         <% end %>
                         <li>
                           <a href="#changePlan" class="b-b padder-v" data-toggle="tab">
@@ -993,6 +984,21 @@ $(function(){
                             Rate the meals
                           </div>
                         </a>
+
+
+                        <% if @display_meal_selection %>
+                          <% if @display_marketplace_to_customers %>
+                            <a href="#partner_product_selection"  data-toggle="tab">
+                              <div class="btn btn-s-md btn-success m-t-sm m-l-md" style="width: 82%;">
+                                <i class="fa fa-truck">
+                                </i>&nbsp;&nbsp;&nbsp;&nbsp;
+                                Marketplace (new)
+                              </div>
+                            </a>
+
+                          <% end %>
+                        <% end %>
+
                     </ul>
                 </nav>
                 
