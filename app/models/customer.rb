@@ -17,6 +17,8 @@ class Customer < ActiveRecord::Base
     has_many :gift_redemptions, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :gift_remains, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
     has_many :partner_product_sales, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_many :reminder_email_logs, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
+    has_one :no_email_customer, foreign_key: :stripe_customer_id, primary_key: :stripe_customer_id
 
     validates :email, uniqueness: true
     validates :referral_code, uniqueness: true, allow_nil: :true, allow_blank: :true

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160602172436) do
+ActiveRecord::Schema.define(version: 20160603205955) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -242,6 +242,12 @@ ActiveRecord::Schema.define(version: 20160602172436) do
     t.boolean  "no_microwave"
   end
 
+  create_table "no_email_customers", force: :cascade do |t|
+    t.string   "stripe_customer_id"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
+
   create_table "nutritional_infos", force: :cascade do |t|
     t.integer  "menu_id"
     t.string   "protein"
@@ -358,6 +364,13 @@ ActiveRecord::Schema.define(version: 20160602172436) do
     t.datetime "updated_at"
     t.string   "stripe_refund_id",   limit: 255
     t.integer  "internal_refund_id"
+  end
+
+  create_table "reminder_email_logs", force: :cascade do |t|
+    t.string   "stripe_customer_id"
+    t.date     "date_reminder_sent"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
   end
 
   create_table "scheduled_tasks", force: :cascade do |t|
