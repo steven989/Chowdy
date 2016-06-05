@@ -368,8 +368,9 @@ class AdminActionsController < ApplicationController
                 different_delivery_address = (params[:customer][:different_delivery_address].blank? || params[:customer][:different_delivery_address] == "0") ? false : true
                 split_delivery_with = params[:customer][:split_delivery_with]
                 delivery_address = params[:customer][:delivery_address]
+                unit_number = params[:customer][:unit_number]
                 phone_number = params[:customer][:phone_number]
-                send_notification = ((delivery_address != @customer.delivery_address) || (phone_number != @customer.phone_number) || (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (split_delivery_with != @customer.split_delivery_with) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
+                send_notification = ( (unit_number != @customer.unit_number) || (delivery_address != @customer.delivery_address) || (phone_number != @customer.phone_number) || (no_beef != @customer.no_beef) || (no_pork != @customer.no_pork) || (no_poultry != @customer.no_poultry) || (split_delivery_with != @customer.split_delivery_with) || (extra_ice != @customer.extra_ice)) && ((Date.today.wday == 0 && @customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && @customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && @customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1)))
                 @customer.update_attributes(no_beef:no_beef,no_pork:no_pork,no_poultry:no_poultry,extra_ice:extra_ice,split_delivery_with:split_delivery_with,different_delivery_address:different_delivery_address)
                 if (["Yes","yes"].include? @customer.recurring_delivery) && (send_notification)
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Meal preference has changed")
@@ -1189,7 +1190,7 @@ class AdminActionsController < ApplicationController
     end
 
     def delivery_info_params
-        params.require(:customer).permit(:delivery_address,:delivery_time, :special_delivery_instructions)
+        params.require(:customer).permit(:delivery_address,:delivery_time, :special_delivery_instructions, :unit_number)
     end
 
 end
