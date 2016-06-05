@@ -1511,14 +1511,14 @@ $(function(){
                                       <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control" %>
                                     </div>
                                     <div class="form-group">
-                                      <%= label_tag 'delivery_address', "Delivery address" %>
+                                      <%= label_tag 'delivery_address', "Delivery address (including street number)" %>
                                       <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control" %>
                                       <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
                                           <strong></strong>
                                       </div>
                                     </div>
                                     <div class="form-group">
-                                      <%= label_tag 'unit_number', "Unit number" %>
+                                      <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
                                       <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                     </div>
                                     <div class="form-group">
