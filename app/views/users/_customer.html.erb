@@ -1494,7 +1494,7 @@ $(function(){
                                     <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
                                         <%= submit_tag "Switch to pick-up (stop delivery)", class:"btn btn-sm btn-danger"  %>
                                         <div class="alert alert-warning m-t-md m-b-xs">
-                                        Note that stopping delivery here will be effective immediately for your next batch (<b><%= Date.today < @current_customer.first_pick_up_date ? @current_customer.first_pick_up_date.strftime("%B %d") : ([1,2,3].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%B %d") : Chowdy::Application.closest_date(1,1).strftime("%B %d")) %></b>). If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
+                                        Note that stopping delivery here will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch. If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
                                     <% end %>
                                   <% end %>
                               </div>
@@ -1535,6 +1535,12 @@ $(function(){
                                           
                                           You have unsaved changes
                                         </div>
+                                      </div>
+                                    </div>
+                                    <div class="row">
+                                      <div class="col-sm-12 m-t-md">
+                                        Changes will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch
+
                                       </div>
                                     </div>
                                   <% end %>
