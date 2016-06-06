@@ -91,7 +91,7 @@ class Customer < ActiveRecord::Base
                 customer.create_referral_code
 
                 #corporate customer?
-                corporate = ["Quickplay"].any? {|loc| hub_email.downcase.include?(loc.downcase)}
+                corporate = ["Quickplay"].any? {|loc| hub.gsub(/\\/,"").downcase.include?(loc.downcase)}
 
                 if corporate
                     matched_corporate_office = ["Quickplay"].select {|loc| hub_email.downcase.include?(loc.downcase)}[0]
