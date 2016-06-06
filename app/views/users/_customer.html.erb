@@ -1494,69 +1494,79 @@ $(function(){
                                   </div>
                                 </div>
                               </div>
-                            <% end %>                   
-                            <div class="row">
-                              <div class="col-sm-6">
-                                <div class="alert alert-<%= @delivery_color_class %> m-t-md padder-v">
-                                    <h5><%= @delivery_note %></h5>
-                                    <% unless @current_customer.recurring_delivery.blank? %>
-                                      <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
-                                          <%= submit_tag "Switch to pick-up (stop delivery)", class:"btn btn-sm btn-danger"  %>
-                                          <div class="alert alert-warning m-t-md m-b-xs">
-                                          Note that stopping delivery here will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch. If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
+                            <% end %> 
+
+                            <div class="col-sm-6 padder padder-v">
+                              <div class="row">
+                                <h2>Setting up your meal delivery</h2>
+                                <p>Please fill out the form on this page to set up your delivery.</p>
+                                <span id="delivery_time_notice"><% if @delivery_boundary == "downtown" %>The <span class="text-danger-lt">default delivery time is every Monday and Thursday between 11am and 1pm</span> unless otherwise requested below. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will come in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery)<br><br>If our courier cannot drop off the meals, they will return them to the hub, where you're welcome to pick up the meals yourself.<% elsif @delivery_boundary == "GTA" %> - your meals will be delivered between 10am and 3pm every Monday and Thursday in a thermal insulated bag. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (in case you are not home)<br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste<% end %></span>
+                              </div>
+
+                              <div class="row">
+                                  <div class="alert alert-<%= @delivery_color_class %> m-t-md padder-v">
+                                      <h5><%= @delivery_note %></h5>
+                                      <% unless @current_customer.recurring_delivery.blank? %>
+                                        <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
+                                            <%= submit_tag "Switch to pick-up (stop delivery)", class:"btn btn-sm btn-danger"  %>
+                                            <div class="alert alert-warning m-t-md m-b-xs">
+                                            Note that stopping delivery here will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch. If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
+                                        <% end %>
                                       <% end %>
-                                    <% end %>
                                 </div>
                               </div>
+
                             </div>
-                            <div class="row">
-                              <div class="col-sm-6">
-                                <section class="panel panel-default">
-                                  <header class="panel-heading font-bold">Delivery request form ($8 per drop)<span id="delivery_time_notice"><% if @delivery_boundary == "downtown" %> - note that <span class="text-danger-lt">default delivery time is every Monday and Thursday between 11am and 1pm</span> unless otherwise requested below. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will come in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery)<br><br>If our courier cannot drop off the meals, they will return them to the hub, where you're welcome to pick up the meals yourself.<% elsif @delivery_boundary == "GTA" %> - your meals will be delivered between 10am and 3pm every Monday and Thursday in a thermal insulated bag. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (in case you are not home)<br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste<% end %></span></header>
-                                  <div class="panel-body">
-                                    <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
-                                      <div class="form-group">
-                                        <%= label_tag 'phone_number', "Phone number" %>
-                                        <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control" %>
-                                      </div>
-                                      <div class="form-group">
-                                        <%= label_tag 'delivery_address', "Delivery address (including street number)" %>
-                                        <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control" %>
-                                        <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
-                                            <strong></strong>
+                            <div class="col-sm-6">
+                              <div class="row m-t-lg">
+                                <div class="col-sm-12">
+                                  <section class="panel panel-default">
+                                    <header class="panel-heading font-bold">Delivery request form ($8 per drop)</header>
+                                    <div class="panel-body">
+                                      <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
+                                        <div class="form-group">
+                                          <%= label_tag 'phone_number', "Phone number" %>
+                                          <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control" %>
                                         </div>
-                                      </div>
-                                      <div class="form-group">
-                                        <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
-                                        <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
-                                      </div>
-                                      <div class="form-group">
-                                        <%= label_tag 'note', "Additional note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
-                                        <%= text_area_tag 'note', @note, class: "form-control" %>
-                                      </div>
-                                      <%= hidden_field_tag 'boundary', @delivery_boundary %>
-                                      <div class="row">
-                                        <div class="col-sm-5 m-t-md">
-                                          <%= submit_tag @delivery_button, class:"btn btn-md btn-default #{"disabled" unless @do_not_disable_delivery_button_initially}", id: "request_delivery_submit" %>
-                                        </div>
-                                        <div class="col-sm-7 m-t-md">
-                                          <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
-                                            
-                                            You have unsaved changes
+                                        <div class="form-group">
+                                          <%= label_tag 'delivery_address', "Delivery address (including street number)" %>
+                                          <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control" %>
+                                          <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
+                                              <strong></strong>
                                           </div>
                                         </div>
-                                      </div>
-                                      <div class="row">
-                                        <div class="col-sm-12 m-t-md">
-                                          Changes will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch
-
+                                        <div class="form-group">
+                                          <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
+                                          <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                         </div>
-                                      </div>
-                                    <% end %>
-                                  </div>
-                                </section>
-                              </div>
-                            </div>                      
+                                        <div class="form-group">
+                                          <%= label_tag 'note', "Additional note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
+                                          <%= text_area_tag 'note', @note, class: "form-control", rows:  6 %>
+                                        </div>
+                                        <%= hidden_field_tag 'boundary', @delivery_boundary %>
+                                        <div class="row">
+                                          <div class="col-sm-5 m-t-md">
+                                            <%= submit_tag @delivery_button, class:"btn btn-md btn-success #{"disabled" unless @do_not_disable_delivery_button_initially}", id: "request_delivery_submit" %>
+                                          </div>
+                                          <div class="col-sm-7 m-t-md">
+                                            <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
+                                              
+                                              You have unsaved changes
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="row">
+                                          <div class="col-sm-12 m-t-md">
+                                            Changes will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch
+
+                                          </div>
+                                        </div>
+                                      <% end %>
+                                    </div>
+                                  </section>
+                                </div>
+                              </div>   
+                            </div>                   
                           </section>
                         </section>                      
                       </section>
