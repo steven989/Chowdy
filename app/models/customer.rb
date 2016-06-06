@@ -94,7 +94,7 @@ class Customer < ActiveRecord::Base
                 corporate = ["Quickplay"].any? {|loc| hub.gsub(/\\/,"").downcase.include?(loc.downcase)}
 
                 if corporate
-                    matched_corporate_office = ["Quickplay"].select {|loc| hub_email.downcase.include?(loc.downcase)}[0]
+                    matched_corporate_office = ["Quickplay"].select {|loc| hub.gsub(/\\/,"").downcase.include?(loc.downcase)}[0]
                     matched_corporate_office_address = case 
                                                             when !matched_corporate_office.match(/quickplay/i).nil?
                                                                 "901 King St West, Toronto, Ontario M5V 3H5"
