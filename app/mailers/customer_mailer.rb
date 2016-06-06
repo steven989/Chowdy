@@ -2,7 +2,7 @@ class CustomerMailer < ActionMailer::Base
 
   default from: "help@chowdy.ca"
 
-  def confirmation_email(customer,hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral)
+  def confirmation_email(customer,hub,name,start_date,customer_email,meal_count,monday_regular,thursday_regular,monday_green,thursday_green,referral,corporate=false)
     
     @current_customer = customer
     @referrer = @current_customer.referral_info
@@ -15,6 +15,8 @@ class CustomerMailer < ActionMailer::Base
     @referral = referral
 
     @hub = hub
+    @corporate = corporate
+
     @delivery = !@hub.match(/delivery/i).nil?
     @op_hours = case 
                     when !@hub.match(/wanda/i).nil?
@@ -23,6 +25,8 @@ class CustomerMailer < ActionMailer::Base
                         "Monday - Friday, 7:00am to 6:00pm (closed on weekends and holidays)"
                     when !@hub.match(/coffee/i).nil? 
                         "Monday - Saturday, 7:00am to 7:00pm (open 9am on Saturday)"
+                    when !@hub.match(/quickplay/i).nil? 
+                        "noon"
                 end
     @proper_hub_name = case 
                     when !@hub.match(/wanda/i).nil?
@@ -31,6 +35,8 @@ class CustomerMailer < ActionMailer::Base
                         "deKEFIR"
                     when !@hub.match(/coffee/i).nil? 
                         "Coffee Bar Inc."
+                    when !@hub.match(/quickplay/i).nil? 
+                        "Quickplay"
                 end
     @hub_address = case 
                     when !@hub.match(/wanda/i).nil?

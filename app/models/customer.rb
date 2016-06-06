@@ -53,6 +53,8 @@ class Customer < ActiveRecord::Base
                     meal_per_week = 12
                 when "14mealsweek"
                     meal_per_week = 14
+                when "4mealswk_pi" 
+                    meal_per_week = 4
                 when "6mealswk_pi" 
                     meal_per_week = 6
                 when "8mealswk_pi"
@@ -66,6 +68,7 @@ class Customer < ActiveRecord::Base
             end
 
             unless Customer.where(stripe_customer_id:customer_id).length > 0 #this is so that Stripe doens't ceaselessly create new customers 
+
 
                 customer = Customer.create(
                     stripe_customer_id:customer_id, 
@@ -81,15 +84,41 @@ class Customer < ActiveRecord::Base
                     purchase:"Recurring",
                     next_pick_up_date: StartDate.first.start_date,
                     date_signed_up_for_recurring: Time.now,
-                    price_increase_2015:true
+                    price_increase_2015:true,
+                    corporate:false
                     )
 
                 customer.create_referral_code
 
+                #corporate customer?
+                corporate = ["Quickplay"].any? {|loc| hub_email.downcase.include?(loc.downcase)}
+
+                if corporate
+                    matched_corporate_office = ["Quickplay"].select {|loc| hub_email.downcase.include?(loc.downcase)}[0]
+                    matched_corporate_office_address = case 
+                                                            when !matched_corporate_office.match(/quickplay/i).nil?
+                                                                "901 King St West, Toronto, Ontario M5V 3H5"
+                                                        end
+                    matched_corporate_office_unit = case 
+                                                            when !matched_corporate_office.match(/quickplay/i).nil?
+                                                                "Suite 200"
+                                                        end
+                    customer.update_attributes(
+                        corporate:true,
+                        corporate_office:matched_corporate_office,
+                        split_delivery_with:matched_corporate_office,
+                        delivery_address:matched_corporate_office_address,
+                        unit_number:matched_corporate_office_unit,
+                        recurring_delivery:"Yes"
+                    )
+                
+                end
+
                 #assign hubs 
-                if hub.match(/delivery/i).nil?
+                if ((hub.match(/delivery/i).nil?) && (!corporate))
                     customer.update_attributes(monday_pickup_hub:hub,thursday_pickup_hub:hub)
                 end
+
 
                 #add logic to split odd grean meal numbers
                 raw_green_input = customer.raw_green_input
@@ -394,7 +423,7 @@ class Customer < ActiveRecord::Base
                     unless duplicate_match.length >= 1
                         #check to see if this customer was started before backend was deployed
                         unless Customer.where{ (date_signed_up_for_recurring==nil) | (date_signed_up_for_recurring < "2015-06-12")}.map {|c| c.email}.include? customer_email
-                            CustomerMailer.confirmation_email(customer,hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email).deliver
+                            CustomerMailer.confirmation_email(customer,hub_email,first_name_email,start_date_email,customer_email,meal_per_week,email_monday_regular,email_thursday_regular,email_monday_green,email_thursday_green,referral_name_email,corporate).deliver
                         end
                     end
 
