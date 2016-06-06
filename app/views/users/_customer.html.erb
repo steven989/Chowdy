@@ -238,6 +238,10 @@ $(function(){
       $('#request_delivery_submit').removeClass("disabled").addClass("disabled");
     })
 
+    $('#delivery_request_form #phone_number,#delivery_request_form #unit_number,#delivery_request_form #note').off("input").on("input",function(){
+      $('#request_delivery_submit').removeClass("disabled");
+    })
+
     // $('#delivery_request_form input').off("focusout").on("focusout",delivery_check);
 
     function delivery_check(){
