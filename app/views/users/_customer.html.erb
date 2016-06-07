@@ -1545,7 +1545,7 @@ $(function(){
                                         <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
                                             <%= submit_tag "Switch to pick-up (stop delivery)", class:"btn btn-sm btn-danger"  %>
                                             <div class="alert alert-warning m-t-md m-b-xs">
-                                            Note that stopping delivery here will be effective for your <b><%= @delivery_change_effective_date %></b> batch. If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
+                                            Note that stopping delivery here will be effective for your <b><%= @delivery_change_effective_date %></b> delivery. If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
                                         <% end %>
                                       <% end %>
                                 </div>
