@@ -274,10 +274,47 @@ protect_from_forgery :except => :payment
             monday_delivery_enabled = params[:monday_delivery_enabled].blank? ? false : true
             thursday_delivery_enabled = params[:thursday_delivery_enabled].blank? ? false : true
 
-            current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address],unit_number:params[:unit_number], special_delivery_instructions:params[:note], recurring_delivery:"yes", delivery_boundary:params[:boundary],monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+            current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address],unit_number:params[:unit_number], special_delivery_instructions:params[:note], recurring_delivery:"yes", delivery_boundary:params[:boundary])
             current_customer.update_attributes(monday_delivery_hub: "delivery") if current_customer.monday_delivery_hub.blank?
             current_customer.update_attributes(thursday_delivery_hub: "delivery") if current_customer.thursday_delivery_hub.blank?
             current_customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
+
+            _monday_delivery_enabled = current_customer.monday_delivery_enabled?
+            _thursday_delivery_enabled = current_customer.thursday_delivery_enabled?
+
+
+            if (monday_delivery_enabled != _monday_delivery_enabled) || (thursday_delivery_enabled != _thursday_delivery_enabled)
+                total_meals = current_customer.regular_meals_on_monday.to_i + current_customer.regular_meals_on_thursday.to_i + current_customer.green_meals_on_monday.to_i + current_customer.green_meals_on_thursday.to_i
+                green_meals = current_customer.green_meals_on_monday.to_i + current_customer.green_meals_on_thursday.to_i
+                regular_meals = total_meals - green_meals
+
+                if monday_delivery_enabled && thursday_delivery_enabled
+                    if total_meals.odd?
+                        total_meals_1 = total_meals/2+1
+                        total_meals_2 = total_meals/2
+                    else
+                        total_meals_1 = total_meals/2
+                        total_meals_2 = total_meals/2
+                    end
+
+                    if green_meals.odd?
+                        green_meals_1 = green_meals/2+1
+                        green_meals_2 = green_meals/2
+                    else
+                        green_meals_1 = green_meals/2
+                        green_meals_2 = green_meals/2
+                    end
+
+                    regular_meals_1 = total_meals_1 - green_meals_1
+                    regular_meals_2 = total_meals_2 - green_meals_2
+
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals_1,green_meals_on_monday:green_meals_1,regular_meals_on_thursday:regular_meals_2,green_meals_on_thursday:green_meals_2)
+                elsif monday_delivery_enabled && !thursday_delivery_enabled
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals,green_meals_on_monday:green_meals,regular_meals_on_thursday:0,green_meals_on_thursday:0)
+                elsif thursday_delivery_enabled && !monday_delivery_enabled
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:0,green_meals_on_monday:0,regular_meals_on_thursday:regular_meals,green_meals_on_thursday:green_meals)
+                end
+            end
 
 
             if _current_delivery

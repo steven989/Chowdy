@@ -526,6 +526,46 @@ class AdminActionsController < ApplicationController
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Change delivery info")
                     CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Change delivery info")
                 end
+
+                monday_delivery_enabled = (params[:customer][:monday_delivery_enabled].blank? || params[:customer][:monday_delivery_enabled] == "0") ? false : true
+                thursday_delivery_enabled = (params[:customer][:thursday_delivery_enabled].blank? || params[:customer][:thursday_delivery_enabled] == "0") ? false : true
+                _monday_delivery_enabled = @customer.monday_delivery_enabled?
+                _thursday_delivery_enabled = @customer.thursday_delivery_enabled?
+
+
+                if (monday_delivery_enabled != _monday_delivery_enabled) || (thursday_delivery_enabled != _thursday_delivery_enabled)
+                    total_meals = @customer.regular_meals_on_monday.to_i + @customer.regular_meals_on_thursday.to_i + @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    green_meals = @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    regular_meals = total_meals - green_meals
+
+                    if monday_delivery_enabled && thursday_delivery_enabled
+                        if total_meals.odd?
+                            total_meals_1 = total_meals/2+1
+                            total_meals_2 = total_meals/2
+                        else
+                            total_meals_1 = total_meals/2
+                            total_meals_2 = total_meals/2
+                        end
+
+                        if green_meals.odd?
+                            green_meals_1 = green_meals/2+1
+                            green_meals_2 = green_meals/2
+                        else
+                            green_meals_1 = green_meals/2
+                            green_meals_2 = green_meals/2
+                        end
+
+                        regular_meals_1 = total_meals_1 - green_meals_1
+                        regular_meals_2 = total_meals_2 - green_meals_2
+
+                        @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals_1,green_meals_on_monday:green_meals_1,regular_meals_on_thursday:regular_meals_2,green_meals_on_thursday:green_meals_2)
+                    elsif monday_delivery_enabled && !thursday_delivery_enabled
+                        @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals,green_meals_on_monday:green_meals,regular_meals_on_thursday:0,green_meals_on_thursday:0)
+                    elsif thursday_delivery_enabled && !monday_delivery_enabled
+                        @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:0,green_meals_on_monday:0,regular_meals_on_thursday:regular_meals,green_meals_on_thursday:green_meals)
+                    end
+                end
+
             else
                 flash[:status] = "fail"
                 status = "fail"
@@ -1188,7 +1228,7 @@ class AdminActionsController < ApplicationController
     private 
 
     def individual_attributes_params
-        params.require(:customer).permit(:name,:next_pick_up_date,:notes,:delivery_time,:special_delivery_instructions, :sponsored, :price_increase_2015)
+        params.require(:customer).permit(:name,:next_pick_up_date,:notes,:delivery_time,:special_delivery_instructions, :sponsored, :price_increase_2015,:corporate,:corporate_office)
     end
 
     def delivery_info_params
