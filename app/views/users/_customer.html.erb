@@ -232,30 +232,33 @@ $(function(){
     // check delivery 
     $('#delivery_request_form input').off("change").on("change", function(){
       $("#delivery_change_warning").removeClass("hidden");
+      monday_thursday_delivery_checkbox();
     });
 
-    $('#delivery_request_form #monday_delivery_enabled, #delivery_request_form #thursday_delivery_enabled').off("change").on("change", function(){
-      var monday_checked = $('#monday_delivery_enabled').is(':checked');
-      var thursday_checked = $('#thursday_delivery_enabled').is(':checked');
+    $('#delivery_request_form #monday_delivery_enabled, #delivery_request_form #thursday_delivery_enabled').off("change").on("change", monday_thursday_delivery_checkbox);
 
-      if (monday_checked && thursday_checked) {
-        $('#delivery_request_form #monday_delivery_enabled').removeAttr('disabled');
-        $('#delivery_request_form #thursday_delivery_enabled').removeAttr('disabled');
-        $("#monday_thursday_delivery_enable_notice").removeClass("hidden").addClass("hidden");
-      } else if (monday_checked) {
-        $('#delivery_request_form #monday_delivery_enabled').attr('disabled',true);
-        $('#monday_thursday_delivery_enable_notice').html('Note: all of your meals will be delievered on Mondays').removeClass("hidden");
-      } else if (thursday_checked){
-        $('#delivery_request_form #thursday_delivery_enabled').attr('disabled',true);
-        $('#monday_thursday_delivery_enable_notice').html('Note: all of your meals will be delievered on Thursdays').removeClass("hidden");        
-      } else {
-        $('#monday_thursday_delivery_enable_notice').html('You cannot leave both dates blank. Meals will be delivered on both days.').removeClass("hidden");
+    function monday_thursday_delivery_checkbox(){
+        var monday_checked = $('#monday_delivery_enabled').is(':checked');
+        var thursday_checked = $('#thursday_delivery_enabled').is(':checked');
+
+        if (monday_checked && thursday_checked) {
+          $("#monday_thursday_delivery_enable_notice").removeClass("hidden").addClass("hidden");
+          $('#request_delivery_submit').removeClass("disabled");
+          $("#delivery_change_warning").removeClass("hidden");
+        } else if (monday_checked) {
+          $('#monday_thursday_delivery_enable_notice').html('Note: all of your meals will be delievered on Mondays').removeClass("hidden");
+          $('#request_delivery_submit').removeClass("disabled");
+          $("#delivery_change_warning").removeClass("hidden");
+        } else if (thursday_checked){
+          $('#monday_thursday_delivery_enable_notice').html('Note: all of your meals will be delievered on Thursdays').removeClass("hidden");      
+          $('#request_delivery_submit').removeClass("disabled");  
+          $("#delivery_change_warning").removeClass("hidden");
+        } else {
+          $('#monday_thursday_delivery_enable_notice').html('You cannot leave both dates blank. Meals will be delivered on both days.').removeClass("hidden");
+          $('#request_delivery_submit').removeClass("disabled").addClass("disabled");  
+        }
+      
       }
-      
-      
-    });
-
-
 
 
 
@@ -265,7 +268,10 @@ $(function(){
 
     $('#delivery_request_form #phone_number,#delivery_request_form #unit_number,#delivery_request_form #note').off("input").on("input",function(){
       $('#request_delivery_submit').removeClass("disabled");
+      monday_thursday_delivery_checkbox();
     })
+
+
 
     // $('#delivery_request_form input').off("focusout").on("focusout",delivery_check);
 
@@ -1590,7 +1596,7 @@ $(function(){
                                               </div>
                                             </div>
 
-                                            <div class="alert alert-warning alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
+                                            <div class="alert alert-danger alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
 
                                             </div>
 
