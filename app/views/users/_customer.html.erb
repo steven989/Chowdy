@@ -295,7 +295,7 @@ $(function(){
                     } else {
                     var latlng = results[0].geometry.location;
                       if (contains_location(latlng)=="downtown") {
-                        $('#address_match_warning strong').html("Note that the default delivery time is every <span class='text-danger-lt'>Monday and Thursday between 11am and 1pm</span> unless otherwise requested below.<br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will be in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery) <br><br>If our courier cannot drop off the meals, they will return them to the hub, where you are welcome to pick up the meals yourself");
+                        $('#address_match_warning strong').html("Note that the default delivery time is every <span class='text-danger-lt'>Monday and Thursday between 11am and 1pm</span> unless otherwise requested below.<br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door.<br><br>If you cannot receive your meals during our default delivery time, please indicate below a better time for delivery. <br><br>If our courier cannot drop off the meals, they will return them to our downtown hub at 346 Front Street West, where you are welcome to pick up the meals yourself");
                         $('#address_match_warning').removeClass("hidden");
                         $("label[for='note']").html("Additional note (we cannot deliver after 5pm)")
                         $('#boundary').val("downtown");
@@ -304,7 +304,7 @@ $(function(){
                         }
                       } else if (contains_location(latlng)=="gta") {
                         $('#boundary').val("GTA");
-                        $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>10am and 3pm every Monday and Thursday in a thermal insulated bag</span>. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door. <br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste");
+                        $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>10am and 3:30pm every Monday and Thursday in a thermal insulated bag</span>. <br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door. <br><br>Please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste");
                         $("label[for='note']").html("Additional note")
                         $('#address_match_warning').removeClass("hidden");
                         if ($("#delivery_request_form #phone_number").val() != "" ){
@@ -1535,7 +1535,7 @@ $(function(){
                               <div class="row">
                                 <h2>Setting up your meal delivery</h2>
                                 <p>Please fill out the form on this page to set up your delivery.</p>
-                                <span id="delivery_time_notice"><% if @delivery_boundary == "downtown" %>The <span class="text-danger-lt">default delivery time is every Monday and Thursday between 11am and 1pm</span> unless otherwise requested below. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will come in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery)<br><br>If our courier cannot drop off the meals, they will return them to the hub, where you're welcome to pick up the meals yourself.<% elsif @delivery_boundary == "GTA" %> - your meals will be delivered between 10am and 3pm every Monday and Thursday in a thermal insulated bag. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (in case you are not home)<br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste<% end %></span>
+                                <span id="delivery_time_notice"><% if @delivery_boundary == "downtown" %>The <span class="text-danger-lt">default delivery time is every Monday and Thursday between 11am and 1pm</span> unless otherwise specified in the form on this page. <br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door. <br> If you cannot receive your meals during our default delivery time, please indicate below a better time for delivery. <br><br>If our courier cannot drop off the meals, they will return them to our downtown hub at <b>346 Front Street West</b>, where you are welcome to pick up the meals yourself<% elsif @delivery_boundary == "GTA" %> Your meals will be delivered between <b>10am and 3:30pm every Monday and Thursday</b> in a thermal insulated bag. <br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door.<br><br><b>Please return the insulated thermal bags</b> and ice packs to our courier so we can reuse them and minimize waste<% end %></span>
                               </div>
 
                               <div class="row">
@@ -1602,8 +1602,9 @@ $(function(){
 
                                         </div>
                                         <div class="form-group">
-                                          <%= label_tag 'note', "Additional note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
+                                          <%= label_tag 'note', "Additional delivery note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
                                           <%= text_area_tag 'note', @note, class: "form-control", rows:  6 %>
+                                          <span class="m-t-xs" style="font-size:9px;"><em>*** These delivery notes are only to help the courier reach you at the time of delivery. For any account related changes or assistance, please email <a href="mailto:help@chowdy.ca">help@chowdy.ca</a> before the Thursday cutoff date.</em></span>
                                         </div>
                                         <%= hidden_field_tag 'boundary', @delivery_boundary %>
                                         <div class="row">
@@ -1622,8 +1623,11 @@ $(function(){
                                         </div>
                                         <div class="row">
                                           <div class="col-sm-12 m-t-md">
-                                            Changes will be effective for your <b><%= @delivery_change_effective_date %></b> delivery
+                                            <div class="alert alert-warning">
+                                              <i class='fa fa-exclamation pull-left' style="font-size:20px;"></i>
+                                              Changes will be effective for your <b><%= @delivery_change_effective_date %></b> delivery
 
+                                            </div>
                                           </div>
                                         </div>
                                       <% end %>
