@@ -126,6 +126,8 @@ class AdminActionsController < ApplicationController
                 no_pork:"#{c.no_pork ? 'No Pork' : ''}",
                 no_beef:"#{c.no_beef ? 'No Beef' : ''}",
                 no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",
+                monday_delivery_enabled:c.monday_delivery_enabled,
+                thursday_delivery_enabled:c.thursday_delivery_enabled,
                 extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",
                 gifter_pays_delivery: c.gift_remains.blank? ? (c.gifts.blank? ? '' : (c.gifts.order(id: :desc).limit(1).take.pay_delivery? && Date.today < (c.first_pick_up_date + 5.days) ? c.gifts.order(id: :desc).limit(1).take.sender_email : '' ) ) : (c.gift_remains.order(id: :desc).limit(1).take.gift.pay_delivery? ? c.gift_remains.order(id: :desc).limit(1).take.gift.sender_email : ''),
                 multiple_delivery_address:"#{c.different_delivery_address ? 'Multiple Delivery Address' : ''}",
@@ -156,7 +158,7 @@ class AdminActionsController < ApplicationController
                 disposition = "attachment; filename='deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","unit_number","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","gifter_pays_delivery","multiple_delivery_address","split_delivery_with","corporate_office","corporate","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","unit_number","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","monday_delivery_enabled","thursday_delivery_enabled","extra_ice","gifter_pays_delivery","multiple_delivery_address","split_delivery_with","corporate_office","corporate","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 else 
                     send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 end
