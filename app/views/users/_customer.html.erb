@@ -234,6 +234,31 @@ $(function(){
       $("#delivery_change_warning").removeClass("hidden");
     });
 
+    $('#delivery_request_form #monday_delivery_enabled, #delivery_request_form #thursday_delivery_enabled').off("change").on("change", function(){
+      var monday_checked = $('#monday_delivery_enabled').is(':checked');
+      var thursday_checked = $('#thursday_delivery_enabled').is(':checked');
+
+      if (monday_checked && thursday_checked) {
+        $('#delivery_request_form #monday_delivery_enabled').removeAttr('disabled');
+        $('#delivery_request_form #thursday_delivery_enabled').removeAttr('disabled');
+        $("#monday_thursday_delivery_enable_notice").removeClass("hidden").addClass("hidden");
+      } else if (monday_checked) {
+        $('#delivery_request_form #monday_delivery_enabled').attr('disabled',true);
+        $('#monday_thursday_delivery_enable_notice').html('Note: all of your meals will be delievered on Mondays').removeClass("hidden");
+      } else if (thursday_checked){
+        $('#delivery_request_form #thursday_delivery_enabled').attr('disabled',true);
+        $('#monday_thursday_delivery_enable_notice').html('Note: all of your meals will be delievered on Thursdays').removeClass("hidden");        
+      } else {
+        $('#monday_thursday_delivery_enable_notice').html('You cannot leave both dates blank. Meals will be delivered on both days.').removeClass("hidden");
+      }
+      
+      
+    });
+
+
+
+
+
     $('#delivery_address').off("input").on("input",function(){
       $('#request_delivery_submit').removeClass("disabled").addClass("disabled");
     })
@@ -1521,7 +1546,7 @@ $(function(){
                               <div class="row m-t-lg">
                                 <div class="col-sm-12">
                                   <section class="panel panel-default">
-                                    <header class="panel-heading font-bold">Delivery request form ($8 per drop)</header>
+                                    <header class="panel-heading font-bold">Delivery request form ($8 per drop/delivery)</header>
                                     <div class="panel-body">
                                       <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
                                         <div class="form-group">
@@ -1540,15 +1565,45 @@ $(function(){
                                           <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                         </div>
                                         <div class="form-group">
+                                            <div class="row">
+                                              <div class="col-sm-6">
+                                                <div class="checkbox i-checks">
+                                                  <%= label_tag :monday_delivery_enabled, "Monday" do %>
+                                                    <%= check_box_tag :monday_delivery_enabled,nil,@current_customer.monday_delivery_enabled %>
+                                                    <i></i>
+                                                    Monday Delivery
+                                                  <% end %>
+                                                </div>
+                                              </div>
+                                              <div class="col-sm-6">
+                                                <div class="checkbox i-checks">
+                                                  <%= label_tag :thursday_delivery_enabled, "Thursday" do %>
+                                                    <%= check_box_tag :thursday_delivery_enabled,nil,@current_customer.thursday_delivery_enabled %>
+                                                    <i></i>
+                                                    Thursday Delivery
+                                                  <% end %>
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            <div class="alert alert-warning alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
+
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group">
                                           <%= label_tag 'note', "Additional note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
                                           <%= text_area_tag 'note', @note, class: "form-control", rows:  6 %>
                                         </div>
                                         <%= hidden_field_tag 'boundary', @delivery_boundary %>
                                         <div class="row">
-                                          <div class="col-sm-5 m-t-md">
-                                            <%= submit_tag @delivery_button, class:"btn btn-md btn-success #{"disabled" unless @do_not_disable_delivery_button_initially}", id: "request_delivery_submit" %>
+                                          <div class="col-sm-6 m-t-md">
+                                            <%= button_tag type: "submit", class:"btn btn-md btn-success #{"disabled" unless @do_not_disable_delivery_button_initially}", id: "request_delivery_submit" do %>
+                                              <i class='fa fa-check'></i> <%= @delivery_button %>
+                                            <% end %>
+          
                                           </div>
-                                          <div class="col-sm-7 m-t-md">
+                                          <div class="col-sm-6 m-t-md">
                                             <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
                                               
                                               You have unsaved changes
