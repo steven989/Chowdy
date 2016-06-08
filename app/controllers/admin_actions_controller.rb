@@ -536,36 +536,21 @@ class AdminActionsController < ApplicationController
 
 
                 if (monday_delivery_enabled != _monday_delivery_enabled) || (thursday_delivery_enabled != _thursday_delivery_enabled)
-                    total_meals = @customer.regular_meals_on_monday.to_i + @customer.regular_meals_on_thursday.to_i + @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
-                    green_meals = @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
-                    regular_meals = total_meals - green_meals
+                    @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
 
-                    if monday_delivery_enabled && thursday_delivery_enabled
-                        if total_meals.odd?
-                            total_meals_1 = total_meals/2+1
-                            total_meals_2 = total_meals/2
-                        else
-                            total_meals_1 = total_meals/2
-                            total_meals_2 = total_meals/2
+                    if (["Yes","yes"].include? @customer.recurring_delivery)
+                        if monday_delivery_enabled && thursday_delivery_enabled
+                            @customer.balance_meals
+                        elsif monday_delivery_enabled && !thursday_delivery_enabled
+                            @customer.all_meals_on_day_1
+                        elsif thursday_delivery_enabled && !monday_delivery_enabled
+                            @customer.all_meals_on_day_2
                         end
-
-                        if green_meals.odd?
-                            green_meals_1 = green_meals/2+1
-                            green_meals_2 = green_meals/2
-                        else
-                            green_meals_1 = green_meals/2
-                            green_meals_2 = green_meals/2
-                        end
-
-                        regular_meals_1 = total_meals_1 - green_meals_1
-                        regular_meals_2 = total_meals_2 - green_meals_2
-
-                        @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals_1,green_meals_on_monday:green_meals_1,regular_meals_on_thursday:regular_meals_2,green_meals_on_thursday:green_meals_2)
-                    elsif monday_delivery_enabled && !thursday_delivery_enabled
-                        @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals,green_meals_on_monday:green_meals,regular_meals_on_thursday:0,green_meals_on_thursday:0)
-                    elsif thursday_delivery_enabled && !monday_delivery_enabled
-                        @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:0,green_meals_on_monday:0,regular_meals_on_thursday:regular_meals,green_meals_on_thursday:green_meals)
+                    else
+                        flash[:notice_customers] = "Delivery info updated. However, Monday/Thursday meal split did not change because customer is not currently on delivery"
+                        notice_customers = "Delivery info updated. However, Monday/Thursday meal split did not change because customer is not currently on delivery"                        
                     end
+
                 end
 
             else
@@ -577,6 +562,7 @@ class AdminActionsController < ApplicationController
         elsif params[:todo] == "delivery_toggle"
             if ["Yes","yes"].include? @customer.recurring_delivery
                 if @customer.update_attributes(recurring_delivery: nil)
+                    @customer.balance_meals
                     flash[:status] = "success"
                     status = "success"
                     flash[:notice_customers] = "Delivery turned off"
@@ -595,10 +581,25 @@ class AdminActionsController < ApplicationController
                     CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Stop Delivery")
                 end
             else
+                _monday_delivery_enabled = @customer.monday_delivery_enabled?
+                _thursday_delivery_enabled = @customer.thursday_delivery_enabled?
                 @customer.update_attributes(recurring_delivery: "yes")
                 @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
                 @customer.update_attributes(thursday_delivery_hub: "delivery") if @customer.thursday_delivery_hub.blank?                
                 @customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
+
+                if _monday_delivery_enabled && !_thursday_delivery_enabled
+                    total_meals = @customer.regular_meals_on_monday.to_i + @customer.regular_meals_on_thursday.to_i + @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    green_meals = @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    regular_meals = total_meals - green_meals
+                    @customer.update(regular_meals_on_monday:regular_meals,green_meals_on_monday:green_meals,regular_meals_on_thursday:0,green_meals_on_thursday:0)
+                elsif _thursday_delivery_enabled && !_monday_delivery_enabled
+                    total_meals = @customer.regular_meals_on_monday.to_i + @customer.regular_meals_on_thursday.to_i + @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    green_meals = @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    regular_meals = total_meals - green_meals
+                    @customer.update(regular_meals_on_monday:0,green_meals_on_monday:0,regular_meals_on_thursday:regular_meals,green_meals_on_thursday:green_meals)
+                end
+
                 if @customer.errors.any?
                     flash[:status] = "fail"
                     status = "fail"
@@ -606,7 +607,6 @@ class AdminActionsController < ApplicationController
                     notice_customers = "Delivery cannot be turned on: #{@customer.errors.full_messages.join(", ")}"
                 else
                     flash[:status] = "success"
-
                     status = "success"
                     flash[:notice_customers] = "Delivery turned on"
                     notice_customers = "Delivery turned on"

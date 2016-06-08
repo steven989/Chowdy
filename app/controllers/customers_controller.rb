@@ -284,35 +284,23 @@ protect_from_forgery :except => :payment
 
 
             if (monday_delivery_enabled != _monday_delivery_enabled) || (thursday_delivery_enabled != _thursday_delivery_enabled)
-                total_meals = current_customer.regular_meals_on_monday.to_i + current_customer.regular_meals_on_thursday.to_i + current_customer.green_meals_on_monday.to_i + current_customer.green_meals_on_thursday.to_i
-                green_meals = current_customer.green_meals_on_monday.to_i + current_customer.green_meals_on_thursday.to_i
-                regular_meals = total_meals - green_meals
-
                 if monday_delivery_enabled && thursday_delivery_enabled
-                    if total_meals.odd?
-                        total_meals_1 = total_meals/2+1
-                        total_meals_2 = total_meals/2
-                    else
-                        total_meals_1 = total_meals/2
-                        total_meals_2 = total_meals/2
-                    end
-
-                    if green_meals.odd?
-                        green_meals_1 = green_meals/2+1
-                        green_meals_2 = green_meals/2
-                    else
-                        green_meals_1 = green_meals/2
-                        green_meals_2 = green_meals/2
-                    end
-
-                    regular_meals_1 = total_meals_1 - green_meals_1
-                    regular_meals_2 = total_meals_2 - green_meals_2
-
-                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals_1,green_meals_on_monday:green_meals_1,regular_meals_on_thursday:regular_meals_2,green_meals_on_thursday:green_meals_2)
+                    current_customer.balance_meals
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
                 elsif monday_delivery_enabled && !thursday_delivery_enabled
-                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:regular_meals,green_meals_on_monday:green_meals,regular_meals_on_thursday:0,green_meals_on_thursday:0)
+                    current_customer.all_meals_on_day_1
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
                 elsif thursday_delivery_enabled && !monday_delivery_enabled
-                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled,regular_meals_on_monday:0,green_meals_on_monday:0,regular_meals_on_thursday:regular_meals,green_meals_on_thursday:green_meals)
+                    current_customer.all_meals_on_day_2
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+                end
+            else
+                if (!_current_delivery) && (monday_delivery_enabled) && (!thursday_delivery_enabled) 
+                    current_customer.all_meals_on_day_1
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+                elsif (!_current_delivery) && (!monday_delivery_enabled) && (thursday_delivery_enabled) 
+                    current_customer.all_meals_on_day_2
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
                 end
             end
 
@@ -335,6 +323,14 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery:nil)
+
+            _monday_delivery_enabled = current_customer.monday_delivery_enabled?
+            _thursday_delivery_enabled = current_customer.thursday_delivery_enabled?
+
+            if !_monday_delivery_enabled || !_thursday_delivery_enabled
+                current_customer.balance_meals
+            end
+
             if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")

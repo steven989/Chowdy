@@ -655,6 +655,48 @@ class Customer < ActiveRecord::Base
         self.update_attribute(:referral_code, code_candidate)
     end
 
+    def balance_meals
+
+        total_meals = self.regular_meals_on_monday.to_i + self.regular_meals_on_thursday.to_i + self.green_meals_on_monday.to_i + self.green_meals_on_thursday.to_i
+        green_meals = self.green_meals_on_monday.to_i + self.green_meals_on_thursday.to_i
+        regular_meals = total_meals - green_meals
+
+        if total_meals.odd?
+            total_meals_1 = total_meals/2+1
+            total_meals_2 = total_meals/2
+        else
+            total_meals_1 = total_meals/2
+            total_meals_2 = total_meals/2
+        end
+
+        if green_meals.odd?
+            green_meals_1 = green_meals/2+1
+            green_meals_2 = green_meals/2
+        else
+            green_meals_1 = green_meals/2
+            green_meals_2 = green_meals/2
+        end
+
+        regular_meals_1 = total_meals_1 - green_meals_1
+        regular_meals_2 = total_meals_2 - green_meals_2
+
+        self.update(regular_meals_on_monday:regular_meals_1,green_meals_on_monday:green_meals_1,regular_meals_on_thursday:regular_meals_2,green_meals_on_thursday:green_meals_2)
+
+    end
+
+    def all_meals_on_day_1
+        total_meals = self.regular_meals_on_monday.to_i + self.regular_meals_on_thursday.to_i + self.green_meals_on_monday.to_i + self.green_meals_on_thursday.to_i
+        green_meals = self.green_meals_on_monday.to_i + self.green_meals_on_thursday.to_i
+        regular_meals = total_meals - green_meals
+        self.update(regular_meals_on_monday:regular_meals,green_meals_on_monday:green_meals,regular_meals_on_thursday:0,green_meals_on_thursday:0)
+    end
+
+    def all_meals_on_day_2
+        total_meals = self.regular_meals_on_monday.to_i + self.regular_meals_on_thursday.to_i + self.green_meals_on_monday.to_i + self.green_meals_on_thursday.to_i
+        green_meals = self.green_meals_on_monday.to_i + self.green_meals_on_thursday.to_i
+        regular_meals = total_meals - green_meals
+        self.update(regular_meals_on_monday:0,green_meals_on_monday:0,regular_meals_on_thursday:regular_meals,green_meals_on_thursday:green_meals)
+    end
 
     def self.meal_count(count_type)
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
