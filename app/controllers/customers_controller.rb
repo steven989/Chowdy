@@ -465,6 +465,53 @@ protect_from_forgery :except => :payment
         end 
     end
 
+    def one_link_restart
+        stripe_customer_id = params[:id]
+        @customer = Customer.where(stripe_customer_id:stripe_customer_id).take
+        unless @customer.blank?
+            if [1,2,3,4].include? Date.today.wday
+                adjusted_restart_date = Chowdy::Application.closest_date(1,1) #upcoming Monday
+            else
+                adjusted_restart_date = Chowdy::Application.closest_date(2,1) #Two Mondays from now
+            end
+            associated_cutoff = [4].include?(Date.today.wday) ? Date.today : Chowdy::Application.closest_date(1,4) #upcoming Thursday
+            
+            if @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
+                if ((["Yes","yes"].include? @customer.active?) && (["Yes","yes"].include? @customer.paused?)) || (@customer.active?.blank? || (["No","no"].include? @customer.active?))
+                    @customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+                end
+            elsif ["pause","cancel"].include? @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
+                @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ?", "pause", "cancel").destroy_all
+            elsif ["restart"].include? @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
+                    @customer.stop_queues.where("stop_type ilike ?", "restart").destroy_all
+                    @customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+            end
+
+            if @customer.errors.any?
+                flash[:status] = "fail"
+                status = "fail"
+                flash[:notice_customers] = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+                notice_customers = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
+            else
+                if @customer.user
+                    @customer.user.log_activity("Admin (#{current_user.email}): requested restart")
+                end
+                flash[:status] = "success"
+                status = "success"
+                flash[:notice_customers] = "Restart request submitted"    
+                notice_customers = "Restart request submitted"    
+            end
+        end
+
+        if @customer.user
+            auto_login(@customer.user)
+            redirect_to user_profile_path+"#dashboard"
+        else
+            redirect_to login_path
+        end
+        
+    end
+
     def resend_sign_up_link_customer_request
         email = params[:email].downcase
         customer = Customer.where(email:email).take
