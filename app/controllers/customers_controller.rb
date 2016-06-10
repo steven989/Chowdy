@@ -505,11 +505,18 @@ protect_from_forgery :except => :payment
 
         if @customer.user
             auto_login(@customer.user)
-            redirect_to user_profile_path+"#dashboard"
-        else
-            redirect_to login_path
         end
         
+    end
+
+    def add_to_do_not_email
+        stripe_customer_id = params[:id]
+        @customer = Customer.where(stripe_customer_id:stripe_customer_id).take
+        unless @customer.blank?
+            if NoEmailCustomer.where(stripe_customer_id:stripe_customer_id).blank?
+                NoEmailCustomer.create(stripe_customer_id:stripe_customer_id)
+            end
+        end
     end
 
     def resend_sign_up_link_customer_request

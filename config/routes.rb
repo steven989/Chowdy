@@ -21,6 +21,7 @@ Chowdy::Application.routes.draw do
   get 'customers/:id/resend_confirmation_email_form' => 'customers#resend_confirmation_email_form', as: 'resend_confirmation_email_form'
   get 'customers/:id/resend_sign_up_link_form' => 'customers#resend_sign_up_link_form', as: 'resend_sign_up_link_form'
   get 'customers/:id/olrestart' => 'customers#one_link_restart', as: 'one_link_restart'
+  get 'customers/:id/add_to_do_not_email' => 'customers#add_to_do_not_email', as: 'add_to_do_not_email'
   post 'customers/:id/resend_sign_up_link' => 'customers#resend_sign_up_link', as: 'resend_sign_up_link'
   post 'customers/:id/resend_signup_confirmation_email' => 'customers#resend_signup_confirmation_email', as: 'resend_signup_confirmation_email'
   get 'customers/resend_sign_up_link' => 'customers#resend_sign_up_link_customer_request', as: 'resend_sign_up_link_customer_request'

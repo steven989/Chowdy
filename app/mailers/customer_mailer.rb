@@ -285,6 +285,17 @@ class CustomerMailer < ActionMailer::Base
     end 
   end
 
+  def restart_reminder(customer)
+      @customer = customer
+
+    mail(
+      to: @customer.email, 
+      subject: 'Restart your Chowdy subscription'
+      ) do |format|
+        format.text
+    end       
+  end
+
   def send_customer_list
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
 

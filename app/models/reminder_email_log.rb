@@ -26,10 +26,19 @@ class ReminderEmailLog < ActiveRecord::Base
             Where 
                 (b.latest_reminder_email_sent is NULL or ((b.latest_reminder_email_sent < b.latest_cancel_request_created_at) AND (b.latest_reminder_email_sent < ( current_date + (-? * interval '1 day'))) ))
                 AND b.latest_cancel_request_created_at < ( current_date + (-? * interval '1 day'))",duration, duration]).select {|c| ["No","no","",nil].include? c.active?}
+    
     end
 
-    def 
-        
+    def self.generate_restart_email(customers)
+        customers.each do |c|
+            discount = c.reminder_email_logs.blank? ? 500 : nil
+            c.add_discount_to_stripe(c.restart_discount,"discount for restarting Chowdy subscription") if discount
+            ReminderEmailLog.create(stripe_customer_id:c.stripe_customer_id,date_reminder_sent:Date.today)
+            CustomerMailer.delay.restart_reminder(customer)
+            if c.user
+                c.user.log_activity("System: created and sent restart email #{discount ? 'with discount of $'+(discount.to_f/100).round(2).to_s} : 'wiht no discount'")
+            end
+        end
     end
 
 end

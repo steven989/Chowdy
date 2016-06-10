@@ -493,6 +493,26 @@ class Customer < ActiveRecord::Base
             end        
     end
 
+    def add_discount_to_stripe(amount,refund_reason)
+        begin
+            Stripe::InvoiceItem.create(
+                customer: self.stripe_customer_id,
+                amount: -amount,
+                currency: 'CAD',
+                description: refund_reason
+            )
+        rescue => error
+            result = "fail"
+            notice = "Error occurred when creating discount invoice item for upcoming invoice: #{error.message}"
+        else 
+            result = "success"
+            notice = "Discount invoice item successfully created"
+            if self.user
+                self.user.log_activity("Discount of $#{(amount.to_f/100).round(2).to_s} added to Stripe#{' : '+refund_reason unless refund_reason.blank?}")
+            end
+        end
+        {result:result,notice:notice}
+    end
 
     def self.handle_failed_payment(stripe_customer_id,invoice_number,attempts,next_attempt,invoice_amount,latest_attempt_date,invoice_date)
         existing_invoice = FailedInvoice.where(invoice_number: invoice_number, paid:false).take
