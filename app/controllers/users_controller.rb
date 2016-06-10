@@ -217,11 +217,11 @@ class UsersController < ApplicationController
             @menu = Menu.all.order(production_day: :asc)
         else
 
-            @display_marketplace_to_customers = SystemSetting.where(setting:"marketplace",setting_attribute:"display").blank? ? ((@current_user.email == "tiffany.bayliss@gmail.com" || @current_user.email == "steven989@gmail.com") ? true : false) : (SystemSetting.where(setting:"marketplace",setting_attribute:"display").take.setting_value == "true" ? true : ((@current_user.email == "tiffany.bayliss@gmail.com" || @current_user.email == "steven989@gmail.com") ? true : false) )
-
+            @current_customer = current_user.customer
+            @display_marketplace_to_customers = SystemSetting.where(setting:"marketplace",setting_attribute:"display").blank? ? false : ( SystemSetting.where(setting:"marketplace",setting_attribute:"display").take.setting_value == "false" ? false : ((["Yes","yes"].include?(@current_customer.recurring_delivery) && @current_customer.delivery_boundary == 'GTA') ? true : false ))
             @disable_markplace_purchase =  SystemSetting.where(setting:"marketplace",setting_attribute:"order").blank? ? true : (SystemSetting.where(setting:"marketplace",setting_attribute:"order").take.setting_value == "true" ? false : true)
 
-            @current_customer = current_user.customer
+            
             @marketplace_delivery_date = PartnerProductDeliveryDate.first.delivery_date.strftime("%A %B %e, %Y")
             @display_cancel = true
             @display_pause = true
