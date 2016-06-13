@@ -126,6 +126,8 @@ class AdminActionsController < ApplicationController
                 no_pork:"#{c.no_pork ? 'No Pork' : ''}",
                 no_beef:"#{c.no_beef ? 'No Beef' : ''}",
                 no_poultry:"#{c.no_poultry ? 'No poultry' : ''}",
+                monday_delivery_enabled:c.monday_delivery_enabled,
+                thursday_delivery_enabled:c.thursday_delivery_enabled,
                 extra_ice:"#{c.extra_ice ? 'Extra ice' : ''}",
                 gifter_pays_delivery: c.gift_remains.blank? ? (c.gifts.blank? ? '' : (c.gifts.order(id: :desc).limit(1).take.pay_delivery? && Date.today < (c.first_pick_up_date + 5.days) ? c.gifts.order(id: :desc).limit(1).take.sender_email : '' ) ) : (c.gift_remains.order(id: :desc).limit(1).take.gift.pay_delivery? ? c.gift_remains.order(id: :desc).limit(1).take.gift.sender_email : ''),
                 multiple_delivery_address:"#{c.different_delivery_address ? 'Multiple Delivery Address' : ''}",
@@ -156,7 +158,7 @@ class AdminActionsController < ApplicationController
                 disposition = "attachment; filename='deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv'"
                 response.headers['Content-Disposition'] = disposition
                 if @data.blank?
-                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","unit_number","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","extra_ice","gifter_pays_delivery","multiple_delivery_address","split_delivery_with","corporate_office","corporate","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
+                    send_data  CSV.generate {|csv| csv << ["id","email","name","delivery_address","unit_number","phone_number","reg_mon","grn_mon","reg_thu","grn_thu","no_pork","no_beef","no_poultry","monday_delivery_enabled","thursday_delivery_enabled","extra_ice","gifter_pays_delivery","multiple_delivery_address","split_delivery_with","corporate_office","corporate","beef_monday","pork_monday","poultry_monday","green_1_monday","green_2_monday","beef_thursday","pork_thursday","poultry_thursday","green_1_thursday","green_2_thursday","mon_check","thu_check","special_delivery_instructions","monday_delivery_hub","thursday_delivery_hub", "delivery_boundary"]}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 else 
                     send_data  CSV.generate {|csv| csv << @data.first.keys; @data.each {|data| csv << data.values}}, type: 'text/csv; charset=utf-8; header=present', disposition: disposition, filename: "deliveries_week_of_#{StartDate.first.start_date.strftime("%Y_%m_%d")}.csv"
                 end
@@ -526,6 +528,31 @@ class AdminActionsController < ApplicationController
                     CustomerMailer.delay.stop_delivery_notice(@customer, "Change delivery info")
                     CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Change delivery info")
                 end
+
+                monday_delivery_enabled = (params[:customer][:monday_delivery_enabled].blank? || params[:customer][:monday_delivery_enabled] == "0") ? false : true
+                thursday_delivery_enabled = (params[:customer][:thursday_delivery_enabled].blank? || params[:customer][:thursday_delivery_enabled] == "0") ? false : true
+                _monday_delivery_enabled = @customer.monday_delivery_enabled?
+                _thursday_delivery_enabled = @customer.thursday_delivery_enabled?
+
+
+                if (monday_delivery_enabled != _monday_delivery_enabled) || (thursday_delivery_enabled != _thursday_delivery_enabled)
+                    @customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+
+                    if (["Yes","yes"].include? @customer.recurring_delivery)
+                        if monday_delivery_enabled && thursday_delivery_enabled
+                            @customer.balance_meals
+                        elsif monday_delivery_enabled && !thursday_delivery_enabled
+                            @customer.all_meals_on_day_1
+                        elsif thursday_delivery_enabled && !monday_delivery_enabled
+                            @customer.all_meals_on_day_2
+                        end
+                    else
+                        flash[:notice_customers] = "Delivery info updated. However, Monday/Thursday meal split did not change because customer is not currently on delivery"
+                        notice_customers = "Delivery info updated. However, Monday/Thursday meal split did not change because customer is not currently on delivery"                        
+                    end
+
+                end
+
             else
                 flash[:status] = "fail"
                 status = "fail"
@@ -535,6 +562,7 @@ class AdminActionsController < ApplicationController
         elsif params[:todo] == "delivery_toggle"
             if ["Yes","yes"].include? @customer.recurring_delivery
                 if @customer.update_attributes(recurring_delivery: nil)
+                    @customer.balance_meals
                     flash[:status] = "success"
                     status = "success"
                     flash[:notice_customers] = "Delivery turned off"
@@ -553,10 +581,25 @@ class AdminActionsController < ApplicationController
                     CustomerMailer.delay.urgent_stop_delivery_notice(@customer, "Stop Delivery")
                 end
             else
+                _monday_delivery_enabled = @customer.monday_delivery_enabled?
+                _thursday_delivery_enabled = @customer.thursday_delivery_enabled?
                 @customer.update_attributes(recurring_delivery: "yes")
                 @customer.update_attributes(monday_delivery_hub: "delivery") if @customer.monday_delivery_hub.blank?
                 @customer.update_attributes(thursday_delivery_hub: "delivery") if @customer.thursday_delivery_hub.blank?                
                 @customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
+
+                if _monday_delivery_enabled && !_thursday_delivery_enabled
+                    total_meals = @customer.regular_meals_on_monday.to_i + @customer.regular_meals_on_thursday.to_i + @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    green_meals = @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    regular_meals = total_meals - green_meals
+                    @customer.update(regular_meals_on_monday:regular_meals,green_meals_on_monday:green_meals,regular_meals_on_thursday:0,green_meals_on_thursday:0)
+                elsif _thursday_delivery_enabled && !_monday_delivery_enabled
+                    total_meals = @customer.regular_meals_on_monday.to_i + @customer.regular_meals_on_thursday.to_i + @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    green_meals = @customer.green_meals_on_monday.to_i + @customer.green_meals_on_thursday.to_i
+                    regular_meals = total_meals - green_meals
+                    @customer.update(regular_meals_on_monday:0,green_meals_on_monday:0,regular_meals_on_thursday:regular_meals,green_meals_on_thursday:green_meals)
+                end
+
                 if @customer.errors.any?
                     flash[:status] = "fail"
                     status = "fail"
@@ -564,7 +607,6 @@ class AdminActionsController < ApplicationController
                     notice_customers = "Delivery cannot be turned on: #{@customer.errors.full_messages.join(", ")}"
                 else
                     flash[:status] = "success"
-
                     status = "success"
                     flash[:notice_customers] = "Delivery turned on"
                     notice_customers = "Delivery turned on"
@@ -1188,7 +1230,7 @@ class AdminActionsController < ApplicationController
     private 
 
     def individual_attributes_params
-        params.require(:customer).permit(:name,:next_pick_up_date,:notes,:delivery_time,:special_delivery_instructions, :sponsored, :price_increase_2015)
+        params.require(:customer).permit(:name,:next_pick_up_date,:notes,:delivery_time,:special_delivery_instructions, :sponsored, :price_increase_2015,:corporate,:corporate_office)
     end
 
     def delivery_info_params

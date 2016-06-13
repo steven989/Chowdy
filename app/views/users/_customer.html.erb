@@ -232,7 +232,37 @@ $(function(){
     // check delivery 
     $('#delivery_request_form input').off("change").on("change", function(){
       $("#delivery_change_warning").removeClass("hidden");
+      if($('#monday_delivery_enabled').length == 1) {
+        monday_thursday_delivery_checkbox();  
+      }
     });
+
+    $('#delivery_request_form #monday_delivery_enabled, #delivery_request_form #thursday_delivery_enabled').off("change").on("change", monday_thursday_delivery_checkbox);
+
+    function monday_thursday_delivery_checkbox(){
+        var monday_checked = $('#monday_delivery_enabled').is(':checked');
+        var thursday_checked = $('#thursday_delivery_enabled').is(':checked');
+
+        if (monday_checked && thursday_checked) {
+          $("#monday_thursday_delivery_enable_notice").removeClass("hidden").addClass("hidden");
+          $('#request_delivery_submit').removeClass("disabled");
+          $("#delivery_change_warning").removeClass("hidden");
+        } else if (monday_checked) {
+          $('#monday_thursday_delivery_enable_notice').html('Note: all of your weekly meals will be delievered on Mondays').removeClass("hidden");
+          $('#request_delivery_submit').removeClass("disabled");
+          $("#delivery_change_warning").removeClass("hidden");
+        } else if (thursday_checked){
+          $('#monday_thursday_delivery_enable_notice').html('Note: all of your weekly meals will be delievered on Thursdays').removeClass("hidden");      
+          $('#request_delivery_submit').removeClass("disabled");  
+          $("#delivery_change_warning").removeClass("hidden");
+        } else {
+          $('#monday_thursday_delivery_enable_notice').html('You cannot leave both dates blank. Meals will be delivered on both days.').removeClass("hidden");
+          $('#request_delivery_submit').removeClass("disabled").addClass("disabled");  
+        }
+      
+      }
+
+
 
     $('#delivery_address').off("input").on("input",function(){
       $('#request_delivery_submit').removeClass("disabled").addClass("disabled");
@@ -240,13 +270,18 @@ $(function(){
 
     $('#delivery_request_form #phone_number,#delivery_request_form #unit_number,#delivery_request_form #note').off("input").on("input",function(){
       $('#request_delivery_submit').removeClass("disabled");
+      if($('#monday_delivery_enabled').length == 1) {
+      monday_thursday_delivery_checkbox();
+      } 
     })
+
+
 
     // $('#delivery_request_form input').off("focusout").on("focusout",delivery_check);
 
     function delivery_check(){
             GMaps.geocode({
-              address: $('#delivery_request_form #delivery_address').val()+", Toronto",
+              address: $('#delivery_request_form #delivery_address').val(),
               callback: function(results, status) {
                 if (status == 'OK') {
                   if (results.length > 1) {
@@ -255,34 +290,34 @@ $(function(){
                       });
                   $('#address_match_warning strong').html("We found multiple matching locations. <i>Did you mean:</i><br>"+result_array.join(" "));
                   $('#address_match_warning').removeClass("hidden");
-                  $("#delivery_request_form input:submit").addClass("disabled");
+                  $("#request_delivery_submit").addClass("disabled");
                   } else {
                     if (results[0].geometry.location_type == "APPROXIMATE") {
                       $('#address_match_warning strong').html("We could not locate your address. Please be more specific.");
                       $('#address_match_warning').removeClass("hidden");
-                      $("#delivery_request_form input:submit").addClass("disabled");
+                      $("#request_delivery_submit").addClass("disabled");
                     } else {
                     var latlng = results[0].geometry.location;
                       if (contains_location(latlng)=="downtown") {
-                        $('#address_match_warning strong').html("Note that the default delivery time is every <span class='text-danger-lt'>Monday and Thursday between 11am and 1pm</span> unless otherwise requested below.<br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will be in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery) <br><br>If our courier cannot drop off the meals, they will return them to the hub, where you are welcome to pick up the meals yourself");
+                        $('#address_match_warning strong').html("Note that the default delivery time is every <span class='text-danger-lt'>Monday and Thursday between 11am and 1pm</span> unless otherwise requested below.<br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door.<br><br>If you cannot receive your meals during our default delivery time, please indicate below a better time for delivery. <br><br>If our courier cannot drop off the meals, they will return them to our downtown hub at 346 Front Street West, where you are welcome to pick up the meals yourself");
                         $('#address_match_warning').removeClass("hidden");
                         $("label[for='note']").html("Additional note (we cannot deliver after 5pm)")
                         $('#boundary').val("downtown");
                         if ($("#delivery_request_form #phone_number").val() != "" ){
-                          $("#delivery_request_form input:submit").removeClass("disabled");
+                          $("#request_delivery_submit").removeClass("disabled");
                         }
                       } else if (contains_location(latlng)=="gta") {
                         $('#boundary').val("GTA");
-                        $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>10am and 3pm every Monday and Thursday in a thermal insulated bag</span>. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door. <br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste");
+                        $('#address_match_warning strong').html("Your meals will be delivered between <span class='text-danger-lt'>10am and 3:30pm every Monday and Thursday in a thermal insulated bag</span>. <br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door. <br><br>Please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste");
                         $("label[for='note']").html("Additional note")
                         $('#address_match_warning').removeClass("hidden");
                         if ($("#delivery_request_form #phone_number").val() != "" ){
-                          $("#delivery_request_form input:submit").removeClass("disabled");
+                          $("#request_delivery_submit").removeClass("disabled");
                         }
                       } else {
                         $('#address_match_warning strong').html("Your location is outside of our delivery zone");
                         $('#address_match_warning').removeClass("hidden");
-                        $("#delivery_request_form input:submit").addClass("disabled");                    
+                        $("#request_delivery_submit").addClass("disabled");                    
                       }
                     }
                   }
@@ -1498,69 +1533,115 @@ $(function(){
                                   </div>
                                 </div>
                               </div>
-                            <% end %>                   
-                            <div class="row">
-                              <div class="col-sm-6">
-                                <div class="alert alert-<%= @delivery_color_class %> m-t-md padder-v">
-                                    <h5><%= @delivery_note %></h5>
-                                    <% unless @current_customer.recurring_delivery.blank? %>
-                                      <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
-                                          <%= submit_tag "Switch to pick-up (stop delivery)", class:"btn btn-sm btn-danger"  %>
-                                          <div class="alert alert-warning m-t-md m-b-xs">
-                                          Note that stopping delivery here will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch. If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
+                            <% end %> 
+
+                            <div class="col-sm-6 padder padder-v">
+                              <div class="row">
+                                <h2>Setting up your meal delivery</h2>
+                                <p>Please fill out the form on this page to set up your delivery.</p>
+                                <span id="delivery_time_notice"><% if @delivery_boundary == "downtown" %>The <span class="text-danger-lt">default delivery time is every Monday and Thursday between 11am and 1pm</span> unless otherwise specified in the form on this page. <br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door. <br> If you cannot receive your meals during our default delivery time, please indicate below a better time for delivery. <br><br>If our courier cannot drop off the meals, they will return them to our downtown hub at <b>346 Front Street West</b>, where you are welcome to pick up the meals yourself<% elsif @delivery_boundary == "GTA" %> Your meals will be delivered between <b>10am and 3:30pm every Monday and Thursday</b> in a thermal insulated bag. <br><br>If you live in a residence with a front desk, please check ahead with your concierge if food delivery can be left at the desk or by your door.<br><br><b>Please return the insulated thermal bags</b> and ice packs to our courier so we can reuse them and minimize waste<% end %></span>
+                              </div>
+
+                              <div class="row">
+                                  <div class="alert alert-<%= @delivery_color_class %> m-t-md padder-v">
+                                      <h5><%= @delivery_note %></h5>
+                                      <% unless @current_customer.recurring_delivery.blank? %>
+                                        <%= form_tag update_customer_path("stop_delivery"), method: 'POST', class: "m-b-none m-t-xs" do %>
+                                            <%= submit_tag "Switch to pick-up (stop delivery)", class:"btn btn-sm btn-danger"  %>
+                                            <div class="alert alert-warning m-t-md m-b-xs">
+                                            Note that stopping delivery here will be effective for your <b><%= @delivery_change_effective_date %></b> delivery. If you have already requested pause/cancel for your subscription, you do <b>not</b> need to separately request stop delivery here</div>
+                                        <% end %>
                                       <% end %>
-                                    <% end %>
                                 </div>
                               </div>
+
                             </div>
-                            <div class="row">
-                              <div class="col-sm-6">
-                                <section class="panel panel-default">
-                                  <header class="panel-heading font-bold">Delivery request form ($8 per drop)<span id="delivery_time_notice"><% if @delivery_boundary == "downtown" %> - note that <span class="text-danger-lt">default delivery time is every Monday and Thursday between 11am and 1pm</span> unless otherwise requested below. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (note that since you are in our downtown delivery zone, your meals will come in regular bags, not thermal-insulated bags. So if you cannot receive your meals during our default delivery time, please indicate below a better time for delivery)<br><br>If our courier cannot drop off the meals, they will return them to the hub, where you're welcome to pick up the meals yourself.<% elsif @delivery_boundary == "GTA" %> - your meals will be delivered between 10am and 3pm every Monday and Thursday in a thermal insulated bag. Our couriers will call you when they arrive. <br><br>If you live in a residence with a front desk, please make sure that your concierge can accept the delivery on your behalf, or will let our courier leave the food by your door (in case you are not home)<br><br>If you can, please return the insulated thermal bags and ice packs to our courier so we can reuse them and minimize waste<% end %></span></header>
-                                  <div class="panel-body">
-                                    <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
-                                      <div class="form-group">
-                                        <%= label_tag 'phone_number', "Phone number" %>
-                                        <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control" %>
-                                      </div>
-                                      <div class="form-group">
-                                        <%= label_tag 'delivery_address', "Delivery address (including street number)" %>
-                                        <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control" %>
-                                        <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
-                                            <strong></strong>
+                            <div class="col-sm-6">
+                              <div class="row m-t-lg">
+                                <div class="col-sm-12">
+                                  <section class="panel panel-default">
+                                    <header class="panel-heading font-bold">Delivery request form ($8 per drop/delivery)</header>
+                                    <div class="panel-body">
+                                      <%= form_tag update_customer_path("delivery"), method: 'POST', role: 'form', id:"delivery_request_form" do %>
+                                        <div class="form-group">
+                                          <%= label_tag 'phone_number', "Phone number" %>
+                                          <%= telephone_field_tag 'phone_number', @phone_number, class:"form-control" %>
                                         </div>
-                                      </div>
-                                      <div class="form-group">
-                                        <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
-                                        <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
-                                      </div>
-                                      <div class="form-group">
-                                        <%= label_tag 'note', "Additional note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
-                                        <%= text_area_tag 'note', @note, class: "form-control" %>
-                                      </div>
-                                      <%= hidden_field_tag 'boundary', @delivery_boundary %>
-                                      <div class="row">
-                                        <div class="col-sm-5 m-t-md">
-                                          <%= submit_tag @delivery_button, class:"btn btn-md btn-default #{"disabled" unless @do_not_disable_delivery_button_initially}", id: "request_delivery_submit" %>
-                                        </div>
-                                        <div class="col-sm-7 m-t-md">
-                                          <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
-                                            
-                                            You have unsaved changes
+                                        <div class="form-group">
+                                          <%= label_tag 'delivery_address', "Delivery address (including street number)" %>
+                                          <%= text_field_tag 'delivery_address', @delivery_address, class: "form-control" %>
+                                          <div class="alert alert-warning m-t-xs hidden" id="address_match_warning">
+                                              <strong></strong>
                                           </div>
                                         </div>
-                                      </div>
-                                      <div class="row">
-                                        <div class="col-sm-12 m-t-md">
-                                          Changes will be effective for your <b><%= [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %d") : Chowdy::Application.closest_date(1,1).strftime("%A %B %d") %></b> batch
-
+                                        <div class="form-group">
+                                          <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
+                                          <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                         </div>
-                                      </div>
-                                    <% end %>
-                                  </div>
-                                </section>
-                              </div>
-                            </div>                      
+                                        <% unless SystemSetting.where(setting:'delivery',setting_value:"enable_monday_thursday_only_split").blank?  %>
+                                          <% if SystemSetting.where(setting:'delivery',setting_attribute:"enable_monday_thursday_only_split").take.setting_value == "true" %>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                  <div class="col-sm-6">
+                                                    <div class="checkbox i-checks">
+                                                      <%= label_tag :monday_delivery_enabled, "Monday" do %>
+                                                        <%= check_box_tag :monday_delivery_enabled,nil,@current_customer.monday_delivery_enabled %>
+                                                        <i></i>
+                                                        Monday Delivery
+                                                      <% end %>
+                                                    </div>
+                                                  </div>
+                                                  <div class="col-sm-6">
+                                                    <div class="checkbox i-checks">
+                                                      <%= label_tag :thursday_delivery_enabled, "Thursday" do %>
+                                                        <%= check_box_tag :thursday_delivery_enabled,nil,@current_customer.thursday_delivery_enabled %>
+                                                        <i></i>
+                                                        Thursday Delivery
+                                                      <% end %>
+                                                    </div>
+                                                  </div>
+                                                </div>
+
+                                                <div class="alert alert-danger alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
+                                                </div>
+                                            </div>
+                                          <% end %>
+                                        <% end %>
+                                        <div class="form-group">
+                                          <%= label_tag 'note', "Additional delivery note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
+                                          <%= text_area_tag 'note', @note, class: "form-control", rows:  6 %>
+                                          <span class="m-t-xs" style="font-size:9px;"><em>*** These delivery notes are only to help the courier reach you at the time of delivery. For any account related changes or assistance, please email <a href="mailto:help@chowdy.ca">help@chowdy.ca</a> before the Thursday cutoff date.</em></span>
+                                        </div>
+                                        <%= hidden_field_tag 'boundary', @delivery_boundary %>
+                                        <div class="row">
+                                          <div class="col-sm-6 m-t-md">
+                                            <%= button_tag type: "submit", class:"btn btn-md btn-success #{"disabled" unless @do_not_disable_delivery_button_initially}", id: "request_delivery_submit" do %>
+                                              <i class='fa fa-check'></i> <%= @delivery_button %>
+                                            <% end %>
+          
+                                          </div>
+                                          <div class="col-sm-6 m-t-md">
+                                            <div class="alert alert-warning alert-block text-center hidden" id="delivery_change_warning" style="height:34px; padding-top:8px;">
+                                              
+                                              You have unsaved changes
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="row">
+                                          <div class="col-sm-12 m-t-md">
+                                            <div class="alert alert-warning">
+                                              <i class='fa fa-exclamation pull-left' style="font-size:20px;"></i>
+                                              Changes will be effective for your <b><%= @delivery_change_effective_date %></b> delivery
+
+                                            </div>
+                                          </div>
+                                        </div>
+                                      <% end %>
+                                    </div>
+                                  </section>
+                                </div>
+                              </div>   
+                            </div>                   
                           </section>
                         </section>                      
                       </section>

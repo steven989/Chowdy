@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160606181911) do
+ActiveRecord::Schema.define(version: 20160606201716) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -101,6 +101,8 @@ ActiveRecord::Schema.define(version: 20160606181911) do
     t.string   "unit_number"
     t.boolean  "corporate"
     t.string   "corporate_office"
+    t.boolean  "monday_delivery_enabled"
+    t.boolean  "thursday_delivery_enabled"
   end
 
   create_table "daily_snapshots", force: :cascade do |t|

@@ -270,11 +270,41 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#changePlan"
         elsif params[:id].downcase == "delivery" 
             _current_delivery = (["Yes","yes"].include? current_customer.recurring_delivery) ? true : false
+
+            monday_delivery_enabled = params[:monday_delivery_enabled].blank? ? false : true
+            thursday_delivery_enabled = params[:thursday_delivery_enabled].blank? ? false : true
+
             current_customer.update(phone_number:params[:phone_number], delivery_address:params[:delivery_address],unit_number:params[:unit_number], special_delivery_instructions:params[:note], recurring_delivery:"yes", delivery_boundary:params[:boundary])
             current_customer.update_attributes(monday_delivery_hub: "delivery") if current_customer.monday_delivery_hub.blank?
             current_customer.update_attributes(thursday_delivery_hub: "delivery") if current_customer.thursday_delivery_hub.blank?
             current_customer.stop_queues.where("stop_type ilike ?", "change_hub").destroy_all
-            
+
+            _monday_delivery_enabled = current_customer.monday_delivery_enabled?
+            _thursday_delivery_enabled = current_customer.thursday_delivery_enabled?
+
+
+            if (monday_delivery_enabled != _monday_delivery_enabled) || (thursday_delivery_enabled != _thursday_delivery_enabled)
+                if monday_delivery_enabled && thursday_delivery_enabled
+                    current_customer.balance_meals
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+                elsif monday_delivery_enabled && !thursday_delivery_enabled
+                    current_customer.all_meals_on_day_1
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+                elsif thursday_delivery_enabled && !monday_delivery_enabled
+                    current_customer.all_meals_on_day_2
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+                end
+            else
+                if (!_current_delivery) && (monday_delivery_enabled) && (!thursday_delivery_enabled) 
+                    current_customer.all_meals_on_day_1
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+                elsif (!_current_delivery) && (!monday_delivery_enabled) && (thursday_delivery_enabled) 
+                    current_customer.all_meals_on_day_2
+                    current_customer.update(monday_delivery_enabled:monday_delivery_enabled,thursday_delivery_enabled:thursday_delivery_enabled)
+                end
+            end
+
+
             if _current_delivery
                 if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
                     CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Change delivery info")
@@ -293,6 +323,14 @@ protect_from_forgery :except => :payment
             redirect_to user_profile_path+"#delivery"
         elsif params[:id].downcase == "stop_delivery" 
             current_customer.update(recurring_delivery:nil)
+
+            _monday_delivery_enabled = current_customer.monday_delivery_enabled?
+            _thursday_delivery_enabled = current_customer.thursday_delivery_enabled?
+
+            if !_monday_delivery_enabled || !_thursday_delivery_enabled
+                current_customer.balance_meals
+            end
+
             if (Date.today.wday == 0 && current_customer.next_pick_up_date == Chowdy::Application.closest_date(1,1)) || (Date.today.wday == 1 && current_customer.next_pick_up_date == Date.today) || ([2,3].include?(Date.today.wday) && current_customer.next_pick_up_date == Chowdy::Application.closest_date(-1,1))
                 CustomerMailer.delay.stop_delivery_notice(current_customer, "Stop Delivery")
                 CustomerMailer.delay.urgent_stop_delivery_notice(current_customer, "Stop Delivery")

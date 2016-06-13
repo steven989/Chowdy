@@ -230,6 +230,17 @@ class UsersController < ApplicationController
             @display_meal_selection = @current_customer.recurring_delivery.blank? ? false : true
             @active_gift = @current_customer.gifts.order(id: :desc).limit(1).take
 
+            
+            if @current_customer.monday_delivery_enabled? && @current_customer.thursday_delivery_enabled?
+                @delivery_change_effective_date = [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %e") : Chowdy::Application.closest_date(1,1).strftime("%A %B %e") 
+            elsif @current_customer.monday_delivery_enabled? && !@current_customer.thursday_delivery_enabled?
+                @delivery_change_effective_date = [1,2,3,4,5,6].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,1).strftime("%A %B %e") : Chowdy::Application.closest_date(2,1).strftime("%A %B %e") 
+            elsif !@current_customer.monday_delivery_enabled? && @current_customer.thursday_delivery_enabled?
+                @delivery_change_effective_date = [4,5,6,0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %e") : Chowdy::Application.closest_date(2,4).strftime("%A %B %e") 
+            else 
+                @delivery_change_effective_date = [0,1,2].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,4).strftime("%A %B %e") : Chowdy::Application.closest_date(1,1).strftime("%A %B %e") 
+            end
+
             @parter_products = Kaminari.paginate_array(PartnerProduct.products_to_display).page(1)
             @parter_products_menu = @parter_products.map{|pp| {product_id:pp.id, price:pp.price_in_cents, name:pp.product_name, description:pp.product_description}}
 

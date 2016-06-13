@@ -104,7 +104,21 @@
               <%= f.label :price_increase_2015, "$7.99 ?" %>
               <%= f.check_box :price_increase_2015, class: "form-control" %>
           </div>
+        </div>  
+        <div class="col-sm-2">
+          <div class="form-group">
+              <%= f.label :corporate, "Corporate?" %>
+              <%= f.check_box :corporate, class: "form-control" %>
+          </div>
         </div>        
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group">
+              <%= f.label :corporate_office, "Corporate program/office" %>
+              <%= f.text_field :corporate_office, class: "form-control" %>          
+          </div>
+        </div>
       </div>
       <div class="row">
         <div class="col-sm-12">
@@ -236,6 +250,20 @@
           <div class="form-group">
               <%= f.label :delivery_set_up? %>
               <%= f.text_field :delivery_set_up?, class: "form-control" %>
+          </div>
+          <div class="row">
+            <div class="col-sm-5">
+              <div class="form-group">
+                  <%= f.label :monday_delivery_enabled %>
+                  <%= f.check_box :monday_delivery_enabled, class: "form-control" %>
+              </div>          
+            </div>
+            <div class="col-sm-5">
+              <div class="form-group">
+                  <%= f.label :thursday_delivery_enabled %>
+                  <%= f.check_box :thursday_delivery_enabled, class: "form-control" %>
+              </div>
+            </div>
           </div>
           <div class="form-group">
               <%= f.label :special_delivery_instructions %>
