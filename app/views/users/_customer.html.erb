@@ -232,7 +232,10 @@ $(function(){
     // check delivery 
     $('#delivery_request_form input').off("change").on("change", function(){
       $("#delivery_change_warning").removeClass("hidden");
-      monday_thursday_delivery_checkbox();
+      $('#request_delivery_submit').removeClass("disabled");
+      if($('#monday_delivery_enabled').length == 1) {
+        monday_thursday_delivery_checkbox();  
+      }
     });
 
     $('#delivery_request_form #monday_delivery_enabled, #delivery_request_form #thursday_delivery_enabled').off("change").on("change", monday_thursday_delivery_checkbox);
@@ -268,7 +271,9 @@ $(function(){
 
     $('#delivery_request_form #phone_number,#delivery_request_form #unit_number,#delivery_request_form #note').off("input").on("input",function(){
       $('#request_delivery_submit').removeClass("disabled");
+      if($('#monday_delivery_enabled').length == 1) {
       monday_thursday_delivery_checkbox();
+      } 
     })
 
 
@@ -1574,33 +1579,35 @@ $(function(){
                                           <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
                                           <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                              <div class="col-sm-6">
-                                                <div class="checkbox i-checks">
-                                                  <%= label_tag :monday_delivery_enabled, "Monday" do %>
-                                                    <%= check_box_tag :monday_delivery_enabled,nil,@current_customer.monday_delivery_enabled %>
-                                                    <i></i>
-                                                    Monday Delivery
-                                                  <% end %>
+                                        <% if SystemSetting.where(setting:'delivery',setting_value:"enable_monday_thursday_only_split").blank?  %>
+
+                                        <% else %>
+                                          <div class="form-group">
+                                              <div class="row">
+                                                <div class="col-sm-6">
+                                                  <div class="checkbox i-checks">
+                                                    <%= label_tag :monday_delivery_enabled, "Monday" do %>
+                                                      <%= check_box_tag :monday_delivery_enabled,nil,@current_customer.monday_delivery_enabled %>
+                                                      <i></i>
+                                                      Monday Delivery
+                                                    <% end %>
+                                                  </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                  <div class="checkbox i-checks">
+                                                    <%= label_tag :thursday_delivery_enabled, "Thursday" do %>
+                                                      <%= check_box_tag :thursday_delivery_enabled,nil,@current_customer.thursday_delivery_enabled %>
+                                                      <i></i>
+                                                      Thursday Delivery
+                                                    <% end %>
+                                                  </div>
                                                 </div>
                                               </div>
-                                              <div class="col-sm-6">
-                                                <div class="checkbox i-checks">
-                                                  <%= label_tag :thursday_delivery_enabled, "Thursday" do %>
-                                                    <%= check_box_tag :thursday_delivery_enabled,nil,@current_customer.thursday_delivery_enabled %>
-                                                    <i></i>
-                                                    Thursday Delivery
-                                                  <% end %>
-                                                </div>
+
+                                              <div class="alert alert-danger alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
                                               </div>
-                                            </div>
-
-                                            <div class="alert alert-danger alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
-
-                                            </div>
-
-                                        </div>
+                                          </div>
+                                        <% end %>
                                         <div class="form-group">
                                           <%= label_tag 'note', "Additional delivery note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
                                           <%= text_area_tag 'note', @note, class: "form-control", rows:  6 %>
