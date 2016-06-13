@@ -369,8 +369,9 @@ $(function(){
 
     // date picker
 
-    var earliest_resume_date = new Date(<%= @earliest_pause_end_date.year %>,<%= @earliest_pause_end_date.month.to_i - 1 %>,<%= @earliest_pause_end_date.day %>,0,0,0,0)
-    var earliest_pause_start_date = new Date(<%= @earliest_pause_start_date.year %>,<%= @earliest_pause_start_date.month.to_i - 1 %>,<%= @earliest_pause_start_date.day %>,0,0,0,0)
+    var earliest_resume_date = new Date(<%= @earliest_pause_end_date.year %>,<%= @earliest_pause_end_date.month.to_i - 1 %>,<%= @earliest_pause_end_date.day %>,0,0,0,0);
+    var max_resume_date = new Date(<%= @max_pause_end_date.year %>,<%= @max_pause_end_date.month.to_i - 1 %>,<%= @max_pause_end_date.day %>,0,0,0,0);
+    var earliest_pause_start_date = new Date(<%= @earliest_pause_start_date.year %>,<%= @earliest_pause_start_date.month.to_i - 1 %>,<%= @earliest_pause_start_date.day %>,0,0,0,0);
 
     var pauseStartDate = $('#pause_date_start_picker').datepicker({
       format: "yyyy-mm-dd",
@@ -393,7 +394,7 @@ $(function(){
       $('#pause_date_picker').datepicker({
         format: "yyyy-mm-dd",
         onRender: function(date) {
-          return (date.valueOf() < earliest_resume_date.valueOf() || date.getDay() != 1) ? 'disabled' : '';
+          return (date.valueOf() < earliest_resume_date.valueOf() || date.getDay() != 1 || date.valueOf() > max_resume_date.valueOf()) ? 'disabled' : '';
         }
       }).on('changeDate', function() {
           pauseDateValidate();
