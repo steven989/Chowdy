@@ -1578,7 +1578,7 @@ $(function(){
                                           <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
                                           <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                         </div>
-                                        <% unless SystemSetting.where(setting:'delivery',setting_value:"enable_monday_thursday_only_split").blank?  %>
+                                        <% unless SystemSetting.where(setting:'delivery',setting_attribute:"enable_monday_thursday_only_split").blank?  %>
                                           <% if SystemSetting.where(setting:'delivery',setting_attribute:"enable_monday_thursday_only_split").take.setting_value == "true" %>
                                             <div class="form-group">
                                                 <div class="row">
