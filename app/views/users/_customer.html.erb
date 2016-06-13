@@ -232,7 +232,6 @@ $(function(){
     // check delivery 
     $('#delivery_request_form input').off("change").on("change", function(){
       $("#delivery_change_warning").removeClass("hidden");
-      $('#request_delivery_submit').removeClass("disabled");
       if($('#monday_delivery_enabled').length == 1) {
         monday_thursday_delivery_checkbox();  
       }
@@ -282,7 +281,7 @@ $(function(){
 
     function delivery_check(){
             GMaps.geocode({
-              address: $('#delivery_request_form #delivery_address').val()+", Toronto",
+              address: $('#delivery_request_form #delivery_address').val(),
               callback: function(results, status) {
                 if (status == 'OK') {
                   if (results.length > 1) {
@@ -291,12 +290,12 @@ $(function(){
                       });
                   $('#address_match_warning strong').html("We found multiple matching locations. <i>Did you mean:</i><br>"+result_array.join(" "));
                   $('#address_match_warning').removeClass("hidden");
-                  $("#delivery_request_form input:submit").addClass("disabled");
+                  $("#request_delivery_submit").addClass("disabled");
                   } else {
                     if (results[0].geometry.location_type == "APPROXIMATE") {
                       $('#address_match_warning strong').html("We could not locate your address. Please be more specific.");
                       $('#address_match_warning').removeClass("hidden");
-                      $("#delivery_request_form input:submit").addClass("disabled");
+                      $("#request_delivery_submit").addClass("disabled");
                     } else {
                     var latlng = results[0].geometry.location;
                       if (contains_location(latlng)=="downtown") {
@@ -305,7 +304,7 @@ $(function(){
                         $("label[for='note']").html("Additional note (we cannot deliver after 5pm)")
                         $('#boundary').val("downtown");
                         if ($("#delivery_request_form #phone_number").val() != "" ){
-                          $("#delivery_request_form input:submit").removeClass("disabled");
+                          $("#request_delivery_submit").removeClass("disabled");
                         }
                       } else if (contains_location(latlng)=="gta") {
                         $('#boundary').val("GTA");
@@ -313,12 +312,12 @@ $(function(){
                         $("label[for='note']").html("Additional note")
                         $('#address_match_warning').removeClass("hidden");
                         if ($("#delivery_request_form #phone_number").val() != "" ){
-                          $("#delivery_request_form input:submit").removeClass("disabled");
+                          $("#request_delivery_submit").removeClass("disabled");
                         }
                       } else {
                         $('#address_match_warning strong').html("Your location is outside of our delivery zone");
                         $('#address_match_warning').removeClass("hidden");
-                        $("#delivery_request_form input:submit").addClass("disabled");                    
+                        $("#request_delivery_submit").addClass("disabled");                    
                       }
                     }
                   }
@@ -1579,34 +1578,34 @@ $(function(){
                                           <%= label_tag 'unit_number', "Apartment/Suite/Unit number " %>
                                           <%= text_field_tag 'unit_number', @unit_number, class: "form-control" %>
                                         </div>
-                                        <% if SystemSetting.where(setting:'delivery',setting_value:"enable_monday_thursday_only_split").blank?  %>
-
-                                        <% else %>
-                                          <div class="form-group">
-                                              <div class="row">
-                                                <div class="col-sm-6">
-                                                  <div class="checkbox i-checks">
-                                                    <%= label_tag :monday_delivery_enabled, "Monday" do %>
-                                                      <%= check_box_tag :monday_delivery_enabled,nil,@current_customer.monday_delivery_enabled %>
-                                                      <i></i>
-                                                      Monday Delivery
-                                                    <% end %>
+                                        <% unless SystemSetting.where(setting:'delivery',setting_value:"enable_monday_thursday_only_split").blank?  %>
+                                          <% if SystemSetting.where(setting:'delivery',setting_attribute:"enable_monday_thursday_only_split").take.setting_value == "true" %>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                  <div class="col-sm-6">
+                                                    <div class="checkbox i-checks">
+                                                      <%= label_tag :monday_delivery_enabled, "Monday" do %>
+                                                        <%= check_box_tag :monday_delivery_enabled,nil,@current_customer.monday_delivery_enabled %>
+                                                        <i></i>
+                                                        Monday Delivery
+                                                      <% end %>
+                                                    </div>
+                                                  </div>
+                                                  <div class="col-sm-6">
+                                                    <div class="checkbox i-checks">
+                                                      <%= label_tag :thursday_delivery_enabled, "Thursday" do %>
+                                                        <%= check_box_tag :thursday_delivery_enabled,nil,@current_customer.thursday_delivery_enabled %>
+                                                        <i></i>
+                                                        Thursday Delivery
+                                                      <% end %>
+                                                    </div>
                                                   </div>
                                                 </div>
-                                                <div class="col-sm-6">
-                                                  <div class="checkbox i-checks">
-                                                    <%= label_tag :thursday_delivery_enabled, "Thursday" do %>
-                                                      <%= check_box_tag :thursday_delivery_enabled,nil,@current_customer.thursday_delivery_enabled %>
-                                                      <i></i>
-                                                      Thursday Delivery
-                                                    <% end %>
-                                                  </div>
-                                                </div>
-                                              </div>
 
-                                              <div class="alert alert-danger alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
-                                              </div>
-                                          </div>
+                                                <div class="alert alert-danger alert-block text-center hidden" id="monday_thursday_delivery_enable_notice" style="height:34px; padding-top:8px;">
+                                                </div>
+                                            </div>
+                                          <% end %>
                                         <% end %>
                                         <div class="form-group">
                                           <%= label_tag 'note', "Additional delivery note #{"(we cannot deliver after 5pm)" if @delivery_boundary == "downtown"}" %>
