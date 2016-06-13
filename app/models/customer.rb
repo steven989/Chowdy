@@ -85,7 +85,9 @@ class Customer < ActiveRecord::Base
                     next_pick_up_date: StartDate.first.start_date,
                     date_signed_up_for_recurring: Time.now,
                     price_increase_2015:true,
-                    corporate:false
+                    corporate:false,
+                    monday_delivery_enabled:true,
+                    thursday_delivery_enabled:true
                     )
 
                 customer.create_referral_code
