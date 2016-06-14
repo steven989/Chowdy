@@ -298,11 +298,9 @@ class CustomerMailer < ActionMailer::Base
 
       @subject = (@discount == false) ? "Restart your Chowdy subscription today" : "Get a $#{(@discount.to_f/100).round(2).to_s} Chowdy meal credit!"
 
-      @restart_date = 
-
     mail(
       to: @customer.email, 
-      subject: 'Resume your meal subscription and get a $5 meal credit!'
+      subject: @subject
       ) do |format|
         format.html
     end       
