@@ -3,7 +3,7 @@
     
 </head>
 <body>
-    <div class="row" style="height:600px">
+    <div class="row">
         <div class="col-sm-12">
             <p>Hey <%= @customer.name.split(/\s/)[0].capitalize %>!</p>
                 <p>We've noticed you took a break from Chowdy meal subscription. We missed you!</p> 
@@ -19,8 +19,9 @@
             <p>- the Chowdy team</p>
         </div>
     </div>
+    <br>
     <div class="row">
-        <p style="font-size:6px"><i><a href="<%= short_url(add_to_do_not_email_url(@customer.stripe_customer_id,@reminder_log.id)) %>">Click here to stop receiving future email updates</a></i></p>
+        <p style="font-size:8px">You received this email because you subscribed to Chowdy meal subscription. <i><a href="<%= short_url(add_to_do_not_email_url(@customer.stripe_customer_id,@reminder_log.id)) %>">Click here to stop receiving future email updates</a></i></p>
     </div>
 </body>
 
