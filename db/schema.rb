@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160606201716) do
+ActiveRecord::Schema.define(version: 20160614151056) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -373,8 +373,12 @@ ActiveRecord::Schema.define(version: 20160606201716) do
   create_table "reminder_email_logs", force: :cascade do |t|
     t.string   "stripe_customer_id"
     t.date     "date_reminder_sent"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.integer  "discount"
+    t.boolean  "restarted_with_direct_link"
+    t.boolean  "restarted_without_direct_link"
+    t.boolean  "requested_to_no_further_email"
   end
 
   create_table "scheduled_tasks", force: :cascade do |t|

@@ -505,6 +505,7 @@ protect_from_forgery :except => :payment
 
     def one_link_restart
         stripe_customer_id = params[:id]
+        reminder_id = paramsp[:reminder_id]
         @customer = Customer.where(stripe_customer_id:stripe_customer_id).take
         unless @customer.blank?
             if [1,2,3,4].include? Date.today.wday
@@ -525,6 +526,8 @@ protect_from_forgery :except => :payment
                     @customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
             end
 
+            ReminderEmailLog.find(reminder_id).update_attributes(restarted_with_direct_link:true) if ReminderEmailLog.find(reminder_id)
+
             if @customer.errors.any?
                 flash[:status] = "fail"
                 status = "fail"
@@ -532,7 +535,7 @@ protect_from_forgery :except => :payment
                 notice_customers = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
             else
                 if @customer.user
-                    @customer.user.log_activity("Admin (#{current_user.email}): requested restart")
+                    @customer.user.log_activity("Admin (#{@customer.user.email}): requested restart through restart link")
                 end
                 flash[:status] = "success"
                 status = "success"
@@ -549,10 +552,12 @@ protect_from_forgery :except => :payment
 
     def add_to_do_not_email
         stripe_customer_id = params[:id]
+        reminder_id = paramsp[:reminder_id]
         @customer = Customer.where(stripe_customer_id:stripe_customer_id).take
         unless @customer.blank?
             if NoEmailCustomer.where(stripe_customer_id:stripe_customer_id).blank?
                 NoEmailCustomer.create(stripe_customer_id:stripe_customer_id)
+                ReminderEmailLog.find(reminder_id).update_attributes(requested_to_no_further_email:true) if ReminderEmailLog.find(reminder_id)
             end
         end
     end

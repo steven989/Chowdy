@@ -291,8 +291,9 @@ class CustomerMailer < ActionMailer::Base
     end 
   end
 
-  def restart_reminder(customer)
+  def restart_reminder(customer,rm)
       @customer = customer
+      @reminder_log = rm
 
     mail(
       to: @customer.email, 

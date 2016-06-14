@@ -33,8 +33,8 @@ class ReminderEmailLog < ActiveRecord::Base
         customers.each do |c|
             discount = c.reminder_email_logs.blank? ? 500 : nil
             c.add_discount_to_stripe(discount,"discount for restarting Chowdy subscription") if discount
-            ReminderEmailLog.create(stripe_customer_id:c.stripe_customer_id,date_reminder_sent:Date.today)
-            CustomerMailer.restart_reminder(c).deliver
+            rm = ReminderEmailLog.create(stripe_customer_id:c.stripe_customer_id,date_reminder_sent:Date.today,discount:discount)
+            CustomerMailer.restart_reminder(c,rm).deliver
             if c.user
                 c.user.log_activity("System: created and sent restart email #{discount ? 'with discount of $'+(discount.to_f/100).round(2).to_s : 'with no discount'}")
             end

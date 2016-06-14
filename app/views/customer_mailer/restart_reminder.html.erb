@@ -5,8 +5,8 @@
 <body>
     <p>Hi <%= @customer.name.split(/\s/)[0].capitalize %>,</p>
     <p>Restart your Chowdy subscription today with the following link: 
-        <a href="<%= short_url(one_link_restart_url(@customer.stripe_customer_id)) %>">Restart</a></p>
-    <p>Do not receive emails like this in the future:<a href="<%= short_url(add_to_do_not_email_url(@customer.stripe_customer_id)) %>">Do not email</a></p>
+        <a href="<%= short_url(one_link_restart_url(@customer.stripe_customer_id,@reminder_log.id)) %>">Restart</a></p>
+    <p>Do not receive emails like this in the future:<a href="<%= short_url(add_to_do_not_email_url(@customer.stripe_customer_id,@reminder_log.id)) %>">Do not email</a></p>
     <p>- the Chowdy team</p>
 </body>
 
