@@ -103,6 +103,13 @@ namespace :customers do
     end
 
 
+    desc 'Send emails to customers to remind them to restart their subscription'
+    task :restart_reminder_emails, [:number_of_days] => [:environment] do |t, args|        
+        customers = ReminderEmailLog.generate_customer_list(args[:number_of_days])
+        ReminderEmailLog.generate_restart_email(customers)
+    end
+
+
     desc 'automatically increase or reduce meal selection above or below the number of meals subscribed'
     task :adjust_meal_selection_to_match_subscription => [:environment] do
         week = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
