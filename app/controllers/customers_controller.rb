@@ -535,7 +535,7 @@ protect_from_forgery :except => :payment
                 notice_customers = "Restart request cannot be submitted: #{@customer.errors.full_messages.join(", ")}"    
             else
                 if @customer.user
-                    @customer.user.log_activity("Admin (#{@customer.user.email}): requested restart through restart link")
+                    @customer.user.log_activity("Customer requested restart through restart link")
                 end
                 flash[:status] = "success"
                 status = "success"
