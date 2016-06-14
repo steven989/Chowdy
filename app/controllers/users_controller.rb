@@ -384,9 +384,13 @@ class UsersController < ApplicationController
             @delivery_boundary_coordinates = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"coordinates").take.setting_value
             @delivery_boundary_coordinates_gta = SystemSetting.where(setting:"delivery_boundary", setting_attribute:"gta_coordinates").take.setting_value
 
-            if ["Yes","yes"].include? @current_customer.recurring_delivery
-                monday_pickup_hub_match_string = "delivery"
-                thursday_pickup_hub_match_string = "delivery"
+            if (["Yes","yes"].include? @current_customer.recurring_delivery) && (@current_customer.delivery_boundary == 'GTA')
+                monday_pickup_hub_match_string = "GTA delivery"
+                thursday_pickup_hub_match_string = "GTA delivery"
+
+            elsif (["Yes","yes"].include? @current_customer.recurring_delivery) && (@current_customer.delivery_boundary == 'downtown')
+                monday_pickup_hub_match_string = "Downtown delivery"
+                thursday_pickup_hub_match_string = "Downtown delivery"
             else
                 monday_pickup_hub_match_string = case 
                                 when !@current_customer.monday_pickup_hub.match(/wanda/i).nil?
