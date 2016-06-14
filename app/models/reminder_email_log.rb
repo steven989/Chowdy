@@ -36,7 +36,7 @@ class ReminderEmailLog < ActiveRecord::Base
             ReminderEmailLog.create(stripe_customer_id:c.stripe_customer_id,date_reminder_sent:Date.today)
             CustomerMailer.delay.restart_reminder(customer)
             if c.user
-                c.user.log_activity("System: created and sent restart email #{discount ? 'with discount of $'+(discount.to_f/100).round(2).to_s} : 'wiht no discount'")
+                c.user.log_activity("System: created and sent restart email #{discount ? 'with discount of $'+(discount.to_f/100).round(2).to_s : 'wiht no discount'}")
             end
         end
     end
