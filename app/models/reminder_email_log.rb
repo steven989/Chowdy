@@ -26,7 +26,7 @@ class ReminderEmailLog < ActiveRecord::Base
                     ) b on a.id = b.customer_id
             Where 
                 (b.latest_reminder_email_sent is NULL or ((b.latest_reminder_email_sent < b.latest_cancel_request_created_at) AND (b.latest_reminder_email_sent < ( current_date + (-? * interval '1 day'))) ))
-                AND b.latest_cancel_request_created_at < ( current_date + (-? * interval '1 day'))",duration, duration]).select {|c| ["No","no","",nil].include? c.active?}
+                AND b.latest_cancel_request_created_at < ( current_date + (-? * interval '1 day'))",duration, duration]).select {|c| ["No","no","",nil].include? c.active?}.uniq
     
     end
 
@@ -65,7 +65,7 @@ class ReminderEmailLog < ActiveRecord::Base
             (b.latest_reminder_email_sent is NULL or (b.latest_reminder_email_sent < b.pause_start_date))
             AND b.stripe_customer_id is not null 
             AND b.pause_start_date < ( current_date + (-? * interval '1 day'))
-            AND b.pause_end_date > ( current_date + (? * interval '1 day'))",duration_before, duration_after]).select {|c| ["Yes","yes"].include? c.paused?}
+            AND b.pause_end_date > ( current_date + (? * interval '1 day'))",duration_before, duration_after]).select {|c| ["Yes","yes"].include? c.paused?}.uniq
     
     end
 
