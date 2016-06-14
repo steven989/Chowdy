@@ -108,7 +108,7 @@ namespace :customers do
         cancelled_customers = ReminderEmailLog.generate_customer_list(args[:number_of_days])
         paused_customers = ReminderEmailLog.paused_customer_list(args[:duration_before_for_pause],args[:duration_after_for_pause])”
         ReminderEmailLog.generate_restart_email(cancelled_customers,500)
-        ReminderEmailLog.generate_restart_email(paused_customers)
+        ReminderEmailLog.generate_restart_email(paused_customers,500)
     end
 
 
