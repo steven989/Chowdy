@@ -61,7 +61,11 @@ class ReminderEmailLog < ActiveRecord::Base
                     a.start_date,
                     a.end_date
                 ) b on a.stripe_customer_id = b.stripe_customer_id
-            Where b.stripe_customer_id is not null and b.pause_start_date < ( current_date + (-? * interval '1 day')) and b.pause_end_date > ( current_date + (? * interval '1 day'))",duration_before, duration_after]).select {|c| ["Yes","yes"].include? c.paused?}
+            Where 
+            (b.latest_reminder_email_sent is NULL or (b.latest_reminder_email_sent < b.pause_start_date))
+            AND b.stripe_customer_id is not null 
+            AND b.pause_start_date < ( current_date + (-? * interval '1 day'))
+            AND b.pause_end_date > ( current_date + (? * interval '1 day'))",duration_before, duration_after]).select {|c| ["Yes","yes"].include? c.paused?}
     
     end
 
@@ -70,7 +74,7 @@ class ReminderEmailLog < ActiveRecord::Base
             discount = c.reminder_email_logs.blank? ? discount_amount : nil
             c.add_discount_to_stripe(discount,"discount for restarting Chowdy subscription") if discount
             rm = ReminderEmailLog.create(stripe_customer_id:c.stripe_customer_id,date_reminder_sent:Date.today,discount:discount)
-            CustomerMailer.restart_reminder(c,rm).deliver
+            CustomerMailer.delay.restart_reminder(c,rm)
             if c.user
                 c.user.log_activity("System: created and sent restart email #{discount ? 'with discount of $'+(discount.to_f/100).round(2).to_s : 'with no discount'}")
             end

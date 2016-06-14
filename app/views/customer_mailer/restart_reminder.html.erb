@@ -21,7 +21,7 @@
     </div>
     <br>
     <div class="row">
-        <p style="font-size:8px">You received this email because you subscribed to Chowdy meal subscription. <i><a href="<%= short_url(add_to_do_not_email_url(@customer.stripe_customer_id,@reminder_log.id)) %>">Click here to stop receiving future email updates</a></i></p>
+        <p style="font-size:8px">You received this email because you subscribed to Chowdy meal subscription. <a href="<%= short_url(add_to_do_not_email_url(@customer.stripe_customer_id,@reminder_log.id)) %>">Click here to stop receiving future email updates</a></p>
     </div>
 </body>
 
