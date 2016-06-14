@@ -545,6 +545,8 @@ protect_from_forgery :except => :payment
             end
         end
 
+        @adjusted_restart_date = adjusted_restart_date
+
         if @customer.user
             auto_login(@customer.user)
         end

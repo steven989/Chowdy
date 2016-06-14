@@ -294,10 +294,15 @@ class CustomerMailer < ActionMailer::Base
   def restart_reminder(customer,rm)
       @customer = customer
       @reminder_log = rm
+      @discount = (( @reminder_log.discount.blank? ) || ( @reminder_log.discount == 0 )) ? false : @reminder_log.discount
+
+      @subject = (@discount == false) ? "Restart your Chowdy subscription today" : "Get a $#{(@discount.to_f/100).round(2).to_s} Chowdy meal credit!"
+
+      @restart_date = 
 
     mail(
       to: @customer.email, 
-      subject: 'Restart your Chowdy subscription'
+      subject: 'Resume your meal subscription and get a $5 meal credit!'
       ) do |format|
         format.html
     end       

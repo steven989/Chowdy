@@ -104,9 +104,11 @@ namespace :customers do
 
 
     desc 'Send emails to customers to remind them to restart their subscription'
-    task :restart_reminder_emails, [:number_of_days] => [:environment] do |t, args|        
-        customers = ReminderEmailLog.generate_customer_list(args[:number_of_days])
-        ReminderEmailLog.generate_restart_email(customers)
+    task :restart_reminder_emails, [:number_of_days,:duration_before_for_pause,:duration_after_for_pause] => [:environment] do |t, args|        
+        cancelled_customers = ReminderEmailLog.generate_customer_list(args[:number_of_days])
+        paused_customers = ReminderEmailLog.paused_customer_list(args[:duration_before_for_pause],args[:duration_after_for_pause])”
+        ReminderEmailLog.generate_restart_email(cancelled_customers,500)
+        ReminderEmailLog.generate_restart_email(paused_customers)
     end
 
 
