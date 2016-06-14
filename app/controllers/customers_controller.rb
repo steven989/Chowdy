@@ -505,7 +505,7 @@ protect_from_forgery :except => :payment
 
     def one_link_restart
         stripe_customer_id = params[:id]
-        reminder_id = paramsp[:reminder_id]
+        reminder_id = params[:reminder_id]
         @customer = Customer.where(stripe_customer_id:stripe_customer_id).take
         unless @customer.blank?
             if [1,2,3,4].include? Date.today.wday
@@ -552,7 +552,7 @@ protect_from_forgery :except => :payment
 
     def add_to_do_not_email
         stripe_customer_id = params[:id]
-        reminder_id = paramsp[:reminder_id]
+        reminder_id = params[:reminder_id]
         @customer = Customer.where(stripe_customer_id:stripe_customer_id).take
         unless @customer.blank?
             if NoEmailCustomer.where(stripe_customer_id:stripe_customer_id).blank?
