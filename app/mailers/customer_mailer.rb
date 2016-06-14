@@ -298,7 +298,7 @@ class CustomerMailer < ActionMailer::Base
       to: @customer.email, 
       subject: 'Restart your Chowdy subscription'
       ) do |format|
-        format.text
+        format.html
     end       
   end
 
