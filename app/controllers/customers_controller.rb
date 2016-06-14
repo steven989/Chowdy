@@ -157,6 +157,7 @@ protect_from_forgery :except => :payment
                 if current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.blank?
                     if ((["Yes","yes"].include? current_customer.active?) && (["Yes","yes"].include? current_customer.paused?)) || (current_customer.active?.blank? || (["No","no"].include? current_customer.active?))
                         current_customer.stop_queues.create(stop_type:'restart',associated_cutoff:associated_cutoff,start_date:adjusted_restart_date)
+                        current_customer.reminder_email_logs.where(restarted_with_direct_link:nil).order(created_at: :desc).limit(1).take.update_attributes(restarted_without_direct_link:true) if current_customer.reminder_email_logs.where(restarted_with_direct_link:nil,restarted_without_direct_link:nil).order(created_at: :desc).limit(1).take
                     end
                 elsif ["pause","cancel"].include? current_customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").order(created_at: :desc).limit(1).take.stop_type
                     if Date.today.between?("2015-12-18".to_date,"2015-12-24".to_date)
