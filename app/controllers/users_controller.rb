@@ -271,22 +271,30 @@ class UsersController < ApplicationController
             monday_beef_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Beef")
             @monday_beef_selection_1_name = monday_beef_selection_1.blank? ? "Menu to be announced" : coder.decode(monday_beef_selection_1.take.meal_name).titlecase
             @monday_beef_selection_1_sub_name = monday_beef_selection_1.blank? ? "" : ((monday_beef_selection_1.take.carb.blank? && monday_beef_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_beef_selection_1.take.carb).to_s.titlecase + ((monday_beef_selection_1.take.carb.blank? || monday_beef_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_beef_selection_1.take.veggie).to_s.titlecase
+            @monday_beef_selection_1_id = monday_beef_selection_1.blank? ? 0 : monday_beef_selection_1.take.id
 
             monday_pork_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Pork")
             @monday_pork_selection_1_name = monday_pork_selection_1.blank? ? "Menu to be announced" : coder.decode(monday_pork_selection_1.take.meal_name).titlecase
             @monday_pork_selection_1_sub_name = monday_pork_selection_1.blank? ? "" : ((monday_pork_selection_1.take.carb.blank? && monday_pork_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_pork_selection_1.take.carb).to_s.titlecase + ((monday_pork_selection_1.take.carb.blank? || monday_pork_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_pork_selection_1.take.veggie).to_s.titlecase
+            @monday_pork_selection_1_id = monday_pork_selection_1.blank? ? 0 : monday_pork_selection_1.take.id
+
 
             monday_poultry_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Poultry")
             @monday_poultry_selection_1_name = monday_poultry_selection_1.blank? ? "Menu to be announced" : coder.decode(monday_poultry_selection_1.take.meal_name).titlecase
             @monday_poultry_selection_1_sub_name = monday_poultry_selection_1.blank? ? "" : ((monday_poultry_selection_1.take.carb.blank? && monday_poultry_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_poultry_selection_1.take.carb).to_s.titlecase + ((monday_poultry_selection_1.take.carb.blank? || monday_poultry_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_poultry_selection_1.take.veggie).to_s.titlecase
+            @monday_poultry_selection_1_id = monday_poultry_selection_1.blank? ? 0 : monday_poultry_selection_1.take.id
+
 
             monday_green_1_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Green 1")
             @monday_green_1_selection_1_name = monday_green_1_selection_1.blank? ? "Menu to be announced" : coder.decode(monday_green_1_selection_1.take.meal_name).titlecase
             @monday_green_1_selection_1_sub_name = monday_green_1_selection_1.blank? ? "" : ((monday_green_1_selection_1.take.carb.blank? && monday_green_1_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_green_1_selection_1.take.carb).to_s.titlecase + ((monday_green_1_selection_1.take.carb.blank? || monday_green_1_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_green_1_selection_1.take.veggie).to_s.titlecase
+            @monday_green_1_selection_1_id = monday_green_1_selection_1.blank? ? 0 : monday_green_1_selection_1.take.id
+
 
             monday_green_2_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Green 2")
             @monday_green_2_selection_1_name = monday_green_2_selection_1.blank? ? "Menu to be announced" : coder.decode(monday_green_2_selection_1.take.meal_name).titlecase
             @monday_green_2_selection_1_sub_name = monday_green_2_selection_1.blank? ? "" : ((monday_green_2_selection_1.take.carb.blank? && monday_green_2_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_green_2_selection_1.take.carb).to_s.titlecase + ((monday_green_2_selection_1.take.carb.blank? || monday_green_2_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_green_2_selection_1.take.veggie).to_s.titlecase
+            @monday_green_2_selection_1_id = monday_green_2_selection_1.blank? ? 0 : monday_green_2_selection_1.take.id
 
             meal_selection_customer_monday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_1)
 
@@ -302,27 +310,32 @@ class UsersController < ApplicationController
             # @thursday_green_1_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 1").blank?
             # @thursday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").blank?
 
+            @show_nutritional_info_to_customers = SystemSetting.where(setting:"meal_selection",setting_attribute:"show_nutritional_info").blank? ? false : (SystemSetting.where(setting:"meal_selection",setting_attribute:"show_nutritional_info").take.setting_value == "true" ? true : false)
 
             thursday_beef_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Beef")
             @thursday_beef_selection_1_name = thursday_beef_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_beef_selection_1.take.meal_name).titlecase
             @thursday_beef_selection_1_sub_name = thursday_beef_selection_1.blank? ? "" : ((thursday_beef_selection_1.take.carb.blank? && thursday_beef_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_beef_selection_1.take.carb).to_s.titlecase + ((thursday_beef_selection_1.take.carb.blank? || thursday_beef_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_beef_selection_1.take.veggie).to_s.titlecase
+            @thursday_beef_selection_1_id = thursday_beef_selection_1.blank? ? 0 : thursday_beef_selection_1.take.id
 
             thursday_pork_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Pork")
             @thursday_pork_selection_1_name = thursday_pork_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_pork_selection_1.take.meal_name).titlecase
             @thursday_pork_selection_1_sub_name = thursday_pork_selection_1.blank? ? "" : ((thursday_pork_selection_1.take.carb.blank? && thursday_pork_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_pork_selection_1.take.carb).to_s.titlecase + ((thursday_pork_selection_1.take.carb.blank? || thursday_pork_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_pork_selection_1.take.veggie).to_s.titlecase
+            @thursday_pork_selection_1_id = thursday_pork_selection_1.blank? ? 0 : thursday_pork_selection_1.take.id
 
             thursday_poultry_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Poultry")
             @thursday_poultry_selection_1_name = thursday_poultry_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_poultry_selection_1.take.meal_name).titlecase
             @thursday_poultry_selection_1_sub_name = thursday_poultry_selection_1.blank? ? "" : ((thursday_poultry_selection_1.take.carb.blank? && thursday_poultry_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_poultry_selection_1.take.carb).to_s.titlecase + ((thursday_poultry_selection_1.take.carb.blank? || thursday_poultry_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_poultry_selection_1.take.veggie).to_s.titlecase
+            @thursday_poultry_selection_1_id = thursday_poultry_selection_1.blank? ? 0 : thursday_poultry_selection_1.take.id
 
             thursday_green_1_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Green 1")
             @thursday_green_1_selection_1_name = thursday_green_1_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_green_1_selection_1.take.meal_name).titlecase
             @thursday_green_1_selection_1_sub_name = thursday_green_1_selection_1.blank? ? "" : ((thursday_green_1_selection_1.take.carb.blank? && thursday_green_1_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_green_1_selection_1.take.carb).to_s.titlecase + ((thursday_green_1_selection_1.take.carb.blank? || thursday_green_1_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_green_1_selection_1.take.veggie).to_s.titlecase
+            @thursday_green_1_selection_1_id = thursday_green_1_selection_1.blank? ? 0 : thursday_green_1_selection_1.take.id
 
             thursday_green_2_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2")
             @thursday_green_2_selection_1_name = thursday_green_2_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_green_2_selection_1.take.meal_name).titlecase
             @thursday_green_2_selection_1_sub_name = thursday_green_2_selection_1.blank? ? "" : ((thursday_green_2_selection_1.take.carb.blank? && thursday_green_2_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_green_2_selection_1.take.carb).to_s.titlecase + ((thursday_green_2_selection_1.take.carb.blank? || thursday_green_2_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_green_2_selection_1.take.veggie).to_s.titlecase
-
+            @thursday_green_2_selection_1_id = thursday_green_2_selection_1.blank? ? 0 : thursday_green_2_selection_1.take.id
 
             meal_selection_customer_thursday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_2)
 

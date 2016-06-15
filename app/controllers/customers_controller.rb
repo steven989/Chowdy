@@ -29,6 +29,7 @@ protect_from_forgery :except => :payment
 
     end
 
+
     def rate_menu_item
         current_customer = current_user.customer
         menu_id = params[:menu_id].to_i

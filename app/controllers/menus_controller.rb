@@ -169,6 +169,17 @@ class MenusController < ApplicationController
         end
     end
 
+    def show_nutritional_info
+        menu_item = Menu.where(id:params[:id])
+        @nutritional_info = menu_item.take.nutritional_info unless menu_item.blank?
+
+        respond_to do |format|
+          format.html {
+            render partial: 'show_nutritional_info'
+          }      
+        end         
+    end
+
     private
 
     def nutritional_info_params

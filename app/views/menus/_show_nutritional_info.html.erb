@@ -1,0 +1,49 @@
+
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Nutritional Info</h4>
+  </div>
+  <div class="modal-body">
+    <table class="display table table-striped m-b-none" style="font-size: 12px;">
+        <% if @nutritional_info %>
+            <thead>
+                  <tr>
+                    <th></th>
+                    <th class="text-center">Value Per Meal</th>
+                  </tr>
+            </thead>
+        <% end %>
+      <tbody >
+        <% if @nutritional_info %>
+          <tr>
+            <td><b>Calorie</b></td>
+            <td class="text-center"><%= @nutritional_info.calories %></td>
+          </tr>
+          <tr>
+            <td><b>Protein</b></td>
+            <td class="text-center"><%= @nutritional_info.protein %></td>
+          </tr>
+          <tr>
+            <td><b>Fiber</b></td>
+            <td class="text-center"><%= @nutritional_info.fiber %></td>
+          </tr>
+          <tr>
+            <td><b>Fat Content</b></td>
+            <td class="text-center"><%= @nutritional_info.fat %></td>
+          </tr>
+          <tr>
+            <td><b>Carbohydrates</b></td>
+            <td class="text-center"><%= @nutritional_info.carb %></td>
+          </tr>
+        <% else %>
+          <tr>
+            <td colspan='2'><i>Nutritional information not available at this time. Please check back later</i></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>    
+ 
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+  </div>

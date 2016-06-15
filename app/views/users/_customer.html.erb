@@ -1192,7 +1192,7 @@ $(function(){
                                         <% if @display_meal_selection %>
                                           <div class="row">
                                             <div class="col-md-12 text-center" style="padding: 0 10% 0 10%;">
-                                              <p class="m-b-xs text-muted"><a href="#meal_selection" data-toggle="tab" class="url_seg" >Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b>. Cut off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %><% if @selection_timing_exception_for_new_customers %> (normally it's every Thursday at midnight, but we've extended it for you this week!)<% end %>. If no selection is made before the cut off then default selection will be sent.</p>
+                                              <p class="m-b-xs text-muted"><a href="#meal_selection" data-toggle="tab" class="url_seg" >Click here</a> to select your meals for <b><%= (@display_production_day_1 + 1.day).strftime("%A %b %e") %></b> and <b><%= (@display_production_day_2 + 1.day).strftime("%A %b %e") %></b>. Cut off for choosing your meals is <%= @cut_off_date.strftime("%A %b %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %><% if @selection_timing_exception_for_new_customers %> (normally it's every Thursday at midnight, but we've extended it for you this week!)<% end %>. If no selection is made before the cut off then default selection will be sent<% if @show_nutritional_info_to_customers %>. Click on the meal names to see nutritional information <% end %></p>
                                             </div>
                                           </div>
                                         <% end %>
@@ -2145,13 +2145,13 @@ $(function(){
                               Meal selection for <b style="font-size:15px;"><%= (@display_production_day_1 + 1.day).strftime("%A %B %e") %></b> (Meals remaining: <span id="monday_selection_full">none. You have selected all your meals! You can add more meals in <a href="#changePlan" data-toggle="tab" class="url_seg">Manage Subscription</a> tab</span><b><span id="monday_total_remaining_display" style="color:#f0ad4e"><span id="monday_total_remaining"></span> meals</span></b>)
                             </div>
                             <div class="row padder">
-                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>. If no selection is made before the cut off then default selection will be sent
+                              Choose your meals by <%= @cut_off_date.strftime("%A %B %e") %> at <%= @cut_off_date.wday == 0 ? '2pm' : 'midnight' %>. If no selection is made before the cut off then default selection will be sent<% if @show_nutritional_info_to_customers %>. Click on the meal names to see nutritional information <% end %>
                             </div>
                             <div class="row m-t-none">
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @monday_beef_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_beef_selection_1_id) %>" class="pull_modal"><%= @monday_beef_selection_1_name %></a><% else %><%= @monday_beef_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @monday_beef_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2171,7 +2171,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card pork">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @monday_pork_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_pork_selection_1_id) %>" class="pull_modal"><%= @monday_pork_selection_1_name %></a><% else %><%= @monday_pork_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @monday_pork_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2191,7 +2191,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card poultry">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @monday_poultry_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_poultry_selection_1_id) %>" class="pull_modal"><%= @monday_poultry_selection_1_name %></a><% else %><%= @monday_poultry_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @monday_poultry_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2211,7 +2211,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @monday_green_1_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_green_1_selection_1_id) %>" class="pull_modal"><%= @monday_green_1_selection_1_name %></a><% else %><%= @monday_green_1_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @monday_green_1_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row  display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2231,7 +2231,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @monday_green_2_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_green_2_selection_1_id) %>" class="pull_modal"><%= @monday_green_2_selection_1_name %></a><% else %><%= @monday_green_2_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @monday_green_2_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2259,7 +2259,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card beef">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @thursday_beef_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_beef_selection_1_id) %>" class="pull_modal"><%= @thursday_beef_selection_1_name %></a><% else %><%= @thursday_beef_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @thursday_beef_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2279,7 +2279,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card pork">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @thursday_pork_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_pork_selection_1_id) %>" class="pull_modal"><%= @thursday_pork_selection_1_name %></a><% else %><%= @thursday_pork_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @thursday_pork_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2299,7 +2299,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card poultry">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @thursday_poultry_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_poultry_selection_1_id) %>" class="pull_modal"><%= @thursday_poultry_selection_1_name %></a><% else %><%= @thursday_poultry_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @thursday_poultry_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2319,7 +2319,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @thursday_green_1_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_green_1_selection_1_id) %>" class="pull_modal"><%= @thursday_green_1_selection_1_name %></a><% else %><%= @thursday_green_1_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @thursday_green_1_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
@@ -2339,7 +2339,7 @@ $(function(){
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
                                 <div class="inner">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
-                                    <h5 style="color:#555;"><%= @thursday_green_2_selection_1_name %></h5>
+                                    <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_green_2_selection_1_id) %>" class="pull_modal"><%= @thursday_green_2_selection_1_name %></a><% else %><%= @thursday_green_2_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @thursday_green_2_selection_1_sub_name %></p>
                                   </div>
                                   <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
