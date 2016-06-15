@@ -6,16 +6,20 @@
     <div class="row">
         <div class="col-sm-12">
             <p>Hey <%= @customer.name.split(/\s/)[0].capitalize %>!</p>
-                <p>We've noticed you took a break from Chowdy meal subscription. We missed you!</p> 
+                <p>We've noticed you took a break from Chowdy meal subscription. Hope you enjoyed the service!</p> 
             <% if @discount %>
                 <p>We'd like to <b>offer you $<%= (@discount.to_f/100).round(2).to_s %> credit</b> towards your meals if you'd like to resume your subscription for next week. You can resume by clicking the link below.</p>
                 <p>We're always looking to continue improving the service, so we'd love it if you left some feedback on the meals using the web app.</p>
             <% else %>
-                <p>Our menu has changed quite a bit since you last ordered (and we've made a bunch of other changes). We'd love for you to come back and check them out. We're always looking to continue improving the service, any comments you have are welcome.</p>
+                <p>Let us know what we could be doing better with Chowdy to make this meal subscription a regular part of your routine. We're always looking to find ways to make Chowdy work better for you as an affordable meal service.</p>
+
+                <p>If you're simply taking some time off, feel free to resume your subscription any time by clicking on the link below.</p>
             <% end %>            
                 <p><a href="<%= short_url(one_link_restart_url(@customer.stripe_customer_id,@reminder_log.id)) %>">Click this link to resume your subscription</a></p>
-
-            <p>Thanks and we hope you enjoy the meals!</p>
+                
+            <% if @discount %>
+                <p>Thanks and we hope you enjoy the meals!</p>
+            <% end %>
             <p>- the Chowdy team</p>
         </div>
     </div>

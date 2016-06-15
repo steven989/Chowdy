@@ -296,7 +296,7 @@ class CustomerMailer < ActionMailer::Base
       @reminder_log = rm
       @discount = (( @reminder_log.discount.blank? ) || ( @reminder_log.discount == 0 )) ? false : @reminder_log.discount
 
-      @subject = (@discount == false) ? "Restart your Chowdy subscription today" : "Get a $#{(@discount.to_f/100).round(2).to_s} Chowdy meal credit!"
+      @subject = (@discount == false) ? "Your Chowdy meal subscription is currently still on hold!" : "Get a $#{(@discount.to_f/100).round(2).to_s} Chowdy meal credit!"
 
     mail(
       to: @customer.email, 
