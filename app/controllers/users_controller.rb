@@ -624,9 +624,9 @@ class UsersController < ApplicationController
             if [1,2,3,4].include? Date.today.wday
                 @earliest_pause_end_date = Chowdy::Application.closest_date(2,1)
                 @earliest_pause_start_date = Chowdy::Application.closest_date(-1,1,@earliest_pause_end_date)
-                @max_pause_end_date = Chowdy::Application.closest_date(26,1)
+                @max_pause_end_date = Chowdy::Application.closest_date(10,1)
             else
-                @max_pause_end_date = Chowdy::Application.closest_date(26,1)
+                @max_pause_end_date = Chowdy::Application.closest_date(10,1)
                 @earliest_pause_end_date = Chowdy::Application.closest_date(3,1)
                 @earliest_pause_start_date = Chowdy::Application.closest_date(-1,1,@earliest_pause_end_date)
             end
