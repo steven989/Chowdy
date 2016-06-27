@@ -106,7 +106,7 @@ class PartnerProductSalesController < ApplicationController
     def weekly_sales_report #this is to produce the list to package items to ship
 
         delivery_date = PartnerProductSale.pull_date
-        sales = PartnerProductSale.where{(delivery_date == delivery_date) && (order_status !~ "Cancelled")}
+        sales = PartnerProductSale.where("delivery_date = ? and order_status not ilike ?", delivery_date, "%cancelled%")
 
         customers = sales.map {|s| s.customer }
         customers = customers.uniq
@@ -150,7 +150,7 @@ class PartnerProductSalesController < ApplicationController
     def weekly_sales_total_report #this will aggregate the amount ordered by customers for vendor purchase purposes
 
         delivery_date = PartnerProductSale.pull_date
-        sales = PartnerProductSale.where{(delivery_date == delivery_date) && (order_status !~ "Cancelled")}
+        sales = PartnerProductSale.where("delivery_date = ? and order_status not ilike ?", delivery_date, "%cancelled%")
 
         products_to_order = []
 
