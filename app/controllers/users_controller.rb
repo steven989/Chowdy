@@ -39,6 +39,8 @@ class UsersController < ApplicationController
                 @monday_regular_wandas = MealStatistic.retrieve("monday_regular_wandas")
                 @monday_regular_coffee_bar = MealStatistic.retrieve("monday_regular_coffee_bar")
                 @monday_regular_dekefir = MealStatistic.retrieve("monday_regular_dekefir")
+                @monday_regular_red_bench = MealStatistic.retrieve("monday_regular_red_bench")
+                @monday_regular_green_grind = MealStatistic.retrieve("monday_regular_green_grind")
                 @monday_regular_gta_delivery = MealStatistic.retrieve("monday_regular_gta_delivery")
                 
                 @wandas_selected_beef_monday = MealStatistic.retrieve("wandas_selected_beef_monday")
@@ -60,6 +62,8 @@ class UsersController < ApplicationController
                 @monday_green_wandas = MealStatistic.retrieve("monday_green_wandas")
                 @monday_green_coffee_bar = MealStatistic.retrieve("monday_green_coffee_bar")
                 @monday_green_dekefir = MealStatistic.retrieve("monday_green_dekefir")
+                @monday_green_red_bench = MealStatistic.retrieve("monday_green_red_bench")
+                @monday_green_green_grind = MealStatistic.retrieve("monday_green_green_grind")
                 @monday_green_gta_delivery = MealStatistic.retrieve("monday_green_gta_delivery")
 
                 @wandas_selected_green_1_monday = MealStatistic.retrieve("wandas_selected_green_1_monday")
@@ -78,6 +82,8 @@ class UsersController < ApplicationController
                 @thursday_regular_wandas = MealStatistic.retrieve("thursday_regular_wandas")
                 @thursday_regular_coffee_bar = MealStatistic.retrieve("thursday_regular_coffee_bar")
                 @thursday_regular_dekefir = MealStatistic.retrieve("thursday_regular_dekefir")
+                @thursday_regular_red_bench = MealStatistic.retrieve("thursday_regular_red_bench")
+                @thursday_regular_green_grind = MealStatistic.retrieve("thursday_regular_green_grind")
                 @thursday_regular_gta_delivery = MealStatistic.retrieve("thursday_regular_gta_delivery")
 
                 @wandas_selected_beef_thursday = MealStatistic.retrieve("wandas_selected_beef_thursday")
@@ -100,6 +106,8 @@ class UsersController < ApplicationController
                 @thursday_green_wandas = MealStatistic.retrieve("thursday_green_wandas")
                 @thursday_green_coffee_bar = MealStatistic.retrieve("thursday_green_coffee_bar")
                 @thursday_green_dekefir = MealStatistic.retrieve("thursday_green_dekefir")
+                @thursday_green_red_bench = MealStatistic.retrieve("thursday_green_red_bench")
+                @thursday_green_green_grind = MealStatistic.retrieve("thursday_green_green_grind")
                 @thursday_green_gta_delivery = MealStatistic.retrieve("thursday_green_gta_delivery")
 
                 @wandas_selected_green_1_thursday = MealStatistic.retrieve("wandas_selected_green_1_thursday")
@@ -133,6 +141,15 @@ class UsersController < ApplicationController
             @neg_adjustment_beef_monday_dekefir = -MealStatistic.retrieve("neg_adjustment_beef_monday_dekefir").to_i
             @neg_adjustment_poultry_monday_dekefir = -MealStatistic.retrieve("neg_adjustment_poultry_monday_dekefir").to_i
 
+            @neg_adjustment_pork_monday_red_bench = -MealStatistic.retrieve("neg_adjustment_pork_monday_red_bench").to_i
+            @neg_adjustment_beef_monday_red_bench = -MealStatistic.retrieve("neg_adjustment_beef_monday_red_bench").to_i
+            @neg_adjustment_poultry_monday_red_bench = -MealStatistic.retrieve("neg_adjustment_poultry_monday_red_bench").to_i
+
+            @neg_adjustment_pork_monday_green_grind = -MealStatistic.retrieve("neg_adjustment_pork_monday_green_grind").to_i
+            @neg_adjustment_beef_monday_green_grind = -MealStatistic.retrieve("neg_adjustment_beef_monday_green_grind").to_i
+            @neg_adjustment_poultry_monday_green_grind = -MealStatistic.retrieve("neg_adjustment_poultry_monday_green_grind").to_i
+
+
             @neg_adjustment_pork_monday_gta_delivery = ""
             @neg_adjustment_beef_monday_gta_delivery = ""
             @neg_adjustment_poultry_monday_gta_delivery = ""
@@ -152,6 +169,15 @@ class UsersController < ApplicationController
             @neg_adjustment_pork_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_pork_thursday_dekefir").to_i
             @neg_adjustment_beef_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_beef_thursday_dekefir").to_i
             @neg_adjustment_poultry_thursday_dekefir = -MealStatistic.retrieve("neg_adjustment_poultry_thursday_dekefir").to_i
+
+            @neg_adjustment_pork_thursday_red_bench = -MealStatistic.retrieve("neg_adjustment_pork_thursday_red_bench").to_i
+            @neg_adjustment_beef_thursday_red_bench = -MealStatistic.retrieve("neg_adjustment_beef_thursday_red_bench").to_i
+            @neg_adjustment_poultry_thursday_red_bench = -MealStatistic.retrieve("neg_adjustment_poultry_thursday_red_bench").to_i
+
+            @neg_adjustment_pork_thursday_green_grind = -MealStatistic.retrieve("neg_adjustment_pork_thursday_green_grind").to_i
+            @neg_adjustment_beef_thursday_green_grind = -MealStatistic.retrieve("neg_adjustment_beef_thursday_green_grind").to_i
+            @neg_adjustment_poultry_thursday_green_grind = -MealStatistic.retrieve("neg_adjustment_poultry_thursday_green_grind").to_i
+
 
             @neg_adjustment_pork_thursday_gta_delivery = ""
             @neg_adjustment_beef_thursday_gta_delivery = ""
@@ -387,7 +413,7 @@ class UsersController < ApplicationController
             @referral_dollars_earned = @number_of_referrals * 10
 
             @cancel_reasons =  SystemSetting.where(setting:"cancel_reason").map {|reason| reason.setting_value} 
-            @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3"]).map {|hub| hub.setting_value} 
+            @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3","hub_5"]).map {|hub| hub.setting_value} 
             
             unless @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take.blank?
                 @requested_hub_to_change_to = @current_customer.stop_queues.where(stop_type:'change_hub').limit(1).take
@@ -410,6 +436,10 @@ class UsersController < ApplicationController
                                     "wanda"
                                 when !@current_customer.monday_pickup_hub.match(/dekefir/i).nil?
                                     "dekefir"
+                                when !@current_customer.monday_pickup_hub.match(/bench/i).nil?
+                                    "bench"
+                                when !@current_customer.monday_pickup_hub.match(/grind/i).nil?
+                                    "grind"
                                 when !@current_customer.monday_pickup_hub.match(/coffee/i).nil? 
                                     "coffee"
                             end
@@ -419,6 +449,10 @@ class UsersController < ApplicationController
                                     "wanda"
                                 when !@current_customer.thursday_pickup_hub.match(/dekefir/i).nil?
                                     "dekefir"
+                                when !@current_customer.thursday_pickup_hub.match(/bench/i).nil?
+                                    "bench"
+                                when !@current_customer.thursday_pickup_hub.match(/grind/i).nil?
+                                    "grind"
                                 when !@current_customer.thursday_pickup_hub.match(/coffee/i).nil? 
                                     "coffee"
                             end
@@ -430,6 +464,10 @@ class UsersController < ApplicationController
                                 SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").blank?
                             when !@current_customer.monday_pickup_hub.match(/dekefir/i).nil?
                                 SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").blank?
+                            when !@current_customer.monday_pickup_hub.match(/bench/i).nil?
+                                SystemSetting.where(setting:"hub", setting_attribute:"hub_5_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_5_hours").blank?
+                            when !@current_customer.monday_pickup_hub.match(/grind/i).nil?
+                                SystemSetting.where(setting:"hub", setting_attribute:"hub_6_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_6_hours").blank?
                             when !@current_customer.monday_pickup_hub.match(/coffee/i).nil? 
                                 SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").blank?
                         end   
@@ -439,6 +477,10 @@ class UsersController < ApplicationController
                                 SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").blank?
                             when !@current_customer.thursday_pickup_hub.match(/dekefir/i).nil?
                                 SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").blank?
+                            when !@current_customer.thursday_pickup_hub.match(/bench/i).nil?
+                                SystemSetting.where(setting:"hub", setting_attribute:"hub_5_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_5_hours").blank?
+                            when !@current_customer.thursday_pickup_hub.match(/grind/i).nil?
+                                SystemSetting.where(setting:"hub", setting_attribute:"hub_6_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_6_hours").blank?
                             when !@current_customer.thursday_pickup_hub.match(/coffee/i).nil? 
                                 SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").blank?
                         end   
@@ -450,6 +492,10 @@ class UsersController < ApplicationController
                         "wanda"
                     when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/dekefir/i).nil?
                         "dekefir"
+                    when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/bench/i).nil?
+                        "bench"
+                    when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/grind/i).nil?
+                        "grind"
                     when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/coffee/i).nil? 
                         "coffee"
                 end
@@ -460,6 +506,10 @@ class UsersController < ApplicationController
                                     SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_2_hours").blank?
                                 when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/dekefir/i).nil?
                                     SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_3_hours").blank?
+                                when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/bench/i).nil?
+                                    SystemSetting.where(setting:"hub", setting_attribute:"hub_5_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_5_hours").blank?
+                                when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/grind/i).nil?
+                                    SystemSetting.where(setting:"hub", setting_attribute:"hub_6_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_6_hours").blank?
                                 when !@current_customer.stop_queues.where(stop_type:"change_hub").take.cancel_reason.match(/coffee/i).nil? 
                                     SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").take.setting_value unless SystemSetting.where(setting:"hub", setting_attribute:"hub_1_hours").blank?
                             end   

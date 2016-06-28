@@ -21,6 +21,10 @@ class CustomerMailer < ActionMailer::Base
     @op_hours = case 
                     when !@hub.match(/wanda/i).nil?
                         "Monday - Saturday, 10:30am to Midnight"
+                    when !@hub.match(/bench/i).nil?
+                        "Monday - Saturday, noon to 10pm"
+                    when !@hub.match(/grind/i).nil?
+                        "Monday - Saturday, 8am to 9pm (9am to 7pm on Saturday)"
                     when !@hub.match(/dekefir/i).nil?
                         "Monday - Friday, 7:00am to 6:00pm (closed on weekends and holidays)"
                     when !@hub.match(/coffee/i).nil? 
@@ -31,6 +35,10 @@ class CustomerMailer < ActionMailer::Base
     @proper_hub_name = case 
                     when !@hub.match(/wanda/i).nil?
                         "Wanda's Belgium Waffle"
+                    when !@hub.match(/bench/i).nil?
+                        "The Red Bench"
+                    when !@hub.match(/grind/i).nil?
+                        "The Green Grind"
                     when !@hub.match(/dekefir/i).nil?
                         "deKEFIR"
                     when !@hub.match(/coffee/i).nil? 
@@ -41,6 +49,10 @@ class CustomerMailer < ActionMailer::Base
     @hub_address = case 
                     when !@hub.match(/wanda/i).nil?
                         "599 Younge Street"
+                    when !@hub.match(/bench/i).nil?
+                        "611 Yonge Street"
+                    when !@hub.match(/grind/i).nil?
+                        "567 College Street"
                     when !@hub.match(/dekefir/i).nil?
                         "333 Bay Street (PATH level beneath Bay Adelaide Centre)"
                     when !@hub.match(/coffee/i).nil? 
@@ -309,7 +321,7 @@ class CustomerMailer < ActionMailer::Base
   def send_customer_list
         current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
 
-        hub_array = ['wandas','coffee_bar','dekefir','gta_courier']
+        hub_array = ['wandas','coffee_bar','dekefir','red_bench','green_grind','gta_courier']
         hub_array.each do |hub|
             @id_iterate = 1
             if hub == 'wandas'
@@ -325,6 +337,14 @@ class CustomerMailer < ActionMailer::Base
                 @location = "deKEFIR"
                 @location_match ='dekefir'
                 @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%dekefir%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%dekefir%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%dekefir%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
+            elsif hub == 'red_bench'
+                @location = "The Red Bench"
+                @location_match ='red_bench'
+                @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%bench%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%bench%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%bench%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%bench%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
+            elsif hub == 'green_grind'
+                @location = "The Green Grind"
+                @location_match ='green_grind'
+                @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%grind%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%grind%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%grind%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%grind%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
             elsif hub == 'gta_courier'
                 @location = "GTA Courier"
                 @location_match ='gta'

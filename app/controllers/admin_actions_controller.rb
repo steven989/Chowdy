@@ -75,6 +75,14 @@ class AdminActionsController < ApplicationController
             @location = "Coffee Bar"
             @location_match ='coffee'
             @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%coffee%bar%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%coffee%bar%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%coffee%bar%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%coffee%bar%') & (recurring_delivery >> ["Yes","yes"])))}.order("LOWER(name) asc")
+        elsif params[:hub] == 'red_bench'
+            @location = "The Red Bench"
+            @location_match ='bench'
+            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%bench%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%bench%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%bench%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%bench%') & (recurring_delivery >> ["Yes","yes"])))}.order("LOWER(name) asc")
+        elsif params[:hub] == 'green_grind'
+            @location = "The Green Grind"
+            @location_match ='green_grind'
+            @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%grind%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%grind%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%grind%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%grind%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
         elsif params[:hub] == 'dekefir'
             @location = "deKEFIR"
             @location_match ='dekefir'
@@ -190,6 +198,10 @@ class AdminActionsController < ApplicationController
         @green_thursday = MealStatistic.retrieve("green_meals_next_thursday").to_i - @not_selected_green_adjustment_next_thursday
         @monday_wandas = MealStatistic.retrieve("wandas_meals_next_monday").to_i
         @thursday_wandas = MealStatistic.retrieve("wandas_meals_next_thursday").to_i
+        @monday_red_bench = MealStatistic.retrieve("red_bench_meals_next_monday").to_i
+        @thursday_red_bench = MealStatistic.retrieve("red_bench_meals_next_thursday").to_i
+        @monday_green_grind = MealStatistic.retrieve("green_grind_meals_next_monday").to_i
+        @thursday_green_grind = MealStatistic.retrieve("green_grind_meals_next_thursday").to_i
         @monday_coffee_bar = MealStatistic.retrieve("coffee_bar_meals_next_monday").to_i
         @thursday_coffee_bar = MealStatistic.retrieve("coffee_bar_meals_next_thursday").to_i
         @monday_dekefir = MealStatistic.retrieve("dekefir_meals_next_monday").to_i
@@ -217,7 +229,7 @@ class AdminActionsController < ApplicationController
         @customer = Customer.where(id:params[:id]).take
         @interval = @customer.interval.blank? ? "week" : @customer.interval
         @interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
-        @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3","hub_4"]).map {|hub| hub.setting_value} 
+        @hubs =  SystemSetting.where(setting:"hub", setting_attribute: ["hub_1","hub_2","hub_3","hub_5","hub_6","hub_4"]).map {|hub| hub.setting_value} 
         @meals_refunded_this_week = Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).group(:internal_refund_id).maximum(:meals_refunded).values.sum {|e| e.blank? ? 0 : e}
         @amount_refunded_this_week = (Refund.where(stripe_customer_id:@customer.stripe_customer_id, refund_week: SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date).sum(:amount_refunded).to_f)/100.00
         @active_coupons = Promotion.where(active:true).map {|p| p.code }
