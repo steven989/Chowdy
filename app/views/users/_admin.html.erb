@@ -1510,7 +1510,7 @@ $(function(){
                                             <td><%= v.id %></td>
                                             <td><%= v.ext_vendor_id %></td>
                                             <td><%= v.vendor_name %></td>
-                                            <td><%= v.vendor_description %></td>
+                                            <td><%= v.vendor_description.first(30) %>...</td>
                                             <td><%= v.contact_name %></td>
                                             <td><%= v.phone_number %></td>
                                             <td><%= v.email_address %></td>
