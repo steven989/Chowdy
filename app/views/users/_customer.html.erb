@@ -934,6 +934,75 @@ $(function(){
       });
     }
     pagination_listener();
+
+
+    // drop zone  
+    function configureDropZone() {
+        Dropzone.options.mealPhotoSubmission = {
+          url: $('#meal-photo-submission').attr('action'),
+          paramName: 'photos',
+          autoProcessQueue: false,
+          uploadMultiple: true,
+          parallelUploads: 100,
+          maxFiles: 3,
+          maxFilesize: 3, // MB
+          forceFallback: false,
+          acceptedFiles: 'image/jpg,image/jpeg,image/png,image/tif,image/tiff,image/gif',
+          dictDefaultMessage: "<i class='fa fa-cloud-upload'> Click or drag and drop up to 3 images here (JPG,PNG,GIF or TIFF files up to 3MB each)",
+
+          init: function() {
+                myDropzone = this; // closure
+
+            var submitButton = $("#submit_meal_photo");
+
+            var submit_button_original_value = submitButton.attr('value');
+            var submit_button_width = submitButton.outerWidth();
+
+            submitButton.off("click").on("click", function(event) {
+              if(event.preventDefault) {
+                event.preventDefault();
+                submitButton.css('width',submit_button_width);
+                submitButton.addClass('disabled').attr('value','Wait...');
+              } else {
+                event.returnValue = false;
+                submitButton.css('width',submit_button_width);
+                submitButton.addClass('disabled').attr('value','Wait...');
+              };
+
+              if (myDropzone.getQueuedFiles().length > 0) {                        
+                  myDropzone.processQueue();  
+              } else {                       
+                  updateWithoutFile();
+              }         
+
+            });
+
+            // this is the hover effect
+            this.on('dragover', function(){
+                $('.upload .dropzone').addClass('draghover');
+            });
+            this.on('dragleave', function(){
+                $('.upload .dropzone').removeClass('draghover');
+            }); 
+            this.on('drop',function(){
+                $('.upload .dropzone').removeClass('draghover');
+                $('.dz-default.dz-message').html("");
+            });
+            // spinner when file is uploading
+            this.on('removedfile',function(){
+                $('.dz-default.dz-message').html("<i class='fa fa-cloud-upload'> Click or drag and drop up to 3 images here (JPG,PNG,GIF or TIFF files up to 3MB each)");
+            });
+
+
+          }
+        };
+    }
+
+    configureDropZone(); 
+    Dropzone.discover();    
+
+
+
 });
 
 </script>
@@ -997,6 +1066,13 @@ $(function(){
                             </a>
                           </li>
                         <% end %>
+                        <li>
+                          <a href="#photo_submission" class="b-b padder-v" data-toggle="tab">
+                            <i class="i i-pictures icon">
+                            </i>
+                            <span class="font-bold">Photo Submission</span>
+                          </a>
+                        </li>
                         <li>
                           <a href="#settings" class="b-b padder-v" data-toggle="tab">
                             <i class="i i-settings icon">
@@ -2437,6 +2513,78 @@ $(function(){
                         </section>
                       <% end %>
                     <% end %> 
+
+                    <section class="tab-pane" id="photo_submission" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder">
+
+
+                              <% if flash[:notice_photo_submission] %>
+                                <div class="row m-t-sm">
+                                  <div class="col-sm-12">
+                                    <div class="alert alert-<%= flash[:status] %>" style="margin-bottom:0 !important; font-size: 18px;">
+                                      <%= raw flash[:notice_photo_submission] %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %> 
+
+                              <div class="col-sm-6 padder padder-v">
+                                <div class="row">
+                                  <h2>Submit your meal photos, Get free meals!</h2>
+                                  <p>Help support Chowdy by sending in your cool food photos!</p>
+                                  <p>Selected photos will be posted on our social media and earn you free food!</p>
+                                </div>
+
+                                <div class="row">
+                                  <ol>
+                                    <li>Take a photo of your Chowdy meals and show us how you make it part of your lifestyle. Get creative!</li>
+                                    <li>Upload it here and we will take a look</li>
+                                    <li>If your photo is chosen, an instant meal credit will be applied to your account towards your next week</li>
+                                  </ol>
+                                </div>
+                                <div class="row">
+                                  You can track your meal credits from photo submission here!
+                                </div>
+                              </div>
+                              <div class="col-sm-6">
+                                <div class="row m-t-lg">
+                                  <div class="col-sm-12">
+                                    <section class="panel panel-default">
+                                      <header class="panel-heading font-bold">Submit your photo</header>
+                                      <div class="panel-body">
+                                        <%= form_tag meal_photo_submission_path, method: 'POST', role: 'form', class:"dropzone", id:"meal-photo-submission" do %>
+
+                                         <div class="dropzone-previews"></div>
+
+
+                                          <div class="form-group">
+                                            <%= label_tag 'caption', "Caption" %>
+                                            <%= text_field_tag 'caption',nil, class: "form-control" %>
+                                          </div>
+
+                                          <div class="form-group">
+                                            <%= label_tag 'social_media_handles', "Your Instagram, Twitter, Facebook, etc." %>
+                                            <%= text_field_tag 'social_media_handles',nil, class: "form-control" %>
+                                          </div>
+
+                                          <div class="row">
+                                            <div class="col-sm-6 m-t-md">
+                                              <%= submit_tag 'Upload Photo', class: "btn btn-md btn-info", id: "submit_meal_photo" %>
+                                            </div>
+                                          </div>
+                                        <% end %>
+                                      </div>
+                                    </section>
+                                  </div>
+                                </div>   
+                              </div>
+
+  
+                            </section>
+                        </section>
+                    </section> 
+
 
                 </section>
             </section>
