@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160614151056) do
+ActiveRecord::Schema.define(version: 20160629200258) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -103,6 +103,9 @@ ActiveRecord::Schema.define(version: 20160614151056) do
     t.string   "corporate_office"
     t.boolean  "monday_delivery_enabled"
     t.boolean  "thursday_delivery_enabled"
+    t.string   "social_media_handles"
+    t.integer  "photos_submitted"
+    t.integer  "meals_earned_from_photo_submission"
   end
 
   create_table "daily_snapshots", force: :cascade do |t|
@@ -207,6 +210,8 @@ ActiveRecord::Schema.define(version: 20160614151056) do
     t.integer  "green_2"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+    t.integer  "salad_bowl_1"
+    t.integer  "salad_bowl_2"
   end
 
   create_table "meal_statistics", force: :cascade do |t|
@@ -332,6 +337,15 @@ ActiveRecord::Schema.define(version: 20160614151056) do
     t.integer  "quantity_available"
     t.string   "photos",                          default: [],              array: true
     t.integer  "position"
+  end
+
+  create_table "photo_submissions", force: :cascade do |t|
+    t.string   "stripe_customer_id"
+    t.string   "caption"
+    t.boolean  "selected"
+    t.string   "photo"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
   end
 
   create_table "promotion_redemptions", force: :cascade do |t|

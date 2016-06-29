@@ -577,11 +577,8 @@ protect_from_forgery :except => :payment
         redirect_to login_path
     end
 
-    def stripe_destroy #delete customer account through Stripe webhook
-        #delete on system and Stripe
-    end
-
-    def admin
+    def photo_submission
+        
     end
 
 end
