@@ -578,6 +578,44 @@ protect_from_forgery :except => :payment
     end
 
     def photo_submission
+
+        caption = params[:caption]
+        social_media_handles = params[:social_media_handles]
+        customer = current_user.customer
+        total_submitted_count = 0 
+        total_saved_count = 0
+
+        customer.update_attributes(social_media_handles:social_media_handles) unless social_media_handles.blank?
+
+        params[:photos].each do |photo|
+            total_submitted_count +=1
+            
+            if PhotoSubmission.create(stripe_customer_id:customer.stripe_customer_id,caption:caption,photo:photo[1])
+                photos_count = customer.photos_submitted.to_i + 1
+                customer.update_attributes(photos_submitted:photos_count)
+                total_saved_count += 1
+            end
+
+        end
+
+        total_submitted_images = customer.photos_submitted.to_i
+
+        if total_saved_count == total_submitted_count
+            status='success'
+            notice_photo_submission = 'Your photos have been successfully saved. You will receive meal credits if your photos are selected!'
+        elsif total_saved_count > 0
+            status='success'
+            notice_photo_submission = "#{total_saved_count} of your photos were successfully saved (#{total_submitted_count - total_saved_count} could not be saved due to technical reasons). You will receive meal credits if your photos are selected!"
+        else
+            status='fail'
+            notice_photo_submission = 'Your photos could not be saved. Please make sure your photos have short file names and meet the size limit.'
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: {status:status, message:notice_photo_submission,total_submitted_images:total_submitted_images}
+          } 
+        end 
         
     end
 

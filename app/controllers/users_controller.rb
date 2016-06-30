@@ -244,6 +244,9 @@ class UsersController < ApplicationController
         else
 
             @current_customer = current_user.customer
+            @social_media_handles = @current_customer.social_media_handles
+            @photos_submitted = @current_customer.photos_submitted
+            @meals_earned_from_photo_submission = @current_customer.meals_earned_from_photo_submission
             @display_marketplace_to_customers = SystemSetting.where(setting:"marketplace",setting_attribute:"display").blank? ? false : ( SystemSetting.where(setting:"marketplace",setting_attribute:"display").take.setting_value == "false" ? false : ((["Yes","yes"].include?(@current_customer.recurring_delivery) && @current_customer.delivery_boundary == 'GTA') ? true : false ))
             @disable_markplace_purchase =  SystemSetting.where(setting:"marketplace",setting_attribute:"order").blank? ? true : (SystemSetting.where(setting:"marketplace",setting_attribute:"order").take.setting_value == "true" ? false : true)
 

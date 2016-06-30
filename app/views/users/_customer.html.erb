@@ -944,11 +944,14 @@ $(function(){
           autoProcessQueue: false,
           uploadMultiple: true,
           parallelUploads: 100,
-          maxFiles: 3,
+          maxFiles: 5,
+          addRemoveLinks:true,
+          clickable:'.dropzone-previews',
           maxFilesize: 3, // MB
+          previewsContainer:'.dropzone-previews',
           forceFallback: false,
           acceptedFiles: 'image/jpg,image/jpeg,image/png,image/tif,image/tiff,image/gif',
-          dictDefaultMessage: "<i class='fa fa-cloud-upload'> Click or drag and drop up to 3 images here (JPG,PNG,GIF or TIFF files up to 3MB each)",
+          dictDefaultMessage: "<span style='font-family:Helvetica Neue, Helvetica, Arial, sans-serif;'>Upload or drop up to 5 images here (JPG,PNG,GIF or TIFF files up to 3MB each)</span>",
 
           init: function() {
                 myDropzone = this; // closure
@@ -972,7 +975,8 @@ $(function(){
               if (myDropzone.getQueuedFiles().length > 0) {                        
                   myDropzone.processQueue();  
               } else {                       
-                  updateWithoutFile();
+                  $('#meal-photo-submission .alert').html("You must upload at least 1 file").removeClass('alert-danger').removeClass('alert-success').addClass('alert-danger').removeClass('hidden');
+                  $('#submit_meal_photo').removeClass('disabled').attr('value',submit_button_original_value);
               }         
 
             });
@@ -990,16 +994,40 @@ $(function(){
             });
             // spinner when file is uploading
             this.on('removedfile',function(){
-                $('.dz-default.dz-message').html("<i class='fa fa-cloud-upload'> Click or drag and drop up to 3 images here (JPG,PNG,GIF or TIFF files up to 3MB each)");
+                $('.dz-default.dz-message').html("<span style='font-family:Helvetica Neue, Helvetica, Arial, sans-serif;'>Upload or drop up to 5 images here (JPG,PNG,GIF or TIFF files up to 3MB each)</span>");
             });
+            this.on('success',function(file, data){
 
+                if(data.status == "success"){
+                  $('#meal-photo-submission .alert').html(data.message);
+                  $('#meal-photo-submission .alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-success').removeClass('hidden');
+                  $('#submit_meal_photo').removeClass('disabled').attr('value',submit_button_original_value);
+                  myDropzone.removeAllFiles();
+                  $('#meal-photo-submission #caption').val('');
+                  $('#number_of_images_submitted').html(data.total_submitted_images);
+                } else {
+                  $('#meal-photo-submission .alert').html(data.message);
+                  $('#meal-photo-submission .alert').removeClass('alert-success').removeClass('alert-danger').addClass('alert-danger').removeClass('hidden');
+                  $('#submit_meal_photo').removeClass('disabled').attr('value',submit_button_original_value);
+                }              
+
+            });
 
           }
         };
     }
 
+    function formatDropzone() {
+      $('div.dz-default.dz-message').appendTo('.dropzone-previews');  
+      $('#meal-photo-submission').css("border","none")
+      $('.dropzone-previews').css("border","2px dashed #f5f5f5").css("margin-bottom","10px").css("padding","5px").css("cursor","pointer")
+    }
+
     configureDropZone(); 
     Dropzone.discover();    
+    formatDropzone();
+
+    
 
 
 
@@ -2517,18 +2545,6 @@ $(function(){
                     <section class="tab-pane" id="photo_submission" role="tabpanel">
                         <section class="vbox">
                             <section class="scrollable padder">
-
-
-                              <% if flash[:notice_photo_submission] %>
-                                <div class="row m-t-sm">
-                                  <div class="col-sm-12">
-                                    <div class="alert alert-<%= flash[:status] %>" style="margin-bottom:0 !important; font-size: 18px;">
-                                      <%= raw flash[:notice_photo_submission] %>
-                                    </div>
-                                  </div>
-                                </div>
-                              <% end %> 
-
                               <div class="col-sm-6 padder padder-v">
                                 <div class="row">
                                   <h2>Submit your meal photos, Get free meals!</h2>
@@ -2565,7 +2581,10 @@ $(function(){
 
                                           <div class="form-group">
                                             <%= label_tag 'social_media_handles', "Your Instagram, Twitter, Facebook, etc." %>
-                                            <%= text_field_tag 'social_media_handles',nil, class: "form-control" %>
+                                            <%= text_field_tag 'social_media_handles',@social_media_handles, class: "form-control" %>
+                                          </div>
+                                          <div class="alert hidden" style="margin-bottom:0 !important">
+
                                           </div>
 
                                           <div class="row">
@@ -2577,10 +2596,30 @@ $(function(){
                                       </div>
                                     </section>
                                   </div>
+                                </div>
+                                <div class="row padder">
+                                  <div class="panel panel-default">
+                                    <div class="panel-body">
+                                      <div class="col-sm-6">
+                                        <div class="row text-center">
+                                          <h1 id="number_of_images_submitted"><%= @photos_submitted.to_i %></h1>
+                                        </div>
+                                        <div class="row text-center">
+                                          Photos submitted
+                                        </div>
+                                      </div>
+                                      <div class="col-sm-6">
+                                        <div class="row text-center">
+                                          <h1><%= @meals_earned_from_photo_submission.to_i %></h1>
+                                        </div>
+                                        <div class="row text-center">
+                                          Meals earned
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>   
                               </div>
-
-  
                             </section>
                         </section>
                     </section> 
