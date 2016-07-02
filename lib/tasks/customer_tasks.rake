@@ -12,6 +12,9 @@ namespace :customers do
 
     desc 'Change all Wandas customers to Red Bench'
     task :wandas_to_red_bench => [:environment] do 
+        puts '---------------------------------------------------'
+        puts 'test'
+        puts '---------------------------------------------------'
         Customer.where("monday_pickup_hub ilike ?", "%wanda%").each do |c|
             c.update_attributes(monday_pickup_hub:"611 Yonge St. (The Red Bench)")
         end
