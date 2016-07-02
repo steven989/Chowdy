@@ -1,0 +1,37 @@
+
+<% @photo_submissions.each do |ps| %>
+<table class="display table table-striped m-b-none" style="font-size: 12px;">
+    <thead>
+        <tr>
+            <th>Photo</th>
+            <th>Customer Name/Email</th>
+            <th>Customer Social Media Handles</th>
+            <th>Selected?</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <img class="img-responsive" src="<%= ps.photo.url if ps.photo.file.exists? %>" alt="Photo is missing" style=" width:150;max-width:150;">  
+            </td>
+            <td>
+                <%= ps.customer.name %><br> 
+                <%= ps.customer.email %>
+            </td>
+            <td>
+                <%= ps.customer.social_media_handles %>
+            </td>
+            <td>
+                <%= check_box_tag :selected,ps.id,ps.selected?,class: "form-control"%>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<% end %>
+
+
+<div class="row padder m-t-none">
+  <%= paginate @photo_submissions, params: {controller: :admin_actions, action: :load_photo_submissions} %>
+</div>

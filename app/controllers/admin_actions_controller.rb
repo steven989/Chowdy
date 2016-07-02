@@ -6,6 +6,18 @@ class AdminActionsController < ApplicationController
         redirect_to user_profile_path
     end
 
+    def load_photo_submissions
+
+      @photo_submissions = PhotoSubmission.order(created_at: :desc).page(params[:page]).per(10)
+
+        respond_to do |format|
+          format.html {
+            render partial: 'load_photo_submissions'
+          }      
+        end
+    end
+
+
     def search_customer
         keyword = params[:keyword]
         show_everything = params[:show_everything] == "true" ? true : false

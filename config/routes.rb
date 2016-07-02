@@ -37,7 +37,8 @@ Chowdy::Application.routes.draw do
   get 'admin_action/impersonate_user/:id' => 'admin_actions#impersonate', as: 'impersonate_user'
   get 'admin_action/get_user_activity/:id' => 'admin_actions#get_user_activity', as: 'get_user_activity'
   post 'admin_action/search_customer' => 'admin_actions#search_customer', as: 'search_customer'
-  
+  get  'admin_action/load_photo_submissions' => 'admin_actions#load_photo_submissions', as:'load_photo_submissions'
+
   get  'partner_product_sales/weekly_sales_total_report' => 'partner_product_sales#weekly_sales_total_report', as: 'weekly_marketplace_totals'
   get  'partner_product_sales/weekly_sales_report' => 'partner_product_sales#weekly_sales_report', as: 'weekly_marketplace_deliveries'
   post 'partner_product_sales/search_order_by_customer' => 'partner_product_sales#search_order_by_customer', as: 'search_order_by_customer'

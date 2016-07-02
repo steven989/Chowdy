@@ -138,6 +138,24 @@ $(function(){
        });
 
 
+      function photo_submission_pagination_listener() {
+        $('.pagination a, #pull_submitted_photos').off("click").on("click",function(){
+          event.preventDefault();
+
+          $.ajax({
+            url: $(this).attr('href'),
+            type: 'GET',
+            dataType: 'html'
+          }).done(function(data){
+              $('#photo_submission_container').html(data);
+              photo_submission_pagination_listener();
+          });
+        });
+      }
+
+      photo_submission_pagination_listener();
+
+
       //collapse
 
       $('.meal_details_collapse_control').off("click").on("click",function(){
@@ -147,70 +165,6 @@ $(function(){
           $('.meals_details').addClass("hidden");
         } 
       });
-
-      // Plot sign ups and cancels
-      // var sign_ups = {
-      //   label: "Sign up",
-      //   data: <%= @signup_timeseries %>
-
-      // }
-      // var cancels = {
-      //   label: "Cancel",
-      //   data: <%= @cancel_timeseries %>
-      // }
-
-      // var options = {
-      //     series: {
-      //         lines: {
-      //             show: true,
-      //             lineWidth: 1,
-      //             fill: true,
-      //             fillColor: {
-      //                 colors: [{
-      //                     opacity: 0.3
-      //                 }, {
-      //                     opacity: 0.3
-      //                 }]
-      //             }
-      //         },
-      //         points: {
-      //             show: true
-      //         },
-      //         shadowSize: 2
-      //     },
-      //     grid: {
-      //         hoverable: true,
-      //         clickable: true,
-      //         tickColor: "#f0f0f0",
-      //         borderWidth: 0
-      //     },
-      //     colors: ["#1bb399","#177bbb"],
-      //     xaxis: {
-      //       mode: "time",
-      //       timeformat: "%Y-%m-%d"
-      //     },
-      //     yaxis: {
-      //         ticks: 10,
-      //         tickDecimals: 0
-      //     },
-      //     tooltip: true,
-      //     tooltipOpts: {
-      //       content: "'%s' of %x.1 is %y.4",
-      //       defaultTheme: false,
-      //       shifts: {
-      //         x: 0,
-      //         y: 20
-      //       }
-      //     }
-      // };
-
-      
-      // function plotCharge() {
-      //   if (window.location.hash == "#dashboard" || window.location.hash == "") {
-      //   var sign_up_cancel_plot = $.plot($("#sign_up_cancel_chart"), [sign_ups,cancels],options);
-      //   }
-      // }
-      // plotCharge();
 
       formRetrievalAjax();
 
@@ -222,6 +176,8 @@ $(function(){
        system_setting_table.on('page', function () {
           formRetrievalAjax();
         } );
+
+
 
 });
 
@@ -268,13 +224,7 @@ $(function(){
                             <span class="font-bold">Promotions</span>
                           </a>
                         </li>
-                        <li>
-                          <a href="#system_settings" class="b-b padder-v" data-toggle="tab">
-                            <i class="i i-params icon">
-                            </i>
-                            <span class="font-bold">System Settings</span>
-                          </a>
-                        </li>
+
                         <li>
                           <a href="#gifts" class="b-b padder-v" data-toggle="tab">
                             <i class="fa fa-gift">
@@ -287,6 +237,20 @@ $(function(){
                             <i class="fa fa-truck">
                             </i>
                             <span class="font-bold">Marketplace</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#photo_submission" class="b-b padder-v" data-toggle="tab">
+                            <i class="i i-pictures icon">
+                            </i>
+                            <span class="font-bold">Photo Submission</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="#system_settings" class="b-b padder-v" data-toggle="tab">
+                            <i class="i i-params icon">
+                            </i>
+                            <span class="font-bold">System Settings</span>
                           </a>
                         </li>
                         <li>
@@ -1531,6 +1495,21 @@ $(function(){
                         </section>
 
                     </section> 
+
+
+                    <section class="tab-pane" id="photo_submission" role="tabpanel">
+                        <section class="vbox">
+                            <section class="scrollable padder padder-v">
+                              <div class="row padder padder-v">
+                                <div class="col-sm-12" id="photo_submission_container">
+                                  <button type="button" id="pull_submitted_photos" href="<%= load_photo_submissions_path+'?page=1' %>" class="btn btn-md btn-success m-t-sm">Show Photos</button>
+                                </div>
+                              </div>
+                            </section>                            
+                        </section>
+
+                    </section> 
+
 
                     <section class="tab-pane" id="search_order" role="tabpanel">
                         <section class="vbox">
