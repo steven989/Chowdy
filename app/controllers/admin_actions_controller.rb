@@ -17,6 +17,17 @@ class AdminActionsController < ApplicationController
         end
     end
 
+    def show_submitted_photo
+        @photo = PhotoSubmission.where(id:params[:id]).take
+
+        
+        respond_to do |format|
+          format.html {
+            render partial: 'show_submitted_photo'
+          }
+        end
+    end
+
 
     def search_customer
         keyword = params[:keyword]

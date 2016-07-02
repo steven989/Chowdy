@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">View photo</h4>
+</div>
+<div class="modal-body">
+<% if @photo %>
+    <% if @photo.photo.file.exists? %>
+        <div class="row">
+            <div class="col-sm-12">
+                <img class="img-responsive" id="shown_image" src="<%= @photo.photo.url %>" alt="Photo is missing">  
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-sm-12">
+                Image dimension: <span id='photo_show_width'></span> W  x  <span id='photo_show_height'></span> H
+            </div>
+        </div>
+    <% else %>
+        <i>This photo does not exist</i>
+    <% end %>
+<% else %>
+    <i>This photo does not exist</i>
+<% end %>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+</div>
+<script>
+    if ($('#shown_image').length == 1) {
+        $('#shown_image').on('load',function(){
+            var width = $('#shown_image')[0].naturalWidth;
+            var height = $('#shown_image')[0].naturalHeight;
+            console.log($('#shown_image')[0]);
+            $('#photo_show_width').html(width);
+            $('#photo_show_height').html(height);                    
+        });
+    }
+
+</script>

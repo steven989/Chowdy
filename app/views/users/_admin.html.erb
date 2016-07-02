@@ -141,7 +141,14 @@ $(function(){
       function photo_submission_pagination_listener() {
         $('.pagination a, #pull_submitted_photos').off("click").on("click",function(){
           event.preventDefault();
+          var submit_button_width = $('#pull_submitted_photos').outerWidth();
 
+          if ($('#pull_submitted_photos').length == 0) {
+            $('.pagination').html('Wait...');  
+          } else {
+            $('#pull_submitted_photos').css('width',submit_button_width).addClass('disabled').html('Wait...');  
+          }
+          
           $.ajax({
             url: $(this).attr('href'),
             type: 'GET',
@@ -149,6 +156,7 @@ $(function(){
           }).done(function(data){
               $('#photo_submission_container').html(data);
               photo_submission_pagination_listener();
+              formRetrievalAjax();
           });
         });
       }

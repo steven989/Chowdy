@@ -38,6 +38,7 @@ Chowdy::Application.routes.draw do
   get 'admin_action/get_user_activity/:id' => 'admin_actions#get_user_activity', as: 'get_user_activity'
   post 'admin_action/search_customer' => 'admin_actions#search_customer', as: 'search_customer'
   get  'admin_action/load_photo_submissions' => 'admin_actions#load_photo_submissions', as:'load_photo_submissions'
+  get  'admin_action/:id/show_submitted_photo' => 'admin_actions#show_submitted_photo', as:'show_submitted_photo'
 
   get  'partner_product_sales/weekly_sales_total_report' => 'partner_product_sales#weekly_sales_total_report', as: 'weekly_marketplace_totals'
   get  'partner_product_sales/weekly_sales_report' => 'partner_product_sales#weekly_sales_report', as: 'weekly_marketplace_deliveries'
