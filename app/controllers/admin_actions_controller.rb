@@ -8,7 +8,7 @@ class AdminActionsController < ApplicationController
 
     def load_photo_submissions
 
-      @photo_submissions = PhotoSubmission.order(created_at: :desc).page(params[:page]).per(10)
+      @photo_submissions = PhotoSubmission.order(created_at: :desc).page(params[:page]).per(6)
 
         respond_to do |format|
           format.html {
@@ -28,6 +28,58 @@ class AdminActionsController < ApplicationController
         end
     end
 
+    def make_photo_submission_selection
+        status_array = []
+        params['_json'].each do |selection|
+            photo_id = selection['id'].to_i
+            decision = selection['chosen']
+            photo_submitted = PhotoSubmission.where(id:photo_id).take
+            
+            if photo_submitted
+                if decision #this basically means only update if the photo is selected, which means admin cannot unchoose a photo after it has been chosen
+                    begin 
+                        unless photo_submitted.paid?
+                            customer = photo_submitted.customer
+                            credit_amount = customer.price_increase_2015? ? 903 : 790
+                            photo_submitted.customer.add_discount_to_stripe(credit_amount,"1 meal credit for photo submission being chosen: #{photo_submitted.photo.url}"[0...255])
+                        end
+                    rescue => error
+                        status_array.push({status:false,message:"Meal credit for photo #{photo_id} could not be attached: #{error.message}"})
+                    else
+                        if photo_submitted.update_attributes(selected:decision)
+                            unless photo_submitted.paid?
+                                photo_submitted.update_attributes(paid:true,date_selected:Date.today)
+                            end
+                            status_array.push({status:true})
+                        else
+                            status_array.push({status:false,message:"Photo #{photo_id} could not be updated: #{photo_submitted.errors.full_messages.join(", ")}"})
+                        end
+                    end
+                else
+                    if photo_submitted.selected?
+                        status_array.push({status:true,message:"You cannot unselect photo #{photo_id}"})
+                    end
+                end
+            else
+                status_array.push({status:false,message:"Photo #{photo_id} does not exist"})
+            end
+        end
+
+        issues = status_array.select{|sa| sa[:status] == false}
+        if issues.length > 0
+            status = "fail"
+            message = "Some photos could not be updated. #{issues.map{|a| a[:message]}.join('; ')}"
+        else
+            status = "success"
+            message = "Successfully saved and credits applied. #{status_array.map{|a| a[:message]}.join(' ')}"
+        end
+
+        respond_to do |format|
+          format.json {
+            render json: {status:status, message:message}
+          } 
+        end
+    end
 
     def search_customer
         keyword = params[:keyword]

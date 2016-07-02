@@ -1,41 +1,98 @@
-<table class="display table table-striped m-b-none" style="font-size: 12px;">
-    <thead>
-        <tr>
-            <th>Photo</th>
-            <th>Date Submitted</th>
-            <th>Customer Name/Email</th>
-            <th>Customer Social Media Handles</th>
-            <th>Selected?</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% @photo_submissions.each do |ps| %>
+<div class="row" style="height: 50px;">
+    <div class="col-sm-5">
+        <button type="button" id="submit_photo_selections" href="<%= make_photo_submission_selection_path %>" class="btn btn-md btn-info m-t-sm">Submit Selection (this will trigger meal credits instantly)</button>
+    </div>    
+    <div class="col-sm-7">
+        <div id="photo_submission_alert" class="alert alert-block text-center hidden" style="margin-bottom: 0px;">
 
-            
-                <tr>
-                    <td>
-                      <a href="<%= show_submitted_photo_path(ps) %>" class="pull_modal" >
-                        <img class="img-responsive" src="<%= ps.photo.url if ps.photo.file.exists? %>" alt="Photo is missing" style=" width:150;max-width:150;">  
-                      </a>
-                    </td>
-                    <td>
-                        <%= ps.created_at.strftime("%b %e, %Y") %>
-                    </td>
-                    <td>
-                        <%= ps.customer.name %><br> 
-                        <%= ps.customer.email %>
-                    </td>
-                    <td>
-                        <%= ps.customer.social_media_handles %>
-                    </td>
-                    <td>
-                        <%= check_box_tag :selected,ps.id,ps.selected?,class: "form-control"%>
-                    </td>
-                </tr>
-        <% end %>
-    </tbody>
-</table>
+        </div>        
+    </div>
+</div>
+<br>
+
+<div class="row">
+    <table class="display table table-striped m-b-none" style="font-size: 12px;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Photo</th>
+                <th>Date Submitted<br>(Date chosen by admin in parenthesis)</th>
+                <th>Customer Name<br>Email</th>
+                <th>Customer Social Media Handles</th>
+                <th>Selected?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% @photo_submissions.each do |ps| %>
+
+                
+                    <tr>
+                        <td>
+                            <%= ps.id %>
+                        </td>
+                        <td>
+                          <a href="<%= show_submitted_photo_path(ps) %>" class="pull_modal" >
+                            <img class="img-responsive" src="<%= ps.photo.url %>" alt="Photo is missing" style=" width:150;max-width:150;">  
+                          </a>
+                        </td>
+                        <td>
+                            <%= ps.created_at.strftime("%b %e, %Y") %>
+                            <% unless ps.date_selected.blank? %>
+                                <br>
+                                (<%= ps.date_selected.strftime("%b %e, %Y") %>)
+                            <% end %>
+                        </td>
+                        <td>
+                            <%= ps.customer.name %><br> 
+                            <%= ps.customer.email %>
+                        </td>
+                        <td>
+                            <%= ps.customer.social_media_handles %>
+                        </td>
+                        <td>
+                            <%= check_box_tag :selected,ps.id,ps.selected?,class: "form-control photo_submission_selection_checkbox", disabled: ps.selected? %>
+                        </td>
+                    </tr>
+            <% end %>
+        </tbody>
+    </table>
+</div>
+
 
 <div class="row padder m-t-none">
   <%= paginate @photo_submissions, params: {controller: :admin_actions, action: :load_photo_submissions} %>
 </div>
+
+<script>
+
+        function submit_selection() {
+            var submission_array = [];
+            $('.photo_submission_selection_checkbox').each(function(){
+                submission_array.push({id:$(this).val(),chosen:$(this).is(':checked')})
+            })
+
+            var submit_button_width = $('#submit_photo_selections').outerWidth();
+            var submit_button_original_value = $('#submit_photo_selections').html();
+            $('#submit_photo_selections').css('width',submit_button_width).addClass('disabled').html('Wait...');
+
+            $.ajax({
+              url: $(this).attr('href'),
+              type: 'POST',
+              data: JSON.stringify(submission_array),
+              contentType: "application/json",
+              dataType: 'JSON'
+            }).done(function(data){
+                if (data.status == "success") {
+                    $('#photo_submission_alert').removeClass("alert-danger").removeClass("alert-success").addClass("alert-success").html(data.message).removeClass('hidden');
+                } else {
+                    $('#photo_submission_alert').removeClass("alert-danger").removeClass("alert-success").addClass("alert-danger").html(data.message).removeClass('hidden');
+                }
+                $('#submit_photo_selections').removeClass('disabled').html(submit_button_original_value);
+            });
+
+        }
+
+        $('#submit_photo_selections').on('click',submit_selection);
+
+
+</script>
