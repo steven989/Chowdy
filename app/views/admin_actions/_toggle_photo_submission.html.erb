@@ -1,0 +1,5 @@
+<% if @display %>
+<button type="button" class="btn btn-md btn-warning m-t-none toggle_photo_submission_button"  href="<%= toggle_photo_submission_path+'?toggle=off' %>">Hide photo submission from customers</button>
+<% else %>
+<button type="button" class="btn btn-md btn-success m-t-none toggle_photo_submission_button" href="<%= toggle_photo_submission_path+'?toggle=on' %>">Make photo submission visible to customers</button>
+<% end %>

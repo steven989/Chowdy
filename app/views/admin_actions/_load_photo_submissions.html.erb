@@ -1,3 +1,14 @@
+<div class="row">
+    <div class="col sm-12 padder">
+        <span id="display_photo_submission_toggle_button_container">
+            <% if @show_photo_submission_to_customers %>
+                <button type="button" class="btn btn-md btn-warning m-t-none toggle_photo_submission_button"  href="<%= toggle_photo_submission_path+'?toggle=off' %>">Hide photo submission from customers</button>
+            <% else %>
+                <button type="button" class="btn btn-md btn-success m-t-none toggle_photo_submission_button" href="<%= toggle_photo_submission_path+'?toggle=on' %>">Make photo submission visible to customers</button>
+            <% end %>
+        </span>
+    </div>
+</div>
 <div class="row" style="height: 50px;">
     <div class="col-sm-5">
         <button type="button" id="submit_photo_selections" href="<%= make_photo_submission_selection_path %>" class="btn btn-md btn-info m-t-sm">Submit Selection (this will trigger meal credits instantly)</button>
@@ -64,6 +75,21 @@
 </div>
 
 <script>
+
+        function toggle_display_to_customers() {
+            $('.toggle_photo_submission_button').off('click').on('click',function(){
+                $.ajax({
+                  url: $(this).attr('href'),
+                  type: 'PUT',
+                  dataType: 'HTML'
+                }).done(function(data){
+                    $('#display_photo_submission_toggle_button_container').html(data);
+                    toggle_display_to_customers();
+                });
+            })
+        }
+
+        toggle_display_to_customers();
 
         function submit_selection() {
             var submission_array = [];

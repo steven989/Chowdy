@@ -6,8 +6,34 @@ class AdminActionsController < ApplicationController
         redirect_to user_profile_path
     end
 
-    def load_photo_submissions
+    def toggle_photo_submission
+        toggle = params[:toggle]
 
+        if toggle == "off"
+            @display = false
+            if SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").blank?
+                SystemSetting.create(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers",setting_value:"false")
+            else 
+                SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").take.update_attributes(setting_value:"false")
+            end
+        elsif toggle == "on"
+            @display = true
+            if SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").blank?
+                SystemSetting.create(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers",setting_value:"true")
+            else 
+                SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").take.update_attributes(setting_value:"true")
+            end
+        end
+
+        respond_to do |format|
+          format.html {
+            render partial: 'toggle_photo_submission'
+          }      
+        end
+    end
+
+    def load_photo_submissions
+      @show_photo_submission_to_customers = SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").blank? ? false : (SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").take.setting_value == "true" ? true : false)
       @photo_submissions = PhotoSubmission.order(created_at: :desc).page(params[:page]).per(6)
 
         respond_to do |format|
@@ -42,6 +68,8 @@ class AdminActionsController < ApplicationController
                             customer = photo_submitted.customer
                             credit_amount = customer.price_increase_2015? ? 903 : 790
                             photo_submitted.customer.add_discount_to_stripe(credit_amount,"1 meal credit for photo submission being chosen: #{photo_submitted.photo.url}"[0...255])
+                            meals_earned = customer.meals_earned_from_photo_submission.to_i + 1 
+                            customer.update_attributes(meals_earned_from_photo_submission:meals_earned)
                         end
                     rescue => error
                         status_array.push({status:false,message:"Meal credit for photo #{photo_id} could not be attached: #{error.message}"})

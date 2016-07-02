@@ -38,6 +38,7 @@ Chowdy::Application.routes.draw do
   get 'admin_action/get_user_activity/:id' => 'admin_actions#get_user_activity', as: 'get_user_activity'
   post 'admin_action/search_customer' => 'admin_actions#search_customer', as: 'search_customer'
   get  'admin_action/load_photo_submissions' => 'admin_actions#load_photo_submissions', as:'load_photo_submissions'
+  put  'admin_action/toggle_photo_submission' => 'admin_actions#toggle_photo_submission', as:'toggle_photo_submission'
   get  'admin_action/:id/show_submitted_photo' => 'admin_actions#show_submitted_photo', as:'show_submitted_photo'
   post  'admin_action/make_photo_submission_selection' => 'admin_actions#make_photo_submission_selection', as:'make_photo_submission_selection'
 

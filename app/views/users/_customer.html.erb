@@ -935,6 +935,7 @@ $(function(){
     }
     pagination_listener();
 
+    <% if @show_photo_submission_to_customers %>
 
     // drop zone  
     function configureDropZone() {
@@ -947,11 +948,11 @@ $(function(){
           maxFiles: 5,
           addRemoveLinks:true,
           clickable:'.dropzone-previews',
-          maxFilesize: 3, // MB
+          maxFilesize: 4, // MB
           previewsContainer:'.dropzone-previews',
           forceFallback: false,
           acceptedFiles: 'image/jpg,image/jpeg,image/png,image/tif,image/tiff,image/gif',
-          dictDefaultMessage: "<span style='font-family:Helvetica Neue, Helvetica, Arial, sans-serif;'>Upload or drop up to 5 images here (JPG,PNG,GIF or TIFF files up to 3MB each)</span>",
+          dictDefaultMessage: "<span style='font-family:Helvetica Neue, Helvetica, Arial, sans-serif;'>Upload or drop up to 5 images here<br>(JPG,PNG,GIF or TIFF files up to 3MB each)</span>",
 
           init: function() {
                 myDropzone = this; // closure
@@ -994,7 +995,7 @@ $(function(){
             });
             // spinner when file is uploading
             this.on('removedfile',function(){
-                $('.dz-default.dz-message').html("<span style='font-family:Helvetica Neue, Helvetica, Arial, sans-serif;'>Upload or drop up to 5 images here (JPG,PNG,GIF or TIFF files up to 3MB each)</span>");
+                $('.dz-default.dz-message').html("<span style='font-family:Helvetica Neue, Helvetica, Arial, sans-serif;'>Upload or drop up to 5 images here<br>(JPG,PNG,GIF or TIFF files up to 3MB each)</span>");
             });
             this.on('success',function(file, data){
 
@@ -1020,14 +1021,14 @@ $(function(){
     function formatDropzone() {
       $('div.dz-default.dz-message').appendTo('.dropzone-previews');  
       $('#meal-photo-submission').css("border","none")
-      $('.dropzone-previews').css("border","2px dashed #f5f5f5").css("margin-bottom","10px").css("padding","5px").css("cursor","pointer")
+      $('.dropzone-previews').css("border","2px dashed #A7A7A7").css("margin-bottom","10px").css("padding","8px").css("cursor","pointer")
     }
 
     configureDropZone(); 
     Dropzone.discover();    
     formatDropzone();
 
-    
+    <% end %>
 
 
 
@@ -1094,13 +1095,15 @@ $(function(){
                             </a>
                           </li>
                         <% end %>
-                        <li>
-                          <a href="#photo_submission" class="b-b padder-v" data-toggle="tab">
-                            <i class="i i-pictures icon">
-                            </i>
-                            <span class="font-bold">Photo Submission</span>
-                          </a>
-                        </li>
+                        <% if @show_photo_submission_to_customers %>
+                          <li>
+                            <a href="#photo_submission" class="b-b padder-v" data-toggle="tab">
+                              <i class="i i-pictures icon">
+                              </i>
+                              <span class="font-bold">Photo Submission</span>
+                            </a>
+                          </li>
+                        <% end %>
                         <li>
                           <a href="#settings" class="b-b padder-v" data-toggle="tab">
                             <i class="i i-settings icon">
@@ -2541,90 +2544,93 @@ $(function(){
                         </section>
                       <% end %>
                     <% end %> 
+                    
+                    <% if @show_photo_submission_to_customers %>
+                      <section class="tab-pane" id="photo_submission" role="tabpanel">
+                          <section class="vbox">
+                              <section class="scrollable padder">
+                                <div class="col-sm-5 padder padder-v">
+                                  <div class="row">
+                                    <h3>Submit your meal photos,<br>Get free meals!</h3>
+                                    <p><b>Help support Chowdy by sending in your cool food photos!</b></p><br>
+                                    <p>Selected photos will be posted on our social media and earn you free food!</p>
+                                  </div>
 
-                    <section class="tab-pane" id="photo_submission" role="tabpanel">
-                        <section class="vbox">
-                            <section class="scrollable padder">
-                              <div class="col-sm-6 padder padder-v">
-                                <div class="row">
-                                  <h2>Submit your meal photos, Get free meals!</h2>
-                                  <p>Help support Chowdy by sending in your cool food photos!</p>
-                                  <p>Selected photos will be posted on our social media and earn you free food!</p>
-                                </div>
-
-                                <div class="row">
-                                  <ol>
-                                    <li>Take a photo of your Chowdy meals and show us how you make it part of your lifestyle. Get creative!</li>
-                                    <li>Upload it here and we will take a look</li>
-                                    <li>If your photo is chosen, an instant meal credit will be applied to your account towards your next week</li>
-                                  </ol>
-                                </div>
-                                <div class="row">
-                                  You can track your meal credits from photo submission here!
-                                </div>
-                              </div>
-                              <div class="col-sm-6">
-                                <div class="row m-t-lg">
-                                  <div class="col-sm-12">
-                                    <section class="panel panel-default">
-                                      <header class="panel-heading font-bold">Submit your photo</header>
-                                      <div class="panel-body">
-                                        <%= form_tag meal_photo_submission_path, method: 'POST', role: 'form', class:"dropzone", id:"meal-photo-submission" do %>
-
-                                         <div class="dropzone-previews"></div>
-
-
-                                          <div class="form-group">
-                                            <%= label_tag 'caption', "Caption" %>
-                                            <%= text_field_tag 'caption',nil, class: "form-control" %>
-                                          </div>
-
-                                          <div class="form-group">
-                                            <%= label_tag 'social_media_handles', "Your Instagram, Twitter, Facebook, etc." %>
-                                            <%= text_field_tag 'social_media_handles',@social_media_handles, class: "form-control" %>
-                                          </div>
-                                          <div class="alert hidden" style="margin-bottom:0 !important">
-
-                                          </div>
-
-                                          <div class="row">
-                                            <div class="col-sm-6 m-t-md">
-                                              <%= submit_tag 'Upload Photo', class: "btn btn-md btn-info", id: "submit_meal_photo" %>
-                                            </div>
-                                          </div>
-                                        <% end %>
-                                      </div>
-                                    </section>
+                                  <div class="row">
+                                    <ol>
+                                      <li>Take a photo of your Chowdy meals and show us how you make it part of your lifestyle. Get creative!</li>
+                                      <br>
+                                      <li>Upload it here and we will take a look</li>
+                                      <br>
+                                      <li>If your photo is chosen, an instant meal credit will be applied to your account towards your next week</li>
+                                    </ol>
+                                  </div>
+                                  <br>
+                                  <div class="row">
+                                    You can track your meal credits from photo submission here!
                                   </div>
                                 </div>
-                                <div class="row padder">
-                                  <div class="panel panel-default">
-                                    <div class="panel-body">
-                                      <div class="col-sm-6">
-                                        <div class="row text-center">
-                                          <h1 id="number_of_images_submitted"><%= @photos_submitted.to_i %></h1>
+                                <div class="col-sm-7">
+                                  <div class="row m-t-lg">
+                                    <div class="col-sm-12">
+                                      <section class="panel panel-default">
+                                        <header class="panel-heading font-bold">Submit your photos</header>
+                                        <div class="panel-body">
+                                          <%= form_tag meal_photo_submission_path, method: 'POST', role: 'form', class:"dropzone", id:"meal-photo-submission" do %>
+
+                                           <div class="dropzone-previews"></div>
+
+
+                                            <div class="form-group">
+                                              <%= label_tag 'caption', "Caption" %>
+                                              <%= text_field_tag 'caption',nil,class: "form-control" %>
+                                            </div>
+
+                                            <div class="form-group">
+                                              <%= label_tag 'social_media_handles', "Your Instagram, Twitter, Facebook, etc." %>
+                                              <%= text_field_tag 'social_media_handles',@social_media_handles, class: "form-control" %>
+                                            </div>
+                                            <div class="alert hidden" style="margin-bottom:0 !important">
+
+                                            </div>
+
+                                            <div class="row">
+                                              <div class="col-sm-6 m-t-md">
+                                                <%= submit_tag 'Upload Photos', class: "btn btn-md btn-info", id: "submit_meal_photo" %>
+                                              </div>
+                                            </div>
+                                          <% end %>
                                         </div>
-                                        <div class="row text-center">
-                                          Photos submitted
+                                      </section>
+                                    </div>
+                                  </div>
+                                  <div class="row padder">
+                                    <div class="panel panel-default">
+                                      <div class="panel-body">
+                                        <div class="col-sm-6">
+                                          <div class="row text-center">
+                                            <h1 id="number_of_images_submitted"><%= @photos_submitted.to_i %></h1>
+                                          </div>
+                                          <div class="row text-center">
+                                            Photos submitted
+                                          </div>
                                         </div>
-                                      </div>
-                                      <div class="col-sm-6">
-                                        <div class="row text-center">
-                                          <h1><%= @meals_earned_from_photo_submission.to_i %></h1>
-                                        </div>
-                                        <div class="row text-center">
-                                          Meals earned
+                                        <div class="col-sm-6">
+                                          <div class="row text-center">
+                                            <h1><%= @meals_earned_from_photo_submission.to_i %></h1>
+                                          </div>
+                                          <div class="row text-center">
+                                            Meals earned
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
-                                  </div>
-                                </div>   
-                              </div>
-                            </section>
-                        </section>
-                    </section> 
-
-
+                                  </div>   
+                                </div>
+                              </section>
+                          </section>
+                      </section> 
+                    <% end %>
                 </section>
             </section>
         
