@@ -11,7 +11,7 @@
 </div>
 <div class="row" style="height: 50px;">
     <div class="col-sm-5">
-        <button type="button" id="submit_photo_selections" href="<%= make_photo_submission_selection_path %>" class="btn btn-md btn-info m-t-sm">Submit Selection (this will trigger meal credits instantly)</button>
+        <button type="button" id="submit_photo_selections" href="<%= make_photo_submission_selection_path %>" class="btn btn-md btn-info m-t-sm disabled">Submit Selection (this will trigger meal credits instantly)</button>
     </div>    
     <div class="col-sm-7">
         <div id="photo_submission_alert" class="alert alert-block text-center hidden" style="margin-bottom: 0px;">
@@ -76,6 +76,11 @@
 
 <script>
 
+    
+    $('.photo_submission_selection_checkbox').on('click',function(){
+        $('#submit_photo_selections').removeClass('disabled');
+    })
+
         function toggle_display_to_customers() {
             $('.toggle_photo_submission_button').off('click').on('click',function(){
                 $.ajax({
@@ -110,10 +115,12 @@
             }).done(function(data){
                 if (data.status == "success") {
                     $('#photo_submission_alert').removeClass("alert-danger").removeClass("alert-success").addClass("alert-success").html(data.message).removeClass('hidden');
+                        $('#submit_photo_selections').html(submit_button_original_value);
+                        $('#submit_photo_selections').addClass("disabled");
                 } else {
                     $('#photo_submission_alert').removeClass("alert-danger").removeClass("alert-success").addClass("alert-danger").html(data.message).removeClass('hidden');
                 }
-                $('#submit_photo_selections').removeClass('disabled').html(submit_button_original_value);
+                
             });
 
         }
