@@ -340,7 +340,7 @@ class UsersController < ApplicationController
             # @thursday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").blank?
 
             @show_nutritional_info_to_customers = SystemSetting.where(setting:"meal_selection",setting_attribute:"show_nutritional_info").blank? ? false : (SystemSetting.where(setting:"meal_selection",setting_attribute:"show_nutritional_info").take.setting_value == "true" ? true : false)
-            @show_photo_submission_to_customers = SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").blank? ? false : (SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").take.setting_value == "true" ? true : false)
+            @show_photo_submission_to_customers = SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").blank? ? false : (SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").take.setting_value == "true" ? true : (SystemSetting.where(setting:"photo_submission",setting_attribute:"show_photo_submission_to_customers").take.setting_value == "test" && current_user.email == "tiffany.bayliss@gmail.com" ? true : false))
 
             thursday_beef_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Beef")
             @thursday_beef_selection_1_name = thursday_beef_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_beef_selection_1.take.meal_name).titlecase
