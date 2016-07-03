@@ -107,6 +107,10 @@ gem 'dropzonejs-rails'
 #23) Ordering items
 gem 'acts_as_list'
 
+#24) Delaying photo uploads
+gem 'carrierwave_backgrounder'
+
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

@@ -4,6 +4,8 @@ class PartnerProduct < ActiveRecord::Base
     has_many :partner_product_order_summaries, foreign_key: :product_id, primary_key: :id
 
     mount_uploaders :photos, PartnerProductUploader #for uploading multiple files, this has to be mount_uploaders insteat of mount_uploader
+    process_in_background :photos
+    store_in_background :photos
 
     acts_as_list
 
