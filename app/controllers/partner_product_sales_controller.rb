@@ -112,7 +112,7 @@ class PartnerProductSalesController < ApplicationController
         customers = customers.uniq
 
         @customer_order_array = customers.map do |c|
-            sales_details_array_raw = c.partner_product_sales.map {|pps| pps.partner_product_sale_details.map {|ppsd| {quantity:ppsd.quantity,product:ppsd.partner_product.product_name,size:ppsd.partner_product.product_size,id:ppsd.partner_product.id,vendor:ppsd.partner_product.vendor.vendor_name} } }.flatten
+            sales_details_array_raw = c.partner_product_sales.where("delivery_date = ? and order_status not ilike ?", delivery_date, "%cancelled%").map {|pps| pps.partner_product_sale_details.map {|ppsd| {quantity:ppsd.quantity,product:ppsd.partner_product.product_name,size:ppsd.partner_product.product_size,id:ppsd.partner_product.id,vendor:ppsd.partner_product.vendor.vendor_name} } }.flatten
             sales_details_array = []
             sales_details_array_raw.each { |sdar|
 

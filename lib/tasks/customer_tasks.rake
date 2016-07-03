@@ -10,6 +10,23 @@ namespace :customers do
         end
     end
 
+    desc 'Change all Wandas customers to Red Bench'
+    task :wandas_to_red_bench => [:environment] do 
+        Customer.where("monday_pickup_hub ilike ?", "%wanda%").each do |c|
+            c.update_attributes(monday_pickup_hub:"611 Yonge St. (The Red Bench)")
+        end
+        Customer.where("thursday_pickup_hub ilike ?", "%wanda%").each do |c|
+            c.update_attributes(thursday_pickup_hub:"611 Yonge St. (The Red Bench)")
+        end
+        Customer.where("monday_delivery_hub ilike ?", "%wanda%").each do |c|
+            c.update_attributes(monday_delivery_hub:"611 Yonge St. (The Red Bench)")
+        end
+        Customer.where("monday_delivery_hub ilike ?", "%wanda%").each do |c|
+            c.update_attributes(monday_delivery_hub:"611 Yonge St. (The Red Bench)")
+        end
+    end
+
+
     desc 'push Marketplace delivery date to the next  Monday'
     task :push_marketplace_delivery_date, [:number_of_weeks] => [:environment] do |t, args|        
         new_start_date = Chowdy::Application.closest_date(args[:number_of_weeks],1)

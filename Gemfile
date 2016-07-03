@@ -107,7 +107,7 @@ gem 'dropzonejs-rails'
 #23) Ordering items
 gem 'acts_as_list'
 
-#23) Delayed upload
+#24) Delayed upload
 gem 'carrierwave_backgrounder'
 
 # Use ActiveModel has_secure_password
