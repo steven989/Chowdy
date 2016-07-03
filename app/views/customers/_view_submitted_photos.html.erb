@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel"><%= @to_view == 'all' ? "All photo submissions" : "Chosen submissions" %></h4>
+</div>
+<div class="modal-body" id="photo_submission_modal">
+<% if @photos %>
+    <% @photos.each do |photo| %>
+        <div class="row">
+            <div class="col-sm-12 padder">
+                <img class="img-responsive" id="shown_image" src="<%= photo.photo.url %>" alt="Photo file is missing">      
+            </div>
+        </div>
+        <br>
+    <% end %>
+    <%= paginate @photos, params: {controller: :customers, action: :view_submitted_photos,to_view:@to_view} %>
+<% else %>
+    <% if @to_view == 'all' %>
+        <i>You don't have any photo submitted yet. Upload photos today and earn free meals!</i>
+    <% else %>
+        <i>We haven't chosen any photos from your submission...yet!</i>
+    <% end %>
+<% end %>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
+</div>
+<script>
+    
+    $('#photo_submission_modal .pagination a').off("click").on("click",function(){
+        event.preventDefault();
+        $.ajax({
+          url: $(this).attr('href'),
+          type: 'GET',
+          dataType: 'HTML'
+        }).done(function(data){
+            $('#generalModal .modal-content').html(data);
+        });
+    });
+
+</script>

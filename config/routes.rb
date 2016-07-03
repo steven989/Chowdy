@@ -26,6 +26,9 @@ Chowdy::Application.routes.draw do
   post 'customers/:id/resend_sign_up_link' => 'customers#resend_sign_up_link', as: 'resend_sign_up_link'
   post 'customers/:id/resend_signup_confirmation_email' => 'customers#resend_signup_confirmation_email', as: 'resend_signup_confirmation_email'
   get 'customers/resend_sign_up_link' => 'customers#resend_sign_up_link_customer_request', as: 'resend_sign_up_link_customer_request'
+  get 'customers/view_submitted_photos' => 'customers#view_submitted_photos', as: 'customer_view_submitted_photos'
+  
+  
   resources :users, only: [:show, :new, :create, :edit, :update, :destroy]
   get 'user/profile' => 'users#profile', as: 'user_profile'
   get 'admin_action/customer_sheet' => 'admin_actions#customer_sheet', as: 'customer_sheet'

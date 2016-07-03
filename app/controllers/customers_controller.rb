@@ -29,6 +29,23 @@ protect_from_forgery :except => :payment
 
     end
 
+    def view_submitted_photos
+        @to_view = params[:to_view]
+        if @to_view == "all"
+            @photos = current_user.customer.photo_submissions.order(created_at: :desc).page(params[:page]).per(5)
+
+        else 
+            @photos = current_user.customer.photo_submissions.where(selected:true).order(created_at: :desc).page(params[:page]).per(3)
+        end
+
+
+        respond_to do |format|
+          format.html {
+            render partial: 'view_submitted_photos'
+          }
+        end
+
+    end
 
     def rate_menu_item
         current_customer = current_user.customer

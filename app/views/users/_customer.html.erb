@@ -965,11 +965,9 @@ $(function(){
             submitButton.off("click").on("click", function(event) {
               if(event.preventDefault) {
                 event.preventDefault();
-                submitButton.css('width',submit_button_width);
                 submitButton.addClass('disabled').attr('value','Wait...');
               } else {
                 event.returnValue = false;
-                submitButton.css('width',submit_button_width);
                 submitButton.addClass('disabled').attr('value','Wait...');
               };
 
@@ -2602,7 +2600,7 @@ $(function(){
 
                                             <div class="row">
                                               <div class="col-sm-6 m-t-md">
-                                                <%= submit_tag 'Upload Photos', class: "btn btn-md btn-info", id: "submit_meal_photo" %>
+                                                <%= submit_tag 'Upload Photos', class: "btn btn-md btn-info", id: "submit_meal_photo", style:"width:150px;" %>
                                               </div>
                                             </div>
                                           <% end %>
@@ -2615,7 +2613,9 @@ $(function(){
                                       <div class="panel-body">
                                         <div class="col-sm-6">
                                           <div class="row text-center">
+                                            <a href="<%= customer_view_submitted_photos_path+'?to_view=all' %>" class="pull_modal">
                                             <h1 id="number_of_images_submitted"><%= @photos_submitted.to_i %></h1>
+                                            </a>
                                           </div>
                                           <div class="row text-center">
                                             Photos submitted
@@ -2623,7 +2623,9 @@ $(function(){
                                         </div>
                                         <div class="col-sm-6">
                                           <div class="row text-center">
+                                            <a href="<%= customer_view_submitted_photos_path+'?to_view=chosen' %>" class="pull_modal">
                                             <h1><%= @meals_earned_from_photo_submission.to_i %></h1>
+                                            </a>
                                           </div>
                                           <div class="row text-center">
                                             Meals earned
