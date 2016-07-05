@@ -26,6 +26,11 @@ namespace :customers do
         end
     end
 
+    desc 'Delete all expired announcements'
+    task :delete_expired_announcements => [:environment] do 
+        SystemSetting.where("setting ilike ? and expiry_date < ?", "%announcement%", Date.today).delete_all
+    end
+
 
     desc 'push Marketplace delivery date to the next  Monday'
     task :push_marketplace_delivery_date, [:number_of_weeks] => [:environment] do |t, args|        
