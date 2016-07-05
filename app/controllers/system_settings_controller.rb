@@ -24,6 +24,7 @@ class SystemSettingsController < ApplicationController
 
   def edit
     @system_setting = SystemSetting.find(params[:id])
+    @announcement = @system_setting.setting.downcase == "announcement"
     respond_to do |format|
       format.html {
         render partial: 'form'
@@ -60,8 +61,10 @@ class SystemSettingsController < ApplicationController
   end
 
   def create_announcement
+
     @scope = params[:system_setting][:setting_attribute].blank? ? "all" : params[:system_setting][:setting_attribute]
-    @system_setting = SystemSetting.new(setting:"announcement", setting_attribute:@scope, setting_value: params[:system_setting][:setting_value])
+    expiry_date = params[:system_setting][:expiry_date].blank? ? nil : params[:system_setting][:expiry_date].to_date
+    @system_setting = SystemSetting.new(setting:"announcement", setting_attribute:@scope, setting_value: params[:system_setting][:setting_value],expiry_date:expiry_date)
     if @system_setting.save
       flash[:status] = "success"
       flash[:notice_system_settings] = "Announcement created for #{@scope} customers"
@@ -89,6 +92,6 @@ class SystemSettingsController < ApplicationController
   private
 
   def system_setting_params
-    params.require(:system_setting).permit(:setting, :setting_attribute, :setting_value)
+    params.require(:system_setting).permit(:setting, :setting_attribute, :setting_value, :expiry_date)
   end
 end

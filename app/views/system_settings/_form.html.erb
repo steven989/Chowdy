@@ -16,6 +16,12 @@
         <%= f.label :setting_value %>
         <%= f.text_area :setting_value, class: "form-control", rows: 6 %>
     </div>
+    <% if @announcement %>
+      <div class="form-group">
+          <%= f.label :expiry_date %>
+          <%= f.date_field :expiry_date, class: "form-control" %>
+      </div>
+    <% end %>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-md btn-default m-t-sm" data-dismiss="modal">Close</button>
