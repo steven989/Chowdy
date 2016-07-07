@@ -28,6 +28,7 @@
                 <th>ID</th>
                 <th>Photo</th>
                 <th>Date Submitted<br>(Date chosen by admin in parenthesis)</th>
+                <th>Caption</th>
                 <th>Customer Name<br>Email</th>
                 <th>Customer Social Media Handles</th>
                 <th>Selected?</th>
@@ -52,6 +53,9 @@
                                 <br>
                                 (<%= ps.date_selected.strftime("%b %e, %Y") %>)
                             <% end %>
+                        </td>
+                        <td>
+                            <%= ps.caption %>
                         </td>
                         <td>
                             <%= ps.customer.name %><br> 
