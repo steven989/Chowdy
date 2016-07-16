@@ -35,7 +35,7 @@ ActiveRecord::Schema.define(version: 20160715160549) do
     t.string   "hub_note",                             limit: 255
     t.string   "purchase",                             limit: 255
     t.string   "active?",                              limit: 255
-    t.date     "    "
+    t.date     "first_pick_up_date"
     t.date     "last_pick_up_date"
     t.integer  "total_meals_per_week"
     t.integer  "number_of_green"
