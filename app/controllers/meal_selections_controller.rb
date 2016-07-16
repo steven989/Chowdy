@@ -27,16 +27,16 @@ class MealSelectionsController < ApplicationController
         message = []
         meal_selections = []
 
-        if meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i + meal_selection[0]['salad_bowl_1'].to_i + meal_selection[0]['salad_bowl_2'].to_i + meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i < monday_regular.to_i + monday_green.to_i
+        if meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i + meal_selection[0]['salad_bowl_1'].to_i + meal_selection[0]['salad_bowl_2'].to_i + meal_selection[0]['diet'].to_i + meal_selection[0]['chefs_special'].to_i + meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i < monday_regular.to_i + monday_green.to_i
             status = "fail"
             message.push("Not enough meals selected for Monday")
-        elsif meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i + meal_selection[0]['salad_bowl_1'].to_i + meal_selection[0]['salad_bowl_2'].to_i + meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i > monday_regular.to_i + monday_green.to_i
+        elsif meal_selection[0]['beef'].to_i + meal_selection[0]['pork'].to_i + meal_selection[0]['poultry'].to_i + meal_selection[0]['salad_bowl_1'].to_i + meal_selection[0]['salad_bowl_2'].to_i + meal_selection[0]['diet'].to_i + meal_selection[0]['chefs_special'].to_i + meal_selection[0]['green_1'].to_i + meal_selection[0]['green_2'].to_i > monday_regular.to_i + monday_green.to_i
             status = "fail"
             message.push("Meals selected for Monday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")            
-        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i + meal_selection[1]['salad_bowl_1'].to_i + meal_selection[1]['salad_bowl_2'].to_i + meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i < thursday_regular.to_i + thursday_green.to_i 
+        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i + meal_selection[1]['salad_bowl_1'].to_i + meal_selection[1]['salad_bowl_2'].to_i + meal_selection[1]['diet'].to_i + meal_selection[1]['chefs_special'].to_i + meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i < thursday_regular.to_i + thursday_green.to_i 
             status = "fail"
             message.push("Not enough meals selected for Thursday")
-        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i + meal_selection[1]['salad_bowl_1'].to_i + meal_selection[1]['salad_bowl_2'].to_i + meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i > thursday_regular.to_i + thursday_green.to_i 
+        elsif meal_selection[1]['beef'].to_i + meal_selection[1]['pork'].to_i + meal_selection[1]['poultry'].to_i + meal_selection[1]['salad_bowl_1'].to_i + meal_selection[1]['salad_bowl_2'].to_i + meal_selection[1]['diet'].to_i + meal_selection[1]['chefs_special'].to_i + meal_selection[1]['green_1'].to_i + meal_selection[1]['green_2'].to_i > thursday_regular.to_i + thursday_green.to_i 
             status = "fail"
             message.push("Meals selected for Thursday is more than the subscribed amount. Please adjust your subscription amount in the 'Manage Subscriptions' tab")            
         else
@@ -51,7 +51,9 @@ class MealSelectionsController < ApplicationController
                     green_1:ms['green_1'].to_i,
                     green_2:ms['green_2'].to_i,
                     salad_bowl_1:ms['salad_bowl_1'].to_i,
-                    salad_bowl_2:ms['salad_bowl_2'].to_i
+                    salad_bowl_2:ms['salad_bowl_2'].to_i,
+                    diet:ms['diet'].to_i,
+                    chefs_special:ms['chefs_special'].to_i
                 )
 
                 meal_selections.push(result)
@@ -98,7 +100,9 @@ class MealSelectionsController < ApplicationController
                     green_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 1").take.meal_name,number:selections_production_day_1.green_1},
                     green_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 2").take.meal_name,number:selections_production_day_1.green_2},
                     salad_bowl_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Salad Bowl 1").take.meal_name,number:selections_production_day_1.salad_bowl_1},
-                    salad_bowl_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Salad_Bowl 2").take.meal_name,number:selections_production_day_1.salad_bowl_2}
+                    salad_bowl_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Salad Bowl 2").take.meal_name,number:selections_production_day_1.salad_bowl_2},
+                    diet:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Diet").take.meal_name,number:selections_production_day_1.diet},
+                    chefs_special:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Chef's Special").take.meal_name,number:selections_production_day_1.chefs_special}
                 
                 },
 
@@ -109,7 +113,9 @@ class MealSelectionsController < ApplicationController
                     green_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 1").take.meal_name,number:selections_production_day_2.green_1},
                     green_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 2").take.meal_name,number:selections_production_day_2.green_2},
                     salad_bowl_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Salad Bowl 1").take.meal_name,number:selections_production_day_2.salad_bowl_1},
-                    salad_bowl_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Salad Bowl 2").take.meal_name,number:selections_production_day_2.salad_bowl_2}
+                    salad_bowl_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Salad Bowl 2").take.meal_name,number:selections_production_day_2.salad_bowl_2},
+                    diet:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Diet").take.meal_name,number:selections_production_day_2.diet},
+                    chefs_special:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Chef's Special").take.meal_name,number:selections_production_day_2.chefs_special}
                 }
             }
         else 

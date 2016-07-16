@@ -93,7 +93,7 @@ $(function(){
         var month = $('#month_select').val();
         var month_value = month_array.indexOf(month);
         var pull_url = '<%= menu_path("placeholder") %>'.replace("placeholder",month_value+1) + '?year='+current_year;
-        var meal_types = ["Beef", "Pork", "Poultry", "Green 1", "Green 2","Salad Bowl 1", "Salad Bowl 2"]
+        var meal_types = ["Beef", "Pork", "Poultry", "Green 1", "Green 2","Salad Bowl 1", "Salad Bowl 2", "Diet","Chef's Special"]
         
         //pull data from the system
           $.ajax({

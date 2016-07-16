@@ -118,11 +118,11 @@ namespace :customers do
         production_day_1 = Chowdy::Application.closest_date(-1,7,week)
         production_day_2 = Chowdy::Application.closest_date(1,3,week)
         mismatched_rows = MealSelection.where(production_day:[production_day_1,production_day_2]).select do |ms|
-            (ms.pork.to_i + ms.beef.to_i + ms.poultry.to_i != (ms.production_day.wday == 0 ? ms.customer.regular_meals_on_monday.to_i : ms.customer.regular_meals_on_thursday.to_i)) || (ms.green_1.to_i + ms.green_2.to_i != (ms.production_day.wday == 0 ? ms.customer.green_meals_on_monday.to_i : ms.customer.green_meals_on_thursday.to_i))
+            (ms.pork.to_i + ms.beef.to_i + ms.poultry.to_i + ms.salad_bowl_1.to_i + ms.salad_bowl_2.to_i + ms.diet.to_i + ms.chefs_special.to_i != (ms.production_day.wday == 0 ? ms.customer.regular_meals_on_monday.to_i : ms.customer.regular_meals_on_thursday.to_i)) || (ms.green_1.to_i + ms.green_2.to_i != (ms.production_day.wday == 0 ? ms.customer.green_meals_on_monday.to_i : ms.customer.green_meals_on_thursday.to_i))
         end
 
         mismatched_rows.each do |mmr|
-            mmr_reg = mmr.pork.to_i + mmr.beef.to_i + mmr.poultry.to_i
+            mmr_reg = mmr.pork.to_i + mmr.beef.to_i + mmr.poultry.to_i + mmr.salad_bowl_1.to_i + mmr.salad_bowl_2.to_i + mmr.diet.to_i + mmr.chefs_special.to_i
             mmr_grn = mmr.green_1.to_i + mmr.green_2.to_i
             mmr_total = mmr_reg + mmr_grn
             cust_reg = mmr.production_day.wday == 0 ? mmr.customer.regular_meals_on_monday.to_i : mmr.customer.regular_meals_on_thursday.to_i
@@ -140,6 +140,10 @@ namespace :customers do
                 array_of_eligible_meals.push("pork") unless mmr.customer.no_pork?
                 array_of_eligible_meals.push("beef") unless mmr.customer.no_beef?
                 array_of_eligible_meals.push("poultry") unless mmr.customer.no_poultry?
+                array_of_eligible_meals.push("salad_bowl_1")
+                array_of_eligible_meals.push("salad_bowl_2")
+                array_of_eligible_meals.push("diet")
+                array_of_eligible_meals.push("chefs_special")
 
                 array_of_eligible_green = []
                 array_of_eligible_green.push("green_1")
@@ -181,6 +185,14 @@ namespace :customers do
                         mmr.update_attributes(beef:mmr.beef.to_i+1)
                     elsif el == "poultry"
                         mmr.update_attributes(poultry:mmr.poultry.to_i+1)
+                    elsif el == "salad_bowl_1"
+                        mmr.update_attributes(salad_bowl_1:mmr.salad_bowl_1.to_i+1)
+                    elsif el == "salad_bowl_2"
+                        mmr.update_attributes(salad_bowl_2:mmr.salad_bowl_2.to_i+1)
+                    elsif el == "diet"
+                        mmr.update_attributes(diet:mmr.diet.to_i+1)
+                    elsif el == "chefs_special"
+                        mmr.update_attributes(chefs_special:mmr.chefs_special.to_i+1)
                     end
                     array_of_eligible_meals.push(el)
                     unless do_not_increment
@@ -227,6 +239,10 @@ namespace :customers do
                     array_of_non_eligible_meals.push("pork") if mmr.customer.no_pork?
                     array_of_non_eligible_meals.push("beef") if mmr.customer.no_beef?
                     array_of_non_eligible_meals.push("poultry") if mmr.customer.no_poultry?
+                    array_of_non_eligible_meals.push("salad_bowl_1")
+                    array_of_non_eligible_meals.push("salad_bowl_2")
+                    array_of_non_eligible_meals.push("diet")
+                    array_of_non_eligible_meals.push("chefs_special")
 
                     unless array_of_non_eligible_meals.blank?
                         total_non_eligible_meals = array_of_non_eligible_meals.inject(0) {|sum,anem| 
@@ -236,6 +252,14 @@ namespace :customers do
                                 sum + mmr.beef.to_i
                             elsif anem == "poultry"
                                 sum + mmr.poultry.to_i
+                            elsif anem == "salad_bowl_1"
+                                sum + mmr.salad_bowl_1.to_i
+                            elsif anem == "salad_bowl_2"
+                                sum + mmr.salad_bowl_2.to_i
+                            elsif anem == "diet"
+                                sum + mmr.diet.to_i
+                            elsif anem == "chefs_special"
+                                sum + mmr.chefs_special.to_i
                             end
                         }.to_i
 
@@ -248,6 +272,14 @@ namespace :customers do
                                     mmr.update_attributes(beef:0)
                                 elsif anem == "poultry"
                                     mmr.update_attributes(poultry:0)
+                                elsif anem == "salad_bowl_1"
+                                    mmr.update_attributes(salad_bowl_1:0)
+                                elsif anem == "salad_bowl_2"
+                                    mmr.update_attributes(salad_bowl_2:0)
+                                elsif anem == "diet"
+                                    mmr.update_attributes(diet:0)
+                                elsif anem == "chefs_special"
+                                    mmr.update_attributes(chefs_special:0)
                                 end                            
                             }
                             change_total += total_non_eligible_meals
@@ -274,6 +306,30 @@ namespace :customers do
                                     else 
                                         do_not_increment = true
                                     end
+                                elsif el == "salad_bowl_1"
+                                    if mmr.salad_bowl_1.to_i > 0
+                                        mmr.update_attributes(salad_bowl_1:mmr.salad_bowl_1.to_i-1)
+                                    else 
+                                        do_not_increment = true
+                                    end
+                                elsif el == "salad_bowl_2"
+                                    if mmr.salad_bowl_2.to_i > 0
+                                        mmr.update_attributes(salad_bowl_2:mmr.salad_bowl_2.to_i-1)
+                                    else 
+                                        do_not_increment = true
+                                    end
+                                elsif el == "diet"
+                                    if mmr.diet.to_i > 0
+                                        mmr.update_attributes(diet:mmr.diet.to_i-1)
+                                    else 
+                                        do_not_increment = true
+                                    end
+                                elsif el == "chefs_special"
+                                    if mmr.chefs_special.to_i > 0
+                                        mmr.update_attributes(chefs_special:mmr.chefs_special.to_i-1)
+                                    else 
+                                        do_not_increment = true
+                                    end
                                 end
                                 array_of_non_eligible_meals.push(el)
                                 change_reg += 1 unless do_not_increment
@@ -285,6 +341,10 @@ namespace :customers do
                     array_of_eligible_meals.push("pork") 
                     array_of_eligible_meals.push("beef") 
                     array_of_eligible_meals.push("poultry")
+                    array_of_eligible_meals.push("salad_bowl_1")
+                    array_of_eligible_meals.push("salad_bowl_2")
+                    array_of_eligible_meals.push("diet")
+                    array_of_eligible_meals.push("chefs_special")
 
                     unless array_of_eligible_meals.blank?
                         while change_total < 0 do
@@ -306,6 +366,30 @@ namespace :customers do
                             elsif el == "poultry"
                                 if mmr.poultry.to_i > 0
                                     mmr.update_attributes(poultry:mmr.poultry.to_i-1)
+                                else
+                                    do_not_increment = true
+                                end
+                            elsif el == "salad_bowl_1"
+                                if mmr.salad_bowl_1.to_i > 0
+                                    mmr.update_attributes(salad_bowl_1:mmr.salad_bowl_1.to_i-1)
+                                else
+                                    do_not_increment = true
+                                end
+                            elsif el == "salad_bowl_2"
+                                if mmr.salad_bowl_2.to_i > 0
+                                    mmr.update_attributes(salad_bowl_2:mmr.salad_bowl_2.to_i-1)
+                                else
+                                    do_not_increment = true
+                                end
+                            elsif el == "diet"
+                                if mmr.diet.to_i > 0
+                                    mmr.update_attributes(diet:mmr.diet.to_i-1)
+                                else
+                                    do_not_increment = true
+                                end
+                            elsif el == "chefs_special"
+                                if mmr.chefs_special.to_i > 0
+                                    mmr.update_attributes(chefs_special:mmr.chefs_special.to_i-1)
                                 else
                                     do_not_increment = true
                                 end

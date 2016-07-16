@@ -49,12 +49,20 @@ class UsersController < ApplicationController
                 @coffee_bar_selected_beef_monday = MealStatistic.retrieve("coffee_bar_selected_beef_monday")
                 @coffee_bar_selected_pork_monday = MealStatistic.retrieve("coffee_bar_selected_pork_monday")
                 @coffee_bar_selected_poultry_monday = MealStatistic.retrieve("coffee_bar_selected_poultry_monday")
-                @coffee_bar_selected_regular_monday = @coffee_bar_selected_beef_monday.to_i + @coffee_bar_selected_pork_monday.to_i + @coffee_bar_selected_poultry_monday.to_i
+                @coffee_bar_selected_salad_bowl_1_monday = MealStatistic.retrieve("coffee_bar_selected_salad_bowl_1_monday")
+                @coffee_bar_selected_salad_bowl_2_monday = MealStatistic.retrieve("coffee_bar_selected_salad_bowl_2_monday")
+                @coffee_bar_selected_diet_monday = MealStatistic.retrieve("coffee_bar_selected_diet_monday")
+                @coffee_bar_selected_chefs_special_monday = MealStatistic.retrieve("coffee_bar_selected_chefs_special_monday")
+                @coffee_bar_selected_regular_monday = @coffee_bar_selected_beef_monday.to_i + @coffee_bar_selected_pork_monday.to_i + @coffee_bar_selected_poultry_monday.to_i + @coffee_bar_selected_salad_bowl_1_monday.to_i + @coffee_bar_selected_salad_bowl_2_monday.to_i + @coffee_bar_selected_diet_monday.to_i + @coffee_bar_selected_chefs_special_monday.to_i
 
                 @gta_selected_beef_monday = MealStatistic.retrieve("gta_selected_beef_monday")
                 @gta_selected_pork_monday = MealStatistic.retrieve("gta_selected_pork_monday")
                 @gta_selected_poultry_monday = MealStatistic.retrieve("gta_selected_poultry_monday")
-                @gta_selected_regular_monday = @gta_selected_beef_monday.to_i + @gta_selected_pork_monday.to_i + @gta_selected_poultry_monday.to_i
+                @gta_selected_salad_bowl_1_monday = MealStatistic.retrieve("gta_selected_salad_bowl_1_monday")
+                @gta_selected_salad_bowl_2_monday = MealStatistic.retrieve("gta_selected_salad_bowl_2_monday")
+                @gta_selected_diet_monday = MealStatistic.retrieve("gta_selected_diet_monday")
+                @gta_selected_chefs_special_monday = MealStatistic.retrieve("gta_selected_chefs_special_monday")
+                @gta_selected_regular_monday = @gta_selected_beef_monday.to_i + @gta_selected_pork_monday.to_i + @gta_selected_poultry_monday.to_i  + @gta_selected_salad_bowl_1_monday.to_i + @gta_selected_salad_bowl_2_monday.to_i + @gta_selected_diet_monday.to_i + @gta_selected_chefs_special_monday.to_i
             
             @monday_green = MealStatistic.retrieve("monday_green")
                 @monday_green_wandas = MealStatistic.retrieve("monday_green_wandas")
@@ -88,12 +96,20 @@ class UsersController < ApplicationController
                 @coffee_bar_selected_beef_thursday = MealStatistic.retrieve("coffee_bar_selected_beef_thursday")
                 @coffee_bar_selected_pork_thursday = MealStatistic.retrieve("coffee_bar_selected_pork_thursday")
                 @coffee_bar_selected_poultry_thursday = MealStatistic.retrieve("coffee_bar_selected_poultry_thursday")
-                @coffee_bar_selected_regular_thursday = @coffee_bar_selected_beef_thursday.to_i + @coffee_bar_selected_pork_thursday.to_i + @coffee_bar_selected_poultry_thursday.to_i
+                @coffee_bar_selected_salad_bowl_1_thursday = MealStatistic.retrieve("coffee_bar_selected_salad_bowl_1_thursday")
+                @coffee_bar_selected_salad_bowl_2_thursday = MealStatistic.retrieve("coffee_bar_selected_salad_bowl_2_thursday")
+                @coffee_bar_selected_diet_thursday = MealStatistic.retrieve("coffee_bar_selected_diet_thursday")
+                @coffee_bar_selected_chefs_special_thursday = MealStatistic.retrieve("coffee_bar_selected_chefs_special_thursday")
+                @coffee_bar_selected_regular_thursday = @coffee_bar_selected_beef_thursday.to_i + @coffee_bar_selected_pork_thursday.to_i + @coffee_bar_selected_poultry_thursday.to_i + @coffee_bar_selected_salad_bowl_1_thursday.to_i + @coffee_bar_selected_salad_bowl_2_thursday.to_i + @coffee_bar_selected_diet_thursday.to_i + @coffee_bar_selected_chefs_special_thursday.to_i
 
                 @gta_selected_beef_thursday = MealStatistic.retrieve("gta_selected_beef_thursday")
                 @gta_selected_pork_thursday = MealStatistic.retrieve("gta_selected_pork_thursday")
                 @gta_selected_poultry_thursday = MealStatistic.retrieve("gta_selected_poultry_thursday")
-                @gta_selected_regular_thursday = @gta_selected_beef_thursday.to_i + @gta_selected_pork_thursday.to_i + @gta_selected_poultry_thursday.to_i
+                @gta_selected_salad_bowl_1_thursday = MealStatistic.retrieve("gta_selected_salad_bowl_1_thursday")
+                @gta_selected_salad_bowl_2_thursday = MealStatistic.retrieve("gta_selected_salad_bowl_2_thursday")
+                @gta_selected_diet_thursday = MealStatistic.retrieve("gta_selected_diet_thursday")
+                @gta_selected_chefs_special_thursday = MealStatistic.retrieve("gta_selected_chefs_special_thursday")
+                @gta_selected_regular_thursday = @gta_selected_beef_thursday.to_i + @gta_selected_pork_thursday.to_i + @gta_selected_poultry_thursday.to_i + @gta_selected_salad_bowl_1_thursday.to_i + @gta_selected_salad_bowl_2_thursday.to_i + @gta_selected_diet_thursday.to_i + @gta_selected_chefs_special_thursday.to_i
 
 
             @thursday_green = MealStatistic.retrieve("thursday_green")
@@ -306,6 +322,15 @@ class UsersController < ApplicationController
             @monday_salad_bowl_2_selection_1_sub_name = monday_salad_bowl_2_selection_1.blank? ? "" : ((monday_salad_bowl_2_selection_1.take.carb.blank? && monday_salad_bowl_2_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_salad_bowl_2_selection_1.take.carb).to_s.titlecase + ((monday_salad_bowl_2_selection_1.take.carb.blank? || monday_salad_bowl_2_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_salad_bowl_2_selection_1.take.veggie).to_s.titlecase
             @monday_salad_bowl_2_selection_1_id = monday_salad_bowl_2_selection_1.blank? ? 0 : monday_salad_bowl_2_selection_1.take.id
 
+            monday_diet_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Diet")
+            @monday_diet_selection_1_name = monday_diet_selection_1.blank? ? "Menu to be announced" : coder.decode(monday_diet_selection_1.take.meal_name).titlecase
+            @monday_diet_selection_1_sub_name = monday_diet_selection_1.blank? ? "" : ((monday_diet_selection_1.take.carb.blank? && monday_diet_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_diet_selection_1.take.carb).to_s.titlecase + ((monday_diet_selection_1.take.carb.blank? || monday_diet_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_diet_selection_1.take.veggie).to_s.titlecase
+            @monday_diet_selection_1_id = monday_diet_selection_1.blank? ? 0 : monday_diet_selection_1.take.id
+
+            monday_chefs_special_selection_1 = Menu.where(production_day:@display_production_day_1, meal_type:"Chef's Special")
+            @monday_chefs_special_selection_1_name = monday_chefs_special_selection_1.blank? ? "Menu to be announced" : coder.decode(monday_chefs_special_selection_1.take.meal_name).titlecase
+            @monday_chefs_special_selection_1_sub_name = monday_chefs_special_selection_1.blank? ? "" : ((monday_chefs_special_selection_1.take.carb.blank? && monday_chefs_special_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(monday_chefs_special_selection_1.take.carb).to_s.titlecase + ((monday_chefs_special_selection_1.take.carb.blank? || monday_chefs_special_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(monday_chefs_special_selection_1.take.veggie).to_s.titlecase
+            @monday_chefs_special_selection_1_id = monday_chefs_special_selection_1.blank? ? 0 : monday_chefs_special_selection_1.take.id
 
             meal_selection_customer_monday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_1)
 
@@ -316,6 +341,8 @@ class UsersController < ApplicationController
             @monday_green_2_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.green_2
             @monday_salad_bowl_1_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.salad_bowl_1
             @monday_salad_bowl_2_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.salad_bowl_2
+            @monday_diet_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.diet
+            @monday_chefs_special_selection_1_number = meal_selection_customer_monday.blank? ? 0 : meal_selection_customer_monday.take.chefs_special
 
             # @thursday_beef_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Beef").blank?
             # @thursday_pork_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Pork").blank?
@@ -324,6 +351,7 @@ class UsersController < ApplicationController
             # @thursday_green_2_selection_1_name = Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@display_production_day_2, meal_type:"Green 2").blank?
 
             @show_nutritional_info_to_customers = SystemSetting.where(setting:"meal_selection",setting_attribute:"show_nutritional_info").blank? ? false : (SystemSetting.where(setting:"meal_selection",setting_attribute:"show_nutritional_info").take.setting_value == "true" ? true : false)
+            @show_additional_menu_to_customers = SystemSetting.where(setting:"meal_selection",setting_attribute:"show_additional_menu").blank? ? false : (SystemSetting.where(setting:"meal_selection",setting_attribute:"show_additional_menu").take.setting_value == "true" ? true : false)
 
             thursday_beef_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Beef")
             @thursday_beef_selection_1_name = thursday_beef_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_beef_selection_1.take.meal_name).titlecase
@@ -360,6 +388,17 @@ class UsersController < ApplicationController
             @thursday_salad_bowl_2_selection_1_sub_name = thursday_salad_bowl_2_selection_1.blank? ? "" : ((thursday_salad_bowl_2_selection_1.take.carb.blank? && thursday_salad_bowl_2_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_salad_bowl_2_selection_1.take.carb).to_s.titlecase + ((thursday_salad_bowl_2_selection_1.take.carb.blank? || thursday_salad_bowl_2_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_salad_bowl_2_selection_1.take.veggie).to_s.titlecase
             @thursday_salad_bowl_2_selection_1_id = thursday_salad_bowl_2_selection_1.blank? ? 0 : thursday_salad_bowl_2_selection_1.take.id
 
+            thursday_diet_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Diet")
+            @thursday_diet_selection_1_name = thursday_diet_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_diet_selection_1.take.meal_name).titlecase
+            @thursday_diet_selection_1_sub_name = thursday_diet_selection_1.blank? ? "" : ((thursday_diet_selection_1.take.carb.blank? && thursday_diet_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_diet_selection_1.take.carb).to_s.titlecase + ((thursday_diet_selection_1.take.carb.blank? || thursday_diet_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_diet_selection_1.take.veggie).to_s.titlecase
+            @thursday_diet_selection_1_id = thursday_diet_selection_1.blank? ? 0 : thursday_diet_selection_1.take.id
+
+            thursday_chefs_special_selection_1 = Menu.where(production_day:@display_production_day_2, meal_type:"Chef's Special")
+            @thursday_chefs_special_selection_1_name = thursday_chefs_special_selection_1.blank? ? "Menu to be announced" : coder.decode(thursday_chefs_special_selection_1.take.meal_name).titlecase
+            @thursday_chefs_special_selection_1_sub_name = thursday_chefs_special_selection_1.blank? ? "" : ((thursday_chefs_special_selection_1.take.carb.blank? && thursday_chefs_special_selection_1.take.veggie.blank?) ? "" : "with ") + coder.decode(thursday_chefs_special_selection_1.take.carb).to_s.titlecase + ((thursday_chefs_special_selection_1.take.carb.blank? || thursday_chefs_special_selection_1.take.veggie.blank?) ? "" : ", ") + coder.decode(thursday_chefs_special_selection_1.take.veggie).to_s.titlecase
+            @thursday_chefs_special_selection_1_id = thursday_chefs_special_selection_1.blank? ? 0 : thursday_chefs_special_selection_1.take.id
+
+
             meal_selection_customer_thursday = MealSelection.where(stripe_customer_id:@current_customer.stripe_customer_id,production_day:@display_production_day_2)
 
             @thursday_beef_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.beef
@@ -369,7 +408,8 @@ class UsersController < ApplicationController
             @thursday_green_2_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.green_2
             @thursday_salad_bowl_1_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.salad_bowl_1
             @thursday_salad_bowl_2_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.salad_bowl_2
-
+            @thursday_diet_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.diet
+            @thursday_chefs_special_selection_1_number = meal_selection_customer_thursday.blank? ? 0 : meal_selection_customer_thursday.take.chefs_special
 
             current_user.log_activity("user accessing dashboard")
             @menu_date_sunday = Date.today.wday == 0 ? Chowdy::Application.closest_date(-2,7) : Chowdy::Application.closest_date(-1,7)
@@ -385,7 +425,8 @@ class UsersController < ApplicationController
             @green_2_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").blank?
             @salad_bowl_1_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 1").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 1").blank?
             @salad_bowl_2_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 2").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 2").blank?
-
+            @diet_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Diet").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Diet").blank?
+            @chefs_special_monday = Menu.where(production_day:@menu_date_sunday, meal_type:"Chef's Special").take.meal_name unless Menu.where(production_day:@menu_date_sunday, meal_type:"Chef's Special").blank?
 
             @beef_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").blank?
             @pork_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").blank?
@@ -394,7 +435,8 @@ class UsersController < ApplicationController
             @green_2_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").blank?
             @salad_bowl_1_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 1").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 1").blank?
             @salad_bowl_2_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 2").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 2").blank?
-
+            @diet_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Diet").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Diet").blank?
+            @chefs_special_thursday = Menu.where(production_day:@menu_date_wednesday, meal_type:"Chef's Special").take.meal_name unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Chef's Special").blank?
 
             @beef_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Beef").blank?
             @pork_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Pork").blank?
@@ -403,7 +445,8 @@ class UsersController < ApplicationController
             @green_2_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Green 2").blank?
             @salad_bowl_1_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 1").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 1").blank?
             @salad_bowl_2_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 2").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Salad Bowl 2").blank?
-
+            @diet_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Diet").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Diet").blank?
+            @chefs_special_monday_id = Menu.where(production_day:@menu_date_sunday, meal_type:"Chef's Special").take.id unless Menu.where(production_day:@menu_date_sunday, meal_type:"Chef's Special").blank?
 
             @beef_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Beef").blank?
             @pork_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Pork").blank?
@@ -412,7 +455,8 @@ class UsersController < ApplicationController
             @green_2_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Green 2").blank?
             @salad_bowl_1_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 1").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 1").blank?
             @salad_bowl_2_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 2").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Salad Bowl 2").blank?
-
+            @diet_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Diet").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Diet").blank?
+            @chefs_special_thursday_id = Menu.where(production_day:@menu_date_wednesday, meal_type:"Chef's Special").take.id unless Menu.where(production_day:@menu_date_wednesday, meal_type:"Chef's Special").blank?
 
             @rated_menu_items = @current_customer.menu_ratings.where("menu_id is not null").order(created_at: :desc).limit(20).map{|mr| mr.menu_id }
 

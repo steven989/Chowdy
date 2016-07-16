@@ -32,21 +32,31 @@
                 </tr>
                 <tr>
                   <td>Salad Bowl</td>
-                  <td><%= @selection[:meals_production_day_1][:poultry][:number].to_s+" "+@selection[:meals_production_day_1][:salad_bowl_1][:meal_name] %></td>
-                  <td><%= @selection[:meals_production_day_2][:poultry][:number].to_s+" "+@selection[:meals_production_day_2][:salad_bowl_1][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_1][:salad_bowl_1][:number].to_s+" "+@selection[:meals_production_day_1][:salad_bowl_1][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:salad_bowl_1][:number].to_s+" "+@selection[:meals_production_day_2][:salad_bowl_1][:meal_name] %></td>
                 </tr>
                 <tr>
                   <td>Salad Bowl</td>
-                  <td><%= @selection[:meals_production_day_1][:poultry][:number].to_s+" "+@selection[:meals_production_day_1][:salad_bowl_2][:meal_name] %></td>
-                  <td><%= @selection[:meals_production_day_2][:poultry][:number].to_s+" "+@selection[:meals_production_day_2][:salad_bowl_12][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_1][:salad_bowl_2][:number].to_s+" "+@selection[:meals_production_day_1][:salad_bowl_2][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:salad_bowl_2][:number].to_s+" "+@selection[:meals_production_day_2][:salad_bowl_12][:meal_name] %></td>
                 </tr>
                 <tr>
-                  <td>Green</td>
+                  <td>Diet</td>
+                  <td><%= @selection[:meals_production_day_1][:diet][:number].to_s+" "+@selection[:meals_production_day_1][:diet][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:diet][:number].to_s+" "+@selection[:meals_production_day_2][:diet][:meal_name] %></td>
+                </tr>
+                <tr>
+                  <td>Chef's Special</td>
+                  <td><%= @selection[:meals_production_day_1][:chefs_special][:number].to_s+" "+@selection[:meals_production_day_1][:chefs_special][:meal_name] %></td>
+                  <td><%= @selection[:meals_production_day_2][:chefs_special][:number].to_s+" "+@selection[:meals_production_day_2][:chefs_special][:meal_name] %></td>
+                </tr>
+                <tr>
+                  <td>Green (Vegetarian)</td>
                   <td><%= @selection[:meals_production_day_1][:green_1][:number].to_s+" "+@selection[:meals_production_day_1][:green_1][:meal_name] %></td>
                   <td><%= @selection[:meals_production_day_2][:green_1][:number].to_s+" "+@selection[:meals_production_day_2][:green_1][:meal_name] %></td>
                 </tr>
                 <tr>
-                  <td>Green</td>
+                  <td>Green (Vegetarian)</td>
                   <td><%= @selection[:meals_production_day_1][:green_2][:number].to_s+" "+@selection[:meals_production_day_1][:green_2][:meal_name] %></td>
                   <td><%= @selection[:meals_production_day_2][:green_2][:number].to_s+" "+@selection[:meals_production_day_2][:green_2][:meal_name] %></td>
                 </tr>
