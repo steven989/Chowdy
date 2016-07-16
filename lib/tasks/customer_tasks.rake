@@ -1024,19 +1024,15 @@ namespace :app do
                 begin
                     if fic.stripe_subscription_id.blank?
                         fic.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
-                        fic.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)                      
+                        fic.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:"Non-payment", requested_date: Date.today)                      
                         fic.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                     else
                         stripe_subscription = Stripe::Customer.retrieve(fic.stripe_customer_id).subscriptions.retrieve(fic.stripe_subscription_id)
                         if stripe_subscription.delete
                             fic.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
-                            fic.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)
+                            fic.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:"Non-payment", requested_date: Date.today)
                             fic.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                         end
-                    end
-
-                    unless params[:feedback].blank?
-                        fic.feedbacks.create(feedback:params[:feedback], occasion:"cancel") 
                     end
 
                     if fic.errors.any?
