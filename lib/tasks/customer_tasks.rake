@@ -988,4 +988,151 @@ namespace :app do
         CustomerMailer.delay.send_customer_list
     end     
 
+
+    desc 'Assign delivery customers to either GTA or downtown, re-try all outstanding failed invoices'
+    task :weekly_admin_task_for_missing_hub_and_failed_invoice => [:environment] do 
+        current_pick_up_date = SystemSetting.where(setting:"system_date", setting_attribute:"pick_up_date").take.setting_value.to_date
+        active_nonpaused_customers_include_new_signups = Customer.where(active?: ["Yes","yes"], paused?: [nil,"No","no"], next_pick_up_date:[current_pick_up_date,StartDate.first.start_date.to_date])
+        @customers_with_missing_info = active_nonpaused_customers_include_new_signups.where("((monday_pickup_hub is null or monday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((thursday_pickup_hub is null or thursday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((monday_delivery_hub is null or monday_delivery_hub ilike '%delivery%') and recurring_delivery is not null) or ((thursday_delivery_hub is null or thursday_delivery_hub ilike '%delivery%') and recurring_delivery is not null)")
+
+        @customers_with_missing_info.each do |c|
+            if c.delivery_boundary == 'gta'
+                c.update_attributes(monday_delivery_hub:'GTA Courier',thursday_delivery_hub:'GTA Courier')
+            elsif c.delivery_boundary == 'downtown'
+                c.update_attributes(monday_delivery_hub:'346 Front St. W (Coffee Bar Inc.)',thursday_delivery_hub:'346 Front St. W (Coffee Bar Inc.)')
+            end
+        end
+
+        FailedInvoice.where(paid:[false,nil],closed:nil).each do |fi|
+            begin
+                Stripe::Invoice.retrieve(fi.invoice_number).pay
+            rescue
+            else
+            end
+        end
+
+    end     
+
+
+    desc 'Cancel peopel with more than 2 failed invoices and restart people cancelled for non-payment but have paid'
+    task :failed_invoice_weekly_actions => [:environment] do 
+
+        # cancel people with more than 2 failed invoices
+        failed_invoice_customers = FailedInvoice.where(paid:[false,nil],closed:nil).map {|fi| fi.customer}.uniq
+        failed_invoice_customers.each do |fic| 
+            if fic.failed_invoices.length > 1 && ['Yes','yes'].include?(fic.active?) 
+                begin
+                    if fic.stripe_subscription_id.blank?
+                        fic.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                        fic.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)                      
+                        fic.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                    else
+                        stripe_subscription = Stripe::Customer.retrieve(fic.stripe_customer_id).subscriptions.retrieve(fic.stripe_subscription_id)
+                        if stripe_subscription.delete
+                            fic.update(paused?:nil, pause_end_date:nil, next_pick_up_date:nil, active?:"No", stripe_subscription_id: nil)
+                            fic.stop_requests.create(request_type:'cancel',start_date:Date.today,cancel_reason:params[:cancel_reason], requested_date: Date.today)
+                            fic.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        end
+                    end
+
+                    unless params[:feedback].blank?
+                        fic.feedbacks.create(feedback:params[:feedback], occasion:"cancel") 
+                    end
+
+                    if fic.errors.any?
+                        status = "fail"
+                        message = "Error occurred while attempting to cancel: #{fic.error.full_messages.join(", ")}"
+                    else
+                        status = "success"
+                        message = "Customer cancelled"
+                    end
+                rescue => error
+                    flash[:status] = "fail"
+                    status = "fail"
+                    flash[:notice_customers] = "An error occurred when attempting to cancel: #{error.message}" 
+                    notice_customers = "An error occurred when attempting to cancel: #{error.message}" 
+                    puts '---------------------------------------------------'
+                    puts "An error occurred when attempting to cancel: #{error.message}" 
+                    puts '---------------------------------------------------'
+                else
+                    if fic.user
+                        fic.user.log_activity("Admin (#{current_user.email}): cancelled customer's subscription")
+                    end
+                    status ||= "success"
+                    message ||= "Customer cancelled"
+                    flash[:status] = status
+                    flash[:notice_customers] = message
+                    notice_customers = message
+                end
+
+            end
+        end
+
+        #restart people who were cancelled by admin before due to failed invoice but paid up
+
+        FailedInvoice.where(date_paid:Date.today).each do |fip|
+            @customer = fip.customer
+            if  !['Yes','yes'].include?(@customer.active?) && @customer.stop_requests.order(created_at: :desc).limit(1).take.cancel_reason == 'Non-payment'
+                begin
+                    if @customer.stripe_subscription_id.blank?
+                        start_date_update = [2,3,4,5,6,0].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,1) : Date.today
+                        if @customer.sponsored?
+                            @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil,pause_cancel_request:nil) 
+                            @customer.stop_requests.where("request_type ilike ?","%cancel%").order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)                       
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        else
+                            current_customer_interval = @customer.interval.blank? ? "week" : @customer.interval
+                            current_customer_interval_count = @customer.interval_count.blank? ? 1 : @customer.interval_count
+                            applicable_price = @customer.price_increase_2015? ? 799 : 699
+                            meals_per_week = Subscription.where(weekly_meals:@customer.total_meals_per_week, interval: current_customer_interval, interval_count:current_customer_interval_count,price:applicable_price).take.stripe_plan_id
+                            
+                            if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:(start_date_update + 23.9.hours).to_time.to_i)
+                                new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
+                                @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
+                                @customer.stop_requests.where("request_type ilike ?","%cancel%").order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                                @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                            end
+                        end
+                    else 
+                        start_date_update = [2,3,4,5,6,0].include?(Date.today.wday) ? Chowdy::Application.closest_date(1,1) : Date.today
+                        paused_subscription = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.retrieve(@customer.stripe_subscription_id)
+                        paused_subscription.trial_end = (start_date_update + 23.9.hours).to_time.to_i
+                        paused_subscription.prorate = false
+                        if paused_subscription.save
+                            @customer.update(next_pick_up_date:start_date_update, paused?:nil, pause_end_date:nil,pause_cancel_request:nil)
+                            @customer.stop_requests.order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                            @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
+                        end
+                    end
+
+                    if @customer.errors.any?
+                        status = "fail"
+                        message = "Error occurred while attempting to restart: #{@customer.error.full_messages.join(", ")}"
+                    else
+                        status = "success"
+                        message = "Customer restarted"
+                    end
+                rescue => error
+                    flash[:status] = "fail"
+                    status = "fail"
+                    flash[:notice_customers] = "An error occurred when attempting to restart: #{error.message}" 
+                    notice_customers = "An error occurred when attempting to restart: #{error.message}" 
+                    puts '---------------------------------------------------'
+                    puts "An error occurred when attempting to restart: #{error.message}" 
+                    puts '---------------------------------------------------'
+                else
+                    if @customer.user
+                        @customer.user.log_activity("Admin (#{current_user.email}): restarted subscription")
+                    end
+                    status ||= "success"
+                    message ||= "Customer restarted"
+                    flash[:status] = status
+                    flash[:notice_customers] = message
+                    notice_customers = message
+                end
+            end
+        end
+    end 
+
+
 end
