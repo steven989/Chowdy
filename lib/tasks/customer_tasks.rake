@@ -996,7 +996,7 @@ namespace :app do
         @customers_with_missing_info = active_nonpaused_customers_include_new_signups.where("((monday_pickup_hub is null or monday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((thursday_pickup_hub is null or thursday_pickup_hub ilike '%delivery%') and recurring_delivery is null) or ((monday_delivery_hub is null or monday_delivery_hub ilike '%delivery%') and recurring_delivery is not null) or ((thursday_delivery_hub is null or thursday_delivery_hub ilike '%delivery%') and recurring_delivery is not null)")
 
         @customers_with_missing_info.each do |c|
-            if c.delivery_boundary == 'gta'
+            if c.delivery_boundary == 'GTA'
                 c.update_attributes(monday_delivery_hub:'GTA Courier',thursday_delivery_hub:'GTA Courier')
             elsif c.delivery_boundary == 'downtown'
                 c.update_attributes(monday_delivery_hub:'346 Front St. W (Coffee Bar Inc.)',thursday_delivery_hub:'346 Front St. W (Coffee Bar Inc.)')
