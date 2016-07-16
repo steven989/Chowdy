@@ -1047,10 +1047,6 @@ namespace :app do
                         message = "Customer cancelled"
                     end
                 rescue => error
-                    flash[:status] = "fail"
-                    status = "fail"
-                    flash[:notice_customers] = "An error occurred when attempting to cancel: #{error.message}" 
-                    notice_customers = "An error occurred when attempting to cancel: #{error.message}" 
                     puts '---------------------------------------------------'
                     puts "An error occurred when attempting to cancel: #{error.message}" 
                     puts '---------------------------------------------------'
@@ -1058,11 +1054,6 @@ namespace :app do
                     if fic.user
                         fic.user.log_activity("Admin (#{current_user.email}): cancelled customer's subscription")
                     end
-                    status ||= "success"
-                    message ||= "Customer cancelled"
-                    flash[:status] = status
-                    flash[:notice_customers] = message
-                    notice_customers = message
                 end
 
             end
@@ -1113,10 +1104,6 @@ namespace :app do
                         message = "Customer restarted"
                     end
                 rescue => error
-                    flash[:status] = "fail"
-                    status = "fail"
-                    flash[:notice_customers] = "An error occurred when attempting to restart: #{error.message}" 
-                    notice_customers = "An error occurred when attempting to restart: #{error.message}" 
                     puts '---------------------------------------------------'
                     puts "An error occurred when attempting to restart: #{error.message}" 
                     puts '---------------------------------------------------'
@@ -1124,11 +1111,6 @@ namespace :app do
                     if @customer.user
                         @customer.user.log_activity("Admin (#{current_user.email}): restarted subscription")
                     end
-                    status ||= "success"
-                    message ||= "Customer restarted"
-                    flash[:status] = status
-                    flash[:notice_customers] = message
-                    notice_customers = message
                 end
             end
         end
