@@ -168,14 +168,29 @@ $(function(){
           pork:$('#monday_pork_1_spinner').val(),
           poultry:$('#monday_poultry_1_spinner').val(),
           green_1:$('#monday_green_1_1_spinner').val(),
-          green_2:$('#monday_green_2_1_spinner').val()},
+          green_2:$('#monday_green_2_1_spinner').val()<% if @show_additional_menu_to_customers %>,<% end %>
+          <% if @show_additional_menu_to_customers %>
+          salad_bowl_1:$('#monday_salad_bowl_1_1_spinner').val(),
+          salad_bowl_2:$('#monday_salad_bowl_2_1_spinner').val(),
+          diet:$('#monday_diet_1_spinner').val(),
+          chefs_special:$('#monday_chefs_special_1_spinner').val()
+          <% end %>
+        },
         {
           production_day:"<%= @display_production_day_2 %>",
           beef:$('#thursday_beef_1_spinner').val(),
           pork:$('#thursday_pork_1_spinner').val(),
           poultry:$('#thursday_poultry_1_spinner').val(),
           green_1:$('#thursday_green_1_1_spinner').val(),
-          green_2:$('#thursday_green_2_1_spinner').val()}
+          green_2:$('#thursday_green_2_1_spinner').val()<% if @show_additional_menu_to_customers %>,<% end %>
+          <% if @show_additional_menu_to_customers %>
+          salad_bowl_1:$('#thursday_salad_bowl_1_1_spinner').val(),
+          salad_bowl_2:$('#thursday_salad_bowl_2_1_spinner').val(),
+          diet:$('#thursday_diet_1_spinner').val(),
+          chefs_special:$('#thursday_chefs_special_1_spinner').val()
+          <% end %>
+
+        }
         ];
 
   
@@ -451,10 +466,10 @@ $(function(){
     var thursday_green_limit = <%= @thursday_green.to_i %>;
     var monday_total_limit = monday_regular_limit + monday_green_limit;
     var thursday_total_limit = thursday_regular_limit + thursday_green_limit
-    var updated_monday_regular_limit = <%= @monday_regular.to_i - @monday_beef_selection_1_number.to_i - @monday_pork_selection_1_number.to_i - @monday_poultry_selection_1_number.to_i %>;
+    var updated_monday_regular_limit = <%= @monday_regular.to_i - @monday_beef_selection_1_number.to_i - @monday_pork_selection_1_number.to_i - @monday_poultry_selection_1_number.to_i - @monday_salad_bowl_1_selection_1_number.to_i - @monday_salad_bowl_2_selection_1_number.to_i - @monday_diet_selection_1_number.to_i - @monday_chefs_special_selection_1_number.to_i %>;
     var updated_monday_green_limit = <%= @monday_green.to_i - @monday_green_1_selection_1_number.to_i - @monday_green_2_selection_1_number.to_i%>;
     var updated_monday_total_limit = updated_monday_regular_limit + updated_monday_green_limit;
-    var updated_thursday_regular_limit = <%= @thursday_regular.to_i - @thursday_beef_selection_1_number.to_i - @thursday_pork_selection_1_number.to_i - @thursday_poultry_selection_1_number.to_i %>;
+    var updated_thursday_regular_limit = <%= @thursday_regular.to_i - @thursday_beef_selection_1_number.to_i - @thursday_pork_selection_1_number.to_i - @thursday_poultry_selection_1_number.to_i - @thursday_salad_bowl_1_selection_1_number.to_i - @thursday_salad_bowl_2_selection_1_number.to_i - @thursday_diet_selection_1_number.to_i - @thursday_chefs_special_selection_1_number.to_i %>;
     var updated_thursday_green_limit = <%= @thursday_green.to_i - @thursday_green_1_selection_1_number.to_i - @thursday_green_2_selection_1_number.to_i%>;
     var updated_thursday_total_limit = updated_thursday_regular_limit + updated_thursday_green_limit;
 
@@ -520,6 +535,33 @@ $(function(){
       step: 1
     });
 
+    <% if @show_additional_menu_to_customers %>
+
+    $('#monday_salad_bowl_1_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#monday_salad_bowl_1_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_salad_bowl_1_1_spinner').val()*1),
+      step: 1
+    });
+
+    $('#monday_salad_bowl_2_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#monday_salad_bowl_2_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_salad_bowl_2_1_spinner').val()*1),
+      step: 1
+    });
+
+    $('#monday_diet_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#monday_diet_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_diet_1_spinner').val()*1),
+      step: 1
+    });
+
+    $('#monday_chefs_special_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#monday_chefs_special_1_spinner').val()*1 + updated_monday_total_limit,$('#monday_chefs_special_1_spinner').val()*1),
+      step: 1
+    });
+    <% end %>
+
     $('#thursday_beef_1_spinner').TouchSpin({
       min: 0,
       max: Math.max($('#thursday_beef_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_beef_1_spinner').val()*1),
@@ -550,6 +592,31 @@ $(function(){
       step: 1
     });
 
+    <% if @show_additional_menu_to_customers %>
+    $('#thursday_salad_bowl_1_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#thursday_salad_bowl_1_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_salad_bowl_1_1_spinner').val()*1),
+      step: 1
+    });
+
+    $('#thursday_salad_bowl_2_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#thursday_salad_bowl_2_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_salad_bowl_2_1_spinner').val()*1),
+      step: 1
+    });
+
+    $('#thursday_diet_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#thursday_diet_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_diet_1_spinner').val()*1),
+      step: 1
+    });
+
+    $('#thursday_chefs_special_1_spinner').TouchSpin({
+      min: 0,
+      max: Math.max($('#thursday_chefs_special_1_spinner').val()*1 + updated_thursday_total_limit,$('#thursday_chefs_special_1_spinner').val()*1),
+      step: 1
+    });
+    <% end %>
     // marketplace 
 
     <% if @display_marketplace_to_customers %>
@@ -770,23 +837,25 @@ $(function(){
 
     <% end %>
 
-    $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner, #thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').off("change").on("change", function(){
+    $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner,<% if @show_additional_menu_to_customers %> #monday_salad_bowl_1_1_spinner,#monday_salad_bowl_2_1_spinner ,#monday_diet_1_spinner,#monday_chefs_special_1_spinner,<% end %>#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner<% if @show_additional_menu_to_customers %>,#thursday_salad_bowl_1_1_spinner,#thursday_salad_bowl_2_1_spinner,#thursday_diet_1_spinner,#thursday_chefs_special_1_spinner<% end %>').off("change").on("change", function(){
 
       $(this).closest('.display_number_container').find('.selection_display').html($(this).val());
-      updated_monday_regular_limit = monday_regular_limit -  $('#monday_beef_1_spinner').val() -  $('#monday_pork_1_spinner').val() -  $('#monday_poultry_1_spinner').val();
-
+      updated_monday_regular_limit = monday_regular_limit -  $('#monday_beef_1_spinner').val() -  $('#monday_pork_1_spinner').val() -  $('#monday_poultry_1_spinner').val() <% if @show_additional_menu_to_customers %> - $('#monday_salad_bowl_1_1_spinner').val() - $('#monday_salad_bowl_2_1_spinner').val() - $('#monday_diet_1_spinner').val() - $('#monday_chefs_special_1_spinner').val()<% end %>;
 
       updated_monday_green_limit = monday_green_limit -  $('#monday_green_1_1_spinner').val() -  $('#monday_green_2_1_spinner').val();
+
       updated_monday_total_limit = updated_monday_regular_limit + updated_monday_green_limit;
-      updated_thursday_regular_limit = thursday_regular_limit -  $('#thursday_beef_1_spinner').val() -  $('#thursday_pork_1_spinner').val() -  $('#thursday_poultry_1_spinner').val();
+
+      updated_thursday_regular_limit = thursday_regular_limit -  $('#thursday_beef_1_spinner').val() -  $('#thursday_pork_1_spinner').val() -  $('#thursday_poultry_1_spinner').val() <% if @show_additional_menu_to_customers %> - $('#thursday_salad_bowl_1_1_spinner').val() - $('#thursday_salad_bowl_2_1_spinner').val() - $('#thursday_diet_1_spinner').val() - $('#thursday_chefs_special_1_spinner').val()<% end %>;
+
       updated_thursday_green_limit = thursday_green_limit -  $('#thursday_green_1_1_spinner').val() -  $('#thursday_green_2_1_spinner').val();
       updated_thursday_total_limit = updated_thursday_regular_limit + updated_thursday_green_limit;
 
 
-      $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_total_limit + $(this).val()*1)})});
+      $('#monday_beef_1_spinner, #monday_pork_1_spinner, #monday_poultry_1_spinner, #monday_green_1_1_spinner, #monday_green_2_1_spinner <% if @show_additional_menu_to_customers %>, #monday_salad_bowl_1_1_spinner, #monday_salad_bowl_2_1_spinner,#monday_diet_1_spinner,#monday_chefs_special_1_spinner<% end %>').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_monday_total_limit + $(this).val()*1)})});
 
 
-      $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_total_limit + $(this).val()*1)})});
+      $('#thursday_beef_1_spinner, #thursday_pork_1_spinner, #thursday_poultry_1_spinner, #thursday_green_1_1_spinner, #thursday_green_2_1_spinner<% if @show_additional_menu_to_customers %>,#thursday_salad_bowl_1_1_spinner, #thursday_salad_bowl_2_1_spinner,#thursday_diet_1_spinner,#thursday_chefs_special_1_spinner<% end %>').not($(this)).each(function(){$(this).trigger("touchspin.updatesettings", {max: Math.max($(this).val()*1,updated_thursday_total_limit + $(this).val()*1)})});
 
 
       if (updated_monday_total_limit == 0 && updated_thursday_total_limit == 0) {
@@ -2073,6 +2142,88 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
+                              <% if @show_additional_menu_to_customers %>
+                                <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @salad_bowl_1_monday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_salad_bowl_1">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @salad_bowl_1_monday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @salad_bowl_1_monday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_salad_bowl_1">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                                <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @salad_bowl_2_monday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_salad_bowl_2">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @salad_bowl_2_monday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @salad_bowl_2_monday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_salad_bowl_2">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                                <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @diet_monday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_diet">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @diet_monday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @diet_monday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_diet">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                                <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @chefs_special_monday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_chefs_special">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @chefs_special_monday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @chefs_special_monday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_monday_chefs_special">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                              <% end %>
                               <div class="row m-t-md padder menu_card animated fade_left" data-menu-id="<%= @green_1_monday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_monday_green_1">
@@ -2179,6 +2330,88 @@ $(function(){
                                   </section>
                                 </div>                              
                               </div>
+                              <% if @show_additional_menu_to_customers %>
+                                <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @salad_bowl_1_thursday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_salad_bowl_1">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @salad_bowl_1_thursday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @salad_bowl_1_thursday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_salad_bowl_1">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                                <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @salad_bowl_2_thursday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_salad_bowl_2">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @salad_bowl_2_thursday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @salad_bowl_2_thursday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_salad_bowl_2">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                                <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @diet_thursday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_diet">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @diet_thursday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @diet_thursday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_diet">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                                <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @chefs_special_thursday_id ||= 0 %>">
+                                  <div class="col-sm-12">
+                                    <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_chefs_special">
+                                      <div class="panel-heading no-border bg-black lter">
+                                        <span class="font-bold" style="color: #FFFFFF "><%= raw @chefs_special_thursday %></span>
+                                      </div>
+                                      <div class="panel-body no-border">
+                                        Feedback for this item
+                                        <section class="scrollable bg-light lter">
+                                          <textarea rows="3" class="form-control scrollable"></textarea>
+                                          <%= hidden_field_tag 'menu_id', @chefs_special_thursday_id ||= 0 %>
+                                        </section>
+                                      </div>
+                                      <div class="clearfix panel-footer no-border">
+                                        <div class="star_rating pull-left"></div>
+                                        <div class="submit_meal_rating pull-right btn btn-default disabled" id="submit_rating_thursday_chefs_special">Submit rating</div>
+                                      </div>
+                                    </section>
+                                  </div>                              
+                                </div>
+                              <% end %>
                               <div class="row m-t-md padder menu_card animated fade_right" data-menu-id="<%= @green_1_thursday_id ||= 0 %>">
                                 <div class="col-sm-12">
                                   <section class="panel b-a animated fadeInUp" style="border: none;" id="rating_thursday_green_1">
@@ -2313,8 +2546,94 @@ $(function(){
                                   </div>                                 
                                 </div>
                               </div>
-                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
-                                <div class="inner">
+                              <% if @show_additional_menu_to_customers %>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card salad_bowl_1 text-center">
+                                  <div class="inner" style="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_salad_bowl_1_selection_1_id) %>" class="pull_modal"><%= @monday_salad_bowl_1_selection_1_name %></a><% else %><%= @monday_salad_bowl_1_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @monday_salad_bowl_1_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="monday_salad_bowl_1_1" style="font-size:30px;"><%= @monday_salad_bowl_1_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="monday_salad_bowl_1_1_spinner" value="<%= @monday_salad_bowl_1_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                                    
+                                    </div>
+                                    <span style='font-size:11px;'><i>Salad Bowl</i></span>
+                                  </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card salad_bowl_2 text-center">
+                                  <div class="inner" style="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_salad_bowl_2_selection_1_id) %>" class="pull_modal"><%= @monday_salad_bowl_2_selection_1_name %></a><% else %><%= @monday_salad_bowl_2_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @monday_salad_bowl_2_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="monday_salad_bowl_2_1" style="font-size:30px;"><%= @monday_salad_bowl_2_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="monday_salad_bowl_2_1_spinner" value="<%= @monday_salad_bowl_2_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                                    
+                                    </div>                                 
+                                    <span style='font-size:11px;'><i>Salad Bowl</i></span>
+                                  </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card diet text-center">
+                                  <div class="inner" style="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_diet_selection_1_id) %>" class="pull_modal"><%= @monday_diet_selection_1_name %></a><% else %><%= @monday_diet_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @monday_diet_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="monday_diet_1" style="font-size:30px;"><%= @monday_diet_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="monday_diet_1_spinner" value="<%= @monday_diet_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                                    
+                                    </div>                                 
+                                    <span style='font-size:11px;'><i>Diet</i></span>
+                                  </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card chefs_special text-center">
+                                  <div class="inner" style="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_chefs_special_selection_1_id) %>" class="pull_modal"><%= @monday_chefs_special_selection_1_name %></a><% else %><%= @monday_chefs_special_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @monday_chefs_special_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="monday_chefs_special_1" style="font-size:30px;"><%= @monday_chefs_special_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="monday_chefs_special_1_spinner" value="<%= @monday_chefs_special_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                                    
+                                    </div>                                 
+                                    <span style='font-size:11px;'><i>Chef's Special</i></span>
+                                  </div>
+                                </div>
+                              <% end %>
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1 text-center">
+                                <div class="inner" style="padding-bottom:5px;">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
                                     <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_green_1_selection_1_id) %>" class="pull_modal"><%= @monday_green_1_selection_1_name %></a><% else %><%= @monday_green_1_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @monday_green_1_selection_1_sub_name %></p>
@@ -2331,10 +2650,11 @@ $(function(){
                                       </div>
                                     </div>                                    
                                   </div>                                 
+                                  <span style='font-size:11px;'><i>Vegetarian</i></span>
                                 </div>
                               </div>
-                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
-                                <div class="inner">
+                              <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2 text-center">
+                                <div class="inner" style="padding-bottom:5px;">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
                                     <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@monday_green_2_selection_1_id) %>" class="pull_modal"><%= @monday_green_2_selection_1_name %></a><% else %><%= @monday_green_2_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @monday_green_2_selection_1_sub_name %></p>
@@ -2351,6 +2671,7 @@ $(function(){
                                       </div>
                                     </div>                                    
                                   </div>                                 
+                                  <span style='font-size:11px;'><i>Vegetarian</i></span>
                                 </div>
                               </div>
                             </div>
@@ -2421,8 +2742,94 @@ $(function(){
                                   </div>                                 
                                 </div>
                               </div>
+                              <% if @show_additional_menu_to_customers %>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card salad_bowl_1">
+                                  <div class="inner text-center" style="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_salad_bowl_1_selection_1_id) %>" class="pull_modal"><%= @thursday_salad_bowl_1_selection_1_name %></a><% else %><%= @thursday_salad_bowl_1_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @thursday_salad_bowl_1_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="thursday_salad_bowl_1_1" style="font-size:30px;"><%= @thursday_salad_bowl_1_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="thursday_salad_bowl_1_1_spinner" value="<%= @thursday_salad_bowl_1_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                                    
+                                    </div>                                 
+                                    <span style='font-size:11px;'><i>Salad Bowl</i></span>
+                                  </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card salad_bowl_2">
+                                  <div class="inner text-center" padding="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_salad_bowl_2_selection_1_id) %>" class="pull_modal"><%= @thursday_salad_bowl_2_selection_1_name %></a><% else %><%= @thursday_salad_bowl_2_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @thursday_salad_bowl_2_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="thursday_salad_bowl_2_1" style="font-size:30px;"><%= @thursday_salad_bowl_2_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="thursday_salad_bowl_2_1_spinner" value="<%= @thursday_salad_bowl_2_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                               
+                                      <span style='font-size:11px;'><i>Salad Bowl</i></span>     
+                                    </div>                                 
+                                  </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card diet">
+                                  <div class="inner text-center" padding="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_diet_selection_1_id) %>" class="pull_modal"><%= @thursday_diet_selection_1_name %></a><% else %><%= @thursday_diet_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @thursday_diet_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="thursday_diet_1" style="font-size:30px;"><%= @thursday_diet_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="thursday_diet_1_spinner" value="<%= @thursday_diet_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                               
+                                      <span style='font-size:11px;'><i>Diet</i></span>     
+                                    </div>                                 
+                                  </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card chefs_special">
+                                  <div class="inner text-center" padding="padding-bottom:5px;">
+                                    <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
+                                      <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_chefs_special_selection_1_id) %>" class="pull_modal"><%= @thursday_chefs_special_selection_1_name %></a><% else %><%= @thursday_chefs_special_selection_1_name %><% end %></h5>
+                                      <p style="color:#555; font-size: 12px;"><%= @thursday_chefs_special_selection_1_sub_name %></p>
+                                    </div>
+                                    <div class="row display_number_container" style="height: 30%; width:100%; margin-left: 0;">
+                                      <div class="col-md-12 text-center text-muted m-t-n-md container" style="width:100%;">
+                                        <div class="row">
+                                            <span class="h1 block selection_display" id="thursday_chefs_special_1" style="font-size:30px;"><%= @thursday_chefs_special_selection_1_number %></span>
+                                        </div>
+                                        <div class="row row-centered">
+                                          <div class="col-md-12" style="float:none;margin-top: -48px; padding:7px;">
+                                            <input type="text" id="thursday_chefs_special_1_spinner" value="<%= @thursday_chefs_special_selection_1_number %>" style="opacity: 0;">
+                                          </div>
+                                        </div>
+                                      </div>                               
+                                      <span style='font-size:11px;'><i>Chef's Special</i></span>     
+                                    </div>                                 
+                                  </div>
+                                </div>
+                              <% end %>
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_1">
-                                <div class="inner">
+                                <div class="inner text-center" style="padding-bottom:5px;">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
                                     <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_green_1_selection_1_id) %>" class="pull_modal"><%= @thursday_green_1_selection_1_name %></a><% else %><%= @thursday_green_1_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @thursday_green_1_selection_1_sub_name %></p>
@@ -2439,10 +2846,11 @@ $(function(){
                                       </div>
                                     </div>                                    
                                   </div>                                 
+                                  <span style='font-size:11px;'><i>Vegetarian</i></span>
                                 </div>
                               </div>
                               <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5 m-l-md m-t-sm meal_card green_2">
-                                <div class="inner">
+                                <div class="inner text-center" style="padding-bottom:5px;">
                                   <div class="row text-center" style="padding: 5px; height: 70%; width:100%; background-color:white; margin-left: 0;">
                                     <h5 style="color:#555;"><% if @show_nutritional_info_to_customers %><a href="<%= show_nutritional_info_path(id:@thursday_green_2_selection_1_id) %>" class="pull_modal"><%= @thursday_green_2_selection_1_name %></a><% else %><%= @thursday_green_2_selection_1_name %><% end %></h5>
                                     <p style="color:#555; font-size: 12px;"><%= @thursday_green_2_selection_1_sub_name %></p>
@@ -2459,6 +2867,7 @@ $(function(){
                                       </div>
                                     </div>                                    
                                   </div>                                 
+                                  <span style='font-size:11px;'><i>Vegetarian</i></span>
                                 </div>
                               </div>
                             </div>
