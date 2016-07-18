@@ -24,6 +24,7 @@ class MealSelectionsController < ApplicationController
 
         meal_selection = JSON.parse(params[:meal_selection])
 
+
         message = []
         meal_selections = []
 
@@ -90,34 +91,58 @@ class MealSelectionsController < ApplicationController
         production_day_2 = Chowdy::Application.closest_date(1,3,week_date)
         selections_production_day_2 = current_user.customer.meal_selections.where(production_day:production_day_2).take
 
+        @show_additional_menu_to_customers = SystemSetting.where(setting:"meal_selection",setting_attribute:"show_additional_menu").blank? ? false : (SystemSetting.where(setting:"meal_selection",setting_attribute:"show_additional_menu").take.setting_value == "true" ? true : false)
+
         @date = Chowdy::Application.closest_date(1,1,production_day_1).strftime("%B %e")
         if !selections_production_day_1.blank? && !selections_production_day_2.blank?
-            @selection = {
-                meals_production_day_1: {
-                    beef:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Beef").take.meal_name,number:selections_production_day_1.beef},
-                    pork:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Pork").take.meal_name,number:selections_production_day_1.pork},
-                    poultry:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Poultry").take.meal_name,number:selections_production_day_1.poultry},
-                    green_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 1").take.meal_name,number:selections_production_day_1.green_1},
-                    green_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 2").take.meal_name,number:selections_production_day_1.green_2},
-                    salad_bowl_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Salad Bowl 1").take.meal_name,number:selections_production_day_1.salad_bowl_1},
-                    salad_bowl_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Salad Bowl 2").take.meal_name,number:selections_production_day_1.salad_bowl_2},
-                    diet:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Diet").take.meal_name,number:selections_production_day_1.diet},
-                    chefs_special:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Chef's Special").take.meal_name,number:selections_production_day_1.chefs_special}
-                
-                },
+            if @show_additional_menu_to_customers
+                @selection = {
+                    meals_production_day_1: {
+                        beef:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Beef").take.meal_name,number:selections_production_day_1.beef},
+                        pork:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Pork").take.meal_name,number:selections_production_day_1.pork},
+                        poultry:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Poultry").take.meal_name,number:selections_production_day_1.poultry},
+                        green_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 1").take.meal_name,number:selections_production_day_1.green_1},
+                        green_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 2").take.meal_name,number:selections_production_day_1.green_2},
+                        salad_bowl_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Salad Bowl 1").take.meal_name,number:selections_production_day_1.salad_bowl_1},
+                        salad_bowl_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Salad Bowl 2").take.meal_name,number:selections_production_day_1.salad_bowl_2},
+                        diet:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Diet").take.meal_name,number:selections_production_day_1.diet},
+                        chefs_special:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Chef's Special").take.meal_name,number:selections_production_day_1.chefs_special}
+                    
+                    },
 
-                meals_production_day_2: {
-                    beef:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Beef").take.meal_name,number:selections_production_day_2.beef},
-                    pork:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Pork").take.meal_name,number:selections_production_day_2.pork},
-                    poultry:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Poultry").take.meal_name,number:selections_production_day_2.poultry},
-                    green_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 1").take.meal_name,number:selections_production_day_2.green_1},
-                    green_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 2").take.meal_name,number:selections_production_day_2.green_2},
-                    salad_bowl_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Salad Bowl 1").take.meal_name,number:selections_production_day_2.salad_bowl_1},
-                    salad_bowl_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Salad Bowl 2").take.meal_name,number:selections_production_day_2.salad_bowl_2},
-                    diet:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Diet").take.meal_name,number:selections_production_day_2.diet},
-                    chefs_special:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Chef's Special").take.meal_name,number:selections_production_day_2.chefs_special}
+                    meals_production_day_2: {
+                        beef:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Beef").take.meal_name,number:selections_production_day_2.beef},
+                        pork:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Pork").take.meal_name,number:selections_production_day_2.pork},
+                        poultry:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Poultry").take.meal_name,number:selections_production_day_2.poultry},
+                        green_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 1").take.meal_name,number:selections_production_day_2.green_1},
+                        green_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 2").take.meal_name,number:selections_production_day_2.green_2},
+                        salad_bowl_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Salad Bowl 1").take.meal_name,number:selections_production_day_2.salad_bowl_1},
+                        salad_bowl_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Salad Bowl 2").take.meal_name,number:selections_production_day_2.salad_bowl_2},
+                        diet:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Diet").take.meal_name,number:selections_production_day_2.diet},
+                        chefs_special:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Chef's Special").take.meal_name,number:selections_production_day_2.chefs_special}
+                    }
                 }
-            }
+            else
+                @selection = {
+                    meals_production_day_1: {
+                        beef:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Beef").take.meal_name,number:selections_production_day_1.beef},
+                        pork:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Pork").take.meal_name,number:selections_production_day_1.pork},
+                        poultry:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Poultry").take.meal_name,number:selections_production_day_1.poultry},
+                        green_1:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 1").take.meal_name,number:selections_production_day_1.green_1},
+                        green_2:{meal_name:Menu.where(production_day:production_day_1,meal_type:"Green 2").take.meal_name,number:selections_production_day_1.green_2}
+                    
+                    },
+
+                    meals_production_day_2: {
+                        beef:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Beef").take.meal_name,number:selections_production_day_2.beef},
+                        pork:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Pork").take.meal_name,number:selections_production_day_2.pork},
+                        poultry:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Poultry").take.meal_name,number:selections_production_day_2.poultry},
+                        green_1:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 1").take.meal_name,number:selections_production_day_2.green_1},
+                        green_2:{meal_name:Menu.where(production_day:production_day_2,meal_type:"Green 2").take.meal_name,number:selections_production_day_2.green_2}
+                    }
+                }
+
+            end
         else 
             @selection = nil
         end
