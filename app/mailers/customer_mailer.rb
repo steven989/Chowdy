@@ -31,6 +31,8 @@ class CustomerMailer < ActionMailer::Base
                         "Monday - Saturday, 7:00am to 7:00pm (open 9am on Saturday)"
                     when !@hub.match(/quickplay/i).nil? 
                         "noon"
+                    when !@hub.match(/league/i).nil? 
+                        "noon"
                 end
     @proper_hub_name = case 
                     when !@hub.match(/wanda/i).nil?
@@ -45,6 +47,8 @@ class CustomerMailer < ActionMailer::Base
                         "Coffee Bar Inc."
                     when !@hub.match(/quickplay/i).nil? 
                         "Quickplay"
+                    when !@hub.match(/league/i).nil? 
+                        "League"
                 end
     @hub_address = case 
                     when !@hub.match(/wanda/i).nil?

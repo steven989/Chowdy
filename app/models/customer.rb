@@ -96,17 +96,21 @@ class Customer < ActiveRecord::Base
                 customer.create_referral_code
 
                 #corporate customer?
-                corporate = ["Quickplay"].any? {|loc| hub.gsub(/\\/,"").downcase.include?(loc.downcase)}
+                corporate = ["Quickplay","League"].any? {|loc| hub.gsub(/\\/,"").downcase.include?(loc.downcase)}
 
                 if corporate
-                    matched_corporate_office = ["Quickplay"].select {|loc| hub.gsub(/\\/,"").downcase.include?(loc.downcase)}[0]
+                    matched_corporate_office = ["Quickplay","League"].select {|loc| hub.gsub(/\\/,"").downcase.include?(loc.downcase)}[0]
                     matched_corporate_office_address = case 
                                                             when !matched_corporate_office.match(/quickplay/i).nil?
                                                                 "901 King St West, Toronto, Ontario M5V 3H5"
+                                                            when !matched_corporate_office.match(/league/i).nil?
+                                                                "Placeholder League Address"
                                                         end
                     matched_corporate_office_unit = case 
                                                             when !matched_corporate_office.match(/quickplay/i).nil?
                                                                 "Suite 200"
+                                                            when !matched_corporate_office.match(/league/i).nil?
+                                                                "Placeholder League Unit"
                                                         end
                     customer.update_attributes(
                         corporate:true,
