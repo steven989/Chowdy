@@ -1228,7 +1228,7 @@ class AdminActionsController < ApplicationController
                                 if Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.create(plan:meals_per_week,trial_end:(start_date_update + 23.9.hours).to_time.to_i)
                                     new_subscription_id = Stripe::Customer.retrieve(@customer.stripe_customer_id).subscriptions.all.data[0].id
                                     @customer.update(next_pick_up_date:start_date_update, active?:"Yes", paused?:nil, stripe_subscription_id: new_subscription_id,pause_cancel_request:nil) 
-                                    @customer.stop_requests.where("request_type ilike ?","%cancel%").order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1)
+                                    @customer.stop_requests.where("request_type ilike ?","%cancel%").order(created_at: :desc).limit(1).take.update(end_date: start_date_update-1) unless @customer.stop_requests.where("request_type ilike ?","%cancel%").order(created_at: :desc).limit(1).blank?
                                     @customer.stop_queues.where("stop_type ilike ? or stop_type ilike ? or stop_type ilike ?", "pause", "cancel", "restart").destroy_all
                                 end
                             end
