@@ -1525,7 +1525,7 @@ $(function(){
                                           <div class="panel b-a padder text-left padder-v">
                                               <%= form_tag update_customer_path("hub"), method: 'POST', class:"m-b-none", id:"hub_change_form" do %>
                                                 <div class="form-group">
-                                                  <%= select_tag "hub", options_for_select(@hubs), id:"chosen-select-hub",include_blank: true,data: {placeholder: @requested_hub_to_change_to ? @requested_hub_to_change_to.cancel_reason : @current_customer.hub} %>
+                                                  <%= select_tag "hub", options_for_select(@hubs), id:"chosen-select-hub",include_blank: true,data: {placeholder: @requested_hub_to_change_to ? @requested_hub_to_change_to.cancel_reason : @current_customer.monday_pickup_hub} %>
                                                   <script>
                                                     $("#chosen-select-hub").chosen({
                                                       width: "330px",
