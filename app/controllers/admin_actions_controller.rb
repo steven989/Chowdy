@@ -192,7 +192,7 @@ class AdminActionsController < ApplicationController
             @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%bench%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%bench%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%bench%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%bench%') & (recurring_delivery >> ["Yes","yes"])))}.order("LOWER(name) asc")
         elsif params[:hub] == 'green_grind'
             @location = "The Green Grind"
-            @location_match ='green_grind'
+            @location_match ='grind'
             @customers = Customer.where{(active? >> ["Yes","yes"]) & (paused?  >> [nil,"No","no"]) & (next_pick_up_date == current_pick_up_date) & (((monday_pickup_hub =~ '%grind%') & (recurring_delivery >> ["No","no", nil])) | ((monday_delivery_hub =~ '%grind%') & (recurring_delivery >> ["Yes","yes"])) | ((thursday_pickup_hub =~ '%grind%') & (recurring_delivery >> ["No","no", nil])) | ((thursday_delivery_hub =~ '%grind%') & (recurring_delivery << ["Yes","yes"])))}.order("LOWER(name) asc")
         elsif params[:hub] == 'dekefir'
             @location = "deKEFIR"
