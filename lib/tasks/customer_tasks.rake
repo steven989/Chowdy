@@ -50,8 +50,8 @@ namespace :customers do
     desc 'look for unexecuted requests'
     task :find_unexecuted_requests => [:environment] do
         anomaly_array = []
-        if StopQueue.where("created_at < ?",Chowdy::Application.closest_date(-1,5)).length > 0
-            StopQueue.where("created_at < ?",Chowdy::Application.closest_date(-1,5)).each do |sq|
+        if StopQueue.where("associated_cutoff < ?",Date.today).length > 0
+            StopQueue.where("associated_cutoff < ?",Date.today).each do |sq|
                 anomaly_array.push([sq.customer,"unprocessed stop request with associated cut off of #{sq.associated_cutoff.strftime("%Y-%m-%d")}"])
             end
         end
