@@ -110,6 +110,9 @@ gem 'acts_as_list'
 #24) Delayed upload
 gem 'carrierwave_backgrounder'
 
+#25) Generating CSV file to storage
+gem 'aws-sdk'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 

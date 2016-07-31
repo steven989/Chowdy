@@ -274,6 +274,17 @@ class CustomerMailer < ActionMailer::Base
     end 
   end
 
+  def send_delivery_csv_to_admin(url)
+    current_pick_up_date = SystemSetting.where(setting:"system_date",setting_attribute:"pick_up_date").take.setting_value.to_date
+    attachments["deliveries_week_of_#{current_pick_up_date.strftime("%Y_%m_%d")}.csv"] = open(url).read
+    mail(
+      to: SystemSetting.where(setting:"admin",setting_attribute:"admin_email").take.setting_value, 
+      subject: "Delivery CSV for #{current_pick_up_date.strftime("%Y-%m-%d")}"
+      ) do |format|
+        format.html
+    end
+  end
+
   def order_modification_confirmation(customer,order, total_dollars, diff,delivery_date)
     @customer = customer
     @order = order
