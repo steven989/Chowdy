@@ -1132,7 +1132,7 @@ namespace :app do
                     puts '---------------------------------------------------'
                 else
                     if fic.user
-                        fic.user.log_activity("Admin (#{current_user.email}): cancelled customer's subscription")
+                        fic.user.log_activity("System: cancelled customer's subscription")
                     end
                 end
 
