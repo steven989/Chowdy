@@ -141,7 +141,10 @@ $(function(){
             $("#generalModal").animate({
                 scrollTop: 0
             }, 500);
-            partner_product_popup_listener();
+            <% if @display_marketplace_to_customers %>
+              partner_product_popup_listener();
+            <% end %>
+
         });
       });
     }
